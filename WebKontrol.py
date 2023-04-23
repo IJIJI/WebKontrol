@@ -6,7 +6,9 @@ import time
 webAdmin = webAdmin()
 webAdmin.serve()
 
-# while(1):
-#     print("Hello")
-#     time.sleep(1)
+print("Admin server started on port " + str(webAdmin.getPort()))
+
+while(1):
+    print(webAdmin.getPostValue())
+    time.sleep(1)
 # webAdmin.start()
