@@ -25,7 +25,7 @@ class webPuppet:
         self.url = url
         return
 
-    def start(self):
+    def update(self):
         self.driver.get(self.url)
         return
 
