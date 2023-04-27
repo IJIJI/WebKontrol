@@ -1,75 +1,52 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import socketserver
-import sys, os, signal, threading
-
-from io import BytesIO
-
+from flask import Flask, redirect, request, url_for
+from urllib.parse import unquote, quote
 
 class webAdmin:
 
-    hostName = "0.0.0.0"
-    serverPort = 80
+    port = 80
+    host = '0.0.0.0'
 
-    class adminFrontend(BaseHTTPRequestHandler):
+    global postValue
+    postValue = []
 
-        postValue = "b"
-
-        def do_GET(self):
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(bytes("<html><head><title>WebKontrol</title></head>", "utf-8"))
-            self.wfile.write(bytes("<p>Request: %s</p>" % self.path, "utf-8"))
-            self.wfile.write(bytes("<body>", "utf-8"))
-            self.wfile.write(bytes("<p>This is an example web server.</p>", "utf-8"))
-            self.wfile.write(bytes('<form method="post"><input type="text" placeholder="" value="" name="urlInput" required=""><button>submit</button></form>', 'utf-8'))
-            self.wfile.write(bytes("</body></html>", "utf-8"))
-
-            self.postValue = self.path
-
-            return
-
-        def do_POST(self):
-            content_length = int(self.headers['Content-Length'])
-            body = self.rfile.read(content_length)
-            # self.send_response(200)
-            # self.end_headers()
-            # response = BytesIO()
-            # response.write(b'This is POST request. ')
-            # response.write(b'Received: ')
-            # response.write(body)
-            # self.wfile.write(response.getvalue())
-            self.do_GET()
-            self.postValue = body
-
-            return
-
-        def getPostValue(self):
-            postValue = self.postValue
-            self.postValue = ""
-            return postValue
+    app = Flask(__name__)
 
 
-    webServer = socketserver.TCPServer(("", serverPort), adminFrontend)
+    @app.route('/')
+    def page_index():
+        global postValue
+        newValue = postValue
+        postValue = []
+        return 'Hello World! [' + ', '.join(newValue) + ']'
+
+    @app.route('/1')
+    def page_success():
+        return 'Success! Go back to the main page to see the new value.'
+        
+    @app.route('/set_url/', methods=['POST' , 'GET'])
+    def set_url():
+        if(request.form['url'] == None):
+            return "No URL given."
+
+        global postValue
+        postValue.append(unquote("url"))
+        return redirect("/success", code=302)
 
 
+    
+    def start(self):
+        self.app.run(self.host, self.port)
 
-    def __serve(self):
-        self.webServer.serve_forever()
 
-
-    def serve(self):
-
-        threading.Thread(target=self.__serve).start()
 
     def getPostValue(self):
-        return self.webServer.RequestHandlerClass.getPostValue(self.webServer.RequestHandlerClass)
+        global postValue
 
-    def getPort(self):
-        return self.serverPort
-    
+        if len(postValue) == 0:
+            return None
 
-
-        
+        oldPostValue = postValue
+        postValue = []
+        return oldPostValue[len(oldPostValue)-1]
 
 

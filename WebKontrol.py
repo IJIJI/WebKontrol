@@ -4,11 +4,11 @@ import time
 
 
 webAdmin = webAdmin()
-webAdmin.serve()
+webAdmin.start()
 
-print("Admin server started on port " + str(webAdmin.getPort()))
 
-while(1):
-    print(webAdmin.getPostValue())
-    time.sleep(1)
-# webAdmin.start()
+
+
+print(webAdmin.getPostValue())
+print(webAdmin.getPostValue())
+print("Shutting down...")
