@@ -22,6 +22,7 @@ while(1):
                 admin.set_url(puppet.get_url())
                 print("New URL: " + postvalue)
             else:
+                time.sleep(4)
                 puppet.set_url(postvalueOld)
                 puppet.update()
                 admin.set_url(puppet.get_url())
