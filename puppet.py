@@ -4,8 +4,8 @@ from selenium.common.exceptions import WebDriverException
 
 class webPuppet:
 
-    url = "https://synapt.nl/"
-    # url = "https://synapt.nl/splash/"
+    # url = "https://synapt.nl/"
+    url = "https://synapt.nl/splash"
 
     def __init__(self, url=""):
         if url != "":
