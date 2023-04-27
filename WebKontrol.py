@@ -14,7 +14,8 @@ admin.set_url(puppet.get_url())
 while(1):
     try:
         time.sleep(0.1)
-        if (postvalue := admin.getPostValue()) != None:
+        postvalue = admin.getPostValue()
+        if (postvalue != None):
 
             postvalueOld = puppet.get_url()
             puppet.set_url(postvalue)
