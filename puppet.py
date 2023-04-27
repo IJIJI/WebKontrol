@@ -1,9 +1,22 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
 class webPuppet:
 
-    url = ""
+    # url = "https://synapt.nl/splash/"
+    url = "https://synapt.nl/"
 
     def __init__(self, url=""):
-        self.url = url
+        if url != "":
+            self.url = url
+        return
+
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_experimental_option("useAutomationExtension", False)
+    chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])
+    chrome_options.add_argument("--kiosk")
+
+    driver = webdriver.Chrome(chrome_options=chrome_options)
 
     def get_url(self):
         return self.url
@@ -13,7 +26,8 @@ class webPuppet:
         return
 
     def start(self):
-        return  
+        self.driver.get(self.url)
+        return
 
     def stop(self):
         return
