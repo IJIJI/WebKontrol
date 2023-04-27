@@ -9,13 +9,23 @@ puppet.update()
 admin = webAdmin()
 admin.start()
 
+admin.set_url(puppet.get_url())
+
 while(1):
     try:
         time.sleep(0.1)
         if (postvalue := admin.getPostValue()) != None:
+
+            postvalueOld = puppet.get_url()
             puppet.set_url(postvalue)
-            puppet.update()
-            print("New value: " + postvalue)
+            if(puppet.update()):
+                admin.set_url(puppet.get_url())
+                print("New URL: " + postvalue)
+            else:
+                puppet.set_url(postvalueOld)
+                puppet.update()
+                admin.set_url(puppet.get_url())
+                print("Failed updating url, reverting to: " + postvalueOld)
     except KeyboardInterrupt:
         puppet.stop()
         admin.stop()

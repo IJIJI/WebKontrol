@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, url_for
+from flask import Flask, redirect, request, render_template, url_for
 from urllib.parse import unquote, quote
 import threading
 
@@ -9,6 +9,8 @@ class webAdmin:
 
     global postValue
     postValue = []
+    global current_url
+    current_url=""
 
     app = Flask(__name__)
 
@@ -16,11 +18,13 @@ class webAdmin:
 
     @app.route('/')
     def page_index():
-        return 'Hello World! <form action="/set_url" method="post"><input type="text" name="url"><input type="submit" value="Submit"></form>'
+        global current_url
+        return render_template('index.html', cur_url=current_url)
 
-    @app.route('/success')
-    def page_success():
-        return 'Success! Go back to the <a href="/">main page</a> to see the new value.'
+    @app.route('/upated')
+    def page_upated():
+        return render_template('updated.html', cur_url=current_url)
+
         
     @app.route('/set_url', methods=['POST'])
     def set_url():
@@ -31,8 +35,17 @@ class webAdmin:
         global postValue
         postValue.append(unquote(request.form['url']))
 
-        return redirect("/success", code=302)
+        return redirect("/upated", code=302)
 
+
+    @app.route('/reload')
+    def page_reload():
+
+
+        global postValue
+        postValue.append(current_url)
+
+        return redirect("/upated", code=302)
 
 
     thread = threading.Thread(target=app.run, args=(host, port))
@@ -55,11 +68,11 @@ class webAdmin:
         postValue = []
         return oldPostValue[len(oldPostValue)-1]
 
-    def getPostValueString(self):
-        postValue = self.getPostValue()
-        if postValue == None:
-            return ""
-        return postValue
+    def set_url(self, url):
+        global current_url
+        current_url = url
+        return
+
 
 
 
