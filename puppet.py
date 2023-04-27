@@ -1,10 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import WebDriverException
 
 class webPuppet:
 
-    # url = "https://synapt.nl/splash/"
     url = "https://synapt.nl/"
+    # url = "https://synapt.nl/splash/"
 
     def __init__(self, url=""):
         if url != "":
@@ -26,8 +27,12 @@ class webPuppet:
         return
 
     def update(self):
-        self.driver.get(self.url)
-        return
+        try:
+            self.driver.get(self.url)
+        except WebDriverException:
+            return False
+        
+        return True
 
     def stop(self):
         return
