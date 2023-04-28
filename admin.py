@@ -50,6 +50,13 @@ class webAdmin:
         return redirect("/upated", code=302)
 
 
+    @app.route('/splash')
+    def page_splash():
+        # return render_template('splash.html', admin_url=socket.gethostbyname(socket.gethostname()))
+        ip_adresses = [f'http://{link["addr"]}:8080/' for interface in netifaces.interfaces() for link in netifaces.ifaddresses(interface).get(netifaces.AF_INET, []) if link["addr"] != '127.0.0.1']
+        return render_template('splash.html', admin_url=ip_adresses)
+
+
     thread = threading.Thread(target=app.run, args=(host, port))
     
     def start(self):

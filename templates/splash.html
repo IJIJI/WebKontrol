@@ -23,6 +23,11 @@
 <main>
   <section>
     <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Synapt Technologies Logo">
+    <a> Navigate to </a>
+    {% for url in admin_url %}
+      <a href="{{ url }}"><b>{{ url }}</b></a>
+    {% endfor %}
+
   </section>
 </main>
 
