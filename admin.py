@@ -1,75 +1,79 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import socketserver
-import sys, os, signal, threading
-
-from io import BytesIO
-
+from flask import Flask, redirect, request, render_template, url_for
+from urllib.parse import unquote, quote
+import threading
 
 class webAdmin:
 
-    hostName = "0.0.0.0"
-    serverPort = 80
+    port = 80
+    port = 8080
+    host = '0.0.0.0'
 
-    class adminFrontend(BaseHTTPRequestHandler):
+    global postValue
+    postValue = []
+    global current_url
+    current_url=""
 
-        postValue = "b"
+    app = Flask(__name__)
 
-        def do_GET(self):
-            self.send_response(200)
-            self.send_header("Content-type", "text/html")
-            self.end_headers()
-            self.wfile.write(bytes("<html><head><title>WebKontrol</title></head>", "utf-8"))
-            self.wfile.write(bytes("<p>Request: %s</p>" % self.path, "utf-8"))
-            self.wfile.write(bytes("<body>", "utf-8"))
-            self.wfile.write(bytes("<p>This is an example web server.</p>", "utf-8"))
-            self.wfile.write(bytes('<form method="post"><input type="text" placeholder="" value="" name="urlInput" required=""><button>submit</button></form>', 'utf-8'))
-            self.wfile.write(bytes("</body></html>", "utf-8"))
-
-            self.postValue = self.path
-
-            return
-
-        def do_POST(self):
-            content_length = int(self.headers['Content-Length'])
-            body = self.rfile.read(content_length)
-            # self.send_response(200)
-            # self.end_headers()
-            # response = BytesIO()
-            # response.write(b'This is POST request. ')
-            # response.write(b'Received: ')
-            # response.write(body)
-            # self.wfile.write(response.getvalue())
-            self.do_GET()
-            self.postValue = body
-
-            return
-
-        def getPostValue(self):
-            postValue = self.postValue
-            self.postValue = ""
-            return postValue
-
-
-    webServer = socketserver.TCPServer(("", serverPort), adminFrontend)
-
-
-
-    def __serve(self):
-        self.webServer.serve_forever()
-
-
-    def serve(self):
-
-        threading.Thread(target=self.__serve).start()
-
-    def getPostValue(self):
-        return self.webServer.RequestHandlerClass.getPostValue(self.webServer.RequestHandlerClass)
-
-    def getPort(self):
-        return self.serverPort
     
 
+    @app.route('/')
+    def page_index():
+        global current_url
+        return render_template('index.html', cur_url=current_url)
+
+    @app.route('/upated')
+    def page_upated():
+        return render_template('updated.html', cur_url=current_url)
 
         
+    @app.route('/set_url', methods=['POST'])
+    def set_url():
+
+        if(request.form['url'] == None):
+            return "No URL given."
+
+        global postValue
+        postValue.append(unquote(request.form['url']))
+
+        return redirect("/upated", code=302)
+
+
+    @app.route('/reload')
+    def page_reload():
+
+
+        global postValue
+        postValue.append(current_url)
+
+        return redirect("/upated", code=302)
+
+
+    thread = threading.Thread(target=app.run, args=(host, port))
+    
+    def start(self):
+        self.thread.start()
+        return
+
+    def stop(self):
+        self.thread.join()
+        return
+
+    def getPostValue(self):
+        global postValue
+
+        if len(postValue) == 0:
+            return None
+
+        oldPostValue = postValue
+        postValue = []
+        return oldPostValue[len(oldPostValue)-1]
+
+    def set_url(self, url):
+        global current_url
+        current_url = url
+        return
+
+
 
 
