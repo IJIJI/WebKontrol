@@ -50,6 +50,15 @@ class webAdmin:
         return redirect("/upated", code=302)
 
 
+
+
+    # ! For the view-end
+
+    @app.route('/no_connect')
+    def page_no_connect():
+        global current_url
+        return render_template('no_connection.html', cur_url=current_url, cur_dom=urlparse(current_url).netloc)
+        
     @app.route('/splash')
     def page_splash():
         # return render_template('splash.html', admin_url=socket.gethostbyname(socket.gethostname()))
