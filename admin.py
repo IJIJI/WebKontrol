@@ -1,6 +1,4 @@
 from flask import Flask, redirect, request, render_template, url_for
-from urllib.parse import unquote, quote
-import threading
 from urllib.parse import unquote, quote, urlparse
 import netifaces
 
