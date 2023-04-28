@@ -1,0 +1,105 @@
+:root{
+
+    --bg-color: #1c1c1f;
+    --bg-color-light: #35363a;
+    --bg-color-dark: #0d0d0e;
+
+    --ac-color: #cc0033;
+    --ac-color-light: rgb(255, 0, 0);
+    --ac-color-dark: rgb(150, 0, 0);
+    --text-color: white;
+
+}
+
+body::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    /*background: rgb(150, 150, 150);*/
+
+}
+
+
+body::-webkit-scrollbar-thumb {
+    background: var(--bg-color-light);
+    border-radius: 2px;
+}
+body::-webkit-scrollbar-thumb:active {
+    background: var(--bg-color-dark);
+}
+
+::selection {
+    /*background: var(--warn-color-dark);*/
+    /*color: white;*/
+}
+
+
+body
+{
+    margin: 0;
+    padding: 0;
+    font-family: 'Ubuntu', 'Segoe UI', sans-serif;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    overflow-x: hidden;
+
+}
+
+
+a {
+    text-decoration: none;
+    color: var(--ac-color);
+    transition: 0.1s ease background, 0.1s ease color;
+    cursor: pointer;
+    font-size: 20px;
+
+}
+
+a:hover, a:active, a:focus, a#active{
+    color: var(--text-color);
+}
+
+h1{
+    margin: 0;
+}
+
+
+/*PAGE*/
+
+
+body{
+    min-height: 100%;
+    width: 100%;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 0;
+}
+
+main{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    position: absolute;
+
+    width: 100%;
+    height: 100%;
+}
+
+section{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    max-width: 48%;
+}
+
+@media screen and (max-width: 700px) {
+    section{
+        max-width: 80%;
+    }
+
+}
