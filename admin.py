@@ -1,5 +1,6 @@
 from flask import Flask, redirect, request, render_template, url_for
 from urllib.parse import unquote, quote, urlparse
+import threading
 import netifaces
 
 class webAdmin:
@@ -66,6 +67,8 @@ class webAdmin:
         return render_template('splash.html', admin_url=ip_adresses)
 
 
+    thread = threading.Thread(target=app.run, args=(host, port))
+    
     def start(self):
         self.thread.start()
         return
