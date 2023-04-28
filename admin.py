@@ -5,6 +5,7 @@ import threading
 class webAdmin:
 
     port = 80
+    port = 8080
     host = '0.0.0.0'
 
     global postValue
