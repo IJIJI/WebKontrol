@@ -66,8 +66,6 @@ class webAdmin:
         return render_template('splash.html', admin_url=ip_adresses)
 
 
-    thread = threading.Thread(target=app.run, args=(host, port))
-    
     def start(self):
         self.thread.start()
         return
@@ -84,6 +82,7 @@ class webAdmin:
 
         oldPostValue = postValue
         postValue = []
+
         return oldPostValue[len(oldPostValue)-1]
 
     def set_url(self, url):
