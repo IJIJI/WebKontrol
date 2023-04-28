@@ -42,7 +42,7 @@ body
     color: var(--text-color);
     background-color: var(--bg-color);
     overflow-x: hidden;
-
+    text-align: center;
 }
 
 
@@ -51,7 +51,7 @@ a {
     color: var(--ac-color);
     transition: 0.1s ease background, 0.1s ease color;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 40px;
 
 }
 
