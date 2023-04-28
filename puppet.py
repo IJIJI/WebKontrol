@@ -20,7 +20,12 @@ class webPuppet:
 
     driver = webdriver.Chrome(chrome_options=chrome_options)
 
-        return self.url
+    # def update(self):
+    #     if(self.__url == self.url):
+    #         return True
+
+    #     try:
+    #         self.driver.get(self.url)
     #         self.__url = self.url
     #     except WebDriverException:
     #         self.driver.get("http://127.0.0.1:8080/no_connect")
