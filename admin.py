@@ -4,7 +4,6 @@ import threading
 
 class webAdmin:
 
-    port = 80
     port = 8080
     host = '0.0.0.0'
 
@@ -16,6 +15,8 @@ class webAdmin:
     app = Flask(__name__)
 
     
+
+    # ! For the admin-end
 
     @app.route('/')
     def page_index():
