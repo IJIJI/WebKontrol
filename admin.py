@@ -66,6 +66,11 @@ class webAdmin:
         ip_adresses = [f'http://{link["addr"]}:8080/' for interface in netifaces.interfaces() for link in netifaces.ifaddresses(interface).get(netifaces.AF_INET, []) if link["addr"] != '127.0.0.1']
         return render_template('splash.html', admin_url=ip_adresses)
 
+    @app.route('/clock')
+    def page_clock():
+        global current_url
+        return render_template('clock.html')
+
 
     thread = threading.Thread(target=app.run, args=(host, port))
     
