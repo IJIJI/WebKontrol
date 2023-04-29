@@ -1,7 +1,7 @@
 h1.clock{
-  font-family: 'DSEG7 Modern', monospace;
+  font-family: 'DSEG7 Classic', monospace;
   font-weight: light;
-  font-size: 20vh;
+  font-size: 23vh;
   color: var(--ac-color);
   position: relative;
 }
