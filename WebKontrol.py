@@ -5,43 +5,63 @@ import time
 
 config = webConfig()
 
+admin = webAdmin()
+admin.start()
 
 puppet = webPuppet()
 puppet.update()
 
-admin = webAdmin()
-admin.start()
+
+
+
+def tryUpdate(postvalue = None):
+    
+    postvalueNew = admin.getPostValue()
+
+    if(postvalueNew == "" or postvalueNew != None):
+        postvalue = postvalueNew
+
+    elif(postvalue == "" or postvalue == None):
+        return False
+
+    puppet.set_url(postvalue)
+    admin.set_url(puppet.get_url())
+    config.set_url(puppet.get_url())
+    config.save()
+
+
+    if(puppet.update()):
+        print("New URL: " + postvalue)
+
+        return True
+
+    else:
+        postvalueNew = admin.getPostValue()            
+        sleeptime = 30 + time.time()
+        while (sleeptime > time.time()):
+            time.sleep(0.1)
+            postvalueNew = admin.getPostValue()
+            if(postvalueNew != None):
+                postvalue = postvalueNew
+                break
+        return tryUpdate(postvalue)
+
+
 
 if config.check_config():
     config.load()
-    puppet.set_url(config.get_url())
-    admin.set_url(puppet.get_url())
-    puppet.update()
+    print("Config found, URL: " + puppet.get_url())
+    tryUpdate(config.get_url())
 else:
-    config.set_url(puppet.get_url())
-    admin.set_url(puppet.get_url())
-    config.save()
+    print("No config found.")
+    tryUpdate(puppet.get_url())
 
 
 while(1):
     try:
         time.sleep(0.1)
-        postvalue = admin.getPostValue()
-        if (postvalue != None):
 
-            postvalueOld = puppet.get_url()
-            puppet.set_url(postvalue)
-            if(puppet.update()):
-                admin.set_url(puppet.get_url())
-                config.set_url(puppet.get_url())
-                config.save()
-                print("New URL: " + postvalue)
-            else:
-                time.sleep(4)
-                puppet.set_url(postvalueOld)
-                puppet.update()
-                admin.set_url(puppet.get_url())
-                print("Failed updating url, reverting to: " + postvalueOld)
+        tryUpdate()
     except KeyboardInterrupt:
         puppet.stop()
         admin.stop()

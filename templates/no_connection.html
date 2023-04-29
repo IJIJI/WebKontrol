@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <link rel="shortcut icon" href="{{ url_for('static', filename='img/tert.png') }}" type="image/x-icon"/>
+
+  <title>WEBKONTROL</title>
+
+  <meta name="author" content="Synapt Technologies">
+
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+
+</head>
+<body>
+
+
+<main>
+  <section>
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Synapt Technologies Logo">
+    <a href="#"><i><b>{{ cur_dom }}</b></i> failed to load.</a>
+    <a href="#"> Reloading in <span style="font-weight: bolder;" id="countdown">30</span></a>
+  </section>
+</main>
+
+<script>
+
+  const countdownLength = 30;
+
+  const countdownSpan = document.getElementById("countdown");
+
+  var timeleft = countdownLength;
+  for (var i = 0; i < countdownLength; i++) {
+    setTimeout(function () {
+      countdownSpan.innerHTML = timeleft;
+      timeleft -= 1;
+    }, i * 1000);
+  }
+
+
+
+  setTimeout(function () {
+    countdownSpan.innerHTML = "...";
+  }, countdownLength * 1000);
+
+</script>
+
+</body>
+</html>
+
