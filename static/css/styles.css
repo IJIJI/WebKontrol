@@ -11,42 +11,7 @@
 
 }
 
-
-
-@font-face {
-    font-family: "DSEG7 Modern";
-    src: url("fonts/DSEG7-MODERN/DSEG7Modern-Regular.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Regular.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Regular.woff2") format("woff2");
-    font-weight: normal;
-}
-@font-face {
-    font-family: "DSEG7 Modern";
-    src: url("fonts/DSEG7-MODERN/DSEG7Modern-Bold.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Bold.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Bold.woff2") format("woff2");
-    font-weight: bold;
-}
-@font-face {
-    font-family: "DSEG7 Modern";
-    src: url("fonts/DSEG7-MODERN/DSEG7Modern-Italic.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Italic.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Italic.woff2") format("woff2");
-    font-style: italic, oblique;
-}
-@font-face {
-    font-family: "DSEG7 Modern";
-    src: url("fonts/DSEG7-MODERN/DSEG7Modern-BoldItalic.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-BoldItalic.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-BoldItalic.woff2") format("woff2");
-    font-weight: bold;
-    font-style: italic, oblique;
-}
-@font-face {
-    font-family: "DSEG7 Modern";
-    src: url("fonts/DSEG7-MODERN/DSEG7Modern-Light.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Light.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Light.woff2") format("woff2");
-    font-weight: lighter;
-}
-@font-face {
-    font-family: "DSEG7 Modern";
-    src: url("fonts/DSEG7-MODERN/DSEG7Modern-LightItalic.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-LightItalic.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-LightItalic.woff2") format("woff2");
-    font-weight: light;
-    font-style: italic, oblique;
-}
-
-
+/* @import url("fonts.css"); */
 
 body::-webkit-scrollbar {
     width: 6px;
@@ -85,15 +50,19 @@ body
 
 a {
     text-decoration: none;
-    color: var(--ac-color);
+    color: var(--text-color);
     transition: 0.1s ease background, 0.1s ease color;
     cursor: pointer;
-    font-size: 40px;
+    font-size: 34px;
 
 }
 
 a:hover, a:active, a:focus, a#active{
     color: var(--text-color);
+}
+
+a b {
+    color: var(--ac-color);
 }
 
 h1{

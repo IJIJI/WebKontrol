@@ -1,0 +1,69 @@
+
+@font-face {
+  font-family: "DSEG7 Modern";
+  src: url("fonts/DSEG7-MODERN/DSEG7Modern-Regular.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Regular.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Regular.woff2") format("woff2");
+  font-weight: normal;
+}
+@font-face {
+  font-family: "DSEG7 Modern";
+  src: url("fonts/DSEG7-MODERN/DSEG7Modern-Bold.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Bold.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Bold.woff2") format("woff2");
+  font-weight: bold;
+}
+@font-face {
+  font-family: "DSEG7 Modern";
+  src: url("fonts/DSEG7-MODERN/DSEG7Modern-Italic.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Italic.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Italic.woff2") format("woff2");
+  font-style: italic, oblique;
+}
+@font-face {
+  font-family: "DSEG7 Modern";
+  src: url("fonts/DSEG7-MODERN/DSEG7Modern-BoldItalic.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-BoldItalic.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-BoldItalic.woff2") format("woff2");
+  font-weight: bold;
+  font-style: italic, oblique;
+}
+@font-face {
+  font-family: "DSEG7 Modern";
+  src: url("fonts/DSEG7-MODERN/DSEG7Modern-Light.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Light.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Light.woff2") format("woff2");
+  font-weight: lighter;
+}
+@font-face {
+  font-family: "DSEG7 Modern";
+  src: url("fonts/DSEG7-MODERN/DSEG7Modern-LightItalic.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-LightItalic.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-LightItalic.woff2") format("woff2");
+  font-weight: light;
+  font-style: italic, oblique;
+}
+
+
+
+@font-face {
+  font-family: "DSEG7 Classic";
+  src: url("fonts/DSEG7-CLASSIC/DSEG7Classic-Regular.ttf") format("ttf"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-Regular.woff") format("woff"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-Regular.woff2") format("woff2");
+  font-weight: normal;
+}
+@font-face {
+  font-family: "DSEG7 Classic";
+  src: url("fonts/DSEG7-CLASSIC/DSEG7Classic-Bold.ttf") format("ttf"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-Bold.woff") format("woff"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-Bold.woff2") format("woff2");
+  font-weight: bold;
+}
+@font-face {
+  font-family: "DSEG7 Classic";
+  src: url("fonts/DSEG7-CLASSIC/DSEG7Classic-Italic.ttf") format("ttf"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-Italic.woff") format("woff"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-Italic.woff2") format("woff2");
+  font-style: italic, oblique;
+}
+@font-face {
+  font-family: "DSEG7 Classic";
+  src: url("fonts/DSEG7-CLASSIC/DSEG7Classic-BoldItalic.ttf") format("ttf"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-BoldItalic.woff") format("woff"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-BoldItalic.woff2") format("woff2");
+  font-weight: bold;
+  font-style: italic, oblique;
+}
+@font-face {
+  font-family: "DSEG7 Classic";
+  src: url("fonts/DSEG7-CLASSIC/DSEG7Classic-Light.ttf") format("ttf"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-Light.woff") format("woff"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-Light.woff2") format("woff2");
+  font-weight: lighter;
+}
+@font-face {
+  font-family: "DSEG7 Classic";
+  src: url("fonts/DSEG7-CLASSIC/DSEG7Classic-LightItalic.ttf") format("ttf"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-LightItalic.woff") format("woff"), url("fonts/DSEG7-CLASSIC/DSEG7Classic-LightItalic.woff2") format("woff2");
+  font-weight: light;
+  font-style: italic, oblique;
+}
+
