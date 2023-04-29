@@ -1,7 +1,7 @@
 :root{
 
     --bg-color: #1c1c1f;
-    --bg-color-light: #35363a;
+    --bg-color-light: #202024;
     --bg-color-dark: #0d0d0e;
 
     --ac-color: #cc0033;
@@ -10,6 +10,43 @@
     --text-color: white;
 
 }
+
+
+
+@font-face {
+    font-family: "DSEG7 Modern";
+    src: url("fonts/DSEG7-MODERN/DSEG7Modern-Regular.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Regular.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Regular.woff2") format("woff2");
+    font-weight: normal;
+}
+@font-face {
+    font-family: "DSEG7 Modern";
+    src: url("fonts/DSEG7-MODERN/DSEG7Modern-Bold.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Bold.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Bold.woff2") format("woff2");
+    font-weight: bold;
+}
+@font-face {
+    font-family: "DSEG7 Modern";
+    src: url("fonts/DSEG7-MODERN/DSEG7Modern-Italic.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Italic.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Italic.woff2") format("woff2");
+    font-style: italic, oblique;
+}
+@font-face {
+    font-family: "DSEG7 Modern";
+    src: url("fonts/DSEG7-MODERN/DSEG7Modern-BoldItalic.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-BoldItalic.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-BoldItalic.woff2") format("woff2");
+    font-weight: bold;
+    font-style: italic, oblique;
+}
+@font-face {
+    font-family: "DSEG7 Modern";
+    src: url("fonts/DSEG7-MODERN/DSEG7Modern-Light.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-Light.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-Light.woff2") format("woff2");
+    font-weight: lighter;
+}
+@font-face {
+    font-family: "DSEG7 Modern";
+    src: url("fonts/DSEG7-MODERN/DSEG7Modern-LightItalic.ttf") format("ttf"), url("fonts/DSEG7-MODERN/DSEG7Modern-LightItalic.woff") format("woff"), url("fonts/DSEG7-MODERN/DSEG7Modern-LightItalic.woff2") format("woff2");
+    font-weight: light;
+    font-style: italic, oblique;
+}
+
+
 
 body::-webkit-scrollbar {
     width: 6px;
