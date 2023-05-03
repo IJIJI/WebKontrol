@@ -8,8 +8,7 @@ An intuitive web kiosk with a web based admin panel.
 
 I originally developed this for the livestreaming industry. This allows me to display a clock, but also use something like [stagetimer.io](https://stagetimer.io/). This can also be implemented in an information display, or even a touchscreen kiosk.
 
-
-> :warning: **This is still not fully developed, and the code is not perfect. I will continue developing this. In its current state I have tested the platform to be stable.**
+> ⚠️ **This is not yet fully developed, and the code is not perfect. I will continue developing this. In its current state I have tested the platform to be stable.**
 
 # Getting started
 
