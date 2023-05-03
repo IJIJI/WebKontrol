@@ -1,5 +1,5 @@
 # WebKontrol
-A intuitive web kiosk with a web based admin panel. 
+An intuitive web kiosk with a web based admin panel. 
 
 ![Web kiosk admin image](https://www.markdownguide.org/assets/images/tux.png)
 ![Web kiosk clock image](https://www.markdownguide.org/assets/images/tux.png)
