@@ -17,7 +17,8 @@ I am planning to sell pre-configured boxes on my store. If you are interested, [
 WebKontrol is Python based, which means it can run on a lot of operating systems. It is tested on **windows 11** and **Raspberry Pi OS (Desktop).** The first part of the install is interchangable between both, but make sure you have python, pip and git installed.
 
 ##### Dependencies
-```powershell
+
+```bash
 pip install selenium
 pip install flask
 pip install threading
@@ -26,7 +27,8 @@ sudo apt-get install chromium-browser
 ```
 
 ##### Code
-```powershell
+
+```bash
 git clone https://github.com/IJIJI/WebKontrol.git --branch V0.3
 cd WebKontrol/src
 python WebKontrol.py
