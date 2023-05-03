@@ -47,7 +47,7 @@ Add the python script to the end of the startup file. Your location may differ.
 ```shell
 @python /home/pi/Webkontrol/src/WebKontrol.py
 ```
-
+Make sure to safe the file.
 #### Auto hide the cursor (Raspberry Pi OS)
 
 ```shell
@@ -60,6 +60,7 @@ Add the unclutter script to the end of the startup file. You can change the time
 ```shell
 @unclutter -idle 2
 ```
+Make sure to safe the file.
 
 ## Use
 Once you have started the script, you should see the splash screen appearing. It lists the IP addresses on which the web interface is available. If you are on a touchscreen you can press the IP you wish to access, else you have to type it in your browsers search bar. It should look something like this:
