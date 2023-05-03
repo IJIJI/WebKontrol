@@ -14,9 +14,9 @@
 
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/no_connect.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/clock.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+
 
 </head>
 <body>
@@ -24,17 +24,12 @@
 
 <main>
   <section>
-    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Synapt Technologies Logo">
-    <h1 style="margin-bottom: 20px;" class="clock">
+    <h1 class="clock">
       <span id="clock"></span>
       <span class="bg">88:88:88</span>
     </h1>
-    <a><i><b>{{ cur_dom }}</b></i> failed to load.</a>
-    <a>Reloading in <b id="countdown">30</b></a>
   </section>
 </main>
-
-
 
 <script>
   clock = document.getElementById("clock");
@@ -53,29 +48,6 @@
   setInterval(updateClock, 100);
   
 </script>
-
-<script>
-
-  const countdownLength = 30;
-
-  const countdownSpan = document.getElementById("countdown");
-
-  var timeleft = countdownLength;
-  for (var i = 0; i < countdownLength; i++) {
-    setTimeout(function () {
-      countdownSpan.innerHTML = leadingZero(timeleft);
-      timeleft -= 1;
-    }, i * 1000);
-  }
-
-
-
-  setTimeout(function () {
-    countdownSpan.innerHTML = "...";
-  }, countdownLength * 1000);
-
-</script>
-
 
 </body>
 </html>

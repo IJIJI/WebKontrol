@@ -1,7 +1,7 @@
 :root{
 
     --bg-color: #1c1c1f;
-    --bg-color-light: #35363a;
+    --bg-color-light: #202024;
     --bg-color-dark: #0d0d0e;
 
     --ac-color: #cc0033;
@@ -10,6 +10,8 @@
     --text-color: white;
 
 }
+
+/* @import url("fonts.css"); */
 
 body::-webkit-scrollbar {
     width: 6px;
@@ -48,15 +50,19 @@ body
 
 a {
     text-decoration: none;
-    color: var(--ac-color);
+    color: var(--text-color);
     transition: 0.1s ease background, 0.1s ease color;
     cursor: pointer;
-    font-size: 40px;
+    font-size: 34px;
 
 }
 
 a:hover, a:active, a:focus, a#active{
     color: var(--text-color);
+}
+
+a b {
+    color: var(--ac-color);
 }
 
 h1{

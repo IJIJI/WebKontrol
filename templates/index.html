@@ -32,7 +32,14 @@
   <p>Current: <b>{{ cur_url }}</b></p>
   <P><a href="{{ cur_url }}" target="_blank">View</a></P>
   <P><a href="/reload">Reload</a></P>
-  <form action="/set_url" method="post"><input type="url" name="url"><input type="submit" value="Submit"></form>'
+  <P><a href="javascript:set_clock()">Internal Clock</a></P>
+  <form action="/set_url" method="post"><input id="url_input" type="url" name="url"><input type="submit" value="Submit"></form>'
   
+  <script>
+    function set_clock(){
+      document.getElementById("url_input").value = "http://127.0.0.1:8080/clock"
+    }
+  </script>
+
 </body>
 </html>
