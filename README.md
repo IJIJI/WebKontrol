@@ -18,7 +18,7 @@ WebKontrol is Python based, which means it can run on a lot of operating systems
 
 ##### Dependencies
 
-```bash
+```shell
 pip install selenium
 pip install flask
 pip install threading
@@ -28,7 +28,7 @@ sudo apt-get install chromium-browser
 
 ##### Code
 
-```bash
+```shell
 git clone https://github.com/IJIJI/WebKontrol.git --branch V0.3
 cd WebKontrol/src
 python WebKontrol.py
