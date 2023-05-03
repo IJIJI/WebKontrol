@@ -1,6 +1,6 @@
 # WebKontrol
 
-[![License](https://img.shields.io/github/license/IJIJI/WebKontrol)](https://github.com/IJIJI/WebKontrol/blob/main/LICENSE)[![Version](https://img.shields.io/github/v/release/IJIJI/WebKontrol)](https://github.com/IJIJI/WebKontrol/releases)
+[![License](https://img.shields.io/github/license/IJIJI/WebKontrol)](https://github.com/IJIJI/WebKontrol/blob/main/LICENSE) [![Version](https://img.shields.io/github/v/release/IJIJI/WebKontrol?display_name=tag&include_prereleases)](https://github.com/IJIJI/WebKontrol/releases)
 
 An intuitive web kiosk with a web based admin panel.
 
