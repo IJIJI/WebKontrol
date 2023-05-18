@@ -1,0 +1,21 @@
+
+
+main{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  position: absolute;
+
+  width: 100%;
+  min-height: 100%;
+}
+
+section{
+  background-color: var(--bg-color-light);
+  border-radius: 10px;
+  padding: 30px;
+  margin: 100px 20px;
+  max-width: 48%;
+}
