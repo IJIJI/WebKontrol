@@ -4,7 +4,7 @@
 
 An intuitive web kiosk with a web based admin panel.
 
-<img src="img/admin_interface.png" width="400"/> <img src="img/clock_interface.png" width="400"/>
+<img src="img/admin_interface_2.png" width="400"/> <img src="img/clock_interface.png" width="400"/>
 
 I originally developed this for the livestreaming industry. This allows me to display a clock, but also use something like [stagetimer.io](https://stagetimer.io/). This can also be implemented in an information display, or even a touchscreen kiosk.
 
