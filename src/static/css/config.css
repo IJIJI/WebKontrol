@@ -25,6 +25,12 @@ section{
   align-items: flex-start;
 }
 
+@media screen and (max-width: 800px) {
+  section{
+    max-width: 100%;
+  }
+}
+
 section h1{
   font-size: 3rem;
   margin-bottom: 10px;
