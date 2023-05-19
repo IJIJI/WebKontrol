@@ -15,14 +15,13 @@ class webAdmin:
 
     app = Flask(__name__)
 
-    
-
     # ! For the admin-end
 
     @app.route('/')
     def page_index():
         global current_url
-        return render_template('index.html', cur_url=current_url)
+        current_url_short = f"{urlparse(current_url).scheme}://{urlparse(current_url).netloc}/"
+        return render_template('index.html', cur_url=current_url, cur_url_short=current_url_short)
 
     @app.route('/upated')
     def page_upated():
@@ -76,6 +75,7 @@ class webAdmin:
     
     def start(self):
         self.thread.start()
+        # self.app.run(host=self.host, port=self.port, debug=True)
         return
 
     def stop(self):

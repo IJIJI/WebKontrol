@@ -1,7 +1,7 @@
 h1.clock{
   font-family: 'DSEG7 Classic', monospace;
   font-weight: light;
-  font-size: 23vh;
+  font-size: 28vh;
   color: var(--ac-color);
   position: relative;
 }
@@ -11,7 +11,7 @@ h1.clock > span.bg{
   top: 0;
   left: 0;
 
-  color: var(--bg-color-light);
+  color: var(--bg-color-semilight);
   z-index: -1;
   /* text-shadow: 0 0 10px var(--ac-color); */
 }
