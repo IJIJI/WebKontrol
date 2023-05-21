@@ -64,7 +64,7 @@ Add the unclutter script to the end of the startup file. You can change the time
 @unclutter -idle 2
 ```
 
-Make sure to safe the file.
+Make sure to save the file.
 
 ## Use
 
