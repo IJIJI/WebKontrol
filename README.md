@@ -26,6 +26,7 @@ pip install flask
 pip install threading
 pip install netifaces
 sudo apt-get install chromium-browser
+sudo apt-get install chromium-chromedriver
 ```
 
 #### Code
