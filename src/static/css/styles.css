@@ -62,10 +62,13 @@ a:hover, a:active, a:focus, a#active{
     color: var(--text-color);
 }
 
-a, b {
+a b, a span {
     color: var(--ac-color);
 }
 
+p.urlBox a {
+    color: var(--ac-color);
+}
 
 p.urlBox{
     font-size: 90%;
