@@ -31,7 +31,7 @@ sudo apt-get install chromium-browser
 #### Code
 
 ```shell
-git clone https://github.com/IJIJI/WebKontrol.git --branch V0.3
+git clone https://github.com/IJIJI/WebKontrol.git --branch V0.4
 cd WebKontrol/src
 python WebKontrol.py
 ```
