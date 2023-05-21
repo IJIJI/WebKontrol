@@ -62,7 +62,7 @@ a:hover, a:active, a:focus, a#active{
     color: var(--text-color);
 }
 
-a b, a span {
+a b, a span, a.red {
     color: var(--ac-color);
 }
 
