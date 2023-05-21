@@ -32,7 +32,7 @@ sudo apt-get install chromium-chromedriver
 #### Code
 
 ```shell
-git clone https://github.com/IJIJI/WebKontrol.git --branch V0.4
+git clone https://github.com/IJIJI/WebKontrol.git --branch V0.4.1
 cd WebKontrol/src
 python WebKontrol.py
 ```
