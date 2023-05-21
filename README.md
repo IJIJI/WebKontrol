@@ -46,7 +46,7 @@ sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 Add the python script to the end of the startup file. Your location may differ.
 
 ```shell
-@python /home/<USERNAME>/src/WebKontrol.py
+@python /home/<USERNAME>/WebKontrol/src/WebKontrol.py
 ```
 
 Make sure to safe the file.
