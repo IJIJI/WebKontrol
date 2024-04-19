@@ -17,8 +17,9 @@ class webPuppet:
     chrome_options.add_experimental_option("useAutomationExtension", False)
     chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])
     chrome_options.add_argument("--kiosk")
+    chrome_options.add_argument('--force-dark-mode')
 
-    driver = webdriver.Chrome(chrome_options=chrome_options)
+    driver = webdriver.Chrome(chrome_options)
 
     # def update(self):
     #     if(self.__url == self.url):
