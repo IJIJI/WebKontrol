@@ -1,0 +1,21 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block main %}
+<section>
+    <h1>Updated URL</h1>
+    <p>Redirecting back home in <span id="counter">3</span> second(s).</p>
+    <script type="text/javascript">
+    function countdown() {
+    var i = document.getElementById('counter');
+    if (parseInt(i.innerHTML)!=0) {
+        i.innerHTML = parseInt(i.innerHTML)-1;
+    }
+    if (parseInt(i.innerHTML)<=0) {
+        location.href = '/';
+    }
+    }
+    setInterval(function(){ countdown(); },1000);
+    </script>
+    <a class="red" href="/" style="margin-top: 10px;"><span class="material-icons">arrow_backward</span>Go back Home</a>
+</section>
+{% endblock %}
