@@ -26,12 +26,13 @@ pip install flask
 pip install threading
 pip install netifaces
 sudo apt-get install chromium-browser
+sudo apt-get install chromium-chromedriver
 ```
 
 #### Code
 
 ```shell
-git clone https://github.com/IJIJI/WebKontrol.git --branch V0.3
+git clone https://github.com/IJIJI/WebKontrol.git --branch V0.4.2
 cd WebKontrol/src
 python WebKontrol.py
 ```
@@ -45,7 +46,7 @@ sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 Add the python script to the end of the startup file. Your location may differ.
 
 ```shell
-@python /home/pi/Webkontrol/src/WebKontrol.py
+@python /home/<USERNAME>/WebKontrol/src/WebKontrol.py
 ```
 
 Make sure to safe the file.
@@ -63,7 +64,7 @@ Add the unclutter script to the end of the startup file. You can change the time
 @unclutter -idle 2
 ```
 
-Make sure to safe the file.
+Make sure to save the file.
 
 ## Use
 
