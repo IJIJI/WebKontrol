@@ -2,10 +2,24 @@
   "name": "webkontrol",
   "version": "0.5.0",
   "description": "WebKontrol - An intuitive web kiosk with a web based admin panel.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "main": "app.ts",
+  "author": "Synapt <contact@synapt.nl>",
+  "repository": {
+    "url": "https://github.com/IJIJI/WebKontrol",
+    "type": "git"
   },
-  "author": "Synapt Technologies",
-  "license": "ISC"
+  "license": "MIT",
+  "scripts": {
+    "start": "tsx app.ts"
+  },
+  "dependencies": {
+    "events": "^3.3.0",
+    "express": "^4.21.2",
+    "pug": "^3.0.3",
+    "puppeteer": "^23.11.1",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5"
+  }
 }
