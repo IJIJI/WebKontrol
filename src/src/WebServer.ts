@@ -68,7 +68,10 @@ export class WebServer extends EventEmitter {
       });
     });
     this.app.get('/no_connect', (req, res) => {
-      res.render('no_connect', {})
+      res.render('no_connect.html.twig', {
+        cur_url : "Hello World",
+        cur_url_short: "Bye"
+      });
     });
     this.app.get('/splash', (req, res) => {
       res.render('splash.html.twig', {
