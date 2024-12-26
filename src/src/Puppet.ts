@@ -11,52 +11,55 @@ export declare interface Puppet {
   on<U extends keyof PuppetEvents>(
     event: U, listener: PuppetEvents[U]
   ): this;
-
+  
   emit<U extends keyof PuppetEvents>(
     event: U, ...args: Parameters<PuppetEvents[U]>
   ): boolean;
 }
 
 export class Puppet extends EventEmitter {
-
+  
   private browser: Browser;
   private page: Page;
-
+  
   constructor() {
     super();
-
+    
   }
-
+  
   async init() {
     // Launch the browser and open a new blank page
     this.browser = await puppeteer.launch({
       headless: false, // extension are allowed only in head-full mode
+      defaultViewport: null,
       args: [
-          // `--disable-extensions-except=${extensionPath}`, // Full path only
-          // `--load-extension=${extensionPath}`,
-          // '--disable-extensions',
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          "--disable-gpu",
-          "--disable-dev-shm-usage",
-          "--start-maximized",
-          "--start-fullscreen",
+        // `--disable-extensions-except=${extensionPath}`, // Full path only
+        // `--load-extension=${extensionPath}`,
+        // '--disable-extensions',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        "--disable-gpu",
+        "--disable-dev-shm-usage",
+        "--start-maximized",
+        "--start-fullscreen",
+        "--force-dark-mode",
+        "--kiosk"
       ],
       // timeout: 0
     });
-
+    
     this.page = await this.browser.pages().then(pages => pages[0]);
-
+    
     // Navigate the page to a URL.
-    await this.openPage('http://127.0.0.1/clock');
-
+    await this.openPage('http://127.0.0.1/splash/simple');
+    
     // Set screen size.
-    await this.page.setViewport({width: 1920, height: 1080});
-
+    // await this.page.setViewport({width: 1920, height: 1080, deviceScaleFactor: 1});
+    
     console.log('Puppet initialized');
   }
   
-
+  
   async openPage(url: string = 'http://127.0.0.1/clock') 
   {
     try

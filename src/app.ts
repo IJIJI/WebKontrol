@@ -1,22 +1,38 @@
 
-import { WebServer } from "./src/Webserver";
+// import { WebServer } from "./src/Webserver";
 
-const webServer = new WebServer();
-webServer.start();
+// const webServer = new WebServer();
+// webServer.start();
 
 
-import { Puppet } from "./src/Puppet";
+// import { Puppet } from "./src/Puppet";
 
-const puppet = new Puppet();
+// const puppet = new Puppet();
+
+// import { SettingLoader } from "./src/SettingLoader";
+
+// const settingLoader = new SettingLoader();
+
+// settingLoader.load();
+
 // puppet.init().then(() => {
 
-// // setTimeout(() => {
-//   puppet.openPage('https://github.com/');
-// // }, 1000
+//     puppet.openPage(settingLoader.getSettings().url);
 // });
 
 
+// // puppet.init().then(() => {
 
+// // // setTimeout(() => {
+// //   puppet.openPage('https://github.com/');
+// // // }, 1000
+// // });
+
+
+
+import { WebKontrol } from "./src/WebKontrol";
+
+const webKontrol = new WebKontrol();
 
 
 
