@@ -12,46 +12,87 @@ I originally developed this for the livestreaming industry. This allows me to di
 
 # Getting started
 
-I am planning to sell pre-configured boxes on my store. If you are interested, [contact me](mailto:shop@synapt.nl).
+I am planning to sell pre-configured boxes with SDI outputs on my store. If you are interested, [contact me](mailto:shop@synapt.nl).
 
 ## Install
 
-WebKontrol is Python based, which means it can run on a lot of operating systems. It is tested on **windows 11** and **Raspberry Pi OS (Desktop).** The first part of the install is interchangable between both, but make sure you have python, pip and git installed.
+WebKontrol is Node based, which means it can run on a lot of operating systems. It is tested on **windows 11** and **Raspberry Pi OS (Desktop).** 
+
+### Debian
+
+#### Update OS
+
+```shell
+sudo apt-get update &&
+sudo apt-get upgrade
+```
 
 #### Dependencies
 
 ```shell
-pip install selenium
-pip install flask
-pip install threading
-pip install netifaces
-sudo apt-get install chromium-browser
-sudo apt-get install chromium-chromedriver
+sudo apt install git -y &&
+sudo apt install nodejs &&
+sudo apt install npm -y &&
+sudo npm install --global yarn &&
 ```
 
 #### Code
 
-```shell
-git clone https://github.com/IJIJI/WebKontrol.git --branch V0.4.2
-cd WebKontrol/src
-python WebKontrol.py
-```
-
-#### Autostart (Raspberry Pi OS)
+Make a directory:
 
 ```shell
-sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
+sudo mkdir /opt/WebKontrol
 ```
-
-Add the python script to the end of the startup file. Your location may differ.
+Clone and install the code:
 
 ```shell
-@python /home/<USERNAME>/WebKontrol/src/WebKontrol.py
+git clone https://github.com/IJIJI/WebKontrol.git /opt/WebKontrol --branch V0.5 &&
+cd /opt/WebKontrol/src &&
+sudo yarn
 ```
 
-Make sure to safe the file.
+To start WebKontrol you can run this:
+```shell
+yarn start
+```
 
-#### Auto hide the cursor (Raspberry Pi OS)
+#### Autostart - Creating a service
+
+```bash
+sudo nano /lib/systemd/system/webkontrol.service
+```
+
+Paste the following startup service into the file, then press Ctrl + S to save and Ctrl + X to exit:
+
+```yaml
+#/lib/systemd/system/webkontrol.service
+[Unit]
+Description=WebKontrol
+After=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=3
+Restart=on-failure
+WorkingDirectory= /opt/WebKontrol/
+ExecStart=yarn start /opt/WebKontrol/
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start service:
+
+```bash
+sudo systemctl daemon-reload &&
+sudo systemctl enable webkontrol &&
+sudo systemctl start webkontrol
+```
+
+You can now access WebKontrol from your browser! When connected to a display, it will list its IP Address(es).
+
+#### Auto hide the cursor (Debian)
 
 ```shell
 sudo apt-get install unclutter
@@ -72,7 +113,7 @@ Once you have started the script, you should see the splash screen appearing. It
 
 <img src="img/splash_interface.png" width="400"/>
 
-Once you navigate to one of the IP addresses you should see the web interface. Make sure you type in the IP followed by port **8080**
+Once you navigate to one of the IP addresses you should see the web interface.
 
 <img src="img/admin_interface_2.png" width="400"/>
 
@@ -80,7 +121,8 @@ In the admin interface there are three buttons and one input.
 
 - **View:** Opens the current url in a new tab.
 - **Reload:** Reloads the browser on the WebKontrol instance. It also returns to the set URL. If you have navigated on the instance and then relaod it will return to the requested URL.
-- **Internal Clock:** When pressed, the internal clock button fills the input with the link to the internal clock.
+- **View Internal Clock:** Opens the internal clock in a new tab.
+- **Internal Clock:** When pressed, fills the input with the link to the internal clock.
 - **Input:** Here you can enter the URL you wish to display on the WebKontrol instance.
 
 #### No connection
