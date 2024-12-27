@@ -46,8 +46,8 @@ export class WebServer extends EventEmitter {
     this.app.get('/', (req, res) => {
       // res.render('index', { title: 'Hey', message: 'Hello there!' })
       res.render('index.html.twig', {
-        cur_url : "Hello World",
-        cur_url_short: "Bye"
+        cur_url : this.settingLoader.getSettings().url,
+        cur_url_short: this.shortenUrl(this.settingLoader.getSettings().url)
       });
     });
     
@@ -73,7 +73,7 @@ export class WebServer extends EventEmitter {
     this.app.get('/no_connect', (req, res) => {
       res.render('no_connect.html.twig', {
         cur_url : this.settingLoader.getSettings().url,
-        cur_url_short: "Bye"
+        cur_url_short: this.shortenUrl(this.settingLoader.getSettings().url)
       });
     });
     this.app.get('/splash', (req, res) => {
@@ -93,5 +93,10 @@ export class WebServer extends EventEmitter {
     this.app.listen(this.port, () => {
       console.log(`Web Server started on port ${this.port}`)
     })
+  }
+
+  shortenUrl(url: string){
+    const urlObj = new URL(url);
+    return urlObj.hostname;  
   }
 }
