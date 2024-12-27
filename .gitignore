@@ -8,3 +8,5 @@ src/__pycache__/puppet.cpython-310.pyc
 src/__pycache__/admin.cpython-310.pyc
 config.json
 *.pyc
+src/config.json
+config.json
