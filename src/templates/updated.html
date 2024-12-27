@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WEBKONTROL</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/fonts.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/config.css') }}">
+
+</head>
+<body>
+  <aside>
+    <!-- <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Synapt Technologies Logo"> -->
+    <h1>WEBKONTROL</h1>
+    <p>V0.4 <b>Beta</b></p>
+  </aside>
+  <main>
+    <section>
+      <h1>Updated URL</h1>
+      <p>Redirecting back home in <span id="counter">3</span> second(s).</p>
+      <script type="text/javascript">
+      function countdown() {
+        var i = document.getElementById('counter');
+        if (parseInt(i.innerHTML)!=0) {
+          i.innerHTML = parseInt(i.innerHTML)-1;
+        }
+        if (parseInt(i.innerHTML)<=0) {
+          location.href = '/';
+        }
+      }
+      setInterval(function(){ countdown(); },1000);
+      </script>
+      <a class="red" href="/" style="margin-top: 10px;"><span class="material-icons">arrow_backward</span>Go back Home</a>
+    </section>
+  </main>
+ 
+</body>
+</html>
