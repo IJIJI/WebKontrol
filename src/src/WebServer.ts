@@ -5,7 +5,7 @@ import Twig from 'twig';
 import { SettingLoader } from "./SettingLoader";
 
 export interface WebServerEvents {
-  error: () => void;
+  reload: () => void;
 }
 
 export declare interface WebServer {
@@ -54,8 +54,7 @@ export class WebServer extends EventEmitter {
     this.app.post('/set_url', (req, res) => {
       // res.send(req.bod);
       console.log('POST parameter received are: ',req.body);
-      res.render('updated.html.twig', {
-      });
+      res.render('updated.html.twig', {});
       this.settingLoader.set('url', req.body.url);
     });
     
@@ -85,6 +84,10 @@ export class WebServer extends EventEmitter {
       res.render('splash_simple.html.twig', {
         admin_url : ["google.com", "synapt.eu"],
       });
+    });
+    this.app.get('/reload', (req, res) => {
+      res.render('updated.html.twig', {});
+      this.emit('reload');
     });
   }
   

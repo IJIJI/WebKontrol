@@ -26,9 +26,10 @@ export class WebKontrol {
             });           
         });
       
-        //   this.webServer.on('sourceChange', () => {
-        //     this.tallyManager.update();
-        //   });
+        this.webServer.on('reload', () => {
+            this.puppet.openPage(this.settingLoader.getSettings().url);
+            console.log("Puppet reloaded!");
+        });
       
         this.settingLoader.load();
 
