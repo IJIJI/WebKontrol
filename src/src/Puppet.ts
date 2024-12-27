@@ -1,6 +1,7 @@
 import puppeteer, {Browser, Page} from 'puppeteer';
 // Or import puppeteer from 'puppeteer-core';
 import { EventEmitter } from "events";
+import { Console } from 'console';
 
 export interface PuppetEvents {
   failedLoad: () => void;
@@ -64,12 +65,32 @@ export class Puppet extends EventEmitter {
   {
     try
     {
-      await this.page.goto(url);
+      await this.page.goto(url).catch((reason) => {
+        console.log("Failed loading! Attempting in 30s...");
+        this._failedPage(url);
+      });
       this.emit('successLoad');
+      console.log('Success!');
     }
     catch (e)
     {
       this.emit('failedLoad');
+      console.log("Failed loading! ", e);
     }
   }
+
+  async _failedPage(url: string) {
+
+    await this.page.goto('http://127.0.0.1/no_connect');
+
+    await this.delay (30000);
+
+    this.page.goto(url).catch((reason) => {
+      this._failedPage(url);
+    });
+  }
+
+  async delay(delayInms) {
+    return new Promise(resolve => setTimeout(resolve, delayInms));
+  };
 }

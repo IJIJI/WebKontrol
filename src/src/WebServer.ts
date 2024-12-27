@@ -3,6 +3,7 @@ import express from 'express';
 import path from 'path';
 import Twig from 'twig';
 import { SettingLoader } from "./SettingLoader";
+import { OsDetails } from "./OsDetails";
 
 export interface WebServerEvents {
   reload: () => void;
@@ -23,6 +24,8 @@ export class WebServer extends EventEmitter {
   private port = 80;
   
   settingLoader: SettingLoader;
+
+  osDetails: OsDetails = new OsDetails();
   
   constructor(settings: SettingLoader) {
     super();
@@ -77,13 +80,11 @@ export class WebServer extends EventEmitter {
     });
     this.app.get('/splash', (req, res) => {
       res.render('splash.html.twig', {
-        admin_url : ["google.com", "synapt.eu"],
+        admin_url : this.osDetails.getAddresses(),
       });
     });
     this.app.get('/splash/simple', (req, res) => {
-      res.render('splash_simple.html.twig', {
-        admin_url : ["google.com", "synapt.eu"],
-      });
+      res.render('splash_simple.html.twig', {});
     });
     this.app.get('/reload', (req, res) => {
       res.render('updated.html.twig', {});
