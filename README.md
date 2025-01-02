@@ -24,16 +24,16 @@ WebKontrol is Node based, which means it can run on a lot of operating systems. 
 
 ```shell
 sudo apt-get update &&
-sudo apt-get upgrade
+sudo apt-get upgrade -y
 ```
 
 #### Dependencies
 
 ```shell
 sudo apt install git -y &&
-sudo apt install nodejs &&
+sudo apt install nodejs -y &&
 sudo apt install npm -y &&
-sudo npm install --global yarn &&
+sudo npm install --global yarn
 ```
 
 #### Code
@@ -56,10 +56,12 @@ To start WebKontrol you can run this:
 yarn start
 ```
 
-#### Autostart - Creating a service
+TODO: Fix webkontrol module imports
+
+#### Autostart - Raspberry Pi OS
 
 ```bash
-sudo nano /lib/systemd/system/webkontrol.service
+sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 ```
 
 Paste the following startup service into the file, then press Ctrl + S to save and Ctrl + X to exit:
