@@ -53,7 +53,7 @@ sudo yarn
 
 To start WebKontrol you can run this:
 ```shell
-yarn start
+sudo yarn start
 ```
 
 TODO: Fix webkontrol module imports
