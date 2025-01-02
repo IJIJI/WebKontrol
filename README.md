@@ -46,7 +46,7 @@ sudo mkdir /opt/WebKontrol
 Clone and install the code:
 
 ```shell
-git clone https://github.com/IJIJI/WebKontrol.git /opt/WebKontrol --branch V0.5 &&
+sudo git clone https://github.com/IJIJI/WebKontrol.git /opt/WebKontrol --branch V0.5 &&
 cd /opt/WebKontrol/src &&
 sudo yarn
 ```
