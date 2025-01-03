@@ -33,6 +33,7 @@ sudo apt-get upgrade -y
 sudo apt install git -y &&
 sudo apt install nodejs -y &&
 sudo apt install npm -y &&
+sudo npm install --global tsx -y &&
 sudo npm install --global yarn -y
 ```
 
