@@ -1,6 +1,6 @@
 
 import { SettingLoader } from "./SettingLoader";
-import { WebServer } from "./Webserver";
+import { WebServer } from "./WebServer";
 import { Puppet } from "./Puppet";
 
 
