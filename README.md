@@ -79,13 +79,16 @@ Make sure to save the file.
 ### Auto-hide the cursor (Debian)
 
 ```shell
-sudo apt-get install unclutter
-sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
+sudo apt-get install unclutter -y
 ```
 
 Add the unclutter script to the end of the startup file. You can change the timeout. Here, it is set to 2:
+```bash
+sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
+```
 
-```shell
+```yaml
+#/etc/xdg/lxsession/LXDE-pi/autostart
 @unclutter -idle 2
 ```
 
