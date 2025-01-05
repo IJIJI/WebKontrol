@@ -33,7 +33,7 @@ sudo apt-get upgrade -y
 sudo apt install git -y &&
 sudo apt install nodejs -y &&
 sudo apt install npm -y &&
-sudo apt-get install chromium-browser -y &&
+sudo apt install chromium-browser -y &&
 sudo npm install --global tsx -y &&
 sudo npm install --global yarn -y
 ```
