@@ -65,7 +65,7 @@ The above config still holds for Raspberry Pi OS, but requires a few more steps.
 First off, to launch the script you may have to do so with a custom chromium location as Puppeteer does not always recognize that automatically. Run the script by adding the location. You can find that location by running: `which chromium-browser`
 
 ```bash
-yarn start -- --chromium=/usr/bin/chromium/
+yarn start --chromium=/usr/bin/chromium/
 ```
 
 ### Give the right permissions
