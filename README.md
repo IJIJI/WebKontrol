@@ -88,7 +88,7 @@ Add the script to the end of the file. Your location may differ.
 
 ```yaml
 #/etc/xdg/lxsession/LXDE-pi/autostart
-@yarn --cwd /opt/WebKontrol/src start
+@yarn --cwd /opt/WebKontrol/src start --chromium=/usr/bin/chromium-browser
 ```
 
 Make sure to save the file.
