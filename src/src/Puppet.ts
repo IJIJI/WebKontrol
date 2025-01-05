@@ -33,6 +33,8 @@ export class Puppet extends EventEmitter {
     this.browser = await puppeteer.launch({
       headless: false, // extension are allowed only in head-full mode
       defaultViewport: null,
+      ignoreDefaultArgs: ['--enable-automation'],
+      // executablePath: '/usr/bin/chromium-browser',
       args: [
         // `--disable-extensions-except=${extensionPath}`, // Full path only
         // `--load-extension=${extensionPath}`,
