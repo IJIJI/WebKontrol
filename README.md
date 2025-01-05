@@ -60,8 +60,15 @@ sudo yarn start
 
 You can now access WebKontrol from your browser! When connected to a display, it will list its IP Address(es).
 
-## Extra (Raspberry Pi OS)
-###
+## Raspberry Pi OS (Desktop)
+The above config still holds for Raspberry Pi OS, but requires a few more steps.
+First off, to launch the script you may have to do so with a custom chromium location as Puppeteer does not always recognize that automatically. Run the script by adding the location. You can find that location by running: `which chromium-browser`
+
+```bash
+yarn start -- --chromium=/usr/bin/chromium/
+```
+
+### Give the right permissions
 Open access to port 80.
 ```bash
 sudo setcap 'cap_net_bind_service=+ep' `which node`
