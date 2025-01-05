@@ -65,7 +65,7 @@ The above config still holds for Raspberry Pi OS, but requires a few more steps.
 First off, to launch the script you may have to do so with a custom chromium location as Puppeteer does not always recognize that automatically. Run the script by adding the location. You can find that location by running: `which chromium-browser`
 
 ```bash
-yarn start -- --chromium=/usr/bin/chromium/
+yarn start --chromium=/usr/bin/chromium-browser
 ```
 
 ### Give the right permissions
@@ -88,7 +88,7 @@ Add the script to the end of the file. Your location may differ.
 
 ```yaml
 #/etc/xdg/lxsession/LXDE-pi/autostart
-@yarn --cwd /opt/WebKontrol/src start
+@yarn --cwd /opt/WebKontrol/src start --chromium=/usr/bin/chromium-browser
 ```
 
 Make sure to save the file.
