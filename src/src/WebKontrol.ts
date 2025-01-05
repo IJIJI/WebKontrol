@@ -10,11 +10,11 @@ export class WebKontrol {
     puppet: Puppet;
     settingLoader: SettingLoader;
 
-    constructor() {
+    constructor(chromiumLocation: string|undefined = undefined) {
         // super();
         this.settingLoader = new SettingLoader();
         this.webServer = new WebServer(this.settingLoader);
-        this.puppet = new Puppet();
+        this.puppet = new Puppet(chromiumLocation);
 
 
         this.settingLoader.on('loaded', (config) => 

@@ -22,19 +22,23 @@ export class Puppet extends EventEmitter {
   
   private browser: Browser;
   private page: Page;
+
+  private chromiumLocation: string|undefined;
   
-  constructor() {
+  constructor(chromiumLocation: string|undefined = undefined) {
     super();
-    
+    this.chromiumLocation = chromiumLocation;
   }
   
   async init() {
     // Launch the browser and open a new blank page
-    this.browser = await puppeteer.launch({
+
+    var settings = {
       headless: false, // extension are allowed only in head-full mode
       defaultViewport: null,
       ignoreDefaultArgs: ['--enable-automation'],
       // executablePath: '/usr/bin/chromium-browser',
+      executablePath: <string|undefined> undefined,
       args: [
         // `--disable-extensions-except=${extensionPath}`, // Full path only
         // `--load-extension=${extensionPath}`,
@@ -49,7 +53,13 @@ export class Puppet extends EventEmitter {
         "--kiosk"
       ],
       // timeout: 0
-    });
+    }
+
+    if (this.chromiumLocation){
+      settings.executablePath = this.chromiumLocation;
+    }
+
+    this.browser = await puppeteer.launch(settings);
     
     this.page = await this.browser.pages().then(pages => pages[0]);
     
