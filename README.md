@@ -33,6 +33,7 @@ sudo apt-get upgrade -y
 sudo apt install git -y &&
 sudo apt install nodejs -y &&
 sudo apt install npm -y &&
+sudo apt-get install chromium-browser -y &&
 sudo npm install --global tsx -y &&
 sudo npm install --global yarn -y
 ```
@@ -60,6 +61,15 @@ sudo yarn start
 You can now access WebKontrol from your browser! When connected to a display, it will list its IP Address(es).
 
 ## Extra (Raspberry Pi OS)
+###
+Open access to port 80.
+```bash
+sudo setcap 'cap_net_bind_service=+ep' `which node`
+```
+Give access to the config file.
+```bash
+sudo chmod a+rwx /opt/WebKontrol/src/config.json
+```
 The following steps are made and tested on Raspberry Pi OS. If you have a different operating system these steps may also differ.
 
 ### Autostart
