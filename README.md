@@ -6,7 +6,7 @@ An intuitive web kiosk with a web-based admin panel.
 
 <img src="img/admin_interface_2.png" width="400"/> <img src="img/clock_interface.png" width="400"/>
 
-I originally developed this for the live-streaming industry. It allows me to display a clock or use something like [stagetimer.io](https://stagetimer.io/). This can also be implemented in an information display or even a touchscreen kiosk.
+I originally developed WebKontrol for the live-streaming industry. It allows me to display a clock or use something like [stagetimer.io](https://stagetimer.io/). This can also be implemented in an information display or a touchscreen kiosk.
 
 > [!WARNING]
 > **WebKontrol is not completely finished, and the code is imperfect. I will continue developing this. I have tested the platform to ensure it is stable.**
@@ -17,9 +17,9 @@ I am planning to sell pre-configured boxes with SDI outputs in my store. If you 
 
 # Install
 
-WebKontrol is Node-based, which means it can run on a lot of operating systems. It is tested on **Windows 11** and **Raspberry Pi OS (Desktop).** 
+WebKontrol is Node-based, which means it can run on a lot of operating systems. It is tested on **Windows 11** and **Raspberry Pi OS Full** on the Raspberry Pi 2 and 4.
 
-## Debian:
+## Debian
 
 ### Update OS
 
@@ -59,9 +59,9 @@ To start WebKontrol you can run this:
 sudo yarn start
 ```
 
-You can now access WebKontrol from your browser! When connected to a display, it will list its IP Address(es).
+You can now access WebKontrol from your browser! When connected to a display, it will initially list its IP Address(es).
 
-## Raspberry Pi OS (Desktop)
+## Raspberry Pi OS (Full)
 The above config still works on Raspberry Pi OS but requires a few more steps. These steps are tested for Raspberry Pi OS. A different OS may still require extra steps.
 
 First off, to launch the script you may have to do so with a custom chromium location as Puppeteer does not always recognize that automatically. Run the script by adding the location. You can find that location by running: `which chromium-browser`
@@ -80,20 +80,9 @@ Give access to the config file.
 sudo chmod a+rwx /opt/WebKontrol/src/config.json
 ```
 
-### Raspberry Pi OS Wayland
-> [!TIP]  
-> To know what version you are using, run: `echo $XDG_SESSION_TYPE`
-
-Autostarting in wayland is more complicated. Switch to X11.
-```bash
-sudo raspi-config
-```
-- select 6) Advanced Options
-- Select A6 Wayland toggle
-
-### Raspberry Pi OS X11 (Older OS Versions)
-
 ## Autostart
+> [!NOTE]  
+> This tutorial will only work for the X11 desktop. To know what version you are using, run: `echo $XDG_SESSION_TYPE`. To switch to X11, run: `sudo raspi-config'. Go to option 6, then A6 'Wayland toggle'. Set it to X11.
 ```bash
 sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 ```
@@ -127,7 +116,7 @@ Make sure to save the file.
 
 ## Use
 
-Once you have started the script, you should see the splash screen appearing. It lists the IP addresses on which the web interface is available. If you are on a touchscreen you can press the IP you wish to access, else you have to type it in your browser's search bar. It should look something like this:
+Once you have started the script, you should see the splash screen appearing. It lists the IP addresses on which the web interface is available. It should look something like this:
 
 <img src="img/splash_interface.png" width="400"/>
 
@@ -135,10 +124,10 @@ Once you navigate to one of the IP addresses you should see the web interface.
 
 <img src="img/admin_interface_2.png" width="400"/>
 
-In the admin interface, there are three buttons and one input.
+In the admin interface, there are four buttons and one input.
 
 - **View:** Opens the current URL in a new tab.
-- **Reload:** Reloads the browser on the WebKontrol instance. It also returns to the set URL. If you have navigated on the puppet and then reload, it will return to the requested URL.
+- **Reload:** Reloads the browser on the WebKontrol instance. It also returns to the set URL. If you the puppet and then reload, it will return to the originally requested URL.
 - **View Internal Clock:** Opens the internal clock in a new tab.
 - **Internal Clock:** When pressed, this fills the input with the link to the internal clock.
 - **Input:** Here you can enter the URL you wish to display on the WebKontrol instance.
