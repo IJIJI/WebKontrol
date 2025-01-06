@@ -73,7 +73,7 @@ Give access to the config file.
 ```bash
 sudo chmod a+rwx /opt/WebKontrol/src/config.json
 ```
-
+### Launch WebKontrol
 To launch the script you may have to do so with a custom chromium location as Puppeteer does not always recognize that automatically. Run the script by adding the location. You can find that location by running: `which chromium-browser`
 
 ```bash
