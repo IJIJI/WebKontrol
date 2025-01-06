@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/github/license/IJIJI/WebKontrol)](https://github.com/IJIJI/WebKontrol/blob/main/LICENSE) [![Version](https://img.shields.io/github/v/release/IJIJI/WebKontrol?display_name=tag&include_prereleases)](https://github.com/IJIJI/WebKontrol/releases) ![Last Commit](https://img.shields.io/github/last-commit/IJIJI/WebKontrol)
 
-An intuitive web kiosk with a web-based admin panel.
+WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel.
 
 <img src="img/admin_interface_2.png" width="400"/> <img src="img/clock_interface.png" width="400"/>
 
@@ -84,7 +84,7 @@ yarn start --chromium=/usr/bin/chromium-browser
 
 ### Autostart
 > [!NOTE]  
-> The autostart part of tutorial will only work for the X11 desktop. To know what version you are using, run: `echo $XDG_SESSION_TYPE`. To switch to X11, run: `sudo raspi-config'. Go to option 6, then A6 'Wayland toggle'. Set it to X11.
+> The autostart part of this tutorial will only work for the X11 desktop. To know what version you are using, run `echo $XDG_SESSION_TYPE` on the desktop environment. To switch to X11, run: `sudo raspi-config'. Go to option 6, then A6 'Wayland toggle'. Set it to X11.
 ```bash
 sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 ```
@@ -96,7 +96,7 @@ Add the script to the end of the file. Your location may differ.
 @yarn --cwd /opt/WebKontrol/src start --chromium=/usr/bin/chromium-browser
 ```
 
-Make sure to save the file.
+Make sure to save the file. Changes will take place on reboot.
 
 ### Auto-hide the cursor
 
@@ -114,7 +114,7 @@ sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 @unclutter -idle 2
 ```
 
-Make sure to save the file.
+Make sure to save the file. Changes will take place on reboot.
 
 ## Use
 
