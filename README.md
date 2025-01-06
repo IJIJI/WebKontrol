@@ -84,7 +84,7 @@ yarn start --chromium=/usr/bin/chromium-browser
 
 ### Autostart
 > [!NOTE]  
-> This tutorial will only work for the X11 desktop. To know what version you are using, run: `echo $XDG_SESSION_TYPE`. To switch to X11, run: `sudo raspi-config'. Go to option 6, then A6 'Wayland toggle'. Set it to X11.
+> The autostart part of tutorial will only work for the X11 desktop. To know what version you are using, run: `echo $XDG_SESSION_TYPE`. To switch to X11, run: `sudo raspi-config'. Go to option 6, then A6 'Wayland toggle'. Set it to X11.
 ```bash
 sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 ```
