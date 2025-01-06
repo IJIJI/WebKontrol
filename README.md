@@ -64,12 +64,6 @@ You can now access WebKontrol from your browser! When connected to a display, it
 ## Raspberry Pi OS (Full)
 The above config still works on Raspberry Pi OS but requires a few more steps. These steps are tested for Raspberry Pi OS. A different OS may still require extra steps.
 
-First off, to launch the script you may have to do so with a custom chromium location as Puppeteer does not always recognize that automatically. Run the script by adding the location. You can find that location by running: `which chromium-browser`
-
-```bash
-yarn start --chromium=/usr/bin/chromium-browser
-```
-
 ### Give the right permissions
 Open access to port 80.
 ```bash
@@ -79,6 +73,14 @@ Give access to the config file.
 ```bash
 sudo chmod a+rwx /opt/WebKontrol/src/config.json
 ```
+
+To launch the script you may have to do so with a custom chromium location as Puppeteer does not always recognize that automatically. Run the script by adding the location. You can find that location by running: `which chromium-browser`
+
+```bash
+yarn start --chromium=/usr/bin/chromium-browser
+```
+
+
 
 ## Autostart
 > [!NOTE]  
