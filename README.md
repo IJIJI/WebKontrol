@@ -6,9 +6,10 @@ An intuitive web kiosk with a web-based admin panel.
 
 <img src="img/admin_interface_2.png" width="400"/> <img src="img/clock_interface.png" width="400"/>
 
-I originally developed this for the live streaming industry. It allows me to display a clock or use something like [stagetimer.io](https://stagetimer.io/). This can also be implemented in an information display or even a touchscreen kiosk.
+I originally developed this for the live-streaming industry. It allows me to display a clock or use something like [stagetimer.io](https://stagetimer.io/). This can also be implemented in an information display or even a touchscreen kiosk.
 
-> ⚠️ **This is not yet fully developed, and the code is imperfect. I will continue developing this. In its current state, I have tested the platform to be stable.**
+> [!WARNING]
+> **WebKontrol is not completely finished, and the code is imperfect. I will continue developing this. I have tested the platform to ensure it is stable.**
 
 # Getting started
 
@@ -16,7 +17,7 @@ I am planning to sell pre-configured boxes with SDI outputs in my store. If you 
 
 # Install
 
-WebKontrol is Node-based, which means it can run on a lot of operating systems. It is tested on **windows 11** and **Raspberry Pi OS (Desktop).** 
+WebKontrol is Node-based, which means it can run on a lot of operating systems. It is tested on **Windows 11** and **Raspberry Pi OS (Desktop).** 
 
 ## Debian:
 
@@ -61,7 +62,8 @@ sudo yarn start
 You can now access WebKontrol from your browser! When connected to a display, it will list its IP Address(es).
 
 ## Raspberry Pi OS (Desktop)
-The above config still holds for Raspberry Pi OS, but requires a few more steps.
+The above config still works on Raspberry Pi OS but requires a few more steps. These steps are tested for Raspberry Pi OS. A different OS may still require extra steps.
+
 First off, to launch the script you may have to do so with a custom chromium location as Puppeteer does not always recognize that automatically. Run the script by adding the location. You can find that location by running: `which chromium-browser`
 
 ```bash
@@ -77,9 +79,21 @@ Give access to the config file.
 ```bash
 sudo chmod a+rwx /opt/WebKontrol/src/config.json
 ```
-The following steps are made and tested on Raspberry Pi OS. If you have a different operating system these steps may also differ.
 
-### Autostart
+### Raspberry Pi OS Wayland
+> [!TIP]  
+> To know what version you are using, run: `echo $XDG_SESSION_TYPE`
+
+Autostarting in wayland is more complicated. Switch to X11.
+```bash
+sudo raspi-config
+```
+- select 6) Advanced Options
+- Select A6 Wayland toggle
+
+### Raspberry Pi OS X11 (Older OS Versions)
+
+## Autostart
 ```bash
 sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 ```
@@ -93,7 +107,7 @@ Add the script to the end of the file. Your location may differ.
 
 Make sure to save the file.
 
-### Auto-hide the cursor (Debian)
+## Auto-hide the cursor
 
 ```shell
 sudo apt-get install unclutter -y
