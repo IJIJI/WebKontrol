@@ -116,6 +116,13 @@ sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 
 Make sure to save the file. Changes will take place on reboot.
 
+### Disable screen blanking
+By default the Raspberry Pi display will go to sleep after some time. To disable this, open raspi config:
+```bash
+sudo raspi-config
+```
+Select option 2 Display, then D2 Screen Blanking. Disable screen blanking. Your display should now stay on.
+
 ## Use
 
 Once you have started the script, you should see the splash screen appearing. It lists the IP addresses on which the web interface is available. It should look something like this:
