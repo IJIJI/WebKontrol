@@ -82,7 +82,7 @@ yarn start --chromium=/usr/bin/chromium-browser
 
 
 
-## Autostart
+### Autostart
 > [!NOTE]  
 > This tutorial will only work for the X11 desktop. To know what version you are using, run: `echo $XDG_SESSION_TYPE`. To switch to X11, run: `sudo raspi-config'. Go to option 6, then A6 'Wayland toggle'. Set it to X11.
 ```bash
@@ -98,7 +98,7 @@ Add the script to the end of the file. Your location may differ.
 
 Make sure to save the file.
 
-## Auto-hide the cursor
+### Auto-hide the cursor
 
 ```shell
 sudo apt-get install unclutter -y
