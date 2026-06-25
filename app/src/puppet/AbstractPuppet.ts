@@ -37,6 +37,8 @@ export abstract class AbstractPuppet<
 
   protected _config: PuppetConfig;
 
+  protected _is_initialized = false;
+
   constructor(config: PuppetConfig) {
     super();
     this._checkConfig(config);
@@ -59,8 +61,13 @@ export abstract class AbstractPuppet<
   async init(): Promise<void> {
     this._logger = new Logger(this._getLogLabels());
     this._logger.info("Initializing...");
-    await this._doInit();
-    this._logger.info("Initialized.");
+    try {
+      await this._doInit();
+      this._is_initialized = true;
+      this._logger.info("Initialized.");
+    } catch (error) {
+      return this._logger.fatal("Failed to initialize", error);
+    }
   }
 
   protected _emitInfoUpdate(info: PuppetInfo) {
