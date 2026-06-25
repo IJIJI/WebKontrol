@@ -84,6 +84,10 @@ export abstract class AbstractPuppet<
     return { ...this._info, target_url: this._config.target_url };
   }
 
+  getConfig(): PuppetConfig {
+    return this._config;
+  }
+
   protected async _updateInfo(info?: Partial<PuppetInfo>) {
 
     this._info = { ...this._info, ...info };
