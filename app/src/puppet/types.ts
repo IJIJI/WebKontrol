@@ -1,5 +1,3 @@
-
-
 export type PuppetKey = string;
 export type PuppetTarget = string;
 
@@ -19,7 +17,6 @@ export type OgTargetInfo = {
   description?: string;
   image?: string;
 };
-
 
 export type SetTargetFail = {
   success: false;

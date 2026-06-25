@@ -1,6 +1,13 @@
 import EventEmitter from "node:events";
 import { Logger } from "../logging/Logger";
-import type { PuppetInfo, PuppetTarget, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./types";
+import type {
+  PuppetInfo,
+  PuppetTarget,
+  SetTargetFail,
+  SetTargetResult,
+  SetTargetSuccess,
+  TargetInfo,
+} from "./types";
 
 export type PuppetEvents = {
   load_success: [result: SetTargetSuccess];
@@ -8,11 +15,9 @@ export type PuppetEvents = {
   info_update: [info: unknown];
 };
 
-
 export abstract class AbstractPuppet<
   T extends PuppetEvents & Record<string, unknown[]> = PuppetEvents,
 > extends EventEmitter<T> {
-  
   private _logger!: Logger;
 
   protected _isInit = false;
@@ -21,11 +26,11 @@ export abstract class AbstractPuppet<
     return ["PPT"];
   }
 
-  protected _target_url: PuppetTarget = '';
+  protected _target_url: PuppetTarget = "";
 
-  protected _info: Omit<PuppetInfo, 'target'> = {
+  protected _info: Omit<PuppetInfo, "target"> = {
     target: {
-      url: '',
+      url: "",
     },
   };
 
@@ -46,11 +51,9 @@ export abstract class AbstractPuppet<
     this._logger.info("Initialized.");
   }
 
-
   protected _emitInfoUpdate(info: PuppetInfo) {
     (this as EventEmitter<PuppetEvents>).emit("info_update", info);
   }
-
 
   async setTarget(target: PuppetTarget): Promise<SetTargetResult> {
     this._target_url = target;
@@ -71,8 +74,7 @@ export abstract class AbstractPuppet<
       } else {
         throw new Error("Failed to set target with unknown error!");
       }
-    }
-    catch (error) {
+    } catch (error) {
       this._logger.error("Failed to set target", error);
       const result: SetTargetFail = {
         success: false,
@@ -89,13 +91,9 @@ export abstract class AbstractPuppet<
       (this as EventEmitter<PuppetEvents>).emit("load_fail", result);
       return result;
     }
-
   }
-  
-
 
   async getInfo(): Promise<PuppetInfo> {
     return { ...this._info, target: await this._getTargetInfo() };
   }
-
 }
