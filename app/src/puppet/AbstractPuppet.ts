@@ -91,17 +91,13 @@ export abstract class AbstractPuppet<
       // TODO: Url Validation
       this._config.target_url = target;
 
-      const success = await this._doSetTarget(target);
-      if (success) {
-        const result: SetTargetSuccess = {
-          success: true,
-        };
-        // this._updateInfo(result.info); //TODO
-        (this as EventEmitter<PuppetEvents>).emit("load_success", result);
-        return result;
-      } else {
-        throw new Error("Failed to set target with unknown error!");
-      }
+      await this._doSetTarget(target);
+      const result: SetTargetSuccess = {
+        success: true,
+      };
+      // this._updateInfo(result.info); //TODO
+      (this as EventEmitter<PuppetEvents>).emit("load_success", result);
+
     } catch (error) {
       this._logger.error("Failed to set target", error);
       const result: SetTargetFail = {
