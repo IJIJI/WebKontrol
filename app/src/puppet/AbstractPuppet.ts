@@ -4,6 +4,8 @@ import type {
   PuppetConfig,
   PuppetInfo,
   PuppetInfoBundle,
+  PuppetScreenshotFail,
+  PuppetScreenshotResult,
   PuppetTarget,
   SetTargetFail,
   SetTargetResult,
@@ -126,5 +128,21 @@ export abstract class AbstractPuppet<
     // TODO: Try to go to error page.
     // TODO: Add a way to differentiate between a load fail and a library fail. -> Error types?
   }
+
+  async getScreenshot(): Promise<PuppetScreenshotResult> {
+    try {
+      return await this._doScreenshot();
+    } catch (error) {
+      const result: PuppetScreenshotFail = { success: false };
+      if (error instanceof Error) {
+        result.error = error;
+      }
+      return result;
+    }
+  }
+
+  protected async _doScreenshot(): Promise<PuppetScreenshotResult> {
+    throw new Error("Screenshot not implemented for this puppet"); // TODO: Fail Silently or add another way to differentiate between fails and not implemented? Error type?
+  };
 
 }
