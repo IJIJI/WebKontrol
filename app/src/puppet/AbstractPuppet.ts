@@ -69,8 +69,12 @@ export abstract class AbstractPuppet<
     }
   }
 
-  protected _emitInfoUpdate(info: PuppetInfo) {
-    (this as EventEmitter<PuppetEvents>).emit("info_update", info);
+  protected _updateInfo(info?: Partial<PuppetInfo>) {
+
+    const newInfo = { ...this._info, ...info };
+    this._info = newInfo;
+
+    (this as EventEmitter<PuppetEvents>).emit("info_update", newInfo);
   }
 
   async setTarget(target: PuppetTarget): Promise<SetTargetResult> {
