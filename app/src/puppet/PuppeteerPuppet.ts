@@ -78,17 +78,4 @@ export class PuppeteerPuppet extends AbstractPuppet {
   }
 
 
-  async _failedPage(url: string) {
-    await this.page.goto("http://127.0.0.1/no_connect");
-
-    await this.delay(30000);
-
-    this.page.goto(url).catch((_reason) => {
-      this._failedPage(url);
-    });
-  }
-
-  async delay(delayInms: number) {
-    return new Promise((resolve) => setTimeout(resolve, delayInms));
-  }
 }
