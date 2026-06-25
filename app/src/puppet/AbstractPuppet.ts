@@ -3,6 +3,7 @@ import { Logger } from "../logging/Logger";
 import type {
   PuppetConfig,
   PuppetInfo,
+  PuppetInfoBundle,
   PuppetTarget,
   SetTargetFail,
   SetTargetResult,
@@ -10,11 +11,12 @@ import type {
   TargetInfo,
 } from "./types";
 import { ConnectionState } from "../types/CommonTypes";
+import { url } from "node:inspector";
 
 export type PuppetEvents = {
   load_success: [result: SetTargetSuccess];
   load_fail: [result: SetTargetFail];
-  info_update: [info: PuppetInfo];
+  info_update: [info: PuppetInfoBundle];
 };
 
 export abstract class AbstractPuppet<
@@ -28,9 +30,7 @@ export abstract class AbstractPuppet<
     return ["PPT"];
   }
 
-  protected _target_url: PuppetTarget = "";
-
-  protected _info: Omit<PuppetInfo, "target"> & Partial<PuppetInfo> = {
+  protected _info: PuppetInfo = {
     state: ConnectionState.OFFLINE,
   };
 
@@ -47,6 +47,7 @@ export abstract class AbstractPuppet<
   protected _checkConfig(config: PuppetConfig) {
     if (!config.id)
       this._logger.fatal(`Invalid ID provided. Submitted config:`, config);
+    // TODO: Url check
     if (config.display == null || config.display < 0 || config.display > 20)
       this._logger.fatal(`Valid Display is required. Submitted config:`, config);
   }
@@ -70,28 +71,26 @@ export abstract class AbstractPuppet<
     }
   }
 
-  protected _updateInfo(info?: Partial<PuppetInfo>) {
+  async _updateInfo(info?: Partial<PuppetInfo>) {
 
-    const newInfo = { ...this._info, ...info };
-    this._info = newInfo;
+    this._info = { ...this._info, ...info };
 
-    (this as EventEmitter<PuppetEvents>).emit("info_update", newInfo);
+    // TODO: Add async callback to allow for target_info loading?
+
+    (this as EventEmitter<PuppetEvents>).emit("info_update", this.getInfo());
   }
 
   async setTarget(target: PuppetTarget): Promise<SetTargetResult> {
-    this._target_url = target;
+    // TODO: Url Validation
+    this._config.target_url = target;
+
     try {
       const success = await this._doSetTarget(target);
       if (success) {
         const result: SetTargetSuccess = {
           success: true,
-          info: {
-            url: this._target_url,
-
-            // title: this._info.title, // TODO, also description and og
-          },
         };
-        // this._emitInfoUpdate(result.info); //TODO
+        // this._updateInfo(result.info); //TODO
         (this as EventEmitter<PuppetEvents>).emit("load_success", result);
         return result;
       } else {
@@ -101,22 +100,17 @@ export abstract class AbstractPuppet<
       this._logger.error("Failed to set target", error);
       const result: SetTargetFail = {
         success: false,
-        info: {
-          url: this._target_url,
-
-          // title: this._info.title, // TODO, also description and og
-        },
       };
       if (error instanceof Error) {
         result.error = error;
       }
-      // this._emitInfoUpdate(result.info); //TODO
+        // this._updateInfo(result.info); //TODO
       (this as EventEmitter<PuppetEvents>).emit("load_fail", result);
       return result;
     }
   }
 
-  async getInfo(): Promise<PuppetInfo> {
-    return { ...this._info, target: await this._getTargetInfo() };
+  getInfo(): PuppetInfoBundle {
+    return { ...this._info, target_url: this._config.target_url };
   }
 }
