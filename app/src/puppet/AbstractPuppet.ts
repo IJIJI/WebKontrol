@@ -85,10 +85,13 @@ export abstract class AbstractPuppet<
   }
 
   async setTarget(target: PuppetTarget): Promise<SetTargetResult> {
-    // TODO: Url Validation
-    this._config.target_url = target;
 
     try {
+      if (!this._is_initialized) throw new Error("Puppet not initialized");
+
+      // TODO: Url Validation
+      this._config.target_url = target;
+
       const success = await this._doSetTarget(target);
       if (success) {
         const result: SetTargetSuccess = {
