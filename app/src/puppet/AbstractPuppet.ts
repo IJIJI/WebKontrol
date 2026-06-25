@@ -1,6 +1,7 @@
 import EventEmitter from "node:events";
 import { Logger } from "../logging/Logger";
 import type {
+  PuppetConfig,
   PuppetInfo,
   PuppetTarget,
   SetTargetFail,
@@ -34,8 +35,19 @@ export abstract class AbstractPuppet<
     },
   };
 
-  constructor() {
+  protected _config: PuppetConfig;
+
+  constructor(config: PuppetConfig) {
     super();
+    this._checkConfig(config);
+    this._config = config;
+  }
+
+  protected _checkConfig(config: PuppetConfig) {
+    if (!config.id)
+      this._logger.fatal(`Invalid ID provided. Submitted config:`, config);
+    if (config.display == null || config.display < 0 || config.display > 20)
+      this._logger.fatal(`Valid Display is required. Submitted config:`, config);
   }
 
   protected abstract _doInit(): Promise<void>;
