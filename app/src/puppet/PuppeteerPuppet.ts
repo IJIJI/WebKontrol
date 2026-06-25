@@ -55,7 +55,7 @@ export class PuppeteerPuppet extends AbstractPuppet {
         "--force-dark-mode",
         "--kiosk",
       ],
-      // timeout: 0
+      // timeout: 0 // Time to wait for browser start
     };
 
     if (this._config.chromiumExecutablePath) {
