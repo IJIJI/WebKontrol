@@ -1,6 +1,6 @@
 import EventEmitter from "node:events";
 import { Logger } from "../logging/Logger";
-import type { PuppetTarget } from "./types";
+import type { PuppetInfo, PuppetTarget, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./types";
 
 export type PuppetEvents = {
   failed_load: [error: Error];
