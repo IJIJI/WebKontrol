@@ -4,7 +4,7 @@ import type { PuppetConfig, PuppetInfo, PuppetTarget } from "./types";
 import type { WithRequired } from "../types/CommonTypes";
 
 export interface PuppeteerPuppetConfig extends PuppetConfig {
-  chromiumLocation?: string;
+  chromiumExecutablePath?: string;
 }
 
 export interface PuppeteerPuppetInfo extends PuppetInfo {
@@ -57,8 +57,8 @@ export class PuppeteerPuppet extends AbstractPuppet {
       // timeout: 0
     };
 
-    if (this._config.chromiumLocation) {
-      settings.executablePath = this._config.chromiumLocation;
+    if (this._config.chromiumExecutablePath) {
+      settings.executablePath = this._config.chromiumExecutablePath;
     }
 
     this.browser = await puppeteer.launch(settings);
