@@ -32,5 +32,6 @@ export type SetTargetSuccess = {
 export type SetTargetResult = SetTargetSuccess | SetTargetFail;
 
 export interface PuppetConfig {
+  id: string;
   display: number; // TODO Implement
 }
