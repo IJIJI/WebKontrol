@@ -42,6 +42,7 @@ export interface PuppetConfig {
   id: string;
   name: string;
   target_url: PuppetTarget;
+  load_wait: number;
   // display: number; // TODO Implement
 }
 

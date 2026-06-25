@@ -40,9 +40,10 @@ export abstract class AbstractPuppet<
 
   protected _is_initialized = false;
 
-  public static readonly DefaultConfig: WithRequired<PuppetConfig, "target_url"> = {
+  public static readonly DefaultConfig: WithRequired<PuppetConfig, "target_url" | "load_wait"> = {
     // TODO: Different default? Internal virtual hosts?
     target_url: "http://127.0.0.1/splash/simple",
+    load_wait: 2000,
   };
 
 
