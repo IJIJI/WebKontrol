@@ -10,8 +10,7 @@ import type {
   SetTargetSuccess,
   TargetInfo,
 } from "./types";
-import { ConnectionState } from "../types/CommonTypes";
-import { url } from "node:inspector";
+import { ConnectionState, type WithRequired } from "../types/CommonTypes";
 
 export type PuppetEvents = {
   load_success: [result: SetTargetSuccess];
@@ -38,11 +37,10 @@ export abstract class AbstractPuppet<
 
   protected _is_initialized = false;
 
-  public static readonly DefaultConfig: Partial<PuppetConfig> = {
+  public static readonly DefaultConfig: WithRequired<PuppetConfig, "target_url"> = {
     target_url: "http://127.0.0.1/splash/simple",
   };
 
-  protected abstract _getDefaultConfig(): PuppetConfig;
 
   constructor(config: PuppetConfig) {
     super();
