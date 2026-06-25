@@ -67,3 +67,26 @@ export class CoreDatabase {
   }
 
 }
+// TODO: Autogen DB!
+// TODO: Add migration support between versions. In supervisor?
+/*
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { migrate } from 'drizzle-orm/better-sqlite3/migrator'; // 👈 Import the migrator
+import Database from 'better-sqlite3';
+import * as schema from './schema';
+import path from 'path';
+
+const sqlite = new Database('settings.db');
+export const db = drizzle(sqlite, { schema });
+
+// This automatically creates or updates your tables on startup!
+try {
+  migrate(db, { 
+    // Point this to the folder generated in Step 1
+    migrationsFolder: path.join(__dirname, '../../drizzle') 
+  });
+  console.log("Database tables synchronized successfully.");
+} catch (error) {
+  console.error("Failed to run database migrations:", error);
+}
+*/
