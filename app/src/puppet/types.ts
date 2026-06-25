@@ -26,6 +26,7 @@ export type OgTargetInfo = {
   image?: string;
 };
 
+// TODO: Look at these types. Are they going to have more fields? If not, is it really needed? Errors can also just be thrown and caught by caller?
 export type SetTargetFail = {
   success: false;
   error?: Error;
