@@ -1,19 +1,35 @@
 import puppeteer, { Browser, Page } from "puppeteer";
 import { AbstractPuppet } from "./AbstractPuppet";
-import type { PuppetConfig } from "./types";
+import type { PuppetConfig, PuppetInfo } from "./types";
+import type { WithRequired } from "../types/CommonTypes";
 
 export interface PuppeteerPuppetConfig extends PuppetConfig {
   chromiumLocation?: string;
 }
 
+export interface PuppeteerPuppetInfo extends PuppetInfo {
+  // Runtime
+}
+
 export class PuppeteerPuppet extends AbstractPuppet {
   declare protected _config: PuppeteerPuppetConfig; // Declare to indicate it overwrites the parent's type.
+
+  protected override _getLogLabels() {
+    return ["PPT", "Puppeteer"];
+  }
+
+  declare protected _info: PuppeteerPuppetInfo; // Declare to indicate it overwrites the parent's type.
+
+  public static readonly DefaultConfig: Omit<PuppetConfig, "id"> = {
+    ...AbstractPuppet.DefaultConfig,
+    name: "Puppeteer Puppet",
+  };
 
   private browser!: Browser;
   private page!: Page;
 
-  constructor(config: PuppeteerPuppetConfig) {
-    super(config);
+  constructor(config: WithRequired<PuppeteerPuppetConfig, "id">) {
+    super({...PuppeteerPuppet.DefaultConfig, ...config});
   }
 
   async init() {
