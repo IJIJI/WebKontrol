@@ -3,11 +3,13 @@ import type { ConnectionState } from "../types/CommonTypes";
 export type PuppetKey = string;
 export type PuppetTarget = string;
 
+// Info inside a puppet
 export interface PuppetInfo {
   state: ConnectionState;
   target_info?: TargetInfo;
 }
 
+// Info from inside a puppet, plus info loaded in from other fields like config
 export interface PuppetInfoBundle extends PuppetInfo {
   target_url: PuppetTarget;
 }
