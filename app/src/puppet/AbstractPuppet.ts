@@ -26,7 +26,7 @@ export abstract class AbstractPuppet<
 
   protected _isInit = false;
 
-  private _getLogLabels() {
+  protected _getLogLabels() {
     return ["PPT"];
   }
 
