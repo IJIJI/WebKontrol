@@ -1,15 +1,20 @@
 import puppeteer, { Browser, Page } from "puppeteer";
 import { AbstractPuppet } from "./AbstractPuppet";
+import type { PuppetConfig } from "./types";
 
-export class Puppet extends AbstractPuppet {
+export interface PuppeteerPuppetConfig extends PuppetConfig {
+  chromiumLocation?: string;
+}
+
+export class PuppeteerPuppet extends AbstractPuppet {
+  declare protected _config: PuppeteerPuppetConfig; // Declare to indicate it overwrites the parent's type.
+
   private browser!: Browser;
   private page!: Page;
 
-  private chromiumLocation: string | undefined;
 
-  constructor(chromiumLocation: string | undefined = undefined) {
-    super();
-    this.chromiumLocation = chromiumLocation;
+  constructor(config: PuppeteerPuppetConfig) {
+    super(config);
   }
 
   async init() {
@@ -37,8 +42,8 @@ export class Puppet extends AbstractPuppet {
       // timeout: 0
     };
 
-    if (this.chromiumLocation) {
-      settings.executablePath = this.chromiumLocation;
+    if (this._config.chromiumLocation) {
+      settings.executablePath = this._config.chromiumLocation;
     }
 
     this.browser = await puppeteer.launch(settings);
