@@ -1,6 +1,6 @@
 import puppeteer, { Browser, Page } from "puppeteer";
 import { AbstractPuppet } from "./AbstractPuppet";
-import type { PuppetConfig, PuppetInfo } from "./types";
+import type { PuppetConfig, PuppetInfo, PuppetTarget } from "./types";
 import type { WithRequired } from "../types/CommonTypes";
 
 export interface PuppeteerPuppetConfig extends PuppetConfig {
@@ -76,20 +76,10 @@ export class PuppeteerPuppet extends AbstractPuppet {
     this._logger.info("Puppet initialized");
   }
 
-  async setPage(url: string = "http://127.0.0.1/clock") {
-    // TODO: Different default? Internal virtual hosts?
-    try {
-      await this.page.goto(url).catch((_reason) => {
-        console.log("Failed loading! Attempting in 30s...");
-        this._failedPage(url);
-      });
-      this.emit("successLoad");
-      console.log("Success!");
-    } catch (e) {
-      this.emit("failedLoad");
-      console.log("Failed loading! ", e);
-    }
+  protected async _doSetTarget(target: PuppetTarget): Promise<void> {
+    await this.page.goto(target);
   }
+
 
   async _failedPage(url: string) {
     await this.page.goto("http://127.0.0.1/no_connect");
