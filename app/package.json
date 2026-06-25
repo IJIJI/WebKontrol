@@ -1,6 +1,7 @@
 {
   "name": "@ijiji/WebKontrol",
   "version": "1.0.0-beta",
+  "description": "WebKontrol - An intuitive browser puppet with a web-based admin panel.",
   "author": "IJssel Koster <ijssel@synapt.nl>, Synapt Technologies <contact@synapt.nl>",
   "repository": {
     "type": "git",
@@ -39,6 +40,7 @@
   "dependencies": {
     "express": "^5.2.1",
     "less": "^4.6.7",
+    "puppeteer": "^25.2.1",
     "react-hot-toast": "^2.6.0",
     "tsx": "^4.22.4",
     "vite-express": "^0.22.1"
