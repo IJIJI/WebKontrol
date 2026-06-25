@@ -68,6 +68,8 @@ export abstract class AbstractPuppet<
       await this._doInit();
       this._is_initialized = true;
       this._logger.info("Initialized.");
+      this._doSetTarget(this._config.target_url);
+      this._logger.info("Target from config set.");
     } catch (error) {
       this._info.state = ConnectionState.FAILED;
       return this._logger.fatal("Failed to initialize", error);
