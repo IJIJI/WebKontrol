@@ -113,9 +113,16 @@ export abstract class AbstractPuppet<
         result.error = error;
       }
         // this._updateInfo(result.info); //TODO
+      this._setFailedLoadingState();
       (this as EventEmitter<PuppetEvents>).emit("load_fail", result);
       return result;
     }
+  }
+
+  protected _setFailedLoadingState() {
+    this._info.state = ConnectionState.ERROR;
+    // TODO: Try to go to error page.
+    // TODO: Add a way to differentiate between a load fail and a library fail. -> Error types?
   }
 
 }
