@@ -33,6 +33,12 @@ export abstract class AbstractPuppet<
     super();
   }
 
+  protected abstract _doInit(): Promise<void>;
+
+  protected abstract _doSetTarget(target: PuppetTarget): Promise<boolean>;
+
+  protected abstract _getTargetInfo(): Promise<TargetInfo> | TargetInfo;
+
   async init(): Promise<void> {
     this._logger = new Logger(this._getLogLabels());
     this._logger.info("Initializing...");
@@ -40,7 +46,11 @@ export abstract class AbstractPuppet<
     this._logger.info("Initialized.");
   }
 
-  protected abstract _doInit(): Promise<void>;
+
+  protected _emitInfoUpdate(info: PuppetInfo) {
+    (this as EventEmitter<PuppetEvents>).emit("info_update", info);
+  }
+
 
   async setTarget(target: PuppetTarget): Promise<SetTargetResult> {
     this._target_url = target;
@@ -81,16 +91,11 @@ export abstract class AbstractPuppet<
     }
 
   }
+  
 
-  protected _emitInfoUpdate(info: PuppetInfo) {
-    (this as EventEmitter<PuppetEvents>).emit("info_update", info);
-  }
-
-  protected abstract _doSetTarget(target: PuppetTarget): Promise<boolean>;
 
   async getInfo(): Promise<PuppetInfo> {
     return { ...this._info, target: await this._getTargetInfo() };
   }
 
-  protected abstract _getTargetInfo(): Promise<TargetInfo> | TargetInfo;
 }
