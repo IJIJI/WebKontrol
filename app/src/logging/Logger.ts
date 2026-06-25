@@ -4,9 +4,10 @@ import * as path from "node:path";
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
-  WARN = 2,
-  ERROR = 3,
-  FATAL = 4,
+  IMPORTANT = 2,
+  WARN = 3,
+  ERROR = 4,
+  FATAL = 5,
 }
 
 interface LogConfig {
@@ -17,7 +18,7 @@ interface LogConfig {
 export class Logger {
   public static readonly project = "webkontrol";
 
-  public static GlobalConsoleLevel: LogLevel = LogLevel.WARN;
+  public static GlobalConsoleLevel: LogLevel = LogLevel.IMPORTANT;
   public static GlobalFileLevel: LogLevel = LogLevel.DEBUG;
 
   protected static instanceCount = 0;
