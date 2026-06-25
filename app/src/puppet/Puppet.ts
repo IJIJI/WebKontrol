@@ -56,7 +56,7 @@ export class Puppet extends EventEmitter<PuppetEvents> {
     this.page = await this.browser.pages().then(pages => pages[0]);
     
     // Navigate the page to a URL.
-    await this.openPage('http://127.0.0.1/splash/simple');
+    await this.setPage('http://127.0.0.1/splash/simple');
     
     // Set screen size.
     // await this.page.setViewport({width: 1920, height: 1080, deviceScaleFactor: 1});
