@@ -16,6 +16,7 @@ export interface PuppetInfoBundle extends PuppetInfo {
 
 export type TargetInfo = {
   title?: string;
+  description?: string;
   og?: OgTargetInfo;
 };
 
