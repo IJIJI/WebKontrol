@@ -97,6 +97,7 @@ export abstract class AbstractPuppet<
       };
       // this._updateInfo(result.info); //TODO
       (this as EventEmitter<PuppetEvents>).emit("load_success", result);
+      return result;
 
     } catch (error) {
       this._logger.error("Failed to set target", error);
