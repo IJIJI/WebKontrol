@@ -1,4 +1,5 @@
 import EventEmitter from "node:events";
+import * as path from "node:path";
 import { Logger } from "../logging/Logger";
 import type {
   PuppetConfig,
@@ -131,7 +132,12 @@ export abstract class AbstractPuppet<
 
   async getScreenshot(): Promise<PuppetScreenshotResult> {
     try {
-      return await this._doScreenshot();
+
+      const imgPath: string = path.join(process.cwd(), "db", "images", `${this._config.id}.png`);
+
+      await this._doScreenshot(imgPath); // TODO: Multiple image history storage? In DB?
+
+      return { success: true, path: imgPath };
     } catch (error) {
       const result: PuppetScreenshotFail = { success: false };
       if (error instanceof Error) {
@@ -141,7 +147,7 @@ export abstract class AbstractPuppet<
     }
   }
 
-  protected async _doScreenshot(): Promise<PuppetScreenshotResult> {
+  protected async _doScreenshot(path: string): Promise<void> {
     throw new Error("Screenshot not implemented for this puppet"); // TODO: Fail Silently or add another way to differentiate between fails and not implemented? Error type?
   };
 
