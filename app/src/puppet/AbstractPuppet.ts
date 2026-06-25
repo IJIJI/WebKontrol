@@ -11,17 +11,27 @@ export type PuppetEvents = {
 export abstract class AbstractPuppet<
   T extends PuppetEvents & Record<string, unknown[]> = PuppetEvents,
 > extends EventEmitter<T> {
-  private logger: Logger;
+  
+  private _logger!: Logger;
 
-  private getLogLabels() {
+  protected _isInit = false;
+
+  private _getLogLabels() {
     return ["PPT"];
   }
 
-  private target: PuppetTarget = '';
+  protected _target: PuppetTarget = '';
 
   constructor() {
     super();
-    this.logger = new Logger(this.getLogLabels());
-    this.logger.info("Constructing...");
   }
+
+  async init(): Promise<void> {
+    this._logger = new Logger(this._getLogLabels());
+    this._logger.info("Initializing...");
+    await this._doInit();
+    this._logger.info("Initialized.");
+  }
+
+  protected abstract _doInit(): Promise<void>;
 }
