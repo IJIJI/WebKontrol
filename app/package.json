@@ -13,6 +13,8 @@
   "packageManager": "yarn@4.9.2",
   "scripts": {
     "dev": "tsx app.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
     "format": "prettier --write .",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json"
