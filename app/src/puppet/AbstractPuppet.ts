@@ -44,7 +44,7 @@ export abstract class AbstractPuppet<
 
   constructor(config: PuppetConfig) {
     super();
-    this._config = config; // TODO: Add Default Config?
+    this._config = config;
     this._checkConfig(this._config);
   }
 
