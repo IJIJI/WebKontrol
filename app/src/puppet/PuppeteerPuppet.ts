@@ -5,6 +5,7 @@ import type { WithRequired } from "../types/CommonTypes";
 
 export interface PuppeteerPuppetConfig extends PuppetConfig {
   chromiumExecutablePath?: string;
+  // TODO: Add settings to choose browser
 }
 
 export interface PuppeteerPuppetInfo extends PuppetInfo {
