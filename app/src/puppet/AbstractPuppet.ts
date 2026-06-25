@@ -38,6 +38,12 @@ export abstract class AbstractPuppet<
 
   protected _is_initialized = false;
 
+  public static readonly DefaultConfig: Partial<PuppetConfig> = {
+    target_url: "http://127.0.0.1/splash/simple",
+  };
+
+  protected abstract _getDefaultConfig(): PuppetConfig;
+
   constructor(config: PuppetConfig) {
     super();
     this._config = config; // TODO: Add Default Config?
