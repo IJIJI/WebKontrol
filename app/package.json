@@ -12,13 +12,10 @@
   "main": "app.ts",
   "packageManager": "yarn@4.9.2",
   "scripts": {
-    "dev": "tsx supervisor.ts",
+    "dev": "tsx app.ts",
     "format": "prettier --write .",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json",
-    "build": "vite build && tsup",
-    "serve": "NODE_ENV=production node dist/supervisor.js",
-    "start": "yarn build && NODE_ENV=production node dist/supervisor.js"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
