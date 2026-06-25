@@ -41,6 +41,7 @@ export class Logger {
   private static readonly LOG_LEVEL_MAP: Record<LogLevel, LogConfig> = {
     [LogLevel.DEBUG]: { label: "DEBUG", color: "\x1b[90m" }, // Gray
     [LogLevel.INFO]: { label: "INFO ", color: "\x1b[36m" }, // Cyan
+    [LogLevel.IMPORTANT]: { label: "IMPORTANT", color: "\x1b[34m" }, // Blue
     [LogLevel.WARN]: { label: "WARN ", color: "\x1b[33m" }, // Yellow
     [LogLevel.ERROR]: { label: "ERROR", color: "\x1b[31m" }, // Red
     [LogLevel.FATAL]: { label: "FATAL", color: "\x1b[35m" }, // Magenta
@@ -140,6 +141,9 @@ export class Logger {
   }
   public info(...data: unknown[]) {
     this.print(LogLevel.INFO, ...data);
+  }
+  public important(...data: unknown[]) {
+    this.print(LogLevel.IMPORTANT, ...data);
   }
   public warn(...data: unknown[]) {
     this.print(LogLevel.WARN, ...data);
