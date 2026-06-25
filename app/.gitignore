@@ -16,6 +16,11 @@ node_modules
 #!.yarn/cache
 .pnp.*
 
-.yarn
+.yarn/
+db/
+dist/
+logs/
+
 # vscode
 .vscode/
+.claude/
