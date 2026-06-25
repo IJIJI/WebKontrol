@@ -65,6 +65,7 @@ export abstract class AbstractPuppet<
       this._is_initialized = true;
       this._logger.info("Initialized.");
     } catch (error) {
+      this._info.state = ConnectionState.FAILED;
       return this._logger.fatal("Failed to initialize", error);
     }
   }
