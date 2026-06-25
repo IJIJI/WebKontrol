@@ -68,12 +68,9 @@ export class PuppeteerPuppet extends AbstractPuppet {
 
     // Navigate the page to a URL.
     // TODO: Load defaults from some central place?
-    await this.setPage("http://127.0.0.1/splash/simple");
 
     // Set screen size.
     // await this.page.setViewport({width: 1920, height: 1080, deviceScaleFactor: 1});
-
-    this._logger.info("Puppet initialized");
   }
 
   protected async _doSetTarget(target: PuppetTarget): Promise<void> {
