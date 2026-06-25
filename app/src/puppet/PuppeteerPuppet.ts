@@ -15,7 +15,7 @@ export class Puppet extends AbstractPuppet {
   async init() {
     // Launch the browser and open a new blank page
 
-    var settings = {
+    const settings = {
       headless: false, // extension are allowed only in head-full mode
       defaultViewport: null,
       ignoreDefaultArgs: ["--enable-automation"],
@@ -58,7 +58,7 @@ export class Puppet extends AbstractPuppet {
   async setPage(url: string = "http://127.0.0.1/clock") {
     // TODO: Different default? Internal virtual hosts?
     try {
-      await this.page.goto(url).catch((reason) => {
+      await this.page.goto(url).catch((_reason) => {
         console.log("Failed loading! Attempting in 30s...");
         this._failedPage(url);
       });
@@ -75,7 +75,7 @@ export class Puppet extends AbstractPuppet {
 
     await this.delay(30000);
 
-    this.page.goto(url).catch((reason) => {
+    this.page.goto(url).catch((_reason) => {
       this._failedPage(url);
     });
   }
