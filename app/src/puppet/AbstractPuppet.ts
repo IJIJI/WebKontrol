@@ -21,7 +21,7 @@ export type PuppetEvents = {
 export abstract class AbstractPuppet<
   T extends PuppetEvents & Record<string, unknown[]> = PuppetEvents,
 > extends EventEmitter<T> {
-  private _logger!: Logger;
+  protected _logger!: Logger;
 
   protected _isInit = false;
 
