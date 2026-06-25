@@ -74,7 +74,12 @@ export abstract class AbstractPuppet<
     }
   }
 
-  async _updateInfo(info?: Partial<PuppetInfo>) {
+  
+  getInfo(): PuppetInfoBundle {
+    return { ...this._info, target_url: this._config.target_url };
+  }
+
+  protected async _updateInfo(info?: Partial<PuppetInfo>) {
 
     this._info = { ...this._info, ...info };
 
@@ -113,7 +118,4 @@ export abstract class AbstractPuppet<
     }
   }
 
-  getInfo(): PuppetInfoBundle {
-    return { ...this._info, target_url: this._config.target_url };
-  }
 }
