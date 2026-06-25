@@ -1,0 +1,69 @@
+import path from "node:path";
+import fs from 'node:fs';
+import Database from 'better-sqlite3';
+import { Logger } from "../logging/Logger";
+import { BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
+import * as schema from './schema';
+import { insertSettingSchema } from "./schema";
+import { eq } from "drizzle-orm/sql/expressions/conditions";
+
+
+export class CoreDatabase {
+
+  private static _instance: CoreDatabase | undefined;
+
+  private _logger: Logger;
+
+  private _db: BetterSQLite3Database<typeof schema>;
+  
+  public static getInstance(): CoreDatabase {
+    if (!CoreDatabase._instance) {
+      CoreDatabase._instance = new CoreDatabase();
+    }
+    return CoreDatabase._instance;
+  }
+  private constructor() {
+
+    this._logger = new Logger(["DB", "CORE"]);
+
+    // Ensure the folder where the db is made, exists. 
+    // TODO: Define this centrally somehow?
+    const dbPath = path.join(process.cwd(), '/db/webkontrol.db');
+    const dbDir = path.dirname(dbPath);
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+
+    const sqlite = new Database(dbPath);
+    // sqlite.pragma('journal_mode = WAL'); // TODO High-performance mode?
+
+    this._db = drizzle(sqlite, { schema });
+
+    this._logger.info(`Database initialized at:`, dbPath);
+  }
+
+  public async updateSetting(key: string, value: string): Promise<void> {
+    
+    const validation = insertSettingSchema.safeParse({ key, value });
+    if (!validation.success) {
+      return this._logger.fatal("Invalid setting data:", validation.error);
+    }
+
+    await this._db.insert(schema.settings)
+      .values(validation.data)
+      .onConflictDoUpdate({
+        target: schema.settings.key,
+        set: { value: validation.data.value }
+      });
+
+    this._logger.info("Setting updated:", validation.data);
+  }
+
+  public async getSetting(key: string): Promise<string | null> {
+    const result = await this._db.query.settings.findFirst({
+      where: eq(schema.settings.key, key)
+    });
+    return result?.value ?? null;
+  }
+
+}
