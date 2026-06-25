@@ -1,8 +1,11 @@
+import type { ConnectionState } from "../types/CommonTypes";
+
 export type PuppetKey = string;
 export type PuppetTarget = string;
 
 export interface PuppetInfo {
   target: TargetInfo;
+  state: ConnectionState;
 }
 
 export type TargetInfo = {
