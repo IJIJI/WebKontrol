@@ -78,7 +78,29 @@ export class PuppeteerPuppet extends AbstractPuppet {
     await this._page.goto(target);
   }
 
+  protected async _getTargetInfo(): Promise<TargetInfo> {
+    
+    const result: TargetInfo = {};
+    
+    const title = await this._page.title();
 
+    if (title) {
+      result.title = title;
+    }
+
+    const description = await this._page.evaluate(() => {
+      const meta = document.querySelector("meta[name='description']");
+      return meta ? meta.getAttribute("content") : "";
+    });
+
+    if (description) {
+      result.description = description;
+    }
+
+    // TODO: OG
+
+    return result;
+  }
 
   protected override async _doScreenshot(path: string): Promise<void> {
     await this._page.screenshot({
