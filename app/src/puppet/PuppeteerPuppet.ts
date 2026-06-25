@@ -79,4 +79,11 @@ export class PuppeteerPuppet extends AbstractPuppet {
   }
 
 
+
+  protected override async _doScreenshot(path: string): Promise<void> {
+    await this._page.screenshot({
+      path: path,
+    });
+  }
+
 }
