@@ -9,11 +9,12 @@ import type {
   SetTargetSuccess,
   TargetInfo,
 } from "./types";
+import { ConnectionState } from "../types/CommonTypes";
 
 export type PuppetEvents = {
   load_success: [result: SetTargetSuccess];
   load_fail: [result: SetTargetFail];
-  info_update: [info: unknown];
+  info_update: [info: PuppetInfo];
 };
 
 export abstract class AbstractPuppet<
@@ -29,10 +30,8 @@ export abstract class AbstractPuppet<
 
   protected _target_url: PuppetTarget = "";
 
-  protected _info: Omit<PuppetInfo, "target"> = {
-    target: {
-      url: "",
-    },
+  protected _info: Omit<PuppetInfo, "target"> & Partial<PuppetInfo> = {
+    state: ConnectionState.OFFLINE,
   };
 
   protected _config: PuppetConfig;
@@ -41,8 +40,8 @@ export abstract class AbstractPuppet<
 
   constructor(config: PuppetConfig) {
     super();
-    this._checkConfig(config);
-    this._config = config;
+    this._config = config; // TODO: Add Default Config?
+    this._checkConfig(this._config);
   }
 
   protected _checkConfig(config: PuppetConfig) {
