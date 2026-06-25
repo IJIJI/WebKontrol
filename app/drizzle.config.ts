@@ -5,6 +5,6 @@ export default defineConfig({
   out: './db/migrations',             // Where migrations will be saved
   dialect: 'sqlite',            // We are using SQLite
   dbCredentials: {
-    url: './db/migrations/webkontrol.db',         // Your local SQLite database file
+    url: './db/webkontrol.db',         // Your local SQLite database file
   },
 });
