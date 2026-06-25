@@ -32,7 +32,7 @@ export class PuppeteerPuppet extends AbstractPuppet {
     super({...PuppeteerPuppet.DefaultConfig, ...config});
   }
 
-  async init() {
+  protected async _doInit() {
     // Launch the browser and open a new blank page
 
     const settings = {
@@ -73,7 +73,7 @@ export class PuppeteerPuppet extends AbstractPuppet {
     // Set screen size.
     // await this.page.setViewport({width: 1920, height: 1080, deviceScaleFactor: 1});
 
-    console.log("Puppet initialized");
+    this._logger.info("Puppet initialized");
   }
 
   async setPage(url: string = "http://127.0.0.1/clock") {
