@@ -44,3 +44,16 @@ export interface PuppetConfig {
   target_url: PuppetTarget;
   // display: number; // TODO Implement
 }
+
+
+export interface PuppetScreenshotSuccess {
+  success: true;
+  path: string; // TODO: Probably implement a file storage class that handles saving and overwriting images by id?
+}
+
+export interface PuppetScreenshotFail {
+  success: false;
+  error?: Error;
+}
+
+export type PuppetScreenshotResult = PuppetScreenshotSuccess | PuppetScreenshotFail;
