@@ -1,6 +1,6 @@
 import puppeteer, { Browser, Page } from "puppeteer";
 import { AbstractPuppet } from "./AbstractPuppet";
-import type { PuppetConfig, PuppetInfo, PuppetTarget } from "./types";
+import type { PuppetConfig, PuppetInfo, PuppetScreenshotResult, PuppetTarget, TargetInfo } from "./types";
 import type { WithRequired } from "../types/CommonTypes";
 
 export interface PuppeteerPuppetConfig extends PuppetConfig {
@@ -26,8 +26,8 @@ export class PuppeteerPuppet extends AbstractPuppet {
     name: "Puppeteer Puppet",
   };
 
-  private browser!: Browser;
-  private page!: Page;
+  private _browser!: Browser;
+  private _page!: Page;
 
   constructor(config: WithRequired<PuppeteerPuppetConfig, "id">) {
     super({...PuppeteerPuppet.DefaultConfig, ...config}); // TODO: Better default config handeling?
@@ -62,10 +62,10 @@ export class PuppeteerPuppet extends AbstractPuppet {
       settings.executablePath = this._config.chromiumExecutablePath;
     }
 
-    this.browser = await puppeteer.launch(settings);
+    this._browser = await puppeteer.launch(settings);
 
     // TODO: Docs use await broser.newPage(); Check which is better.
-    this.page = await this.browser.pages().then((pages) => pages[0]);
+    this._page = await this._browser.pages().then((pages) => pages[0]);
 
     // Navigate the page to a URL.
     // TODO: Load defaults from some central place?
@@ -75,7 +75,7 @@ export class PuppeteerPuppet extends AbstractPuppet {
   }
 
   protected async _doSetTarget(target: PuppetTarget): Promise<void> {
-    await this.page.goto(target);
+    await this._page.goto(target);
   }
 
 
