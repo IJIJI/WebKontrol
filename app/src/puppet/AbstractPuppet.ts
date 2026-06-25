@@ -3,8 +3,9 @@ import { Logger } from "../logging/Logger";
 import type { PuppetInfo, PuppetTarget, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./types";
 
 export type PuppetEvents = {
-  failed_load: [error: Error];
-  successful_load: []; // TODO: Return data? Screenshot?
+  load_success: [result: SetTargetSuccess];
+  load_fail: [result: SetTargetFail];
+  info_update: [info: unknown];
 };
 
 
@@ -20,7 +21,13 @@ export abstract class AbstractPuppet<
     return ["PPT"];
   }
 
-  protected _target: PuppetTarget = '';
+  protected _target_url: PuppetTarget = '';
+
+  protected _info: Omit<PuppetInfo, 'target'> = {
+    target: {
+      url: '',
+    },
+  };
 
   constructor() {
     super();
