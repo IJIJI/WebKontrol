@@ -1,6 +1,5 @@
 import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
-import type { Puppet } from "./puppet/PuppeteerPuppet";
 import type { PuppetKey } from "./puppet/types";
 
 export interface CoreInfo {
