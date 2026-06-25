@@ -56,7 +56,7 @@ export abstract class AbstractPuppet<
 
   protected abstract _doInit(): Promise<void>;
 
-  protected abstract _doSetTarget(target: PuppetTarget): Promise<boolean>;
+  protected abstract _doSetTarget(target: PuppetTarget): Promise<void>;
 
   protected abstract _getTargetInfo(): Promise<TargetInfo> | TargetInfo;
 
