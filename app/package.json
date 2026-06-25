@@ -1,0 +1,46 @@
+{
+  "name": "@ijiji/WebKontrol",
+  "version": "1.0.0-beta",
+  "author": "IJssel Koster <ijssel@synapt.nl>, Synapt Technologies <contact@synapt.nl>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ijiji/WebKontrol.git"
+  },
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "main": "app.ts",
+  "packageManager": "yarn@4.9.2",
+  "scripts": {
+    "dev": "tsx supervisor.ts",
+    "format": "prettier --write .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json",
+    "build": "vite build && tsup",
+    "serve": "NODE_ENV=production node dist/supervisor.js",
+    "start": "yarn build && NODE_ENV=production node dist/supervisor.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.0.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^10.5.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "prettier": "^3.8.4",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.0",
+    "vite": "^8.0.7"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "less": "^4.6.7",
+    "react-hot-toast": "^2.6.0",
+    "tsx": "^4.22.4",
+    "vite-express": "^0.22.1"
+  }
+}
