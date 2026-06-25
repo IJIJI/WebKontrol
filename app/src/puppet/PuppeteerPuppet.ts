@@ -1,18 +1,13 @@
 import puppeteer, {Browser, Page} from 'puppeteer';
-import { EventEmitter } from "node:stream";
-import { Logger } from '../logging/Logger';
+import { AbstractPuppet } from './AbstractPuppet';
 
 
-export type PuppetEvents = {
-  failed_load: [error: Error];
-  successful_load: []; // TODO: Return data? Screenshot?
-};
 
-export class Puppet extends EventEmitter<PuppetEvents> {
-  private logger = new Logger(["CORE"]);
 
-  private browser: Browser;
-  private page: Page;
+export class Puppet extends AbstractPuppet {
+
+  private browser!: Browser;
+  private page!: Page;
 
   private chromiumLocation: string|undefined;
 
