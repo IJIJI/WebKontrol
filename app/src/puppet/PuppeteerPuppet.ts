@@ -29,7 +29,7 @@ export class PuppeteerPuppet extends AbstractPuppet {
   private page!: Page;
 
   constructor(config: WithRequired<PuppeteerPuppetConfig, "id">) {
-    super({...PuppeteerPuppet.DefaultConfig, ...config});
+    super({...PuppeteerPuppet.DefaultConfig, ...config}); // TODO: Better default config handeling?
   }
 
   protected async _doInit() {
