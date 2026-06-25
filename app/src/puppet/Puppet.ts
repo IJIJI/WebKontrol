@@ -53,6 +53,7 @@ export class Puppet extends EventEmitter<PuppetEvents> {
 
     this.browser = await puppeteer.launch(settings);
     
+    // TODO: Docs use await broser.newPage(); Check which is better.
     this.page = await this.browser.pages().then(pages => pages[0]);
     
     // Navigate the page to a URL.
