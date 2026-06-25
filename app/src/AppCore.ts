@@ -19,7 +19,7 @@ export class AppCore {
   constructor() {}
 
   public async start() {
-    this.logger.info("Starting AppCore...");
+    this.logger.important("Starting AppCore...");
 
     const testpuppet = new PuppeteerPuppet({
       id: "test",
