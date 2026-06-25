@@ -16,18 +16,20 @@ interface LogConfig {
 
 
 export class Logger {
+    public static readonly project = "webkontrol";
+
     public static GlobalConsoleLevel: LogLevel = LogLevel.WARN;
     public static GlobalFileLevel: LogLevel = LogLevel.DEBUG;
 
     protected static instanceCount = 0;
-    private static readonly INIT_KEY = Symbol.for("beacon.logger.initialized");
+    private static readonly INIT_KEY = Symbol.for(`${Logger.project}.logger.initialized`);
 
     
     private static readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    // /project/logs/beacon.log
+    // /project/logs/webkontrol.log
     private static readonly LOG_DIR = path.join(process.cwd(), "logs");
-    private static readonly LOG_FILE = path.join(Logger.LOG_DIR, "beacon.log");
-    private static readonly OLD_LOG_FILE = path.join(Logger.LOG_DIR, "beacon.old.log");
+    private static readonly LOG_FILE = path.join(Logger.LOG_DIR, `${Logger.project}.log`);
+    private static readonly OLD_LOG_FILE = path.join(Logger.LOG_DIR, `${Logger.project}.old.log`);
 
     private static readonly LOG_LEVEL_MAP: Record<LogLevel, LogConfig> = {
         [LogLevel.DEBUG]: { label: "DEBUG", color: "\x1b[90m" }, // Gray
