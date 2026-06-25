@@ -75,7 +75,7 @@ export class PuppeteerPuppet extends AbstractPuppet {
   }
 
   protected async _doSetTarget(target: PuppetTarget): Promise<void> {
-    await this._page.goto(target);
+    await this._page.goto(target, {timeout: this._config.load_wait});
   }
 
   protected async _getTargetInfo(): Promise<TargetInfo> {
