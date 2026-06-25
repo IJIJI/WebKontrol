@@ -64,7 +64,7 @@ export class Puppet extends EventEmitter<PuppetEvents> {
     console.log('Puppet initialized');
   }
 
-  async openPage(url: string = 'http://127.0.0.1/clock')
+  async setPage(url: string = 'http://127.0.0.1/clock') // TODO: Different default? Internal virtual hosts?
   {
     try
     {
