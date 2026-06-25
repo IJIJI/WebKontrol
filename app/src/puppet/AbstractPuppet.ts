@@ -48,8 +48,6 @@ export abstract class AbstractPuppet<
     if (!config.id)
       this._logger.fatal(`Invalid ID provided. Submitted config:`, config);
     // TODO: Url check
-    if (config.display == null || config.display < 0 || config.display > 20)
-      this._logger.fatal(`Valid Display is required. Submitted config:`, config);
   }
 
   protected abstract _doInit(): Promise<void>;

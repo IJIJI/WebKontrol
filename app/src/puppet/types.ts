@@ -41,5 +41,5 @@ export interface PuppetConfig {
   id: string;
   name: string;
   target_url: PuppetTarget;
-  display: number; // TODO Implement
+  // display: number; // TODO Implement
 }
