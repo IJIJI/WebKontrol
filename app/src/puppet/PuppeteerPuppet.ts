@@ -12,7 +12,6 @@ export class PuppeteerPuppet extends AbstractPuppet {
   private browser!: Browser;
   private page!: Page;
 
-
   constructor(config: PuppeteerPuppetConfig) {
     super(config);
   }
@@ -52,6 +51,7 @@ export class PuppeteerPuppet extends AbstractPuppet {
     this.page = await this.browser.pages().then((pages) => pages[0]);
 
     // Navigate the page to a URL.
+    // TODO: Load defaults from some central place?
     await this.setPage("http://127.0.0.1/splash/simple");
 
     // Set screen size.
