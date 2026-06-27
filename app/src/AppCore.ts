@@ -32,7 +32,7 @@ export class AppCore {
 
     const testdb = CoreDatabase.getInstance();
 
-    await testdb.updateSetting("test_key", "https://synapt.net/contact.php");
+    await testdb.updateSetting("test", "1", "https://synapt.net/contact.php");
 
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
