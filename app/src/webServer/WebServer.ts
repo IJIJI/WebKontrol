@@ -28,6 +28,14 @@ export class WebServer {
   }
 
   private _serializeState() {
-    return this._state; // TODO state serialisation
+    return JSON.stringify(this._state, jsonReplacer);
+  }
+
+  public setState(state: WebServerState): void {
+    this._state = state;
+    if (this._sseClients.size > 0) {
+      const data = `data: ${JSON.stringify(this._serializeState())}\n\n`; // TODO: Right format?
+      for (const res of this._sseClients) res.write(data);
+    }
   }
 }
