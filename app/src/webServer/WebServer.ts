@@ -38,4 +38,8 @@ export class WebServer {
       for (const res of this._sseClients) res.write(data);
     }
   }
+  
+  public _setHandlers(handlers: WebServerMutationHandlers): void {
+    this._handlers = handlers;
+  }
 }
