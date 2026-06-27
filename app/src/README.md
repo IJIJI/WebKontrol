@@ -5,3 +5,6 @@
 - [ ] key and mouse presses
 - [ ] page title displaying
 - [ ] Add docs/script for puppeteer browser install: `yarn dlx puppeteer browsers install`
+- [ ] destroy functions
+  - [ ] Puppets
+  - [ ] DB?
