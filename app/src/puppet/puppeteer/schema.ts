@@ -1,5 +1,5 @@
 import z from "zod";
-import { extendPuppetConfig, extendPuppetSpecificConfig, PuppetSpecificConfigSchema } from "../schema";
+import { extendPuppetConfig, extendPuppetSpecificConfig } from "../schema";
 
 
 export const PuppeteerPuppetSpecificConfigSchema = extendPuppetSpecificConfig("puppeteer", {
