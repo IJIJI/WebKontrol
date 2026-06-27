@@ -2,7 +2,8 @@ import puppeteer, { type Browser, type Page } from "puppeteer";
 import { AbstractPuppet } from "../AbstractPuppet";
 import type { TargetInfo } from "../model";
 import type { PuppetTarget } from "../schema";
-import { PuppeteerPuppetConfigSchema, type PuppeteerPuppetConfig } from "./schema";
+import { type PuppeteerPuppetConfig } from "./schema";
+import { PuppetRuntimeConfigSchema } from "../schema";
 import type { PuppeteerPuppetInfo } from "./model";
 import type { ZodType } from "zod";
 
@@ -95,7 +96,7 @@ export class PuppeteerPuppet<TConfig extends PuppeteerPuppetConfig = PuppeteerPu
   }
 
   protected _getRuntimeSchema(): ZodType<TConfig['runtime']> {
-    return PuppeteerPuppetConfigSchema as unknown as ZodType<TConfig['runtime']>;
+    return PuppetRuntimeConfigSchema as unknown as ZodType<TConfig['runtime']>;
   }
 
   protected override async _doScreenshot(path: string): Promise<void> {
