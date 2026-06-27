@@ -93,6 +93,7 @@ export class Logger {
     }
   }
 
+  // TODO: Use jsonHelper?
   private parseHelper = (_key: string, value: unknown): unknown => {
     if (value instanceof Error) {
       return { name: value.name, message: value.message, stack: value.stack };
