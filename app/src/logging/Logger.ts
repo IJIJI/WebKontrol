@@ -49,10 +49,13 @@ export class Logger {
   private static readonly LOG_RESET_COLOR = "\x1b[0m";
   private static readonly LOG_GREY_COLOR = "\x1b[90m";
 
-  private prefix: string;
+  private _labels: Array<string>;
+  private get prefix(): string {
+    return this._labels.join("::");
+  }
 
-  constructor(prefix: string[]) {
-    this.prefix = prefix.join("::");
+  constructor(labels: string[]) {
+    this._labels = labels;
 
     if (!fs.existsSync(Logger.LOG_DIR)) {
       fs.mkdirSync(Logger.LOG_DIR, { recursive: true });
@@ -65,6 +68,10 @@ export class Logger {
         `\n\n-----===== Logger Initialized at ${new Date().toISOString()} =====-----`,
       );
     }
+  }
+
+  getLabels(): Array<string> {
+    return this._labels;
   }
 
   private print(level: LogLevel, ...data: unknown[]) {
