@@ -2,12 +2,6 @@ import { z } from 'zod';
 
 import type { ConnectionState } from "../types/CommonTypes";
 
-export const PuppetKeySchema = z.string().min(2).max(12).regex(/^[a-z0-9_-]+$/);
-export type PuppetKey = z.infer<typeof PuppetKeySchema>;
-
-export const PuppetTargetSchema = z.url();
-export type PuppetTarget = z.infer<typeof PuppetTargetSchema>;
-
 
 // Info inside a puppet
 export interface PuppetInfo {
@@ -44,13 +38,7 @@ export type SetTargetSuccess = {
 
 export type SetTargetResult = SetTargetSuccess | SetTargetFail;
 
-export interface PuppetConfig {
-  id: PuppetKey;
-  name: string;
-  target_url: PuppetTarget;
-  load_wait: number;
-  // display: number; // TODO Implement
-}
+
 
 
 export interface PuppetScreenshotSuccess {
