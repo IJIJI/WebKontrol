@@ -10,7 +10,9 @@ export class WebServer {
   private _app = express();
   private logger = new Logger(["WEBSERVER"]);
 
-  private _state: WebServerState = {};
+  private _state: WebServerState = {
+    puppets: []
+  };
 
   private _handlers!: WebServerMutationHandlers;
   
