@@ -24,31 +24,17 @@ export abstract class AbstractPuppet<
   
   protected _config: PuppetConfig;
 
-  public static readonly DefaultConfig: WithRequired<PuppetConfig, "target_url" | "load_wait"> = {
-    // TODO: Different default? Internal virtual hosts?
-    target_url: "http://127.0.0.1/splash/simple",
-    load_wait: 2000,
-  };
-
   protected _info: PuppetInfo = {
     state: ConnectionState.OFFLINE,
   };
 
-
   constructor(config: PuppetConfig) {
     super();
     this._config = config;
-    this._checkConfig(this._config);
   }
   
   getConfig(): PuppetConfig {
     return this._config;
-  }
-
-  protected _checkConfig(config: PuppetConfig): void {
-    if (!config.id)
-      this._logger.fatal(`Invalid ID provided. Submitted config:`, config);
-    // TODO: Url check
   }
 
   protected abstract _doInit(): Promise<void>;
@@ -67,7 +53,7 @@ export abstract class AbstractPuppet<
 
       this._logger.info("Initialized.");
 
-      await this._doSetTarget(this._config.target_url);
+      await this._doSetTarget(this._config.runtime.target_url);
       this._logger.info("Target from config set.");
     } catch (error) {
       this._info.state = ConnectionState.FAILED;
@@ -76,8 +62,9 @@ export abstract class AbstractPuppet<
   }
 
   // TODO: Add target info? -> Needs a caller for some implementations?
+  // TODO: Load url from the puppet?
   getInfo(): PuppetInfoBundle {
-    return { ...this._info, target_url: this._config.target_url };
+    return { ...this._info, target_url: this._config.runtime.target_url };
   }
 
   protected _updateInfo(info?: Partial<PuppetInfo>): void {
@@ -94,7 +81,7 @@ export abstract class AbstractPuppet<
     try {
       if (!this._isInit) throw new Error("Puppet not initialized");
 
-      this._config.target_url = target;
+      this._config.runtime.target_url = target;
 
       await this._doSetTarget(target);
       const result: SetTargetSuccess = {
