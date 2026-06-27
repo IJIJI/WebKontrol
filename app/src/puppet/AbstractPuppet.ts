@@ -108,23 +108,31 @@ export abstract class AbstractPuppet<
 
   async updateRuntime(config: Partial<PuppetRuntimeConfig>): Promise<void> {
 
-    let targetChange: boolean = false;
+    try {
+      if (!this._isInit) throw new Error("Puppet not initialized");
 
-    if (config.target_url && config.target_url !== this._config.runtime.target_url)
-      targetChange = true;
+      let targetChange: boolean = false;
 
-    this._config.runtime = PuppetRuntimeConfigSchema.parse({...this._config.runtime, ...config});
+      if (config.target_url && config.target_url !== this._config.runtime.target_url)
+        targetChange = true;
 
-    if (targetChange)
-      await this._setTarget(this._config.runtime.target_url)
+      this._config.runtime = PuppetRuntimeConfigSchema.parse({...this._config.runtime, ...config});
 
-    await this._store.saveRuntime(this._config.runtime);
+      if (targetChange)
+        await this._setTarget(this._config.runtime.target_url)
+
+      await this._store.saveRuntime(this._config.runtime);
+
+    } catch (error) {
+      this._logger.error("Failed to update runtime", error);
+      // TODO: Add some sort of feedback to caller.
+    }
   }
 
   protected async _setTarget(target: PuppetTarget): Promise<SetTargetResult> {
 
-    try {
-      if (!this._isInit) throw new Error("Puppet not initialized");
+    // TODO: Remove try catch? 
+    try { // TODO: Consolidate return types. SetTargetResult -> UpdateRuntimeResult.
 
       this._config.runtime.target_url = target;
 
@@ -161,6 +169,7 @@ export abstract class AbstractPuppet<
   // TODO: Store in db?
   async getScreenshot(): Promise<PuppetScreenshotResult> {
     try {
+      if (!this._isInit) throw new Error("Puppet not initialized");
 
       const imgPath: string = path.join(process.cwd(), "db", "images", `${this._config.specific.id}.png`);
 
