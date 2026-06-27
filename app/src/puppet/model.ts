@@ -1,4 +1,4 @@
-import type { ConnectionState } from "../../types/CommonTypes";
+import type { ConnectionState } from "../types/CommonTypes";
 import type { PuppetTarget } from "./schema";
 
 /**

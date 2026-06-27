@@ -1,8 +1,8 @@
 import puppeteer, { type Browser, type Page } from "puppeteer";
 import { AbstractPuppet } from "./AbstractPuppet";
 import type { WithRequired } from "../types/CommonTypes";
-import type { PuppetInfo, TargetInfo } from "./types/model";
-import type { PuppetConfig, PuppetTarget } from "./types/schema";
+import type { PuppetInfo, TargetInfo } from "./model";
+import type { PuppetConfig, PuppetTarget } from "./schema";
 
 export interface PuppeteerPuppetConfig extends PuppetConfig {
   chromiumExecutablePath?: string;
