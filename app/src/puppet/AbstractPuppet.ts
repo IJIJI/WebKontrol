@@ -1,19 +1,9 @@
 import EventEmitter from "node:events";
 import * as path from "node:path";
 import { Logger } from "../logging/Logger";
-import type {
-  PuppetConfig,
-  PuppetInfo,
-  PuppetInfoBundle,
-  PuppetScreenshotFail,
-  PuppetScreenshotResult,
-  PuppetTarget,
-  SetTargetFail,
-  SetTargetResult,
-  SetTargetSuccess,
-  TargetInfo,
-} from "./types";
 import { ConnectionState, type WithRequired } from "../types/CommonTypes";
+import type { PuppetInfo, PuppetInfoBundle, PuppetScreenshotFail, PuppetScreenshotResult, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./types/model";
+import type { PuppetConfig, PuppetTarget } from "./types/schema";
 
 export type PuppetEvents = {
   load_success: [result: SetTargetSuccess];
