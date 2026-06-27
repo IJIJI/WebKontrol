@@ -12,17 +12,23 @@ type PUPPET_RUNTIME_CONFIG_BRAND = PUPPET_BASE_BRAND<'runtime'>;
 type PUPPET_GLOBAL_CONFIG_BRAND = PUPPET_BASE_BRAND<'global'>;
 type PUPPET_CONFIG_BRAND = PUPPET_BASE_BRAND<'main'>;
 
-
+// Simple fields
 export const PuppetKeySchema = z.string().min(2).max(12).regex(/^[a-z0-9_-]+$/);
 export type PuppetKey = z.infer<typeof PuppetKeySchema>;
 
 export const PuppetTargetSchema = z.url();
 export type PuppetTarget = z.infer<typeof PuppetTargetSchema>;
 
+// Config: Specific
 export const PuppetSpecificConfigShape = z.object({
   id: PuppetKeySchema,
   name: z.string().max(20).optional(),
 });
+export const PuppetSpecificConfigSchema = PuppetSpecificConfigShape.brand<PUPPET_SPECIFIC_CONFIG_BRAND>();
+
+export type PupppetSpecificConfigBase = z.infer<typeof PuppetSpecificConfigShape>;
+export type PupppetSpecificConfig = z.infer<typeof PuppetSpecificConfigSchema>;
+export type PupppetSpecificConfigInput = z.input<typeof PuppetSpecificConfigSchema>;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function extendPuppetSpecificConfig<const B extends string, T extends z.ZodRawShape>(
@@ -36,26 +42,31 @@ export function extendPuppetSpecificConfig<const B extends string, T extends z.Z
     })
     .brand<PUPPET_SPECIFIC_CONFIG_BRAND>()
 }
-export const PuppetSpecificConfigSchema = PuppetSpecificConfigShape.brand<PUPPET_SPECIFIC_CONFIG_BRAND>();
 
-export type PupppetSpecificConfig = z.infer<typeof PuppetSpecificConfigSchema>;
-export type PupppetSpecificConfigInput = z.input<typeof PuppetSpecificConfigSchema>;
-
-export const PuppetRuntimeConfigSchema = z.object({
+// Config: Runtime
+export const PuppetRuntimeConfigShape = z.object({
   target_url: PuppetTargetSchema,
-}).brand<PUPPET_RUNTIME_CONFIG_BRAND>();
+});
 
+export const PuppetRuntimeConfigSchema = PuppetRuntimeConfigShape.brand<PUPPET_RUNTIME_CONFIG_BRAND>();
+
+export type PuppetRuntimeConfigBase = z.infer<typeof PuppetRuntimeConfigShape>;
 export type PuppetRuntimeConfig = z.infer<typeof PuppetRuntimeConfigSchema>;
 export type PuppetRuntimeConfigInput = z.input<typeof PuppetRuntimeConfigSchema>;
 
-export const PuppetGlobalConfigSchema = z.object({
+// Config: Global
+export const PuppetGlobalConfigShape = z.object({
   load_timout: z.number().min(0).optional().default(20000),
   // TODO: Action on load fail
-}).brand<PUPPET_GLOBAL_CONFIG_BRAND>();
+});
 
+export const PuppetGlobalConfigSchema = PuppetGlobalConfigShape.brand<PUPPET_GLOBAL_CONFIG_BRAND>();
+
+export type PuppetGlobalConfigBase = z.infer<typeof PuppetGlobalConfigShape>;
 export type PuppetGlobalConfig = z.infer<typeof PuppetGlobalConfigSchema>;
 export type PuppetGlobalConfigInput = z.input<typeof PuppetGlobalConfigSchema>;
 
+// Config: Full struct
 export const PuppetConfigShape = z.object({
   specific: PuppetSpecificConfigSchema,
   runtime: PuppetRuntimeConfigSchema, // When a puppet is constructed and already has these runtime values set, they are loaded and overwritten.
@@ -63,6 +74,7 @@ export const PuppetConfigShape = z.object({
 });
 
 
+// TODO: Also add brandless bases here?
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function extendPuppetConfig<const B extends string, T extends z.ZodRawShape>(
   typeLiteral: B,
