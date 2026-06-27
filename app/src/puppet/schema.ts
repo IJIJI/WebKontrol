@@ -42,6 +42,7 @@ export const PuppetConfigShape = z.object({
 
 type PUPPET_CONFIG_BRAND = 'PuppetConfig';
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function extendPuppetConfig<const B extends string, T extends z.ZodRawShape>(
   concreteBrand: B,
   shape: T
