@@ -2,6 +2,7 @@ import express from "express";
 import { Logger } from "../logging/Logger";
 import type { WebServerMutationHandlers, WebServerState } from "./model";
 import { jsonReplacer } from "../helpers/json";
+import type { WebServerConfig } from "./schema";
 
 
 
@@ -11,7 +12,15 @@ export class WebServer {
   private _logger = new Logger(["WEBSERVER"]);
 
   private _state: WebServerState = {
-    puppets: []
+    puppets: [],
+    system: {
+      info: {
+        start_moment: 0
+      },
+      config: {
+        system_name: "WebKontrol"
+      }
+    }
   };
 
   private _handlers!: WebServerMutationHandlers;
@@ -41,5 +50,9 @@ export class WebServer {
   
   public setHandlers(handlers: WebServerMutationHandlers): void {
     this._handlers = handlers;
+  }
+
+  public start(config: WebServerConfig) {
+
   }
 }
