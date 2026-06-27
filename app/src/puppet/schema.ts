@@ -6,10 +6,7 @@ import { z } from 'zod';
  */
 // TODO: Do the input types need to exist? If yes, implement! Probably not in the puppets, they do not carry defaults.
 
-type PUPPET_BASE_BRAND = 'puppet';
-type PUPPET_SPECIFIC_CONFIG_BRAND = 'specific';
-type PUPPET_RUNTIME_CONFIG_BRAND = 'runtime';
-type PUPPET_CONFIG_BRAND = 'config';
+type PUPPET_CONFIG_BRAND = 'puppet_config';
 
 
 export const PuppetKeySchema = z.string().min(2).max(12).regex(/^[a-z0-9_-]+$/);
@@ -59,7 +56,6 @@ export function extendPuppetConfig<const B extends string, T extends z.ZodRawSha
       ...shape
     })
     .brand<PUPPET_CONFIG_BRAND>()
-    .brand<B>();
 }
 
 export const PuppetConfigSchema = PuppetConfigShape.brand<PUPPET_CONFIG_BRAND>();
