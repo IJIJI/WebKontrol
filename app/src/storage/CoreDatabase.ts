@@ -42,9 +42,9 @@ export class CoreDatabase {
     this._logger.info(`Database initialized at:`, dbPath);
   }
 
-  public async updateSetting(type: string, key: string, value: string): Promise<void> {
+  public async updateSetting(domain: string, type: string, key: string, value: string): Promise<void> {
     
-    const validation = insertSettingSchema.safeParse({ type, key, value });
+    const validation = insertSettingSchema.safeParse({ domain, type, key, value });
     if (!validation.success) {
       return this._logger.fatal("Invalid setting data:", validation.error);
     }
@@ -52,7 +52,7 @@ export class CoreDatabase {
     await this._db.insert(schema.settings)
       .values(validation.data)
       .onConflictDoUpdate({
-        target: [schema.settings.type, schema.settings.key],
+        target: [schema.settings.domain, schema.settings.type, schema.settings.key],
         set: { value: validation.data.value }
       });
 
