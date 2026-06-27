@@ -61,14 +61,19 @@ export abstract class AbstractPuppet<
     throw new Error("Screenshot not implemented for this puppet"); // TODO: Fail Silently or add another way to differentiate between fails and not implemented? Error type?
   };
 
-  async init(): Promise<void> {
+  async init(clear_runtime: boolean = false): Promise<void> {
     try {
       this._logger = new Logger(this._getLogLabels());
       this._logger.info("Initializing...");
 
       this._store = new PuppetStore(this._config.specific.id, this._getRuntimeSchema());
 
-      this._config.runtime = await this._store.loadRuntime() ?? this._config.runtime;
+      if (clear_runtime) {
+        await this._store.saveRuntime(this._config.runtime);
+      }
+      else {
+        this._config.runtime = await this._store.loadRuntime() ?? this._config.runtime;
+      }
       
       await this._doInit();
       this._isInit = true;
