@@ -12,12 +12,29 @@ export type PuppetKey = z.infer<typeof PuppetKeySchema>;
 export const PuppetTargetSchema = z.url();
 export type PuppetTarget = z.infer<typeof PuppetTargetSchema>;
 
-
-export const PuppetConfigSchema = z.object({
+export const PuppetSpecificConfigSchema = z.object({
   id: PuppetKeySchema,
   name: z.string().min(1).max(50),
-  target_url: PuppetTargetSchema,
+});
+
+export type PupppetSpecificConfig = z.infer<typeof PuppetSpecificConfigSchema>;
+
+export const PuppetGlobalConfigSchema = z.object({
   load_wait: z.number().min(0).default(2000)
 });
+
+export type PuppetGlobalConfig = z.infer<typeof PuppetGlobalConfigSchema>;
+
+export const PuppetDefaultRuntimeConfigSchema = z.object({
+  target_url: PuppetTargetSchema,
+});
+
+export type PuppetDefaultRuntimeConfig = z.infer<typeof PuppetDefaultRuntimeConfigSchema>;
+
+export const PuppetConfigSchema = z.object({
+  specific: PuppetSpecificConfigSchema,
+  global: PuppetGlobalConfigSchema,
+  runtime: PuppetDefaultRuntimeConfigSchema // When a puppet is constructed and already has these runtime values set, they are loaded and overwritten.
+}).brand<'puppet'>().brand<'config'>();
 
 export type PuppetConfig = z.infer<typeof PuppetConfigSchema>;
