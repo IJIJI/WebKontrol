@@ -26,6 +26,13 @@ export const PuppetSpecificConfigSchema = z.object({
 export type PupppetSpecificConfig = z.infer<typeof PuppetSpecificConfigSchema>;
 export type PupppetSpecificConfigInput = z.input<typeof PuppetSpecificConfigSchema>;
 
+export const PuppetRuntimeConfigSchema = z.object({
+  target_url: PuppetTargetSchema,
+});
+
+export type PuppetRuntimeConfig = z.infer<typeof PuppetRuntimeConfigSchema>;
+export type PuppetRuntimeConfigInput = z.input<typeof PuppetRuntimeConfigSchema>;
+
 export const PuppetGlobalConfigSchema = z.object({
   load_timout: z.number().min(0).optional().default(20000),
   // TODO: Action on load fail
@@ -33,13 +40,6 @@ export const PuppetGlobalConfigSchema = z.object({
 
 export type PuppetGlobalConfig = z.infer<typeof PuppetGlobalConfigSchema>;
 export type PuppetGlobalConfigInput = z.input<typeof PuppetGlobalConfigSchema>;
-
-export const PuppetRuntimeConfigSchema = z.object({
-  target_url: PuppetTargetSchema,
-});
-
-export type PuppetRuntimeConfig = z.infer<typeof PuppetRuntimeConfigSchema>;
-export type PuppetRuntimeConfigInput = z.input<typeof PuppetRuntimeConfigSchema>;
 
 export const PuppetConfigShape = z.object({
   specific: PuppetSpecificConfigSchema,
