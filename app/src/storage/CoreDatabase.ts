@@ -28,7 +28,7 @@ export class CoreDatabase {
 
     // Ensure the folder where the db is made, exists. 
     // TODO: Define this centrally somehow?
-    const dbPath = path.join(process.cwd(), '/db/webkontrol.db');
+    const dbPath = path.join(process.cwd(), '/db/database.db');
     const dbDir = path.dirname(dbPath);
     if (!fs.existsSync(dbDir)) {
       fs.mkdirSync(dbDir, { recursive: true });
