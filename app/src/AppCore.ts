@@ -27,7 +27,7 @@ export class AppCore {
       load_wait: undefined
     };
     const defaultRuntimeConfig: PuppetRuntimeConfig = {
-      target_url: "https://synapt.nl/"
+      target_url: "https://etsy.com/"
     };
 
     // Should have try catch in prod
@@ -64,13 +64,19 @@ export class AppCore {
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await testpuppet.updateRuntime({
-      target_url: "https://synaapt.net/"
+      target_url: "https://synapt.nl/"
+    });    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await testpuppet.updateRuntime({
+      target_url: "https://youtube.com/"
     });
 
-    this.puppets.set(testpuppet.getKey(), testpuppet);
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
     process.exit(0);
+
+    // this.puppets.set(testpuppet.getKey(), testpuppet);
+
   }
 }
 
