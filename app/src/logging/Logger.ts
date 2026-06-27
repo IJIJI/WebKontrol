@@ -86,21 +86,30 @@ export class Logger {
     }
   }
 
+  private parseHelper = (_key: string, value: unknown): unknown => {
+    if (value instanceof Error) {
+      return { name: value.name, message: value.message, stack: value.stack };
+    }
+    if (value instanceof Map) {
+      return Object.fromEntries(value as Map<PropertyKey, unknown>);
+    }
+    if (value instanceof Set) {
+      return [...value];
+    }
+    return value;
+  };
+
   private parseData(data: unknown[]): string {
     return data
       .map((item: unknown) => {
         if (item instanceof Error) return item.stack ?? item.message;
 
         if (typeof item === "object" && item !== null) {
-          return JSON.stringify(item, (_key, value: unknown) => {
-            // Check if the current value being stringified is a Map
-            if (
-              value instanceof Map
-            ) {
-              return Object.fromEntries(value as Map<PropertyKey, unknown>);
-            }
-            return value as string;
-          });
+          try {
+            return JSON.stringify(item, this.parseHelper);
+          } catch {
+            return "[Unserializable Object]";
+          }
         }
 
         return String(item);
