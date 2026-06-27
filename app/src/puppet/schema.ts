@@ -39,7 +39,7 @@ export const PuppetConfigShape = z.object({
 
 type PUPPET_CONFIG_BRAND = 'PuppetConfig';
 
-function extendPuppetConfig<const B extends string, T extends z.ZodRawShape>(
+export function extendPuppetConfig<const B extends string, T extends z.ZodRawShape>(
   concreteBrand: B,
   shape: T
 ) {
