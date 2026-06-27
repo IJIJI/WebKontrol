@@ -7,9 +7,9 @@ export const IncomingPuppetSpecificConfigSchema = z.discriminatedUnion("type", [
 
 export type AnyPuppetSpecificConfig = z.infer<typeof IncomingPuppetSpecificConfigSchema>;
 
-export const ConfigFilePuppetSchema = z.preprocess(
+export const ConfigFilePuppetSpecificSchema = z.preprocess(
   (data) => (typeof data === 'object' && data !== null && !('type' in data))
-    ? { ...data, type: 'puppeteer' }
+    ? { ...(data as Record<string, unknown>), type: 'puppeteer' }
     : data,
   IncomingPuppetSpecificConfigSchema
 );
