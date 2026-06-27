@@ -36,6 +36,7 @@ export type PuppetRuntimeConfigInput = z.input<typeof PuppetRuntimeConfigSchema>
 
 export const PuppetConfigShape = z.object({
   specific: PuppetSpecificConfigSchema,
+  runtime: PuppetRuntimeConfigSchema, // When a puppet is constructed and already has these runtime values set, they are loaded and overwritten.
   global: PuppetGlobalConfigSchema,
 });
 
