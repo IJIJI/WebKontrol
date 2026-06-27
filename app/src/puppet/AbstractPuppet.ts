@@ -108,7 +108,7 @@ export abstract class AbstractPuppet<
     this._config.runtime = {...this._config.runtime, ...config};
 
     if (targetChange)
-      this._setTarget(this._config.runtime.target_url)
+      await this._setTarget(this._config.runtime.target_url)
 
     await this._store.saveRuntime(this._config.runtime);
   }
