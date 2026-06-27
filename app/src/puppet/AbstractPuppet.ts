@@ -91,8 +91,8 @@ export abstract class AbstractPuppet<
     return { 
       ...this._info, 
       config: {
-        runtime: this._config.runtime as PuppetRuntimeConfigBase,
-        specific: this._config.specific as PupppetSpecificConfigBase,
+        runtime: this._config.runtime,
+        specific: this._config.specific,
       }
     };
   }
