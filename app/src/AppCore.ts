@@ -65,7 +65,7 @@ export class AppCore {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await testpuppet.setTarget("https://synaapt.net/");
 
-    this.puppets.set(testpuppet.getConfig().id, testpuppet);
+    this.puppets.set(testpuppet.getConfig().specific.id, testpuppet);
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
     process.exit(0);
