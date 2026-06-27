@@ -117,7 +117,7 @@ export abstract class AbstractPuppet<
   async getScreenshot(): Promise<PuppetScreenshotResult> {
     try {
 
-      const imgPath: string = path.join(process.cwd(), "db", "images", `${this._config.id}.png`);
+      const imgPath: string = path.join(process.cwd(), "db", "images", `${this._config.specific.id}.png`);
 
       await this._doScreenshot(imgPath); // TODO: Multiple image history storage? In DB?
 
