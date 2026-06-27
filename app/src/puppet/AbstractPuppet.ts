@@ -110,7 +110,7 @@ export abstract class AbstractPuppet<
     if (config.target_url && config.target_url !== this._config.runtime.target_url)
       targetChange = true;
 
-    this._config.runtime = {...this._config.runtime, ...config};
+    this._config.runtime = this._getRuntimeSchema().parse({...this._config.runtime, ...config});
 
     if (targetChange)
       await this._setTarget(this._config.runtime.target_url)
