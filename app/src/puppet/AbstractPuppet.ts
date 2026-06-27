@@ -1,7 +1,7 @@
 import EventEmitter from "node:events";
 import * as path from "node:path";
 import { Logger } from "../logging/Logger";
-import { ConnectionState, type WithRequired } from "../types/CommonTypes";
+import { ConnectionState } from "../types/CommonTypes";
 import type { PuppetInfo, PuppetInfoBundle, PuppetScreenshotFail, PuppetScreenshotResult, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./model";
 import type { PuppetConfig, PuppetKey, PuppetTarget } from "./schema";
 
