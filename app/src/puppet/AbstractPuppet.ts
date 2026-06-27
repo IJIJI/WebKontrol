@@ -3,7 +3,7 @@ import * as path from "node:path";
 import { Logger } from "../logging/Logger";
 import { ConnectionState, type WithRequired } from "../types/CommonTypes";
 import type { PuppetInfo, PuppetInfoBundle, PuppetScreenshotFail, PuppetScreenshotResult, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./model";
-import type { PuppetConfig, PuppetTarget } from "./schema";
+import type { PuppetConfig, PuppetKey, PuppetTarget } from "./schema";
 
 export type PuppetEvents = {
   load_success: [result: SetTargetSuccess];
@@ -37,6 +37,10 @@ export abstract class AbstractPuppet<
   
   getConfig(): PuppetConfig {
     return this._config;
+  }
+
+  getKey(): PuppetKey {
+    return this._config.specific.id;
   }
 
   protected abstract _doInit(): Promise<void>;
