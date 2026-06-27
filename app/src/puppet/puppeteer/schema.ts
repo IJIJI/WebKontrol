@@ -1,5 +1,5 @@
 import z from "zod";
-import { extendPuppetConfig, PuppetConfigSchema, PuppetSpecificConfigSchema } from "../schema";
+import { extendPuppetConfig, PuppetSpecificConfigSchema } from "../schema";
 
 
 export const PuppeteerPuppetSpecificConfigSchema = PuppetSpecificConfigSchema.extend({
@@ -8,10 +8,11 @@ export const PuppeteerPuppetSpecificConfigSchema = PuppetSpecificConfigSchema.ex
 });
 
 export type PuppeteerPuppetSpecificConfig = z.infer<typeof PuppeteerPuppetSpecificConfigSchema>;
+export type PuppeteerPuppetSpecificConfigInput = z.infer<typeof PuppeteerPuppetSpecificConfigSchema>;
 
 export const PuppeteerPuppetConfigSchema = extendPuppetConfig("Puppeteer", {
   specific: PuppeteerPuppetSpecificConfigSchema
 })
 
 export type PuppeteerPuppetConfig = z.infer<typeof PuppeteerPuppetConfigSchema>;
-export type PuppeteerPuppetConfigInput = z.input<typeof PuppeteerPuppetConfigSchema>;
+export type PuppeteerPuppetConfigInput = z.infer<typeof PuppeteerPuppetConfigSchema>;
