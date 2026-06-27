@@ -1,6 +1,6 @@
-import puppeteer, { Browser, Page } from "puppeteer";
+import puppeteer, { type Browser, type Page } from "puppeteer";
 import { AbstractPuppet } from "./AbstractPuppet";
-import type { PuppetConfig, PuppetInfo, PuppetScreenshotResult, PuppetTarget, TargetInfo } from "./types";
+import type { PuppetConfig, PuppetInfo, PuppetTarget, TargetInfo } from "./types";
 import type { WithRequired } from "../types/CommonTypes";
 
 export interface PuppeteerPuppetConfig extends PuppetConfig {
@@ -8,6 +8,8 @@ export interface PuppeteerPuppetConfig extends PuppetConfig {
   // TODO: Add settings to choose browser
 }
 
+// TODO: Implement puppeteer info or remove.
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PuppeteerPuppetInfo extends PuppetInfo {
   // Runtime
 }
@@ -15,7 +17,7 @@ export interface PuppeteerPuppetInfo extends PuppetInfo {
 export class PuppeteerPuppet extends AbstractPuppet {
   declare protected _config: PuppeteerPuppetConfig; // Declare to indicate it overwrites the parent's type.
 
-  protected override _getLogLabels() {
+  protected override _getLogLabels(): Array<string> {
     return ["PPT", "Puppeteer"];
   }
 
@@ -33,7 +35,7 @@ export class PuppeteerPuppet extends AbstractPuppet {
     super({...PuppeteerPuppet.DefaultConfig, ...config}); // TODO: Better default config handeling?
   }
 
-  protected async _doInit() {
+  protected async _doInit(): Promise<void> {
     // Launch the browser and open a new blank page
 
     const settings = {
