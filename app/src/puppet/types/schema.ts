@@ -35,6 +35,6 @@ export const PuppetConfigSchema = z.object({
   specific: PuppetSpecificConfigSchema,
   global: PuppetGlobalConfigSchema,
   runtime: PuppetDefaultRuntimeConfigSchema // When a puppet is constructed and already has these runtime values set, they are loaded and overwritten.
-}).brand<'puppet'>().brand<'config'>();
+});
 
 export type PuppetConfig = z.infer<typeof PuppetConfigSchema>;
