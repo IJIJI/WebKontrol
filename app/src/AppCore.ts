@@ -2,7 +2,7 @@ import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { PuppeteerPuppet } from "./puppet/puppeteer/PuppeteerPuppet";
 import { PuppeteerPuppetConfigSchema } from "./puppet/puppeteer/schema";
-import type { PuppetRuntimeConfig, PuppetGlobalConfig, PuppetKey, PuppetGlobalConfigInput } from "./puppet/schema";
+import type { PuppetRuntimeConfig, PuppetKey, PuppetGlobalConfigInput } from "./puppet/schema";
 import { CoreDatabase } from "./storage/CoreDatabase";
 
 export interface CoreInfo {
