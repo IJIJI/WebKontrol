@@ -4,7 +4,7 @@ import { z } from 'zod';
  * This file contains all schema definitions for the puppets. That means the types need to be validated. 
  * Those are types that are not generated or received from the internal code, and should thus not automatically be trusted.
  */
-
+// TODO: Do the input types need to exist? If yes, implement!
 
 type PUPPET_BASE_BRAND = 'puppet';
 type PUPPET_SPECIFIC_CONFIG_BRAND = 'specific';
