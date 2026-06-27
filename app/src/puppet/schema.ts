@@ -52,3 +52,4 @@ export function extendPuppetConfig<const B extends string, T extends z.ZodRawSha
 export const PuppetConfigSchema = PuppetConfigShape.brand<PUPPET_CONFIG_BRAND>();
 
 export type PuppetConfig = z.infer<typeof PuppetConfigSchema>;
+export type PuppetConfigInput = z.input<typeof PuppetConfigSchema>;

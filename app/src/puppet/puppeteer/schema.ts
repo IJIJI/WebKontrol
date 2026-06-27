@@ -14,3 +14,4 @@ export const PuppeteerPuppetConfigSchema = extendPuppetConfig("Puppeteer", {
 })
 
 export type PuppeteerPuppetConfig = z.infer<typeof PuppeteerPuppetConfigSchema>;
+export type PuppeteerPuppetConfigInput = z.input<typeof PuppeteerPuppetConfigSchema>;
