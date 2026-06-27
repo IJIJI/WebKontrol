@@ -10,18 +10,18 @@ export interface CoreInfo {
 }
 
 export class AppCore {
-  private logger = new Logger(["CORE"]);
+  private _logger = new Logger(["CORE"]);
 
-  private puppets: Map<PuppetKey, AbstractPuppet> = new Map();
+  private _puppets: Map<PuppetKey, AbstractPuppet> = new Map();
 
-  private info: CoreInfo = {
+  private _info: CoreInfo = {
     startTime: Date.now(),
   };
 
   constructor() {}
 
   public async start(): Promise<void> {
-    this.logger.important("Starting AppCore...");
+    this._logger.important("Starting AppCore...");
 
     const globalPuppetConfig: PuppetGlobalConfigInput = {
       load_timout: undefined
@@ -53,13 +53,13 @@ export class AppCore {
       await testdb.updateSetting("test", "website", key, "https://example.com/");
     }
 
-    this.logger.important("Stored URL:", await testdb.getSetting("test", "website", key));
+    this._logger.important("Stored URL:", await testdb.getSetting("test", "website", key));
 
     const screenshot = await testpuppet.getScreenshot();
     if (screenshot.success) {
-      this.logger.important("Screenshot saved at:", screenshot.path);
+      this._logger.important("Screenshot saved at:", screenshot.path);
     } else {
-      this.logger.error("Screenshot failed:", screenshot.error);
+      this._logger.error("Screenshot failed:", screenshot.error);
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -75,7 +75,7 @@ export class AppCore {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     process.exit(0);
 
-    // this.puppets.set(testpuppet.getKey(), testpuppet);
+    // this._puppets.set(testpuppet.getKey(), testpuppet);
 
   }
 }
