@@ -59,9 +59,9 @@ export class CoreDatabase {
     this._logger.info("Setting updated:", validation.data);
   }
 
-  public async getSetting(key: string): Promise<string | null> {
+  public async getSetting(domain: string, type: string, key: string): Promise<string | null> {
     const result = await this._db.query.settings.findFirst({
-      where: eq(schema.settings.key, key)
+      where: (settings) => eq(settings.domain, domain) && eq(settings.type, type) && eq(settings.key, key)
     });
     return result?.value ?? null;
   }
