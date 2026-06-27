@@ -3,7 +3,7 @@ import * as path from "node:path";
 import { Logger } from "../logging/Logger";
 import { ConnectionState } from "../types/CommonTypes";
 import type { PuppetInfo, PuppetInfoBundle, PuppetScreenshotFail, PuppetScreenshotResult, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./model";
-import { PuppetRuntimeConfigSchema, type PuppetConfig, type PuppetKey, type PuppetRuntimeConfig, type PuppetRuntimeConfigBase, type PuppetTarget, type PupppetSpecificConfigBase } from "./schema";
+import { PuppetRuntimeConfigSchema, type PuppetConfig, type PuppetKey, type PuppetRuntimeConfig, type PuppetTarget } from "./schema";
 import { PuppetStore } from "../storage/PuppetStore";
 
 export type PuppetEvents = {
