@@ -19,8 +19,10 @@ export abstract class AbstractPuppet<
   protected _isInit = false;
 
   protected _getLogLabels(): Array<string> {
-    return ["PPT"];
+    return ["PPT", ...this._getLogLabelExtensions(), this._config.specific.id];
   }
+
+  protected abstract _getLogLabelExtensions(): Array<string>;
   
   protected _config: PuppetConfig;
 
