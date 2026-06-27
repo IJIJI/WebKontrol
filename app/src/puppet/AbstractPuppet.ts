@@ -14,21 +14,15 @@ export type PuppetEvents = {
 export abstract class AbstractPuppet<
   T extends PuppetEvents & Record<string, unknown[]> = PuppetEvents,
 > extends EventEmitter<T> {
-  protected _logger!: Logger;
 
+  protected _logger!: Logger;
   protected _isInit = false;
 
   protected _getLogLabels(): Array<string> {
     return ["PPT"];
   }
-
-  protected _info: PuppetInfo = {
-    state: ConnectionState.OFFLINE,
-  };
-
+  
   protected _config: PuppetConfig;
-
-  protected _is_initialized = false;
 
   public static readonly DefaultConfig: WithRequired<PuppetConfig, "target_url" | "load_wait"> = {
     // TODO: Different default? Internal virtual hosts?
@@ -36,11 +30,19 @@ export abstract class AbstractPuppet<
     load_wait: 2000,
   };
 
+  protected _info: PuppetInfo = {
+    state: ConnectionState.OFFLINE,
+  };
+
 
   constructor(config: PuppetConfig) {
     super();
     this._config = config;
     this._checkConfig(this._config);
+  }
+  
+  getConfig(): PuppetConfig {
+    return this._config;
   }
 
   protected _checkConfig(config: PuppetConfig): void {
@@ -56,12 +58,13 @@ export abstract class AbstractPuppet<
   protected abstract _getTargetInfo(): Promise<TargetInfo> | TargetInfo;
 
   async init(): Promise<void> {
-    this._logger = new Logger(this._getLogLabels());
-    this._logger.info("Initializing...");
     try {
-      await this._doInit();
+      this._logger = new Logger(this._getLogLabels());
+      this._logger.info("Initializing...");
 
-      this._is_initialized = true;
+      await this._doInit();
+      this._isInit = true;
+
       this._logger.info("Initialized.");
 
       await this._doSetTarget(this._config.target_url);
@@ -72,13 +75,9 @@ export abstract class AbstractPuppet<
     }
   }
 
-  
+  // TODO: Add target info? -> Needs a caller for some implementations?
   getInfo(): PuppetInfoBundle {
     return { ...this._info, target_url: this._config.target_url };
-  }
-
-  getConfig(): PuppetConfig {
-    return this._config;
   }
 
   protected _updateInfo(info?: Partial<PuppetInfo>): void {
@@ -93,9 +92,8 @@ export abstract class AbstractPuppet<
   async setTarget(target: PuppetTarget): Promise<SetTargetResult> {
 
     try {
-      if (!this._is_initialized) throw new Error("Puppet not initialized");
+      if (!this._isInit) throw new Error("Puppet not initialized");
 
-      // TODO: Url Validation
       this._config.target_url = target;
 
       await this._doSetTarget(target);
