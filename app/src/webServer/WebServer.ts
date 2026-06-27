@@ -8,7 +8,7 @@ import { jsonReplacer } from "../helpers/json";
 
 export class WebServer {
   private _app = express();
-  private logger = new Logger(["WEBSERVER"]);
+  private _logger = new Logger(["WEBSERVER"]);
 
   private _state: WebServerState = {
     puppets: []
@@ -39,7 +39,7 @@ export class WebServer {
     }
   }
   
-  public _setHandlers(handlers: WebServerMutationHandlers): void {
+  public setHandlers(handlers: WebServerMutationHandlers): void {
     this._handlers = handlers;
   }
 }
