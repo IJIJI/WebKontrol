@@ -5,7 +5,7 @@ import { ConnectionState } from "../types/CommonTypes";
 import type { PuppetInfo, PuppetInfoBundle, PuppetScreenshotFail, PuppetScreenshotResult, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./model";
 import type { PuppetConfig, PuppetKey, PuppetRuntimeConfig, PuppetTarget } from "./schema";
 import { PuppetStore } from "../storage/PuppetStore";
-import { boolean, type ZodType } from "zod";
+import { type ZodType } from "zod";
 
 export type PuppetEvents = {
   load_success: [result: SetTargetSuccess];
@@ -54,7 +54,7 @@ export abstract class AbstractPuppet<
   protected abstract _getTargetInfo(): Promise<TargetInfo> | TargetInfo;
 
   protected abstract _getRuntimeSchema(): ZodType<TConfig['runtime']>;
-  
+
   // The following is disabled, as the screenshot function is to be implemented optionally in extending classes.
   // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
   protected async _doScreenshot(path: string): Promise<void> {
@@ -106,6 +106,9 @@ export abstract class AbstractPuppet<
       targetChange = true;
 
     this._config.runtime = {...this._config.runtime, ...config};
+
+    if (targetChange)
+      this._setTarget(this._config.runtime.target_url)
 
     await this._store.saveRuntime(this._config.runtime);
   }
