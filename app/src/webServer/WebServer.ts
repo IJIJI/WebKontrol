@@ -22,7 +22,7 @@ export class WebServer {
   //   this.updateManager = updateManager;
   // }
   constructor() {
-    // this._app.set('json replacer', jsonReplacer)
+    this._app.set('json replacer', jsonReplacer)
   }
 
   private _serializeState() {
