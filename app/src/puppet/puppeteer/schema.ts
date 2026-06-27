@@ -4,6 +4,7 @@ import { PuppetConfigSchema, PuppetSpecificConfigSchema } from "../schema";
 
 export const PuppeteerPuppetSpecificConfigSchema = PuppetSpecificConfigSchema.extend({
   chromiumExecutablePath: z.string().optional(),
+  // TODO: Add settings to choose browser (chrome / firefox)
 });
 
 export type PuppeteerPuppetSpecificConfig = z.infer<typeof PuppeteerPuppetSpecificConfigSchema>;
