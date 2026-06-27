@@ -3,9 +3,8 @@ import * as path from "node:path";
 import { Logger } from "../logging/Logger";
 import { ConnectionState } from "../types/CommonTypes";
 import type { PuppetInfo, PuppetInfoBundle, PuppetScreenshotFail, PuppetScreenshotResult, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./model";
-import type { PuppetConfig, PuppetKey, PuppetRuntimeConfig, PuppetTarget } from "./schema";
+import { PuppetRuntimeConfigSchema, type PuppetConfig, type PuppetKey, type PuppetRuntimeConfig, type PuppetTarget } from "./schema";
 import { PuppetStore } from "../storage/PuppetStore";
-import { type ZodType } from "zod";
 
 export type PuppetEvents = {
   load_success: [result: SetTargetSuccess];
@@ -19,7 +18,7 @@ export abstract class AbstractPuppet<
 > extends EventEmitter<TEvents> {
 
   protected _logger!: Logger;
-  protected _store!: PuppetStore<TConfig['runtime']>;
+  protected _store!: PuppetStore;
   protected _isInit = false;
 
   protected _getLogLabels(): Array<string> {
@@ -53,8 +52,6 @@ export abstract class AbstractPuppet<
 
   protected abstract _getTargetInfo(): Promise<TargetInfo> | TargetInfo;
 
-  protected abstract _getRuntimeSchema(): ZodType<TConfig['runtime']>;
-
   // The following is disabled, as the screenshot function is to be implemented optionally in extending classes.
   // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
   protected async _doScreenshot(path: string): Promise<void> {
@@ -66,7 +63,7 @@ export abstract class AbstractPuppet<
       this._logger = new Logger(this._getLogLabels());
       this._logger.info("Initializing...");
 
-      this._store = new PuppetStore(this._config.specific.id, this._getRuntimeSchema());
+      this._store = new PuppetStore(this._config.specific.id);
 
       if (clear_runtime) {
         await this._store.saveRuntime(this._config.runtime);
@@ -110,7 +107,7 @@ export abstract class AbstractPuppet<
     if (config.target_url && config.target_url !== this._config.runtime.target_url)
       targetChange = true;
 
-    this._config.runtime = this._getRuntimeSchema().parse({...this._config.runtime, ...config});
+    this._config.runtime = PuppetRuntimeConfigSchema.parse({...this._config.runtime, ...config});
 
     if (targetChange)
       await this._setTarget(this._config.runtime.target_url)

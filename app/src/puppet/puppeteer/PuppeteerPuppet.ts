@@ -94,10 +94,6 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     return result;
   }
 
-  protected _getRuntimeSchema(): ZodType<PuppeteerPuppetConfig['runtime']> {
-    return PuppetRuntimeConfigSchema as unknown as ZodType<TConfig['runtime']>;
-  }
-
   protected override async _doScreenshot(path: string): Promise<void> {
     await this._page.screenshot({
       path: path,
