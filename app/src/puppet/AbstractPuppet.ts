@@ -3,7 +3,7 @@ import * as path from "node:path";
 import { Logger } from "../logging/Logger";
 import { ConnectionState } from "../types/CommonTypes";
 import type { PuppetInfo, PuppetInfoBundle, PuppetScreenshotFail, PuppetScreenshotResult, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./model";
-import { PuppetRuntimeConfigSchema, type PuppetConfig, type PuppetKey, type PuppetRuntimeConfig, type PuppetTarget } from "./schema";
+import { PuppetRuntimeConfigSchema, type PuppetConfig, type PuppetKey, type PuppetRuntimeConfig, type PuppetRuntimeConfigBase, type PuppetTarget, type PupppetSpecificConfigBase } from "./schema";
 import { PuppetStore } from "../storage/PuppetStore";
 
 export type PuppetEvents = {
@@ -88,7 +88,13 @@ export abstract class AbstractPuppet<
   // TODO: Add target info? -> Needs a caller for some implementations?
   // TODO: Load url from the puppet?
   getInfo(): PuppetInfoBundle {
-    return { ...this._info, target_url: this._config.runtime.target_url };
+    return { 
+      ...this._info, 
+      config: {
+        runtime: this._config.runtime as PuppetRuntimeConfigBase,
+        specific: this._config.specific as PupppetSpecificConfigBase,
+      }
+    };
   }
 
   protected _updateInfo(info?: Partial<PuppetInfo>): void {
