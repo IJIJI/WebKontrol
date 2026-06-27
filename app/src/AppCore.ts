@@ -42,6 +42,12 @@ export class AppCore {
 
     this.logger.important("Stored URL:", await testdb.getSetting("test", "website", key));
 
+    const screenshot = await testpuppet.getScreenshot();
+    if (screenshot.success) {
+      this.logger.important("Screenshot saved at:", screenshot.path);
+    } else {
+      this.logger.error("Screenshot failed:", screenshot.error);
+    }
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await testpuppet.setTarget("https://synaapt.net/");
