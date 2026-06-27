@@ -68,7 +68,7 @@ export class PuppeteerPuppet<TConfig extends PuppeteerPuppetConfig = PuppeteerPu
   }
 
   protected async _doSetTarget(target: PuppetTarget): Promise<void> {
-    await this._page.goto(target, {timeout: this._config.global.load_wait});
+    await this._page.goto(target, {timeout: this._config.global.load_timout});
   }
 
   protected async _getTargetInfo(): Promise<TargetInfo> {

@@ -20,7 +20,7 @@ export type PupppetSpecificConfig = z.infer<typeof PuppetSpecificConfigSchema>;
 export type PupppetSpecificConfigInput = z.input<typeof PuppetSpecificConfigSchema>;
 
 export const PuppetGlobalConfigSchema = z.object({
-  load_wait: z.number().min(0).optional().default(2000),
+  load_timout: z.number().min(0).optional().default(20000),
   // TODO: Action on load fail
 });
 

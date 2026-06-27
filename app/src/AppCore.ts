@@ -24,7 +24,7 @@ export class AppCore {
     this.logger.important("Starting AppCore...");
 
     const globalPuppetConfig: PuppetGlobalConfigInput = {
-      load_wait: undefined
+      load_timout: undefined
     };
     const defaultRuntimeConfig: PuppetRuntimeConfig = {
       target_url: "https://etsy.com/"
