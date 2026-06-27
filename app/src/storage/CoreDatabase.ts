@@ -2,7 +2,7 @@ import path from "node:path";
 import fs from 'node:fs';
 import Database from 'better-sqlite3';
 import { Logger } from "../logging/Logger";
-import { BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
+import { type BetterSQLite3Database, drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from './schema';
 import { insertSettingSchema } from "./schema";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
