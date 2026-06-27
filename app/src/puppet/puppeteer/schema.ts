@@ -10,7 +10,7 @@ export const PuppeteerPuppetSpecificConfigSchema = PuppetSpecificConfigSchema.ex
 export type PuppeteerPuppetSpecificConfig = z.infer<typeof PuppeteerPuppetSpecificConfigSchema>;
 export type PuppeteerPuppetSpecificConfigInput = z.infer<typeof PuppeteerPuppetSpecificConfigSchema>;
 
-export const PuppeteerPuppetConfigSchema = extendPuppetConfig("Puppeteer", {
+export const PuppeteerPuppetConfigSchema = extendPuppetConfig("puppeteer", {
   specific: PuppeteerPuppetSpecificConfigSchema
 })
 
