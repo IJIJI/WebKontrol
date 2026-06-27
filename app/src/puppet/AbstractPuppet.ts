@@ -28,13 +28,13 @@ export abstract class AbstractPuppet<
 
   protected abstract _getLogLabelExtensions(): Array<string>;
   
-  protected _config: PuppetConfig;
+  protected _config: TConfig;
 
   protected _info: PuppetInfo = {
     state: ConnectionState.OFFLINE,
   };
 
-  constructor(config: PuppetConfig) {
+  constructor(config: TConfig) {
     super();
     this._config = config;
   }
