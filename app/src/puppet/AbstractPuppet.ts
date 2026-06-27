@@ -137,6 +137,8 @@ export abstract class AbstractPuppet<
     // TODO: Add a way to differentiate between a load fail and a library fail. -> Error types?
   }
 
+  // TODO: Errors if the folder does not exist. Fix!
+  // TODO: Store in db?
   async getScreenshot(): Promise<PuppetScreenshotResult> {
     try {
 
