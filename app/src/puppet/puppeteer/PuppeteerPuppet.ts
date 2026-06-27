@@ -4,16 +4,8 @@ import type { WithRequired } from "../../types/CommonTypes";
 import type { PuppetInfo, TargetInfo } from "../model";
 import type { PuppetConfig, PuppetTarget } from "../schema";
 
-export interface PuppeteerPuppetConfig extends PuppetConfig {
-  chromiumExecutablePath?: string;
-  // TODO: Add settings to choose browser
-}
 
-// TODO: Implement puppeteer info or remove.
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface PuppeteerPuppetInfo extends PuppetInfo {
-  // Runtime
-}
+
 
 export class PuppeteerPuppet extends AbstractPuppet {
   declare protected _config: PuppeteerPuppetConfig; // Declare to indicate it overwrites the parent's type.
