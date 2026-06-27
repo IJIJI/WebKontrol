@@ -1,5 +1,5 @@
 import type { ConnectionState } from "../types/CommonTypes";
-import type { PuppetRuntimeConfigBase, PuppetTarget, PupppetSpecificConfigBase } from "./schema";
+import type { PuppetRuntimeConfigBase, PupppetSpecificConfigBase } from "./schema";
 
 /**
  * This file contains all model definitions for the puppets. That means types that don't need validation. 
