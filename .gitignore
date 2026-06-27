@@ -11,3 +11,9 @@ config.json
 src/config.json
 /src/config.json
 config.json
+
+
+# dev
+.vscode/
+.claude/
+.github/copilot-instructions.md

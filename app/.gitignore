@@ -21,6 +21,6 @@ db/
 dist/
 logs/
 
-# vscode
+# dev
 .vscode/
 .claude/
