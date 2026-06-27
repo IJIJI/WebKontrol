@@ -10,8 +10,7 @@ import type { ZodType } from "zod";
 
 
 
-export class PuppeteerPuppet<TConfig extends PuppeteerPuppetConfig = PuppeteerPuppetConfig> extends AbstractPuppet<TConfig> {
-  declare protected _config: PuppeteerPuppetConfig; // Declare to indicate it overwrites the parent's type.
+export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
 
   protected override _getLogLabelExtensions(): Array<string> {
     return ["Puppeteer"];
@@ -95,7 +94,7 @@ export class PuppeteerPuppet<TConfig extends PuppeteerPuppetConfig = PuppeteerPu
     return result;
   }
 
-  protected _getRuntimeSchema(): ZodType<TConfig['runtime']> {
+  protected _getRuntimeSchema(): ZodType<PuppeteerPuppetConfig['runtime']> {
     return PuppetRuntimeConfigSchema as unknown as ZodType<TConfig['runtime']>;
   }
 
