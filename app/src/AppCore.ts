@@ -2,7 +2,7 @@ import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { PuppeteerPuppet } from "./puppet/puppeteer/PuppeteerPuppet";
 import { PuppeteerPuppetConfigSchema } from "./puppet/puppeteer/schema";
-import type { PuppetRuntimeConfig, PuppetKey, PuppetGlobalConfigInput } from "./puppet/schema";
+import { type PuppetRuntimeConfig, type PuppetKey, type PuppetGlobalConfigInput, PuppetRuntimeConfigSchema } from "./puppet/schema";
 import { CoreDatabase } from "./storage/CoreDatabase";
 
 export interface CoreInfo {
@@ -26,9 +26,9 @@ export class AppCore {
     const globalPuppetConfig: PuppetGlobalConfigInput = {
       load_timout: undefined
     };
-    const defaultRuntimeConfig: PuppetRuntimeConfig = {
+    const defaultRuntimeConfig: PuppetRuntimeConfig = PuppetRuntimeConfigSchema.parse({
       target_url: "https://etsy.com/"
-    };
+    });
 
     // Should have try catch in prod
     const testPuppetConfig = PuppeteerPuppetConfigSchema.parse({
