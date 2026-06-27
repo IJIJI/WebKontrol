@@ -1,8 +1,8 @@
 import z from "zod";
-import { extendPuppetConfig, PuppetSpecificConfigSchema } from "../schema";
+import { extendPuppetConfig, extendPuppetSpecificConfig, PuppetSpecificConfigSchema } from "../schema";
 
 
-export const PuppeteerPuppetSpecificConfigSchema = PuppetSpecificConfigSchema.extend({
+export const PuppeteerPuppetSpecificConfigSchema = extendPuppetSpecificConfig("puppeteer", {
   chromiumExecutablePath: z.string().optional(),
   // TODO: Add settings to choose browser (chrome / firefox)
 });
