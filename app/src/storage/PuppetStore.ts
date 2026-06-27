@@ -1,4 +1,3 @@
-import type { ZodType } from "zod";
 import { Logger } from "../logging/Logger";
 import { PuppetRuntimeConfigSchema, type PuppetKey, type PuppetRuntimeConfig } from "../puppet/schema";
 import { CoreDatabase } from "./CoreDatabase";
