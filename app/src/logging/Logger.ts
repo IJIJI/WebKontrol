@@ -89,18 +89,17 @@ export class Logger {
   private parseData(data: unknown[]): string {
     return data
       .map((item: unknown) => {
-        if (item instanceof Error) return item.stack || item.message;
+        if (item instanceof Error) return item.stack ?? item.message;
 
         if (typeof item === "object" && item !== null) {
-          return JSON.stringify(item, (key, value) => {
+          return JSON.stringify(item, (_key, value: unknown) => {
             // Check if the current value being stringified is a Map
             if (
-              value instanceof Map ||
-              (value && value.constructor && value.constructor.name === "Map")
+              value instanceof Map
             ) {
-              return Object.fromEntries(value);
+              return Object.fromEntries(value as Map<PropertyKey, unknown>);
             }
-            return value;
+            return value as string;
           });
         }
 
