@@ -1,7 +1,8 @@
 import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { PuppeteerPuppet } from "./puppet/puppeteer/PuppeteerPuppet";
-import type { PuppetKey } from "./puppet/types";
+import { PuppeteerPuppetConfigSchema } from "./puppet/puppeteer/schema";
+import type { PuppetRuntimeConfig, PuppetGlobalConfig, PuppetKey, PuppetGlobalConfigInput } from "./puppet/schema";
 import { CoreDatabase } from "./storage/CoreDatabase";
 
 export interface CoreInfo {
@@ -22,11 +23,23 @@ export class AppCore {
   public async start(): Promise<void> {
     this.logger.important("Starting AppCore...");
 
-    const testpuppet = new PuppeteerPuppet({
-      id: "test",
-      name: "Test Puppet",
-      target_url: "https://example.com",
+    const globalPuppetConfig: PuppetGlobalConfigInput = {
+      load_wait: undefined
+    };
+    const defaultRuntimeConfig: PuppetRuntimeConfig = {
+      target_url: "https://synapt.nl/"
+    };
+
+    // Should have try catch in prod
+    const testPuppetConfig = PuppeteerPuppetConfigSchema.parse({
+      specific: {
+        id: "pup1"
+      },
+      global: globalPuppetConfig,
+      runtime: defaultRuntimeConfig
     });
+
+    const testpuppet = new PuppeteerPuppet(testPuppetConfig);
 
     await testpuppet.init();
 
