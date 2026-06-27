@@ -1,5 +1,5 @@
 import z from "zod";
-import { PuppetConfigSchema, PuppetSpecificConfigSchema } from "../schema";
+import { extendPuppetConfig, PuppetConfigSchema, PuppetSpecificConfigSchema } from "../schema";
 
 
 export const PuppeteerPuppetSpecificConfigSchema = PuppetSpecificConfigSchema.extend({
@@ -9,8 +9,8 @@ export const PuppeteerPuppetSpecificConfigSchema = PuppetSpecificConfigSchema.ex
 
 export type PuppeteerPuppetSpecificConfig = z.infer<typeof PuppeteerPuppetSpecificConfigSchema>;
 
-export const PuppeteerPuppetConfigSchema = PuppetConfigSchema.extend({
-  specific: PuppeteerPuppetSpecificConfigSchema,
-}).brand<"puppeteerConfig">;
+export const PuppeteerPuppetConfigSchema = extendPuppetConfig("Puppeteer", {
+  specific: PuppeteerPuppetSpecificConfigSchema
+})
 
 export type PuppeteerPuppetConfig = z.infer<typeof PuppetConfigSchema>;
