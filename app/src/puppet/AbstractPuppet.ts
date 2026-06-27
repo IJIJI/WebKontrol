@@ -3,7 +3,9 @@ import * as path from "node:path";
 import { Logger } from "../logging/Logger";
 import { ConnectionState } from "../types/CommonTypes";
 import type { PuppetInfo, PuppetInfoBundle, PuppetScreenshotFail, PuppetScreenshotResult, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./model";
-import type { PuppetConfig, PuppetKey, PuppetTarget } from "./schema";
+import type { PuppetConfig, PuppetKey, PuppetRuntimeConfig, PuppetTarget } from "./schema";
+import { PuppetStore } from "../storage/PuppetStore";
+import { boolean, type ZodType } from "zod";
 
 export type PuppetEvents = {
   load_success: [result: SetTargetSuccess];
@@ -12,10 +14,12 @@ export type PuppetEvents = {
 };
 
 export abstract class AbstractPuppet<
-  T extends PuppetEvents & Record<string, unknown[]> = PuppetEvents,
-> extends EventEmitter<T> {
+  TConfig extends PuppetConfig = PuppetConfig,
+  TEvents extends PuppetEvents & Record<string, unknown[]> = PuppetEvents,
+> extends EventEmitter<TEvents> {
 
   protected _logger!: Logger;
+  protected _store!: PuppetStore<TConfig['runtime']>;
   protected _isInit = false;
 
   protected _getLogLabels(): Array<string> {
@@ -49,11 +53,23 @@ export abstract class AbstractPuppet<
 
   protected abstract _getTargetInfo(): Promise<TargetInfo> | TargetInfo;
 
+  protected abstract _getRuntimeSchema(): ZodType<TConfig['runtime']>;
+  
+  // The following is disabled, as the screenshot function is to be implemented optionally in extending classes.
+  // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
+  protected async _doScreenshot(path: string): Promise<void> {
+    throw new Error("Screenshot not implemented for this puppet"); // TODO: Fail Silently or add another way to differentiate between fails and not implemented? Error type?
+  };
+
   async init(): Promise<void> {
     try {
       this._logger = new Logger(this._getLogLabels());
       this._logger.info("Initializing...");
 
+      this._store = new PuppetStore(this._config.specific.id, this._getRuntimeSchema());
+
+      this._config.runtime = await this._store.loadRuntime() ?? this._config.runtime;
+      
       await this._doInit();
       this._isInit = true;
 
@@ -82,7 +98,19 @@ export abstract class AbstractPuppet<
     (this as EventEmitter<PuppetEvents>).emit("info_update", this.getInfo());
   }
 
-  async setTarget(target: PuppetTarget): Promise<SetTargetResult> {
+  async updateRuntime(config: Partial<PuppetRuntimeConfig>): Promise<void> {
+
+    let targetChange: boolean = false;
+
+    if (config.target_url && config.target_url !== this._config.runtime.target_url)
+      targetChange = true;
+
+    this._config.runtime = {...this._config.runtime, ...config};
+
+    await this._store.saveRuntime(this._config.runtime);
+  }
+
+  protected async _setTarget(target: PuppetTarget): Promise<SetTargetResult> {
 
     try {
       if (!this._isInit) throw new Error("Puppet not initialized");
@@ -137,10 +165,6 @@ export abstract class AbstractPuppet<
     }
   }
 
-  // The following is disabled, as the screenshot function is to be implemented optionally in extending classes.
-  // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
-  protected async _doScreenshot(path: string): Promise<void> {
-    throw new Error("Screenshot not implemented for this puppet"); // TODO: Fail Silently or add another way to differentiate between fails and not implemented? Error type?
-  };
+
 
 }

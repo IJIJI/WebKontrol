@@ -63,7 +63,9 @@ export class AppCore {
     }
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    await testpuppet.setTarget("https://synaapt.net/");
+    await testpuppet.updateRuntime({
+      target_url: "https://synaapt.net/"
+    });
 
     this.puppets.set(testpuppet.getKey(), testpuppet);
 
