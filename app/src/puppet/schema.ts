@@ -5,6 +5,13 @@ import { z } from 'zod';
  * Those are types that are not generated or received from the internal code, and should thus not automatically be trusted.
  */
 
+
+type PUPPET_BASE_BRAND = 'puppet';
+type PUPPET_SPECIFIC_CONFIG_BRAND = 'specific';
+type PUPPET_RUNTIME_CONFIG_BRAND = 'runtime';
+type PUPPET_CONFIG_BRAND = 'config';
+
+
 export const PuppetKeySchema = z.string().min(2).max(12).regex(/^[a-z0-9_-]+$/);
 export type PuppetKey = z.infer<typeof PuppetKeySchema>;
 
@@ -40,7 +47,6 @@ export const PuppetConfigShape = z.object({
   global: PuppetGlobalConfigSchema,
 });
 
-type PUPPET_CONFIG_BRAND = 'PuppetConfig';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function extendPuppetConfig<const B extends string, T extends z.ZodRawShape>(
