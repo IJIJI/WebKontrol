@@ -6,7 +6,11 @@ import { z } from 'zod';
  */
 // TODO: Do the input types need to exist? If yes, implement! Probably not in the puppets, they do not carry defaults.
 
-type PUPPET_CONFIG_BRAND = 'puppet_config';
+type PUPPET_BASE_BRAND<T extends string> = `puppet_${T}_config`;
+type PUPPET_SPECIFIC_CONFIG_BRAND = PUPPET_BASE_BRAND<'specific'>;
+type PUPPET_RUNTIME_CONFIG_BRAND = PUPPET_BASE_BRAND<'runtime'>;
+type PUPPET_GLOBAL_CONFIG_BRAND = PUPPET_BASE_BRAND<'global'>;
+type PUPPET_CONFIG_BRAND = PUPPET_BASE_BRAND<'main'>;
 
 
 export const PuppetKeySchema = z.string().min(2).max(12).regex(/^[a-z0-9_-]+$/);
@@ -15,17 +19,31 @@ export type PuppetKey = z.infer<typeof PuppetKeySchema>;
 export const PuppetTargetSchema = z.url();
 export type PuppetTarget = z.infer<typeof PuppetTargetSchema>;
 
-export const PuppetSpecificConfigSchema = z.object({
+export const PuppetSpecificConfigShape = z.object({
   id: PuppetKeySchema,
   name: z.string().max(20).optional(),
 });
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function extendPuppetSpecificConfig<const B extends string, T extends z.ZodRawShape>(
+  typeLiteral: B,
+  shape: T
+) {
+  return PuppetSpecificConfigShape
+    .extend({
+      type: z.literal(typeLiteral),
+      ...shape
+    })
+    .brand<PUPPET_SPECIFIC_CONFIG_BRAND>()
+}
+export const PuppetSpecificConfigSchema = PuppetSpecificConfigShape.brand<PUPPET_SPECIFIC_CONFIG_BRAND>();
 
 export type PupppetSpecificConfig = z.infer<typeof PuppetSpecificConfigSchema>;
 export type PupppetSpecificConfigInput = z.input<typeof PuppetSpecificConfigSchema>;
 
 export const PuppetRuntimeConfigSchema = z.object({
   target_url: PuppetTargetSchema,
-});
+}).brand<PUPPET_RUNTIME_CONFIG_BRAND>();
 
 export type PuppetRuntimeConfig = z.infer<typeof PuppetRuntimeConfigSchema>;
 export type PuppetRuntimeConfigInput = z.input<typeof PuppetRuntimeConfigSchema>;
@@ -33,7 +51,7 @@ export type PuppetRuntimeConfigInput = z.input<typeof PuppetRuntimeConfigSchema>
 export const PuppetGlobalConfigSchema = z.object({
   load_timout: z.number().min(0).optional().default(20000),
   // TODO: Action on load fail
-});
+}).brand<PUPPET_GLOBAL_CONFIG_BRAND>();
 
 export type PuppetGlobalConfig = z.infer<typeof PuppetGlobalConfigSchema>;
 export type PuppetGlobalConfigInput = z.input<typeof PuppetGlobalConfigSchema>;
