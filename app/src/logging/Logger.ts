@@ -16,14 +16,14 @@ interface LogConfig {
 }
 
 export class Logger {
-  public static readonly project = "webkontrol";
+  public static readonly PROJECT = "webkontrol"; // TODO: Better way to define this
 
-  public static GlobalConsoleLevel: LogLevel = LogLevel.IMPORTANT;
-  public static GlobalFileLevel: LogLevel = LogLevel.DEBUG;
+  public static globalConsoleLevel: LogLevel = LogLevel.IMPORTANT;
+  public static globalFileLevel: LogLevel = LogLevel.DEBUG;
 
-  protected static instanceCount = 0;
+  protected static _instanceCount = 0;
   private static readonly INIT_KEY = Symbol.for(
-    `${Logger.project}.logger.initialized`,
+    `${Logger.PROJECT}.logger.initialized`,
   );
 
   private static readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -31,11 +31,11 @@ export class Logger {
   private static readonly LOG_DIR = path.join(process.cwd(), "logs");
   private static readonly LOG_FILE = path.join(
     Logger.LOG_DIR,
-    `${Logger.project}.log`,
+    `${Logger.PROJECT}.log`,
   );
   private static readonly OLD_LOG_FILE = path.join(
     Logger.LOG_DIR,
-    `${Logger.project}.old.log`,
+    `${Logger.PROJECT}.old.log`,
   );
 
   private static readonly LOG_LEVEL_MAP: Record<LogLevel, LogConfig> = {
@@ -50,7 +50,7 @@ export class Logger {
   private static readonly LOG_GREY_COLOR = "\x1b[90m";
 
   private _labels: Array<string>;
-  private get prefix(): string {
+  private get _prefix(): string {
     return this._labels.join("::");
   }
 
@@ -61,10 +61,10 @@ export class Logger {
       fs.mkdirSync(Logger.LOG_DIR, { recursive: true });
     }
 
-    ++Logger.instanceCount;
+    ++Logger._instanceCount;
     if (!(globalThis as Record<symbol, boolean>)[Logger.INIT_KEY]) {
       (globalThis as Record<symbol, boolean>)[Logger.INIT_KEY] = true;
-      this.logToFile(
+      this._logToFile(
         `\n\n-----===== Logger Initialized at ${new Date().toISOString()} =====-----`,
       );
     }
@@ -74,27 +74,27 @@ export class Logger {
     return this._labels;
   }
 
-  private print(level: LogLevel, ...data: unknown[]) {
-    if (level < Logger.GlobalFileLevel && level < Logger.GlobalConsoleLevel)
+  private _print(level: LogLevel, ...data: unknown[]) {
+    if (level < Logger.globalFileLevel && level < Logger.globalConsoleLevel)
       return;
 
     const { label, color } = Logger.LOG_LEVEL_MAP[level];
     const time = new Date().toLocaleTimeString("en-NL");
-    const message = this.parseData(data);
+    const message = this._parseData(data);
 
-    if (level >= Logger.GlobalConsoleLevel) {
+    if (level >= Logger.globalConsoleLevel) {
       console.log(
-        `${Logger.LOG_GREY_COLOR}${time}${Logger.LOG_RESET_COLOR} [${this.prefix}] ${color}${label}${Logger.LOG_RESET_COLOR}: ${message}`,
+        `${Logger.LOG_GREY_COLOR}${time}${Logger.LOG_RESET_COLOR} [${this._prefix}] ${color}${label}${Logger.LOG_RESET_COLOR}: ${message}`,
       );
     }
 
-    if (level >= Logger.GlobalFileLevel) {
-      this.logToFile(`${time} [${this.prefix}] ${label}: ${message}`);
+    if (level >= Logger.globalFileLevel) {
+      this._logToFile(`${time} [${this._prefix}] ${label}: ${message}`);
     }
   }
 
   // TODO: Use jsonHelper?
-  private parseHelper = (_key: string, value: unknown): unknown => {
+  private _parseHelper = (_key: string, value: unknown): unknown => {
     if (value instanceof Error) {
       return { name: value.name, message: value.message, stack: value.stack };
     }
@@ -107,14 +107,14 @@ export class Logger {
     return value;
   };
 
-  private parseData(data: unknown[]): string {
+  private _parseData(data: unknown[]): string {
     return data
       .map((item: unknown) => {
         if (item instanceof Error) return item.stack ?? item.message;
 
         if (typeof item === "object" && item !== null) {
           try {
-            return JSON.stringify(item, this.parseHelper);
+            return JSON.stringify(item, this._parseHelper);
           } catch {
             return "[Unserializable Object]";
           }
@@ -125,7 +125,7 @@ export class Logger {
       .join(" ");
   }
 
-  private logToFile(line: string) {
+  private _logToFile(line: string) {
     try {
       // Check size and overwrite if too big
       if (fs.existsSync(Logger.LOG_FILE)) {
@@ -153,29 +153,29 @@ export class Logger {
   }
 
   public debug(...data: unknown[]): void {
-    this.print(LogLevel.DEBUG, ...data);
+    this._print(LogLevel.DEBUG, ...data);
   }
   public info(...data: unknown[]): void {
-    this.print(LogLevel.INFO, ...data);
+    this._print(LogLevel.INFO, ...data);
   }
   public important(...data: unknown[]): void {
-    this.print(LogLevel.IMPORTANT, ...data);
+    this._print(LogLevel.IMPORTANT, ...data);
   }
   public warn(...data: unknown[]): void {
-    this.print(LogLevel.WARN, ...data);
+    this._print(LogLevel.WARN, ...data);
   }
   public error(...data: unknown[]): void {
-    this.print(LogLevel.ERROR, ...data);
+    this._print(LogLevel.ERROR, ...data);
   }
 
   public fatal(message: string, ...extraData: unknown[]): never {
-    this.print(LogLevel.FATAL, message, ...extraData);
+    this._print(LogLevel.FATAL, message, ...extraData);
 
     const errorString =
       extraData.length > 0
         ? `${message} | Data: ${JSON.stringify(extraData)}`
         : message;
 
-    throw new Error(`[${this.prefix}] ${errorString}`);
+    throw new Error(`[${this._prefix}] ${errorString}`);
   }
 }
