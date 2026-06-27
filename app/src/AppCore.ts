@@ -1,6 +1,6 @@
 import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
-import { PuppeteerPuppet } from "./puppet/PuppeteerPuppet";
+import { PuppeteerPuppet } from "./puppet/puppeteer/PuppeteerPuppet";
 import type { PuppetKey } from "./puppet/types";
 import { CoreDatabase } from "./storage/CoreDatabase";
 
