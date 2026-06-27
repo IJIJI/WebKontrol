@@ -31,10 +31,24 @@ export const PuppetDefaultRuntimeConfigSchema = z.object({
 
 export type PuppetDefaultRuntimeConfig = z.infer<typeof PuppetDefaultRuntimeConfigSchema>;
 
-export const PuppetConfigSchema = z.object({
+export const PuppetConfigShape = z.object({
   specific: PuppetSpecificConfigSchema,
   global: PuppetGlobalConfigSchema,
   runtime: PuppetDefaultRuntimeConfigSchema // When a puppet is constructed and already has these runtime values set, they are loaded and overwritten.
 });
+
+type PUPPET_CONFIG_BRAND = 'PuppetConfig';
+
+function extendPuppetConfig<const B extends string, T extends z.ZodRawShape>(
+  concreteBrand: B,
+  shape: T
+) {
+  return PuppetConfigShape
+    .extend(shape)
+    .brand<PUPPET_CONFIG_BRAND>()
+    .brand<B>();
+}
+
+export const PuppetConfigSchema = PuppetConfigShape.brand<PUPPET_CONFIG_BRAND>();
 
 export type PuppetConfig = z.infer<typeof PuppetConfigSchema>;
