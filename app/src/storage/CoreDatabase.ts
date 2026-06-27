@@ -7,6 +7,12 @@ import * as schema from './schema';
 import { insertSettingSchema } from "./schema";
 import { eq } from "drizzle-orm/sql/expressions/conditions";
 
+// TODO: Check if needed and remove or implement.
+export interface SettingId {
+  domain: string;
+  type: string;
+  key: string;
+}
 
 export class CoreDatabase {
 
