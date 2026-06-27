@@ -28,7 +28,7 @@ export abstract class AbstractPuppet<
 
   protected _isInit = false;
 
-  protected _getLogLabels() {
+  protected _getLogLabels(): Array<string> {
     return ["PPT"];
   }
 
@@ -53,7 +53,7 @@ export abstract class AbstractPuppet<
     this._checkConfig(this._config);
   }
 
-  protected _checkConfig(config: PuppetConfig) {
+  protected _checkConfig(config: PuppetConfig): void {
     if (!config.id)
       this._logger.fatal(`Invalid ID provided. Submitted config:`, config);
     // TODO: Url check
@@ -70,9 +70,11 @@ export abstract class AbstractPuppet<
     this._logger.info("Initializing...");
     try {
       await this._doInit();
+
       this._is_initialized = true;
       this._logger.info("Initialized.");
-      this._doSetTarget(this._config.target_url);
+
+      await this._doSetTarget(this._config.target_url);
       this._logger.info("Target from config set.");
     } catch (error) {
       this._info.state = ConnectionState.FAILED;
@@ -89,7 +91,7 @@ export abstract class AbstractPuppet<
     return this._config;
   }
 
-  protected async _updateInfo(info?: Partial<PuppetInfo>) {
+  protected _updateInfo(info?: Partial<PuppetInfo>): void {
 
     this._info = { ...this._info, ...info };
 
@@ -129,7 +131,7 @@ export abstract class AbstractPuppet<
     }
   }
 
-  protected _setFailedLoadingState() {
+  protected _setFailedLoadingState(): void {
     this._info.state = ConnectionState.ERROR;
     // TODO: Try to go to error page.
     // TODO: Add a way to differentiate between a load fail and a library fail. -> Error types?
@@ -152,6 +154,8 @@ export abstract class AbstractPuppet<
     }
   }
 
+  // The following is disabled, as the screenshot function is to be implemented optionally in extending classes.
+  // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
   protected async _doScreenshot(path: string): Promise<void> {
     throw new Error("Screenshot not implemented for this puppet"); // TODO: Fail Silently or add another way to differentiate between fails and not implemented? Error type?
   };
