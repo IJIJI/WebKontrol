@@ -32,15 +32,24 @@ export class AppCore {
 
     const testdb = CoreDatabase.getInstance();
 
-    await testdb.updateSetting("test", "1", "https://synapt.net/contact.php");
+    const key: string = "1";
+
+    const currentValue = await testdb.getSetting("test", "website", key);
+    if (!currentValue) {
+      // await testdb.updateSetting("test", "website", key, "https://synapt.net/contact.php");
+      await testdb.updateSetting("test", "website", key, "https://example.com/");
+    }
+
+    this.logger.important("Stored URL:", await testdb.getSetting("test", "website", key));
 
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await testpuppet.setTarget("https://synapt.net/");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await testpuppet.setTarget("https://synaapt.net/");
 
     this.puppets.set(testpuppet.getConfig().id, testpuppet);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    process.exit(0);
   }
 }
 
