@@ -1,8 +1,10 @@
 import puppeteer, { type Browser, type Page } from "puppeteer";
 import { AbstractPuppet } from "../AbstractPuppet";
 import type { WithRequired } from "../../types/CommonTypes";
-import type { PuppetInfo, TargetInfo } from "../model";
+import type { TargetInfo } from "../model";
 import type { PuppetConfig, PuppetTarget } from "../schema";
+import type { PuppeteerPuppetConfig } from "./schema";
+import type { PuppeteerPuppetInfo } from "./model";
 
 
 
@@ -10,22 +12,17 @@ import type { PuppetConfig, PuppetTarget } from "../schema";
 export class PuppeteerPuppet extends AbstractPuppet {
   declare protected _config: PuppeteerPuppetConfig; // Declare to indicate it overwrites the parent's type.
 
-  protected override _getLogLabels(): Array<string> {
-    return ["PPT", "Puppeteer"];
+  protected override _getLogLabelExtensions(): Array<string> {
+    return ["Puppeteer"];
   }
 
   declare protected _info: PuppeteerPuppetInfo; // Declare to indicate it overwrites the parent's type.
 
-  public static readonly DefaultConfig: Omit<PuppetConfig, "id"> = {
-    ...AbstractPuppet.DefaultConfig,
-    name: "Puppeteer Puppet",
-  };
-
   private _browser!: Browser;
   private _page!: Page;
 
-  constructor(config: WithRequired<PuppeteerPuppetConfig, "id">) {
-    super({...PuppeteerPuppet.DefaultConfig, ...config}); // TODO: Better default config handeling?
+  constructor(config: PuppeteerPuppetConfig) {
+    super(config);
   }
 
   protected async _doInit(): Promise<void> {
@@ -53,8 +50,8 @@ export class PuppeteerPuppet extends AbstractPuppet {
       // timeout: 0 // Time to wait for browser start
     };
 
-    if (this._config.chromiumExecutablePath) {
-      settings.executablePath = this._config.chromiumExecutablePath;
+    if (this._config.specific.chromiumExecutablePath) {
+      settings.executablePath = this._config.specific.chromiumExecutablePath;
     }
 
     this._browser = await puppeteer.launch(settings);
@@ -70,7 +67,7 @@ export class PuppeteerPuppet extends AbstractPuppet {
   }
 
   protected async _doSetTarget(target: PuppetTarget): Promise<void> {
-    await this._page.goto(target, {timeout: this._config.load_wait});
+    await this._page.goto(target, {timeout: this._config.global.load_wait});
   }
 
   protected async _getTargetInfo(): Promise<TargetInfo> {
