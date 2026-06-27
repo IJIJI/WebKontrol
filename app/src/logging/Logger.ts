@@ -136,19 +136,19 @@ export class Logger {
     }
   }
 
-  public debug(...data: unknown[]) {
+  public debug(...data: unknown[]): void {
     this.print(LogLevel.DEBUG, ...data);
   }
-  public info(...data: unknown[]) {
+  public info(...data: unknown[]): void {
     this.print(LogLevel.INFO, ...data);
   }
-  public important(...data: unknown[]) {
+  public important(...data: unknown[]): void {
     this.print(LogLevel.IMPORTANT, ...data);
   }
-  public warn(...data: unknown[]) {
+  public warn(...data: unknown[]): void {
     this.print(LogLevel.WARN, ...data);
   }
-  public error(...data: unknown[]) {
+  public error(...data: unknown[]): void {
     this.print(LogLevel.ERROR, ...data);
   }
 
