@@ -9,6 +9,8 @@ import {
   type WebServerConfig,
   type WebServerConfigInput,
 } from "./schema";
+import { SystemConfigSchema } from "../system/schema";
+import { PuppetKeySchema, PuppetRuntimeConfigSchema } from "../puppet/schema";
 
 export class WebServer {
   private _app = express();
@@ -159,8 +161,14 @@ export class WebServer {
       res.json(this._state.system.config);
     });
 
-    this._app.patch("/api/system/config", (_req, res) => {
-      //TODO: Update system config
+    this._app.patch("/api/system/config", (req, res) => {
+      const result = SystemConfigSchema.safeParse(req.body);
+
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+      }
+
+      this._handlers.system.setConfig(result.data);
     });
 
     this._app.get("/api/puppets", (_req, res) => {
@@ -169,20 +177,26 @@ export class WebServer {
 
     this._app.patch("/api/puppets/:id", async (req, res) => {
       // TODO: Update puppet runtime config
-      // const id = req.params.id;
-      // const { type, config } = req.body;
-      // if (!type || !config) {
-      //   res.status(400).json({ error: "type and config are required" });
-      //   return;
-      // }
-      // try {
-      //   await this.handlers.updateProducer(id, type, { ...config, id } as ProducerConfig);
-      //   res.status(204).send();
-      //   this.logger.info(`Producer updated:`, id);
-      // } catch (e) {
-      //   this.logger.error("Failed to update producer:", id, e);
-      //   res.status(500).json({ error: e instanceof Error ? e.message : "Failed to update producer" });
-      // }
+      const resultId = PuppetKeySchema.safeParse(req.params.id);
+
+      if (!resultId.success) {
+        return res.status(400).json({ errors: resultId.error.format() });
+      }
+
+      const resultBody = PuppetRuntimeConfigSchema.safeParse(req.body);
+
+      if (!resultBody.success) {
+        return res.status(400).json({ errors: resultBody.error.format() });
+      }
+
+      try {
+        await this._handlers.puppet.setRuntime(resultId.data, resultBody.data);
+        res.status(204).send();
+        this._logger.info(`Updated puppet ${resultId.data} runtime. New:`, resultBody.data);
+      } catch (e) {
+        this._logger.error("Failed to update producer:", resultId.data, e);
+        res.status(500).json({ error: e instanceof Error ? e.message : "Failed to update producer" });
+      }
     });
 
     // ? Update
