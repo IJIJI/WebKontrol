@@ -1,6 +1,6 @@
 import express from "express";
 import ViteExpress from "vite-express";
-import http from 'http';
+import type http from 'http';
 import { Logger } from "../logging/Logger";
 import type { WebServerMutationHandlers, WebServerState } from "./model";
 import { jsonReplacer } from "../helpers/json";
@@ -60,7 +60,8 @@ export class WebServer {
     this._handlers = handlers;
   }
   
-  public async start(config: WebServerConfig): Promise<void> {
+  public async start(): Promise<void> {
+    
     if (this._handlers !== undefined) {
       // TODO: Continue without and set state to ERROR, until they are set?
       throw new Error("Handlers where not set before the server was started!"); // TODO: Check if this should error. Check if there should be an info for the state. 
@@ -115,7 +116,7 @@ export class WebServer {
         reject(new Error("Failed to destroy within timeout."))
       }, 5000);
       
-      this._server!.close((err) => {
+      this._server.close((err) => {
         clearTimeout(forceCloseTimeout);
         clearTimeout(forceRejectTimeout);
         
