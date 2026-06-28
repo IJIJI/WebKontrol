@@ -42,10 +42,11 @@ export class AppCore {
     try {
       this._wireWebServer();
 
-      this._webServer.start();
+      await this._webServer.start();
+      this._syncState();
 
     } catch (error) {
-        this._logger.fatal("Failed to start WebServer.", error);
+      this._logger.fatal("Failed to start WebServer.", error);
     }
 
     //* Test code
@@ -108,24 +109,23 @@ export class AppCore {
 
   }
 
+  private _syncState(): void {
+    this._webServer.setState({
+      puppets: this._puppets.values().map((puppet) => puppet.getInfo()).toArray(),
+      system: {
+        info: {
+          start_moment: Date.now(), // TODO: Track start time and load in from somewhere. system.info in AppCore? Maybe split between runtime and hardware?
+        },
+        config: {
+          system_name: "WebKontrol", // TODO: Load system info and config in from somewhere?
+        }
+      }
+    });
+  }
+
   private _wireWebServer(): void {
-    const syncState = () => {
-      this._webServer.setState({
-          puppets: this._puppets.values().map((puppet) => puppet.getInfo()).toArray(),
-          system: {
-            info: {
-              start_moment: Date.now(), // TODO: Track start time and load in from somewhere. system.info in AppCore? Maybe split between runtime and hardware?
-            },
-            config: {
-              system_name: "WebKontrol", // TODO: Load system info and config in from somewhere?
-            }
-          }
-      });
-    };
 
-    // TODO: Wire in puppets, or better, an orchestrator to call syncstate.
-
-    syncState();
+    // TODO: Wire in puppets, or better, an orchestrator to call this._syncState.
 
     this._webServer.setHandlers({
       puppet: {
