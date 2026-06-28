@@ -1,7 +1,15 @@
-export interface DisplayName {
-  long: string;
-  short?: string;
-}
+import z from "zod";
+
+
+export const DisplayNameSchema = z.object({
+  long: z.string().min(3).max(25),
+  short: z.string().max(10).optional(),
+})
+
+export type DisplayName = z.infer<typeof DisplayNameSchema>;
+export type DisplayNameInput = z.input<typeof DisplayNameSchema>;
+
+
 
 export enum ConnectionState {
   DISABLED = "Disabled",
