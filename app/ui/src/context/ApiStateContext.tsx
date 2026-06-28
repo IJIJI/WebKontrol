@@ -26,9 +26,15 @@ export interface UiWebServerState {
   system?: Partial<SystemBundle>;
 }
 
+export enum ConnectionStatus {
+  CONNECTING = "Connecting",
+  CONNECTED = "Connected",
+  DISCONNECTED = "Disconnected",
+}
+
 interface ApiState {
   state: UiWebServerState;
-  connected: boolean;
+  status: ConnectionStatus;
   error: string | null;
   callBacks: {
     puppet: {
@@ -60,12 +66,9 @@ export function ApiStateProvider({
   // TODO: Combine both helpers below into one?
   const [puppets, setPuppets] = useState<Map<string, UiPuppetState>>(new Map()); // TODO: Should puppets be in some sort of map? Should it contain a callback to modify that same puppet?
   const [system, setSystem] = useState<Partial<SystemBundle> | undefined>({});
-  //TODO Check if loading and error are desired in this form.
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [connected, setConnected] = useState(false);
+  const [status, setStatus] = useState(ConnectionStatus.CONNECTING);
 
-  const [lastServerPing, setLastServerPing] = useState<number>(0);
   const pingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const applyUiWebServerState = useCallback((state: UiWebServerState) => {
@@ -73,25 +76,22 @@ export function ApiStateProvider({
     setSystem(state.system);
 
     setError(null);
-    setLoading(false);
 
     console.debug(`Updated state. Puppets:`, state.puppets, `System:`, state.system);
   }, []);
 
   useEffect(() => {
-    setLoading(true);
     const eventSource = new EventSource("/api/state");
 
     const resetPingTimeout = (): void => {
       if (pingTimeoutRef.current) clearTimeout(pingTimeoutRef.current);
       pingTimeoutRef.current = setTimeout(() => {
-        setConnected(false);
+        setStatus(ConnectionStatus.DISCONNECTED);
         setError("Lost connection to the server (ping timeout)!");
       }, pingTimeoutMs);
     };
 
-    eventSource.addEventListener("ping", (payload: MessageEvent<string>): void => {
-      setLastServerPing(Number(payload.data));
+    eventSource.addEventListener("ping", (_payload: MessageEvent<string>): void => {
       resetPingTimeout();
     });
 
@@ -115,13 +115,13 @@ export function ApiStateProvider({
         system: data.system,
       };
 
-      setConnected(true);
+      setStatus(ConnectionStatus.CONNECTED);
       resetPingTimeout();
       applyUiWebServerState(state); // TODO: Add validation?
     });
 
     eventSource.onerror = (): void => {
-      setConnected(false);
+      setStatus(ConnectionStatus.DISCONNECTED);
       setError("Lost connection to the server!");
     };
 
@@ -130,6 +130,20 @@ export function ApiStateProvider({
       if (pingTimeoutRef.current) clearTimeout(pingTimeoutRef.current);
     };
   }, [applyUiWebServerState, pingTimeoutMs]);
+
+  useEffect(() => {
+    switch(status) {
+      case ConnectionStatus.CONNECTED:
+        console.log(`Connected to server!`);
+        break;
+      case ConnectionStatus.DISCONNECTED:
+        console.warn(`Lost connection to server!`);
+        break;
+      case ConnectionStatus.CONNECTING:
+      default:
+        console.debug(`Connection state is now ${status}`);
+    }
+  }, [status])
 
   const puppetSetRuntime = async (
     id: PuppetKey,
@@ -150,7 +164,7 @@ export function ApiStateProvider({
           puppets: puppets,
           system: system,
         },
-        connected,
+        status,
         error,
         callBacks: {
           puppet: {
