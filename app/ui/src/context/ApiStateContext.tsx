@@ -15,9 +15,17 @@ import type { SystemConfig } from "../../../src/system/schema";
 import type { PuppetInfoBundle } from "../../../src/puppet/model";
 import { SystemBundle } from "../../../src/system/model";
 
-// TODO: This is pretty much the same as the webserver mutation handlers, but I don't think it will be in the future. Check how to best keep in sync.
+export interface UiPuppetState extends PuppetInfoBundle {
+  setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
+};
+
+export interface UiWebServerState {
+  puppets: Map<PuppetKey, UiPuppetState>;
+  system?: SystemBundle;
+};
+
 interface ApiState {
-  state: WebServerState;
+  state: UiWebServerState;
   callBacks: {
     puppet: {
       setRuntime: (
@@ -43,15 +51,16 @@ export function ApiStateProvider({
 }: {
   children: JSX.Element;
 }): JSX.Element {
-  const [puppets, setPuppets] = useState<PuppetInfoBundle[]>([]); // TODO: Should puppets be in some sort of map? Should it contain a callback to modify that same puppet?
-  const [system, setSystem] = useState<Partial<SystemBundle>>({});
+  // TODO: Combine both helpers below into one?
+  const [puppets, setPuppets] = useState<Map<string, UiPuppetState>>(new Map()); // TODO: Should puppets be in some sort of map? Should it contain a callback to modify that same puppet?
+  const [system, setSystem] = useState<SystemBundle>();
   //TODO Check if loading and error are desired in this form.
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const applySSEPayload = useCallback((state: WebServerState) => {
-    setPuppets(state.puppets ?? []);
-    setSystem(state.system ?? {});
+  const applyUiWebServerState = useCallback((state: UiWebServerState) => {
+    setPuppets(state.puppets);
+    setSystem(state.system);
 
     setError(null);
     setLoading(false);
@@ -60,14 +69,65 @@ export function ApiStateProvider({
   useEffect(() => {
     setLoading(true);
     const eventSource = new EventSource("/api/state");
-    eventSource.onmessage = (payload: MessageEvent<string>): void =>
-      applySSEPayload(JSON.parse(payload.data) as WebServerState); // TODO: Add validation?
+    
+    eventSource.onmessage = (payload: MessageEvent<string>): void => {
+      const data: WebServerState = JSON.parse(payload.data);
+      
+      const puppets = new Map<PuppetKey, UiPuppetState> ();
+
+      for (const pup of data.puppets) {
+        const key: PuppetKey = pup.config.specific.id;
+        const full: UiPuppetState = {
+          ...pup,
+          setRuntime: async (config: PuppetRuntimeConfigInput): Promise<void> => puppetSetRuntime(key, config),
+        };
+        puppets.set(key, full);
+      }
+
+      const state: UiWebServerState = {
+        puppets: puppets,
+        system: data.system
+      }
+
+      applyUiWebServerState(state); // TODO: Add validation?
+    }
+
+
+
     eventSource.onerror = (): void =>
       setError("Lost connection to the server!");
+    
     return () => eventSource.close();
-  }, [applySSEPayload]);
+  }, [applyUiWebServerState]);
 
-  return <></>;
+  const puppetSetRuntime = async (
+      id: PuppetKey,
+      runtime: PuppetRuntimeConfigInput,
+    ): Promise<void> => {
+
+  }    
+  const systemSetConfig = async (config: SystemConfig): Promise<void> => {
+
+  }
+
+  return (
+    <ApiStateContext value={{
+      state: {
+        puppets: puppets,
+        system: system
+      },
+      callBacks: {
+        puppet: {
+          setRuntime: puppetSetRuntime,
+        },
+        system: {
+          setConfig: systemSetConfig
+        }
+      }
+    }}>
+      {children}
+    </ApiStateContext>
+  )
 }
 
 // Hook:
