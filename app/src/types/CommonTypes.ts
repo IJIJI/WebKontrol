@@ -20,6 +20,12 @@ export enum ConnectionState {
   UNKNOWN = "Unknown",
 }
 
+export const ConnectionStateSchema = z.enum(ConnectionState);
+
+export const ConnectionStateInputSchema = ConnectionStateSchema.default(ConnectionState.UNKNOWN);
+export type ConnectionStateInput = z.input<typeof ConnectionStateInputSchema>;
+
+
 export type WithRequired<T, K extends keyof T> = Partial<T> &
   Required<Pick<T, K>>;
 
