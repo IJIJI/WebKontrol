@@ -161,14 +161,14 @@ export class WebServer {
       res.json(this._state.system.config);
     });
 
-    this._app.patch("/api/system/config", (req, res) => {
+    this._app.patch("/api/system/config", async (req, res) => {
       const result = SystemConfigSchema.safeParse(req.body);
 
       if (!result.success) {
         return res.status(400).json({ errors: result.error.format() });
       }
 
-      this._handlers.system.setConfig(result.data);
+      await this._handlers.system.setConfig(result.data);
     });
 
     this._app.get("/api/puppets", (_req, res) => {
