@@ -44,7 +44,12 @@ export class AppCore {
       this._logger.fatal("Failed to start WebServer.", error);
     }
 
+
     //* Test code
+    // setInterval(() => {
+    //   this._syncState();
+    // }, 2000);
+    //
     // const globalPuppetConfig: PuppetGlobalConfigInput = {
     //   load_timout: undefined
     // };
