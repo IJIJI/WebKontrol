@@ -6,7 +6,7 @@ import { Component, ReactNode } from "react";
 // The API is polled until the server is confirmed ready, then do a clean reload.
 // TODO: Rewrite
 // TODO: Less css!
-class AppErrorBoundary extends Component<
+export class AppErrorBoundary extends Component<
 { children: ReactNode },
 { hasError: boolean; error: string | null }
 > {
