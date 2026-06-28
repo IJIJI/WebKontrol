@@ -124,13 +124,13 @@ export class AppCore {
 
     this._webServer.setHandlers({
       puppet: {
-        setRuntime: async (
+        updateRuntime: async (
           id: PuppetKey,
-          runtime: PuppetRuntimeConfigInput,
+          runtime: Partial<PuppetRuntimeConfigInput>,
         ): Promise<void> => {},
       },
       system: {
-        setConfig: async (config: SystemConfig): Promise<void> => {},
+        updateConfig: async (config: Partial<SystemConfig>): Promise<void> => {},
 
         update: {
           check: async (): Promise<void> => {},

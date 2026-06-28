@@ -10,13 +10,13 @@ export interface WebServerState {
 
 export interface WebServerMutationHandlers {
   puppet: {
-    setRuntime: (
+    updateRuntime: (
       id: PuppetKey,
-      runtime: PuppetRuntimeConfigInput,
+      runtime: Partial<PuppetRuntimeConfigInput>,
     ) => Promise<void>;
   };
   system: {
-    setConfig: (config: SystemConfig) => Promise<void>;
+    updateConfig: (config: Partial<SystemConfig>) => Promise<void>;
 
     update: {
       check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt

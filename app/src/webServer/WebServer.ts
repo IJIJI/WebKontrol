@@ -162,13 +162,13 @@ export class WebServer {
     });
 
     this._app.patch("/api/system/config", async (req, res) => {
-      const result = SystemConfigSchema.safeParse(req.body);
+      const result = SystemConfigSchema.partial().safeParse(req.body);
 
       if (!result.success) {
         return res.status(400).json({ errors: result.error.format() });
       }
 
-      await this._handlers.system.setConfig(result.data);
+      await this._handlers.system.updateConfig(result.data);
     });
 
     this._app.get("/api/puppets", (_req, res) => {
@@ -183,14 +183,14 @@ export class WebServer {
         return res.status(400).json({ errors: resultId.error.format() });
       }
 
-      const resultBody = PuppetRuntimeConfigSchema.safeParse(req.body);
+      const resultBody = PuppetRuntimeConfigSchema.partial().safeParse(req.body);
 
       if (!resultBody.success) {
         return res.status(400).json({ errors: resultBody.error.format() });
       }
 
       try {
-        await this._handlers.puppet.setRuntime(resultId.data, resultBody.data);
+        await this._handlers.puppet.updateRuntime(resultId.data, resultBody.data);
         res.status(204).send();
         this._logger.info(
           `Updated puppet ${resultId.data} runtime. New:`,
