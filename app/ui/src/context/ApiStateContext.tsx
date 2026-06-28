@@ -71,9 +71,7 @@ export function ApiStateProvider({
     const eventSource = new EventSource("/api/state");
 
     eventSource.onmessage = (payload: MessageEvent<string>): void => {
-      
       const data = JSON.parse(payload.data) as WebServerState;
-
 
       const puppets = new Map<PuppetKey, UiPuppetState>();
 

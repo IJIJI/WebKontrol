@@ -88,14 +88,13 @@ export abstract class AbstractPuppet<
 
       await this._doInit();
       this._isInit = true;
-      this._updateInfo({state: ConnectionState.ONLINE}); // TODO: Make sure this is kept up to date.
+      this._updateInfo({ state: ConnectionState.ONLINE }); // TODO: Make sure this is kept up to date.
 
       this._logger.info("Initialized.");
 
       await this.updateRuntime(this._config.runtime);
 
       this._logger.info("Appied runtime.");
-
     } catch (error) {
       this._info.state = ConnectionState.FAILED;
       return this._logger.fatal("Failed to initialize", error);

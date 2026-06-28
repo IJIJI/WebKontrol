@@ -192,10 +192,17 @@ export class WebServer {
       try {
         await this._handlers.puppet.setRuntime(resultId.data, resultBody.data);
         res.status(204).send();
-        this._logger.info(`Updated puppet ${resultId.data} runtime. New:`, resultBody.data);
+        this._logger.info(
+          `Updated puppet ${resultId.data} runtime. New:`,
+          resultBody.data,
+        );
       } catch (e) {
         this._logger.error("Failed to update producer:", resultId.data, e);
-        res.status(500).json({ error: e instanceof Error ? e.message : "Failed to update producer" });
+        res
+          .status(500)
+          .json({
+            error: e instanceof Error ? e.message : "Failed to update producer",
+          });
       }
     });
 

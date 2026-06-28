@@ -6,5 +6,3 @@ export const SystemConfigSchema = z.object({
 
 export type SystemConfig = z.infer<typeof SystemConfigSchema>;
 export type SystemConfigInput = z.input<typeof SystemConfigSchema>;
-
-

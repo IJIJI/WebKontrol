@@ -1,15 +1,12 @@
 import z from "zod";
 
-
 export const DisplayNameSchema = z.object({
   long: z.string().min(3).max(25),
   short: z.string().max(10).optional(),
-})
+});
 
 export type DisplayName = z.infer<typeof DisplayNameSchema>;
 export type DisplayNameInput = z.input<typeof DisplayNameSchema>;
-
-
 
 export enum ConnectionState {
   DISABLED = "Disabled",
@@ -22,9 +19,10 @@ export enum ConnectionState {
 
 export const ConnectionStateSchema = z.enum(ConnectionState);
 
-export const ConnectionStateInputSchema = ConnectionStateSchema.default(ConnectionState.UNKNOWN);
+export const ConnectionStateInputSchema = ConnectionStateSchema.default(
+  ConnectionState.UNKNOWN,
+);
 export type ConnectionStateInput = z.input<typeof ConnectionStateInputSchema>;
-
 
 export type WithRequired<T, K extends keyof T> = Partial<T> &
   Required<Pick<T, K>>;
