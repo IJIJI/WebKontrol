@@ -135,7 +135,7 @@ export class WebServer {
       res.json(this._state.system.info); // TODO: Different payload? If so, make /api/system this._state.system again.
     });
 
-    this._app.get("/api/events", (req, res) => {
+    this._app.get("/api/state", (req, res) => {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
