@@ -2,27 +2,53 @@ import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { PuppeteerPuppet } from "./puppet/puppeteer/PuppeteerPuppet";
 import { PuppeteerPuppetConfigSchema, PuppeteerPuppetSpecificConfigSchema, type PuppeteerPuppetSpecificConfig } from "./puppet/puppeteer/schema";
-import { type PuppetRuntimeConfig, type PuppetKey, type PuppetGlobalConfigInput, PuppetRuntimeConfigSchema } from "./puppet/schema";
+import { type PuppetRuntimeConfig, type PuppetKey, type PuppetGlobalConfigInput, PuppetRuntimeConfigSchema, type PuppetRuntimeConfigInput } from "./puppet/schema";
 import { CoreDatabase } from "./storage/CoreDatabase";
+import type { SystemConfig } from "./system/schema";
+import { WebServer } from "./webServer/WebServer";
 
 export interface CoreInfo {
   startTime: number;
 }
 
 export class AppCore {
+
   private _logger = new Logger(["CORE"]);
 
+  private _webServer: WebServer;
   private _puppets: Map<PuppetKey, AbstractPuppet> = new Map();
 
   private _info: CoreInfo = {
     startTime: Date.now(),
   };
 
-  constructor() {}
+  constructor() {
+    this._webServer = new WebServer({});
+  }
 
   public async start(): Promise<void> {
     this._logger.important("Starting AppCore...");
 
+    // this._registerShutdownHandlers(); // TODO
+    
+    // TODO: Or remove, something to manage puppets is not really needed as they are fixed config, probably a factory? Also some sort of orchestrator to coordinate mutations?
+    // TODO: Although, once there is more complex config it might be nice?
+    // try {
+    //   await this.lifecycle.boot();
+    // } catch (error) {
+    //   this.logger.fatal("Failed to start Lifecycle.", error);
+    // }
+
+    try {
+      this._wireWebServer();
+
+      this._webServer.start();
+
+    } catch (error) {
+        this._logger.fatal("Failed to start WebServer.", error);
+    }
+
+    //* Test code
     const globalPuppetConfig: PuppetGlobalConfigInput = {
       load_timout: undefined
     };
@@ -76,9 +102,55 @@ export class AppCore {
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
     process.exit(0);
+    //* END Test code
 
     // this._puppets.set(testpuppet.getKey(), testpuppet);
 
+  }
+
+  private _wireWebServer(): void {
+    const syncState = () => {
+      this._webServer.setState({
+          puppets: this._puppets.values().map((puppet) => puppet.getInfo()).toArray(),
+          system: {
+            info: {
+              start_moment: Date.now(), // TODO: Track start time and load in from somewhere. system.info in AppCore? Maybe split between runtime and hardware?
+            },
+            config: {
+              system_name: "WebKontrol", // TODO: Load system info and config in from somewhere?
+            }
+          }
+      });
+    };
+
+    // TODO: Wire in puppets, or better, an orchestrator to call syncstate.
+
+    syncState();
+
+    this._webServer.setHandlers({
+      puppet: {
+        setRuntime: async (id: PuppetKey, runtime: PuppetRuntimeConfigInput): Promise<void> => {
+
+        }
+      },
+      system: {
+        setConfig: async (config: SystemConfig): Promise<void> => {
+
+        },
+
+        update: {
+          check: async (): Promise<void> => {
+
+          },
+          apply: async (ref: string, type: 'release' | 'branch'): Promise<void> {
+
+          },
+          getStatus: async (): Promise<void> => {
+
+          }
+        }
+      }
+    })
   }
 }
 
