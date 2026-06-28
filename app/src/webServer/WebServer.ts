@@ -183,14 +183,19 @@ export class WebServer {
         return res.status(400).json({ errors: resultId.error.format() });
       }
 
-      const resultBody = PuppetRuntimeConfigSchema.partial().safeParse(req.body);
+      const resultBody = PuppetRuntimeConfigSchema.partial().safeParse(
+        req.body,
+      );
 
       if (!resultBody.success) {
         return res.status(400).json({ errors: resultBody.error.format() });
       }
 
       try {
-        await this._handlers.puppet.updateRuntime(resultId.data, resultBody.data);
+        await this._handlers.puppet.updateRuntime(
+          resultId.data,
+          resultBody.data,
+        );
         res.status(204).send();
         this._logger.info(
           `Updated puppet ${resultId.data} runtime. New:`,
@@ -198,11 +203,9 @@ export class WebServer {
         );
       } catch (e) {
         this._logger.error("Failed to update producer:", resultId.data, e);
-        res
-          .status(500)
-          .json({
-            error: e instanceof Error ? e.message : "Failed to update producer",
-          });
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to update producer",
+        });
       }
     });
 
