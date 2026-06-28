@@ -116,7 +116,8 @@ export function ApiStateProvider({
   return (
     <ApiStateContext
       value={{
-        state: { // TODO: Not nested for easier access?
+        state: {
+          // TODO: Not nested for easier access?
           puppets: puppets,
           system: system,
         },
