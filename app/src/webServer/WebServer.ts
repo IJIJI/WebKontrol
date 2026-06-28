@@ -129,4 +129,37 @@ export class WebServer {
       });
     });
   }
+
+  private _registerRoutes(): void {
+    this._app.get("/api/system", (_req, res) => {
+      res.json(this._state.system);
+    });
+
+    this._app.patch("/api/system/config", (_req, res) => {
+      //TODO: Update system config
+    });
+
+    this._app.get("/api/puppets", (_req, res) => {
+      res.json(this._state.puppets);
+    });
+
+    this._app.patch("/api/puppets/:id", async (req, res) => {
+      // TODO: Update puppet runtime config
+      // const id = req.params.id;
+      // const { type, config } = req.body;
+      // if (!type || !config) {
+      //   res.status(400).json({ error: "type and config are required" });
+      //   return;
+      // }
+      // try {
+      //   await this.handlers.updateProducer(id, type, { ...config, id } as ProducerConfig);
+      //   res.status(204).send();
+      //   this.logger.info(`Producer updated:`, id);
+      // } catch (e) {
+      //   this.logger.error("Failed to update producer:", id, e);
+      //   res.status(500).json({ error: e instanceof Error ? e.message : "Failed to update producer" });
+      // }
+    });
+  }
+
 }
