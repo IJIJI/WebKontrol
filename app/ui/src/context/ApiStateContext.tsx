@@ -14,7 +14,7 @@ import type {
 import type { SystemConfig } from "../../../src/system/schema";
 import type { PuppetInfoBundle } from "../../../src/puppet/model";
 import type { SystemBundle } from "../../../src/system/model";
-import { Api } from "./api";
+import { Api } from "./Api";
 
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
