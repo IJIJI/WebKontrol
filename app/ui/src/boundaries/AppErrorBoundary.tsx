@@ -4,6 +4,8 @@ import { Component, ReactNode } from "react";
 // Error boundary that catches render crashes caused by Vite HMR context
 // identity mismatches.
 // The API is polled until the server is confirmed ready, then do a clean reload.
+// TODO: Rewrite
+// TODO: Less css!
 class AppErrorBoundary extends Component<
 { children: ReactNode },
 { hasError: boolean; error: string | null }
