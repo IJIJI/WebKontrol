@@ -82,7 +82,7 @@ export class WebServer {
     
     this._server = await new Promise((res) => {
       const server = ViteExpress.listen(this._app, this._config.port, () => {
-        this._logger.info(`Admin server running on http://localhost:${this._config.port}`);
+        this._logger.important(`Admin server running on http://localhost:${this._config.port}`);
         res(server);
       });
     });
