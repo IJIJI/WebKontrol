@@ -17,12 +17,12 @@ import { SystemBundle } from "../../../src/system/model";
 
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
-};
+}
 
 export interface UiWebServerState {
   puppets: Map<PuppetKey, UiPuppetState>;
   system?: SystemBundle;
-};
+}
 
 interface ApiState {
   state: UiWebServerState;
@@ -69,65 +69,62 @@ export function ApiStateProvider({
   useEffect(() => {
     setLoading(true);
     const eventSource = new EventSource("/api/state");
-    
+
     eventSource.onmessage = (payload: MessageEvent<string>): void => {
       const data: WebServerState = JSON.parse(payload.data);
-      
-      const puppets = new Map<PuppetKey, UiPuppetState> ();
+
+      const puppets = new Map<PuppetKey, UiPuppetState>();
 
       for (const pup of data.puppets) {
         const key: PuppetKey = pup.config.specific.id;
         const full: UiPuppetState = {
           ...pup,
-          setRuntime: async (config: PuppetRuntimeConfigInput): Promise<void> => puppetSetRuntime(key, config),
+          setRuntime: async (config: PuppetRuntimeConfigInput): Promise<void> =>
+            puppetSetRuntime(key, config),
         };
         puppets.set(key, full);
       }
 
       const state: UiWebServerState = {
         puppets: puppets,
-        system: data.system
-      }
+        system: data.system,
+      };
 
       applyUiWebServerState(state); // TODO: Add validation?
-    }
-
-
+    };
 
     eventSource.onerror = (): void =>
       setError("Lost connection to the server!");
-    
+
     return () => eventSource.close();
   }, [applyUiWebServerState]);
 
   const puppetSetRuntime = async (
-      id: PuppetKey,
-      runtime: PuppetRuntimeConfigInput,
-    ): Promise<void> => {
-
-  }    
-  const systemSetConfig = async (config: SystemConfig): Promise<void> => {
-
-  }
+    id: PuppetKey,
+    runtime: PuppetRuntimeConfigInput,
+  ): Promise<void> => {};
+  const systemSetConfig = async (config: SystemConfig): Promise<void> => {};
 
   return (
-    <ApiStateContext value={{
-      state: {
-        puppets: puppets,
-        system: system
-      },
-      callBacks: {
-        puppet: {
-          setRuntime: puppetSetRuntime,
+    <ApiStateContext
+      value={{
+        state: {
+          puppets: puppets,
+          system: system,
         },
-        system: {
-          setConfig: systemSetConfig
-        }
-      }
-    }}>
+        callBacks: {
+          puppet: {
+            setRuntime: puppetSetRuntime,
+          },
+          system: {
+            setConfig: systemSetConfig,
+          },
+        },
+      }}
+    >
       {children}
     </ApiStateContext>
-  )
+  );
 }
 
 // Hook:

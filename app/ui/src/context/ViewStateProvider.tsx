@@ -1,11 +1,8 @@
 import { createContext, JSX, useContext } from "react";
 
-
-
 interface ViewState {
   url: string;
-};
-
+}
 
 const ViewStateContext = createContext<ViewState | null>(null);
 
@@ -14,14 +11,15 @@ export function ViewStateProvider({
 }: {
   children: JSX.Element;
 }): JSX.Element {
-
   return (
-    <ViewStateContext value={{
-      url: "https://example.com/"
-    }}>
+    <ViewStateContext
+      value={{
+        url: "https://example.com/",
+      }}
+    >
       {children}
     </ViewStateContext>
-  )
+  );
 }
 
 // Hook:
