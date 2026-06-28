@@ -1,6 +1,8 @@
 import type { PuppetInfoBundle } from "../puppet/model";
 import type { PuppetKey, PuppetRuntimeConfigInput } from "../puppet/schema";
 import type { SystemBundle } from "../system/model";
+import type { SystemConfig } from "../system/schema";
+import type { UpdateStatus } from "../system/update/model";
 
 
 
@@ -10,7 +12,18 @@ export interface WebServerState {
 };
 
 export interface WebServerMutationHandlers {
-  setPuppetRuntime: (id: PuppetKey, runtime: PuppetRuntimeConfigInput) => Promise<void>;
+  puppet: {
+    setRuntime: (id: PuppetKey, runtime: PuppetRuntimeConfigInput) => Promise<void>;
+  }
+  system: {
+    setConfig: (config: SystemConfig) => Promise<void>;
+
+    update: {
+      check: () => Promise<UpdateStatus>; // TODO: Split update status into current and available or smt
+      apply: (ref: string, type: 'release' | 'branch') => Promise<void>; // TODO: Check arguments
+      getStatus: () => Promise<UpdateStatus>;
+    }
+  }
 }
 
 
