@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import type { WebServerState } from "../../../src/webServer/model";
@@ -51,8 +52,10 @@ const ApiStateContext = createContext<ApiState | null>(null);
 
 export function ApiStateProvider({
   children,
+  pingTimeoutMs = 7_500,
 }: {
   children: JSX.Element;
+  pingTimeoutMs?: number;
 }): JSX.Element {
   // TODO: Combine both helpers below into one?
   const [puppets, setPuppets] = useState<Map<string, UiPuppetState>>(new Map()); // TODO: Should puppets be in some sort of map? Should it contain a callback to modify that same puppet?
@@ -63,6 +66,7 @@ export function ApiStateProvider({
   const [connected, setConnected] = useState(false);
 
   const [lastServerPing, setLastServerPing] = useState<number>(0);
+  const pingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const applyUiWebServerState = useCallback((state: UiWebServerState) => {
     setPuppets(state.puppets);
@@ -78,8 +82,17 @@ export function ApiStateProvider({
     setLoading(true);
     const eventSource = new EventSource("/api/state");
 
+    const resetPingTimeout = (): void => {
+      if (pingTimeoutRef.current) clearTimeout(pingTimeoutRef.current);
+      pingTimeoutRef.current = setTimeout(() => {
+        setConnected(false);
+        setError("Lost connection to the server (ping timeout)!");
+      }, pingTimeoutMs);
+    };
+
     eventSource.addEventListener("ping", (payload: MessageEvent<string>): void => {
-      setLastServerPing(Number(payload.data)); // Unix ms from server
+      setLastServerPing(Number(payload.data));
+      resetPingTimeout();
     });
 
     eventSource.addEventListener("data", (payload: MessageEvent<string>): void => {
@@ -103,6 +116,7 @@ export function ApiStateProvider({
       };
 
       setConnected(true);
+      resetPingTimeout();
       applyUiWebServerState(state); // TODO: Add validation?
     });
 
@@ -111,8 +125,11 @@ export function ApiStateProvider({
       setError("Lost connection to the server!");
     };
 
-    return () => eventSource.close();
-  }, [applyUiWebServerState]);
+    return () => {
+      eventSource.close();
+      if (pingTimeoutRef.current) clearTimeout(pingTimeoutRef.current);
+    };
+  }, [applyUiWebServerState, pingTimeoutMs]);
 
   const puppetSetRuntime = async (
     id: PuppetKey,
