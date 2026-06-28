@@ -5,7 +5,6 @@ import reactHooks from "eslint-plugin-react-hooks";
 import react from "eslint-plugin-react";
 import tsdoc from "eslint-plugin-tsdoc";
 
-
 // TODO:
 // tseslint.configs.strict,
 // tseslint.configs.stylistic,
@@ -14,65 +13,73 @@ const BASE_NAMING_CONVENTIONS = [
   // Static Readonly fields
   // Must be UPPER_CASE (e.g., static readonly MAX_RETRIES = 3;)
   {
-    "selector": "classProperty",
-    "modifiers": ["static", "readonly"],
-    "format": ["UPPER_CASE"],
-    "leadingUnderscore": "forbid"
+    selector: "classProperty",
+    modifiers: ["static", "readonly"],
+    format: ["UPPER_CASE"],
+    leadingUnderscore: "forbid",
   },
 
   {
-    "selector": "classProperty",
-    "modifiers": ["private", "static", "readonly"],
-    "format": ["UPPER_CASE"],
-    "leadingUnderscore": "forbid"
+    selector: "classProperty",
+    modifiers: ["private", "static", "readonly"],
+    format: ["UPPER_CASE"],
+    leadingUnderscore: "forbid",
   },
 
   // Private Class Members
   // Must be _camelCase
   {
-    "selector": ["classProperty", "classMethod", "accessor"],
-    "modifiers": ["private"],
-    "format": ["camelCase"],
-    "leadingUnderscore": "require"
+    selector: ["classProperty", "classMethod", "accessor"],
+    modifiers: ["private"],
+    format: ["camelCase"],
+    leadingUnderscore: "require",
   },
   // Protected Class Members
   // Must be _camelCase
   {
-    "selector": ["classProperty", "classMethod", "accessor"],
-    "modifiers": ["protected"],
-    "format": ["camelCase"],
-    "leadingUnderscore": "require"
+    selector: ["classProperty", "classMethod", "accessor"],
+    modifiers: ["protected"],
+    format: ["camelCase"],
+    leadingUnderscore: "require",
   },
   // Public Class Members (Default for classes)
   // Must be camelCase
   {
-    "selector": ["classProperty", "classMethod", "accessor"],
-    "format": ["camelCase"],
-    "leadingUnderscore": "forbid"
+    selector: ["classProperty", "classMethod", "accessor"],
+    format: ["camelCase"],
+    leadingUnderscore: "forbid",
   },
   // Enum Members
   // Must be UPPER_CASE (e.g., enum Status { ACTIVE, INACTIVE })
   {
-    "selector": "enumMember",
-    "format": ["UPPER_CASE"]
+    selector: "enumMember",
+    format: ["UPPER_CASE"],
   },
   // Type Properties (Interfaces and Type Aliases)
-  // Allows camelCase, or snake_case for event-like fields. 
+  // Allows camelCase, or snake_case for event-like fields.
   // (Note: kebab-case is handled by rule #1 if wrapped in quotes)
   {
-    "selector": "typeProperty",
-    "format": ["camelCase", "snake_case"],
-    "leadingUnderscore": "allow"
-  }
-]
+    selector: "typeProperty",
+    format: ["camelCase", "snake_case"],
+    leadingUnderscore: "allow",
+  },
+];
 
 export default tseslint.config(
   {
-    ignores: ["dist/**", "node_modules/**", ".pnp.*", ".vscode/**", ".yarn/**", "db/**", "logs/**"],
+    ignores: [
+      "dist/**",
+      "node_modules/**",
+      ".pnp.*",
+      ".vscode/**",
+      ".yarn/**",
+      "db/**",
+      "logs/**",
+    ],
   },
   js.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
-  
+
   // JS files: disable type-checked rules (no tsconfig coverage)
   {
     files: ["**/*.js"],
@@ -106,17 +113,17 @@ export default tseslint.config(
         ...BASE_NAMING_CONVENTIONS,
         // Overrides the standard function rule for React components
         {
-          "selector": "function",
-          "format": ["camelCase", "PascalCase"],
-          "leadingUnderscore": "allow"
+          selector: "function",
+          format: ["camelCase", "PascalCase"],
+          leadingUnderscore: "allow",
         },
         // Allows React components assigned to variables
         {
-          "selector": "variable",
-          "format": ["camelCase", "PascalCase", "UPPER_CASE"],
-          "leadingUnderscore": "allow"
-        }
-      ]
+          selector: "variable",
+          format: ["camelCase", "PascalCase", "UPPER_CASE"],
+          leadingUnderscore: "allow",
+        },
+      ],
     },
   },
 
@@ -138,19 +145,19 @@ export default tseslint.config(
       "@typescript-eslint/naming-convention": [
         "error",
         {
-          "selector": "function",
-          "format": ["camelCase", "PascalCase"],
-          "leadingUnderscore": "allow"
+          selector: "function",
+          format: ["camelCase", "PascalCase"],
+          leadingUnderscore: "allow",
         },
 
-        // Add this block to handle React components declared as variables 
+        // Add this block to handle React components declared as variables
         // e.g., const MyComponent = () => <div>...</div>
         {
-          "selector": "variable",
-          "format": ["camelCase", "PascalCase", "UPPER_CASE"],
-          "leadingUnderscore": "allow"
-        }
-      ]
+          selector: "variable",
+          format: ["camelCase", "PascalCase", "UPPER_CASE"],
+          leadingUnderscore: "allow",
+        },
+      ],
     },
   },
 );
