@@ -15,7 +15,7 @@ export class PuppetStore {
   constructor(id: string) {
     this._id = id;
     this._logger = new Logger(["STORE", "PUPPET", id]);
-    this._logger.debug(`Constructed runtime.`);
+    this._logger.debug(`Constructed store.`);
   }
 
   public async saveRuntime(config: PuppetRuntimeConfig): Promise<void> {
