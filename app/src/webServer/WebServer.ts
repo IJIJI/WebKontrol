@@ -11,7 +11,7 @@ import { WebServerConfigSchema, type WebServerConfig, type WebServerConfigInput 
 
 export class WebServer {
   private _app = express();
-  private _server: http.Server;
+  private _server!: http.Server;
   private _logger = new Logger(["WEBSERVER"]);
 
   private _config: WebServerConfig;
@@ -97,6 +97,11 @@ export class WebServer {
     this._isInit = false; // TODO: Add isDestroying variables?
 
     this._logger.info("Attempting graceful shutdown...");
+
+    if (!this._server) {
+      this._logger.warn("Tried destroying WebServer, but the http.Server not running. Ignoring.");
+      return;
+    }
 
     await new Promise<void>((resolve, reject) => {
       const forceCloseTimeout = setTimeout(() => {
