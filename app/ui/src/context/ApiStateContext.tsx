@@ -21,7 +21,7 @@ export interface UiPuppetState extends PuppetInfoBundle {
 
 export interface UiWebServerState {
   puppets: Map<PuppetKey, UiPuppetState>;
-  system?: SystemBundle;
+  system: SystemBundle;
 }
 
 interface ApiState {
@@ -72,18 +72,8 @@ export function ApiStateProvider({
 
     eventSource.onmessage = (payload: MessageEvent<string>): void => {
       
-      const parsed = JSON.parse(payload.data);
-      const data: WebServerState = { // TODO: Zod validation!!
-        puppets: parsed.puppets ?? [],
-        system: {
-          config: {
-            system_name: parsed.system.config.system_name ?? "WebKontrol"
-          },
-          info: {
-            start_moment: parsed.system.info.start_moment ?? 0
-          }
-        }
-      }
+      const data = JSON.parse(payload.data) as WebServerState;
+
 
       const puppets = new Map<PuppetKey, UiPuppetState>();
 
