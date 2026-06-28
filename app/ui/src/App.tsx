@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import type { JSX } from "react";
 import { AppErrorBoundary } from "./boundaries/AppErrorBoundary";
 import { ApiStateProvider } from "./context/ApiStateContext";
 
