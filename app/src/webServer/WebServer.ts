@@ -12,7 +12,7 @@ import { WebServerConfigSchema, type WebServerConfig, type WebServerConfigInput 
 export class WebServer {
   private _app = express();
   private _server!: http.Server;
-  private _logger = new Logger(["WEBSERVER"]);
+  private _logger = new Logger(["WEB", "SERVER"]);
   
   private _config: WebServerConfig;
   
