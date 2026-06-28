@@ -134,6 +134,13 @@ export class AppCore {
           id: PuppetKey,
           runtime: Partial<PuppetRuntimeConfigInput>,
         ): Promise<void> => {
+          const puppet = this._puppets.get(id);
+
+          if (!puppet) {
+            throw new Error(`Puppet does not exist! Tried updating the runtime for puppet with id: ${id}. Requested runtime: ${runtime}`);
+          }
+          puppet.updateRuntime(runtime);
+
           this._logger.important(
             `puppet.updateRuntime() handler called for puppet: ${id} with runtime config:`,
             runtime,
