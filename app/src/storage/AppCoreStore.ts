@@ -28,7 +28,7 @@ export class AppCoreStore {
       this._logger.debug(`Loading runtime...`);
       const raw = await this._db.getSetting("app", "core", "runtime");
       if (raw === null) {
-        this._logger.error(`Failed loading runtime! Got null`);
+        this._logger.info(`Failed loading runtime! Got null`);
         return null;
       }
       const object = SystemConfigSchema.parse(JSON.parse(raw));
