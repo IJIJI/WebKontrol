@@ -103,6 +103,7 @@ export class AppCore {
   }
 
   private _syncState(): void {
+    this._logger.debug(`Syncing state to webserver...`);
     this._webServer.setState({
       puppets: this._puppets
         .values()
