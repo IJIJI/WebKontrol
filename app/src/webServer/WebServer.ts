@@ -55,6 +55,7 @@ export class WebServer {
     if (this._sseClients.size > 0) {
       for (const res of this._sseClients) res.write(this._getSsePayload);
     }
+    this._logger.info(`Updated state for ${this._sseClients.size} clients. New state:`, state);
   }
 
   public setHandlers(handlers: WebServerMutationHandlers): void {
@@ -150,10 +151,12 @@ export class WebServer {
       res.flushHeaders();
       res.write(this._getSsePayload);
       this._sseClients.add(res);
+      this._logger.debug(`New client connected to /api/state. Now a total of ${this._sseClients.size} clients are listening.`);
       const ping = setInterval(() => res.write(": ping\n\n"), 25_000); // TODO: This the right ping interval? It seems high.
       req.on("close", () => {
         clearInterval(ping);
         this._sseClients.delete(res);
+        this._logger.debug(`A client disconnected to /api/state. Now a total of ${this._sseClients.size} clients are listening.`);
       });
     });
 
