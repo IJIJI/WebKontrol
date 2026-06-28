@@ -65,6 +65,8 @@ export function ApiStateProvider({
 
     setError(null);
     setLoading(false);
+
+    console.log(`puppets:`, puppets, `system`, system);
   }, []);
 
   useEffect(() => {
@@ -114,7 +116,7 @@ export function ApiStateProvider({
   return (
     <ApiStateContext
       value={{
-        state: {
+        state: { // TODO: Not nested for easier access?
           puppets: puppets,
           system: system,
         },
