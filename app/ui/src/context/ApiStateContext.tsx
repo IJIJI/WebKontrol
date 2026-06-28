@@ -1,8 +1,8 @@
-import { ReactNode, createContext, useContext, useState } from "react";
-import { WebServerState } from "../../../src/webServer/model"
-import { PuppetKey, PuppetRuntimeConfigInput } from "../../../src/puppet/schema";
-import { SystemConfig } from "../../../src/system/schema";
-import { PuppetInfoBundle } from "../../../src/puppet/model";
+import { type JSX, createContext, useContext, useState } from "react";
+import type { WebServerState } from "../../../src/webServer/model"
+import type { PuppetKey, PuppetRuntimeConfigInput } from "../../../src/puppet/schema";
+import type { SystemConfig } from "../../../src/system/schema";
+import type { PuppetInfoBundle } from "../../../src/puppet/model";
 
 
 // TODO: This is pretty much the same as the webserver mutation handlers, but I don't think it will be in the future. Check how to best keep in sync.
@@ -25,7 +25,7 @@ interface ApiState {
 
 const ApiStateContext = createContext<ApiState | null>(null);
 
-export function ApiStateProvider({ children }: { children: ReactNode }) {
+export function ApiStateProvider({ children }: { children: JSX.Element }): JSX.Element {
 
   const [puppets, setPuppets] = useState<PuppetInfoBundle[]>([]);
 
