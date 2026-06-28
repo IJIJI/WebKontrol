@@ -22,7 +22,7 @@ export interface UiPuppetState extends PuppetInfoBundle {
 
 export interface UiWebServerState {
   puppets: Map<PuppetKey, UiPuppetState>;
-  system?: SystemBundle;
+  system?: Partial<SystemBundle>;
 }
 
 interface ApiState {
