@@ -9,7 +9,6 @@ export interface CoreInfo {
 }
 
 export class AppCore {
-
   private _logger = new Logger(["CORE"]);
 
   private _webServer: WebServer;
@@ -27,7 +26,7 @@ export class AppCore {
     this._logger.important("Starting AppCore...");
 
     // this._registerShutdownHandlers(); // TODO
-    
+
     // TODO: Or remove, something to manage puppets is not really needed as they are fixed config, probably a factory? Also some sort of orchestrator to coordinate mutations?
     // TODO: Although, once there is more complex config it might be nice?
     // try {
@@ -41,7 +40,6 @@ export class AppCore {
 
       await this._webServer.start();
       this._syncState();
-
     } catch (error) {
       this._logger.fatal("Failed to start WebServer.", error);
     }
@@ -91,63 +89,58 @@ export class AppCore {
     // await new Promise((resolve) => setTimeout(resolve, 1000));
     // await testpuppet.updateRuntime({
     //   target_url: "https://synapt.nl/"
-    // });    
+    // });
     // await new Promise((resolve) => setTimeout(resolve, 1000));
     // await testpuppet.updateRuntime({
     //   target_url: "https://youtube.com/"
     // });
-
 
     // await new Promise((resolve) => setTimeout(resolve, 1000));
     // process.exit(0);
     //* END Test code
 
     // this._puppets.set(testpuppet.getKey(), testpuppet);
-
   }
 
   private _syncState(): void {
     this._webServer.setState({
-      puppets: this._puppets.values().map((puppet) => puppet.getInfo()).toArray(),
+      puppets: this._puppets
+        .values()
+        .map((puppet) => puppet.getInfo())
+        .toArray(),
       system: {
         info: {
           start_moment: Date.now(), // TODO: Track start time and load in from somewhere. system.info in AppCore? Maybe split between runtime and hardware?
         },
         config: {
           system_name: "WebKontrol", // TODO: Load system info and config in from somewhere?
-        }
-      }
+        },
+      },
     });
   }
 
   private _wireWebServer(): void {
-
     // TODO: Wire in puppets, or better, an orchestrator to call this._syncState.
 
     this._webServer.setHandlers({
       puppet: {
-        setRuntime: async (id: PuppetKey, runtime: PuppetRuntimeConfigInput): Promise<void> => {
-
-        }
+        setRuntime: async (
+          id: PuppetKey,
+          runtime: PuppetRuntimeConfigInput,
+        ): Promise<void> => {},
       },
       system: {
-        setConfig: async (config: SystemConfig): Promise<void> => {
-
-        },
+        setConfig: async (config: SystemConfig): Promise<void> => {},
 
         update: {
-          check: async (): Promise<void> => {
-
-          },
-          apply: async (ref: string, type: 'release' | 'branch'): Promise<void> => {
-
-          },
-          getStatus: async (): Promise<void> => {
-
-          }
-        }
-      }
-    })
+          check: async (): Promise<void> => {},
+          apply: async (
+            ref: string,
+            type: "release" | "branch",
+          ): Promise<void> => {},
+          getStatus: async (): Promise<void> => {},
+        },
+      },
+    });
   }
 }
-

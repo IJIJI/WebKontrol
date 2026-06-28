@@ -1,5 +1,5 @@
-import { sqliteTable, text, primaryKey } from 'drizzle-orm/sqlite-core';
-import { createInsertSchema } from 'drizzle-zod';
+import { sqliteTable, text, primaryKey } from "drizzle-orm/sqlite-core";
+import { createInsertSchema } from "drizzle-zod";
 
 // Database table entity
 // export const settings = sqliteTable('settings', {
@@ -7,14 +7,16 @@ import { createInsertSchema } from 'drizzle-zod';
 //   value: text('value').notNull(),
 // });
 
-export const settings = sqliteTable("settings", {
-  domain: text('domain').notNull(),
-  type: text('type').notNull(),
-  key: text('key').notNull(),
-  value: text('value').notNull(),
-}, (table) => [
-  primaryKey({ columns: [table.domain, table.type, table.key] }),
-]);
+export const settings = sqliteTable(
+  "settings",
+  {
+    domain: text("domain").notNull(),
+    type: text("type").notNull(),
+    key: text("key").notNull(),
+    value: text("value").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.domain, table.type, table.key] })],
+);
 
 // Automatically generate a Zod schema for inserting data, with custom runtime validation.
 export const insertSettingSchema = createInsertSchema(settings, {
