@@ -1,24 +1,58 @@
 import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { type PuppetKey, type PuppetRuntimeConfigInput } from "./puppet/schema";
-import type { SystemConfig } from "./system/schema";
+import { AppCoreStore } from "./storage/AppCoreStore";
+import type { SystemInfo } from "./system/model";
+import { SystemConfigSchema, type SystemConfig, type SystemConfigInput } from "./system/schema";
 import { WebServer } from "./webServer/WebServer";
 
-export interface CoreInfo {
-  startTime: number;
-}
 
 export class AppCore {
   private _logger = new Logger(["CORE"]);
 
+  private _hasStarted: boolean = false;
+
   private _webServer: WebServer;
   private _puppets: Map<PuppetKey, AbstractPuppet> = new Map();
 
-  private _info: CoreInfo = {
-    startTime: Date.now(),
+  private _info: SystemInfo = {
+    start_moment: Date.now(),
   };
 
-  constructor() {
+  private _config: SystemConfig = {
+    system_name: "WebKontrol"
+  }; 
+  protected _store: AppCoreStore = new AppCoreStore();
+
+  // TODO: This can be massively cleaned up. 
+  // TODO: Runtime should not be an argument, there should be a config bundle for the "real" runtime unchangable config. e.g. webserver port
+  // TODO: Move async code into init function.
+  constructor(config?: SystemConfigInput) {
+
+    if (config) {
+      this._config = SystemConfigSchema.parse(config);
+      this._store.saveRuntime(this._config).then(() => {
+        if(this._hasStarted){
+          this._syncState();
+        }
+      });
+    }
+    else {
+      this._store.loadRuntime().then((loaded) => {
+        if (loaded) {
+          this._config = loaded;
+          this._logger.info(`Loaded SystemConfig from DB:`, this._config);
+        }
+        else {
+          this._store.saveRuntime(this._config);
+          this._logger.important(`Could not find SystemConfig in DB. Using default:`, this._config);
+        }
+        if(this._hasStarted){
+          this._syncState();
+        }
+      });
+    }
+
     this._webServer = new WebServer({});
   }
 
@@ -44,6 +78,7 @@ export class AppCore {
       this._logger.fatal("Failed to start WebServer.", error);
     }
 
+    this._hasStarted = true;
 
     //* Test code
     // setInterval(() => {
@@ -107,7 +142,7 @@ export class AppCore {
     // this._puppets.set(testpuppet.getKey(), testpuppet);
   }
 
-  private _syncState(): void {
+  private _syncState(): void { // Add init check
     this._logger.debug(`Syncing state to webserver...`);
     this._webServer.setState({
       puppets: this._puppets
@@ -115,12 +150,8 @@ export class AppCore {
         .map((puppet) => puppet.getInfo())
         .toArray(),
       system: {
-        info: {
-          start_moment: Date.now(), // TODO: Track start time and load in from somewhere. system.info in AppCore? Maybe split between runtime and hardware?
-        },
-        config: {
-          system_name: "WebKontrol", // TODO: Load system info and config in from somewhere?
-        },
+        info: this._info,
+        config: this._config,
       },
     });
   }
