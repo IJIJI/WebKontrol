@@ -127,18 +127,28 @@ export class AppCore {
         updateRuntime: async (
           id: PuppetKey,
           runtime: Partial<PuppetRuntimeConfigInput>,
-        ): Promise<void> => {},
+        ): Promise<void> => {
+          this._logger.important(`puppet.updateRuntime() handler called for puppet: ${id} with runtime config:`, runtime);
+        },
       },
       system: {
-        updateConfig: async (config: Partial<SystemConfig>): Promise<void> => {},
+        updateConfig: async (config: Partial<SystemConfig>): Promise<void> => {
+          this._logger.important(`puppet.updateConfig() handler called with config:`, config);
+        },
 
         update: {
-          check: async (): Promise<void> => {},
+          check: async (): Promise<void> => {
+            this._logger.important(`update.check() handler called.`);
+          },
           apply: async (
             ref: string,
             type: "release" | "branch",
-          ): Promise<void> => {},
-          getStatus: async (): Promise<void> => {},
+          ): Promise<void> => {
+            this._logger.important(`update.apply() handler called with ref: ${ref} of type: ${type}`);
+          },
+          getStatus: async (): Promise<void> => {
+            this._logger.important(`update.getStatus() handler called.`);
+          },
         },
       },
     });
