@@ -62,7 +62,7 @@ export class WebServer {
   
   public async start(): Promise<void> {
     
-    if (this._handlers !== undefined) {
+    if (this._handlers === undefined) {
       // TODO: Continue without and set state to ERROR, until they are set?
       throw new Error("Handlers where not set before the server was started!"); // TODO: Check if this should error. Check if there should be an info for the state. 
     }
