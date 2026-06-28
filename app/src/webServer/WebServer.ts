@@ -44,15 +44,14 @@ export class WebServer {
     this._config = WebServerConfigSchema.parse(config);
   }
   
-  private _serializeState() {
-    return JSON.stringify(this._state, jsonReplacer);
+  private get _getSsePayload() {
+    return `data: ${JSON.stringify(this._state, jsonReplacer)}\n\n`; // TODO: Right format?
   }
   
   public setState(state: WebServerState): void {
     this._state = state;
     if (this._sseClients.size > 0) {
-      const data = `data: ${JSON.stringify(this._serializeState())}\n\n`; // TODO: Right format?
-      for (const res of this._sseClients) res.write(data);
+      for (const res of this._sseClients) res.write(this._getSsePayload);
     }
   }
   
@@ -132,8 +131,27 @@ export class WebServer {
   }
   
   private _registerRoutes(): void {
+    this._app.get("/api/info", (_req, res) => {
+      res.json(this._state.system.info); // TODO: Different payload? If so, make /api/system this._state.system again.
+    });
+
+    this._app.get("/api/events", (req, res) => {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.flushHeaders();
+      res.write(this._getSsePayload);
+      this._sseClients.add(res);
+      const ping = setInterval(() => res.write(': ping\n\n'), 25_000); // TODO: This the right ping interval? It seems high.
+      req.on('close', () => {
+        clearInterval(ping);
+        this._sseClients.delete(res);
+      });
+    });
+
+
     this._app.get("/api/system", (_req, res) => {
-      res.json(this._state.system);
+      res.json(this._state.system.config);
     });
     
     this._app.patch("/api/system/config", (_req, res) => {
