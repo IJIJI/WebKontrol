@@ -19,9 +19,9 @@ export interface WebServerMutationHandlers {
     setConfig: (config: SystemConfig) => Promise<void>;
 
     update: {
-      check: () => Promise<UpdateStatus>; // TODO: Split update status into current and available or smt
+      check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
       apply: (ref: string, type: 'release' | 'branch') => Promise<void>; // TODO: Check arguments
-      getStatus: () => Promise<UpdateStatus>;
+      getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
     }
   }
 }
