@@ -56,6 +56,19 @@ interface ApiState {
 
 const ApiStateContext = createContext<ApiState | null>(null);
 
+// TODO: Add toasts!
+// const addProducer = async (type: string, config: ProducerConfig & Record<string, unknown>) => {
+//   await toast.promise(
+//     api.addProducer(type, config),
+//     {
+//       loading: 'Adding connection…',
+//       success: 'Connection added',
+//       error:   (e: unknown) => e instanceof Error ? e.message : 'Failed to add connection',
+//     }
+//   )
+// }
+
+
 export function ApiStateProvider({
   children,
   pingTimeoutMs = 7_500,
