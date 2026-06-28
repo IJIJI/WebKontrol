@@ -1,4 +1,4 @@
-import { createContext, JSX, useContext } from "react";
+import { createContext, type JSX, useContext } from "react";
 
 interface ViewState {
   url: string;
