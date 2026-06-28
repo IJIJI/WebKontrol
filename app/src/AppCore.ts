@@ -1,7 +1,7 @@
 import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { PuppeteerPuppet } from "./puppet/puppeteer/PuppeteerPuppet";
-import { PuppeteerPuppetConfigSchema } from "./puppet/puppeteer/schema";
+import { PuppeteerPuppetConfigSchema, PuppeteerPuppetSpecificConfigSchema, type PuppeteerPuppetSpecificConfig } from "./puppet/puppeteer/schema";
 import { type PuppetRuntimeConfig, type PuppetKey, type PuppetGlobalConfigInput, PuppetRuntimeConfigSchema } from "./puppet/schema";
 import { CoreDatabase } from "./storage/CoreDatabase";
 
@@ -30,11 +30,13 @@ export class AppCore {
       target_url: "https://etsy.com/"
     });
 
+    const specificConfig: PuppeteerPuppetSpecificConfig = PuppeteerPuppetSpecificConfigSchema.parse({
+      id: "pup1",
+    })
+
     // Should have try catch in prod
     const testPuppetConfig = PuppeteerPuppetConfigSchema.parse({
-      specific: {
-        id: "pup1"
-      },
+      specific: specificConfig,
       global: globalPuppetConfig,
       runtime: defaultRuntimeConfig
     });
