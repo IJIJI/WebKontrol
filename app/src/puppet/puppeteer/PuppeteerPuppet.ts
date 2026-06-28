@@ -5,11 +5,7 @@ import type { PuppetTarget } from "../schema";
 import { type PuppeteerPuppetConfig } from "./schema";
 import type { PuppeteerPuppetInfo } from "./model";
 
-
-
-
 export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
-
   protected override _getLogLabelExtensions(): Array<string> {
     return ["Puppeteer"];
   }
@@ -65,13 +61,12 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
   }
 
   protected async _doSetTarget(target: PuppetTarget): Promise<void> {
-    await this._page.goto(target, {timeout: this._config.global.load_timout});
+    await this._page.goto(target, { timeout: this._config.global.load_timout });
   }
 
   protected async _getTargetInfo(): Promise<TargetInfo> {
-    
     const result: TargetInfo = {};
-    
+
     const title = await this._page.title();
 
     if (title) {
@@ -97,5 +92,4 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
       path: path,
     });
   }
-
 }

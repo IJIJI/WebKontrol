@@ -2,8 +2,23 @@ import EventEmitter from "node:events";
 import * as path from "node:path";
 import { Logger } from "../logging/Logger";
 import { ConnectionState } from "../types/CommonTypes";
-import type { PuppetInfo, PuppetInfoBundle, PuppetScreenshotFail, PuppetScreenshotResult, SetTargetFail, SetTargetResult, SetTargetSuccess, TargetInfo } from "./model";
-import { PuppetRuntimeConfigSchema, type PuppetConfig, type PuppetKey, type PuppetRuntimeConfig, type PuppetTarget } from "./schema";
+import type {
+  PuppetInfo,
+  PuppetInfoBundle,
+  PuppetScreenshotFail,
+  PuppetScreenshotResult,
+  SetTargetFail,
+  SetTargetResult,
+  SetTargetSuccess,
+  TargetInfo,
+} from "./model";
+import {
+  PuppetRuntimeConfigSchema,
+  type PuppetConfig,
+  type PuppetKey,
+  type PuppetRuntimeConfig,
+  type PuppetTarget,
+} from "./schema";
 import { PuppetStore } from "../storage/PuppetStore";
 
 export type PuppetEvents = {
@@ -16,7 +31,6 @@ export abstract class AbstractPuppet<
   TConfig extends PuppetConfig = PuppetConfig,
   TEvents extends PuppetEvents & Record<string, unknown[]> = PuppetEvents,
 > extends EventEmitter<TEvents> {
-
   protected _logger!: Logger;
   protected _store!: PuppetStore;
   protected _isInit = false;
@@ -26,7 +40,7 @@ export abstract class AbstractPuppet<
   }
 
   protected abstract _getLogLabelExtensions(): Array<string>;
-  
+
   protected _config: TConfig;
 
   protected _info: PuppetInfo = {
@@ -37,7 +51,7 @@ export abstract class AbstractPuppet<
     super();
     this._config = config;
   }
-  
+
   getConfig(): PuppetConfig {
     return this._config;
   }
@@ -56,7 +70,7 @@ export abstract class AbstractPuppet<
   // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
   protected async _doScreenshot(path: string): Promise<void> {
     throw new Error("Screenshot not implemented for this puppet"); // TODO: Fail Silently or add another way to differentiate between fails and not implemented? Error type?
-  };
+  }
 
   async init(clear_runtime: boolean = false): Promise<void> {
     try {
@@ -67,11 +81,11 @@ export abstract class AbstractPuppet<
 
       if (clear_runtime) {
         await this._store.saveRuntime(this._config.runtime);
+      } else {
+        this._config.runtime =
+          (await this._store.loadRuntime()) ?? this._config.runtime;
       }
-      else {
-        this._config.runtime = await this._store.loadRuntime() ?? this._config.runtime;
-      }
-      
+
       await this._doInit();
       this._isInit = true;
 
@@ -88,17 +102,16 @@ export abstract class AbstractPuppet<
   // TODO: Add target info? -> Needs a caller for some implementations?
   // TODO: Load url from the puppet?
   getInfo(): PuppetInfoBundle {
-    return { 
-      ...this._info, 
+    return {
+      ...this._info,
       config: {
         runtime: this._config.runtime,
         specific: this._config.specific,
-      }
+      },
     };
   }
 
   protected _updateInfo(info?: Partial<PuppetInfo>): void {
-
     this._info = { ...this._info, ...info };
 
     // TODO: Add async callback to allow for target_info loading?
@@ -107,22 +120,25 @@ export abstract class AbstractPuppet<
   }
 
   async updateRuntime(config: Partial<PuppetRuntimeConfig>): Promise<void> {
-
     try {
       if (!this._isInit) throw new Error("Puppet not initialized");
 
       let targetChange: boolean = false;
 
-      if (config.target_url && config.target_url !== this._config.runtime.target_url)
+      if (
+        config.target_url &&
+        config.target_url !== this._config.runtime.target_url
+      )
         targetChange = true;
 
-      this._config.runtime = PuppetRuntimeConfigSchema.parse({...this._config.runtime, ...config});
+      this._config.runtime = PuppetRuntimeConfigSchema.parse({
+        ...this._config.runtime,
+        ...config,
+      });
 
-      if (targetChange)
-        await this._setTarget(this._config.runtime.target_url)
+      if (targetChange) await this._setTarget(this._config.runtime.target_url);
 
       await this._store.saveRuntime(this._config.runtime);
-
     } catch (error) {
       this._logger.error("Failed to update runtime", error);
       // TODO: Add some sort of feedback to caller.
@@ -130,9 +146,9 @@ export abstract class AbstractPuppet<
   }
 
   protected async _setTarget(target: PuppetTarget): Promise<SetTargetResult> {
-
-    // TODO: Remove try catch? 
-    try { // TODO: Consolidate return types. SetTargetResult -> UpdateRuntimeResult.
+    // TODO: Remove try catch?
+    try {
+      // TODO: Consolidate return types. SetTargetResult -> UpdateRuntimeResult.
 
       this._config.runtime.target_url = target;
 
@@ -143,7 +159,6 @@ export abstract class AbstractPuppet<
       // this._updateInfo(result.info); //TODO
       (this as EventEmitter<PuppetEvents>).emit("load_success", result);
       return result;
-
     } catch (error) {
       this._logger.error("Failed to set target", error);
       const result: SetTargetFail = {
@@ -152,7 +167,7 @@ export abstract class AbstractPuppet<
       if (error instanceof Error) {
         result.error = error;
       }
-        // this._updateInfo(result.info); //TODO
+      // this._updateInfo(result.info); //TODO
       this._setFailedLoadingState();
       (this as EventEmitter<PuppetEvents>).emit("load_fail", result);
       return result;
@@ -171,7 +186,12 @@ export abstract class AbstractPuppet<
     try {
       if (!this._isInit) throw new Error("Puppet not initialized");
 
-      const imgPath: string = path.join(process.cwd(), "db", "images", `${this._config.specific.id}.png`);
+      const imgPath: string = path.join(
+        process.cwd(),
+        "db",
+        "images",
+        `${this._config.specific.id}.png`,
+      );
 
       await this._doScreenshot(imgPath); // TODO: Multiple image history storage? In DB?
 
@@ -184,7 +204,4 @@ export abstract class AbstractPuppet<
       return result;
     }
   }
-
-
-
 }
