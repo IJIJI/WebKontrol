@@ -2,7 +2,6 @@ import type { PuppetInfoBundle } from "../puppet/model";
 import type { PuppetKey, PuppetRuntimeConfigInput } from "../puppet/schema";
 import type { SystemBundle } from "../system/model";
 import type { SystemConfig } from "../system/schema";
-import type { UpdateStatus } from "../system/update/model";
 
 
 
