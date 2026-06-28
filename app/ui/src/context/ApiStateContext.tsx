@@ -74,7 +74,11 @@ export function ApiStateProvider({
     setLoading(true);
     const eventSource = new EventSource("/api/state");
 
-    eventSource.onmessage = (payload: MessageEvent<string>): void => {
+    eventSource.addEventListener("ping", (payload: MessageEvent<string>): void => {
+      setLastServerPing(Number(payload.data)); // Unix ms from server
+    });
+
+    eventSource.addEventListener("data", (payload: MessageEvent<string>): void => {
       const data = JSON.parse(payload.data) as WebServerState;
 
       const puppets = new Map<PuppetKey, UiPuppetState>();

@@ -46,14 +46,17 @@ export class WebServer {
     this._config = WebServerConfigSchema.parse(config);
   }
 
-  private get _getSsePayload() {
-    return `data: ${JSON.stringify(this._state, jsonReplacer)}\n\n`; // TODO: Right format?
+  private get _getSseDataPayload() {
+    return `event: data\ndata: ${JSON.stringify(this._state, jsonReplacer)}\n\n`;
+  }
+  private get _getSsePingPayload() {
+    return `event: ping\ndata: ${Date.now()}\n\n`;
   }
 
   public setState(state: WebServerState): void {
     this._state = state;
     if (this._sseClients.size > 0) {
-      for (const res of this._sseClients) res.write(this._getSsePayload);
+      for (const res of this._sseClients) res.write(this._getSseDataPayload);
     }
     this._logger.info(`Updated state for ${this._sseClients.size} clients. New state:`, state);
   }
@@ -149,10 +152,10 @@ export class WebServer {
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
       res.flushHeaders();
-      res.write(this._getSsePayload);
+      res.write(this._getSseDataPayload);
       this._sseClients.add(res);
       this._logger.debug(`New client connected to /api/state. Now a total of ${this._sseClients.size} clients are listening.`);
-      const ping = setInterval(() => res.write(": ping\n\n"), 25_000); // TODO: This the right ping interval? It seems high.
+      const ping = setInterval(() => res.write(this._getSsePingPayload), this._config.sse.ping_interval);
       req.on("close", () => {
         clearInterval(ping);
         this._sseClients.delete(res);
