@@ -92,7 +92,7 @@ export abstract class AbstractPuppet<
 
       this._logger.info("Initialized.");
 
-      this.updateRuntime(this._config.runtime);
+      await this.updateRuntime(this._config.runtime);
 
       this._logger.info("Appied runtime.");
 
