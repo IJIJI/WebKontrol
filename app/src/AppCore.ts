@@ -180,9 +180,14 @@ export class AppCore {
       },
       system: {
         updateConfig: async (config: Partial<SystemConfig>): Promise<void> => {
+          const parsed = SystemConfigSchema.parse({ ...this._config, ...config });
+
+          this._config = parsed;
+          this._syncState();
+
           this._logger.important(
             `puppet.updateConfig() handler called with config:`,
-            config,
+            config, `updating the actual config to:`, this._config
           );
         },
 
