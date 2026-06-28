@@ -1,0 +1,86 @@
+
+// Base vars:
+:root {
+  /* Beacon brand. TODO: Different WebKontrol branding? */
+  --acc:  #E85D30;
+  /* --acc:  #CC0033; */
+
+  /* --program: #E24B4A; */
+  --program: #E93838;
+  /* --preview: #1D9E75; */
+  --preview: #16B658;
+  --danger:  #E57373;
+  --warning: #D4930A;
+  --info:    #185fa5;
+  --light:   #eeeeea;
+}
+
+// Light mode:
+.light_mode() {
+  --color-background-primary:   #ffffff;
+  --color-background-secondary: #f1f1ee;
+  --color-background-tertiary:  #eeecea;
+
+  --color-background-success:   #d1e9d2;
+  --color-background-danger:    #FADBDB;
+  --color-background-warning:   #ffd98e;
+  --color-background-info:      #D3E4F3;
+
+  --color-text-primary:   #1a1a18;
+  --color-text-secondary: #5f5e5a;
+  --color-text-tertiary:  #888780;
+  --color-text-success:   #0f6e56;
+  --color-text-danger:    #E93838;
+  --color-text-warning:   #c96400;
+  --color-text-info:      #185fa5;
+  
+  --color-border-tertiary:  rgba(0,0,0,.1);
+  --color-border-secondary: rgba(0,0,0,.18);
+  --color-border-primary:   rgba(0,0,0,.28);
+
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+}
+
+// Dark Mode:
+.dark_mode() {
+  --color-background-primary:   #1c1c1c;
+  --color-background-secondary: #272727;
+  --color-background-tertiary:  #111111;
+
+  --color-background-success:   #04342c;
+  --color-background-danger:    #501313;
+  --color-background-warning:   #412402;
+  --color-background-info:      #042c53;
+
+  --color-text-primary:   #e8e6de;
+  --color-text-secondary: #b4b2a9;
+  --color-text-tertiary:  #6b6a64;
+  --color-text-success:   #5dcaa5;
+  --color-text-danger:    #E93838;
+  --color-text-warning:   #D4930A;
+  --color-text-info:      #85b7eb;
+
+  --color-border-tertiary:  rgba(255,255,255,.1);
+  --color-border-secondary: rgba(255,255,255,.16);
+  --color-border-primary:   rgba(255,255,255,.24);
+
+}
+
+:root, html[data-theme="light"] {
+  .light_mode();
+}
+
+html[data-theme="dark"] {
+  .dark_mode();
+} 
+@media (prefers-color-scheme: dark) {
+  .dark_mode();
+}
+
+
+
