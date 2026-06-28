@@ -10,6 +10,62 @@ import tsdoc from "eslint-plugin-tsdoc";
 // tseslint.configs.strict,
 // tseslint.configs.stylistic,
 
+const BASE_NAMING_CONVENTIONS = [
+  // Static Readonly fields
+  // Must be UPPER_CASE (e.g., static readonly MAX_RETRIES = 3;)
+  {
+    "selector": "classProperty",
+    "modifiers": ["static", "readonly"],
+    "format": ["UPPER_CASE"],
+    "leadingUnderscore": "forbid"
+  },
+
+  {
+    "selector": "classProperty",
+    "modifiers": ["private", "static", "readonly"],
+    "format": ["UPPER_CASE"],
+    "leadingUnderscore": "forbid"
+  },
+
+  // Private Class Members
+  // Must be _camelCase
+  {
+    "selector": ["classProperty", "classMethod", "accessor"],
+    "modifiers": ["private"],
+    "format": ["camelCase"],
+    "leadingUnderscore": "require"
+  },
+  // Protected Class Members
+  // Must be _camelCase
+  {
+    "selector": ["classProperty", "classMethod", "accessor"],
+    "modifiers": ["protected"],
+    "format": ["camelCase"],
+    "leadingUnderscore": "require"
+  },
+  // Public Class Members (Default for classes)
+  // Must be camelCase
+  {
+    "selector": ["classProperty", "classMethod", "accessor"],
+    "format": ["camelCase"],
+    "leadingUnderscore": "forbid"
+  },
+  // Enum Members
+  // Must be UPPER_CASE (e.g., enum Status { ACTIVE, INACTIVE })
+  {
+    "selector": "enumMember",
+    "format": ["UPPER_CASE"]
+  },
+  // Type Properties (Interfaces and Type Aliases)
+  // Allows camelCase, or snake_case for event-like fields. 
+  // (Note: kebab-case is handled by rule #1 if wrapped in quotes)
+  {
+    "selector": "typeProperty",
+    "format": ["camelCase", "snake_case"],
+    "leadingUnderscore": "allow"
+  }
+]
+
 export default tseslint.config(
   {
     ignores: ["dist/**", "node_modules/**", ".pnp.*", ".vscode/**", ".yarn/**", "db/**", "logs/**"],
@@ -47,64 +103,17 @@ export default tseslint.config(
       "@typescript-eslint/explicit-module-boundary-types": "error",
       "@typescript-eslint/naming-convention": [
         "error",
-        // Static Readonly fields
-        // Must be UPPER_CASE (e.g., static readonly MAX_RETRIES = 3;)
-        {
-          "selector": "classProperty",
-          "modifiers": ["static", "readonly"],
-          "format": ["UPPER_CASE"],
-          "leadingUnderscore": "forbid"
-        },
-
-        {
-          "selector": "classProperty",
-          "modifiers": ["private", "static", "readonly"],
-          "format": ["UPPER_CASE"],
-          "leadingUnderscore": "forbid"
-        },
-
-        // Private Class Members
-        // Must be _camelCase
-        {
-          "selector": ["classProperty", "classMethod", "accessor"],
-          "modifiers": ["private"],
-          "format": ["camelCase"],
-          "leadingUnderscore": "require"
-        },
-        // Protected Class Members
-        // Must be _camelCase
-        {
-          "selector": ["classProperty", "classMethod", "accessor"],
-          "modifiers": ["protected"],
-          "format": ["camelCase"],
-          "leadingUnderscore": "require"
-        },
-        // Public Class Members (Default for classes)
-        // Must be camelCase
-        {
-          "selector": ["classProperty", "classMethod", "accessor"],
-          "format": ["camelCase"],
-          "leadingUnderscore": "forbid"
-        },
-        // Enum Members
-        // Must be UPPER_CASE (e.g., enum Status { ACTIVE, INACTIVE })
-        {
-          "selector": "enumMember",
-          "format": ["UPPER_CASE"]
-        },
-        // Functions
-        // Must be camelCase
+        ...BASE_NAMING_CONVENTIONS,
+        // Overrides the standard function rule for React components
         {
           "selector": "function",
-          "format": ["camelCase"],
+          "format": ["camelCase", "PascalCase"],
           "leadingUnderscore": "allow"
         },
-        // Type Properties (Interfaces and Type Aliases)
-        // Allows camelCase, or snake_case for event-like fields. 
-        // (Note: kebab-case is handled by rule #1 if wrapped in quotes)
+        // Allows React components assigned to variables
         {
-          "selector": "typeProperty",
-          "format": ["camelCase", "snake_case"],
+          "selector": "variable",
+          "format": ["camelCase", "PascalCase", "UPPER_CASE"],
           "leadingUnderscore": "allow"
         }
       ]
@@ -124,6 +133,24 @@ export default tseslint.config(
       "react/react-in-jsx-scope": "off",
       // Redundant with TypeScript
       "react/prop-types": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "error",
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          "selector": "function",
+          "format": ["camelCase", "PascalCase"],
+          "leadingUnderscore": "allow"
+        },
+
+        // Add this block to handle React components declared as variables 
+        // e.g., const MyComponent = () => <div>...</div>
+        {
+          "selector": "variable",
+          "format": ["camelCase", "PascalCase", "UPPER_CASE"],
+          "leadingUnderscore": "allow"
+        }
+      ]
     },
   },
 );
