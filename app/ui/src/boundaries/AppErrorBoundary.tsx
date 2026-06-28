@@ -1,4 +1,4 @@
-import { Component, ReactNode } from "react";
+import { Component, type JSX } from "react";
 
 
 // Error boundary that catches render crashes caused by Vite HMR context
@@ -7,36 +7,35 @@ import { Component, ReactNode } from "react";
 // TODO: Rewrite
 // TODO: Less css!
 export class AppErrorBoundary extends Component<
-{ children: ReactNode },
+{ children: JSX.Element },
 { hasError: boolean; error: string | null }
 > {
   state = { hasError: false, error: null }
   private _poll?: ReturnType<typeof setInterval>
   
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError(error: Error): { hasError: true, error: string } {
     return { hasError: true, error: error.message }
   }
 
-  componentDidUpdate(_: unknown, prev: { hasError: boolean }) {
+  componentDidUpdate(_: unknown, prev: { hasError: boolean }): void {
     if (!prev.hasError && this.state.hasError) {
-      this._poll = setInterval(async () => {
-        try {
-          // Poll the root path — it goes through Vite middleware,
-          // so a 200 means both Express and Vite are fully ready.
-          const res = await fetch('/', { method: 'HEAD' })
-          if (res.ok) window.location.reload()
-        } catch {
-          // server not ready yet — keep waiting
-        }
+      this._poll = setInterval(() => {
+        fetch('/', { method: 'HEAD' })
+          .then((res) => {
+            if (res.ok) window.location.reload();
+          })
+          .catch(() => {
+            // server not ready yet — keep waiting
+          })
       }, 2000)
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     if (this._poll) clearInterval(this._poll)
   }
 
-  render() {
+  render(): JSX.Element {
     if (!this.state.hasError) return this.props.children;
     
     return (
