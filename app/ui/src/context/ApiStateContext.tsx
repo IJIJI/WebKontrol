@@ -45,8 +45,8 @@ export function ApiStateProvider({ children }: { children: JSX.Element }): JSX.E
   useEffect(() => {
     setLoading(true);
     const eventSource = new EventSource('/api/state');
-    eventSource.onmessage = (payload) => applySSEPayload(JSON.parse(payload.data));
-    eventSource.onerror = () => setError('Lost connection to the server!');
+    eventSource.onmessage = (payload: MessageEvent<string>): void => applySSEPayload(JSON.parse(payload.data) as WebServerState); // TODO: Add validation?
+    eventSource.onerror = (): void => setError('Lost connection to the server!');
     return () => eventSource.close();
   }, [applySSEPayload])
 
