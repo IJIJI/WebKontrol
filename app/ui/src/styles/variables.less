@@ -79,7 +79,9 @@ html[data-theme="dark"] {
   .dark_mode();
 } 
 @media (prefers-color-scheme: dark) {
-  .dark_mode();
+  html:not([data-theme="light"]) {
+    .dark_mode();
+  }
 }
 
 
