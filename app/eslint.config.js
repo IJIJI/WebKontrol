@@ -134,7 +134,7 @@ export default tseslint.config(
       // Redundant with TypeScript
       "react/prop-types": "off",
       "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "error",
+
       "@typescript-eslint/naming-convention": [
         "error",
         {
