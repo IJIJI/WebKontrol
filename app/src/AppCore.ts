@@ -142,7 +142,7 @@ export class AppCore {
           check: async (): Promise<void> => {
 
           },
-          apply: async (ref: string, type: 'release' | 'branch'): Promise<void> {
+          apply: async (ref: string, type: 'release' | 'branch'): Promise<void> => {
 
           },
           getStatus: async (): Promise<void> => {
