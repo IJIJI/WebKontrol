@@ -50,59 +50,59 @@ export class AppCore {
     }
 
     //* Test code
-    const globalPuppetConfig: PuppetGlobalConfigInput = {
-      load_timout: undefined
-    };
-    const defaultRuntimeConfig: PuppetRuntimeConfig = PuppetRuntimeConfigSchema.parse({
-      target_url: "https://etsy.com/"
-    });
+    // const globalPuppetConfig: PuppetGlobalConfigInput = {
+    //   load_timout: undefined
+    // };
+    // const defaultRuntimeConfig: PuppetRuntimeConfig = PuppetRuntimeConfigSchema.parse({
+    //   target_url: "https://etsy.com/"
+    // });
 
-    const specificConfig: PuppeteerPuppetSpecificConfig = PuppeteerPuppetSpecificConfigSchema.parse({
-      id: "pup1",
-    })
+    // const specificConfig: PuppeteerPuppetSpecificConfig = PuppeteerPuppetSpecificConfigSchema.parse({
+    //   id: "pup1",
+    // })
 
-    // Should have try catch in prod
-    const testPuppetConfig = PuppeteerPuppetConfigSchema.parse({
-      specific: specificConfig,
-      global: globalPuppetConfig,
-      runtime: defaultRuntimeConfig
-    });
+    // // Should have try catch in prod
+    // const testPuppetConfig = PuppeteerPuppetConfigSchema.parse({
+    //   specific: specificConfig,
+    //   global: globalPuppetConfig,
+    //   runtime: defaultRuntimeConfig
+    // });
 
-    const testpuppet = new PuppeteerPuppet(testPuppetConfig);
+    // const testpuppet = new PuppeteerPuppet(testPuppetConfig);
 
-    await testpuppet.init();
+    // await testpuppet.init();
 
-    const testdb = CoreDatabase.getInstance();
+    // const testdb = CoreDatabase.getInstance();
 
-    const key: string = "1";
+    // const key: string = "1";
 
-    const currentValue = await testdb.getSetting("test", "website", key);
-    if (!currentValue) {
-      // await testdb.updateSetting("test", "website", key, "https://synapt.net/contact.php");
-      await testdb.updateSetting("test", "website", key, "https://example.com/");
-    }
+    // const currentValue = await testdb.getSetting("test", "website", key);
+    // if (!currentValue) {
+    //   // await testdb.updateSetting("test", "website", key, "https://synapt.net/contact.php");
+    //   await testdb.updateSetting("test", "website", key, "https://example.com/");
+    // }
 
-    this._logger.important("Stored URL:", await testdb.getSetting("test", "website", key));
+    // this._logger.important("Stored URL:", await testdb.getSetting("test", "website", key));
 
-    const screenshot = await testpuppet.getScreenshot();
-    if (screenshot.success) {
-      this._logger.important("Screenshot saved at:", screenshot.path);
-    } else {
-      this._logger.error("Screenshot failed:", screenshot.error);
-    }
+    // const screenshot = await testpuppet.getScreenshot();
+    // if (screenshot.success) {
+    //   this._logger.important("Screenshot saved at:", screenshot.path);
+    // } else {
+    //   this._logger.error("Screenshot failed:", screenshot.error);
+    // }
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await testpuppet.updateRuntime({
-      target_url: "https://synapt.nl/"
-    });    
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await testpuppet.updateRuntime({
-      target_url: "https://youtube.com/"
-    });
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    // await testpuppet.updateRuntime({
+    //   target_url: "https://synapt.nl/"
+    // });    
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    // await testpuppet.updateRuntime({
+    //   target_url: "https://youtube.com/"
+    // });
 
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    process.exit(0);
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    // process.exit(0);
     //* END Test code
 
     // this._puppets.set(testpuppet.getKey(), testpuppet);
