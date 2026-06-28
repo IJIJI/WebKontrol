@@ -37,7 +37,7 @@ export function extendPuppetSpecificConfig<const B extends string, T extends z.Z
 ) {
   return PuppetSpecificConfigShape
     .extend({
-      type: z.literal(typeLiteral),
+      type: z.literal(typeLiteral).optional().default(typeLiteral),
       ...shape
     })
     .brand<PUPPET_SPECIFIC_CONFIG_BRAND>()
@@ -82,7 +82,7 @@ export function extendPuppetConfig<const B extends string, T extends z.ZodRawSha
 ) {
   return PuppetConfigShape
     .extend({
-      type: z.literal(typeLiteral),
+      type: z.literal(typeLiteral).optional().default(typeLiteral),
       ...shape
     })
     .brand<PUPPET_CONFIG_BRAND>()
