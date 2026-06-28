@@ -33,7 +33,7 @@ export enum ConnectionStatus {
 }
 
 interface ApiState {
-  state: UiWebServerState;
+  state: UiWebServerState; // TODO: Not nested?
   status: ConnectionStatus;
   error: string | null;
   callBacks: {
@@ -76,8 +76,7 @@ export function ApiStateProvider({
   children: JSX.Element;
   pingTimeoutMs?: number;
 }): JSX.Element {
-  // TODO: Combine both helpers below into one?
-  const [puppets, setPuppets] = useState<Map<string, UiPuppetState>>(new Map()); // TODO: Should puppets be in some sort of map? Should it contain a callback to modify that same puppet?
+  const [puppets, setPuppets] = useState<Map<string, UiPuppetState>>(new Map());
   const [system, setSystem] = useState<Partial<SystemBundle> | undefined>({});
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState(ConnectionStatus.CONNECTING);
