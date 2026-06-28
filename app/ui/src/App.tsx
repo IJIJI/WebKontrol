@@ -6,9 +6,7 @@ export default function App(): JSX.Element {
   return (
     <AppErrorBoundary>
       <ApiStateProvider>
-        <h1>
-          HI
-        </h1>
+        <h1>HI</h1>
       </ApiStateProvider>
     </AppErrorBoundary>
   );

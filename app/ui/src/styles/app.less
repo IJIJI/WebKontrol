@@ -2,9 +2,17 @@
 
 /* Zero values and define base */
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   font-family: @font-base;
   font-size: 14px;
@@ -13,16 +21,17 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
 }
 
-button { 
-  font-family: inherit; 
-  cursor: pointer; 
+button {
+  font-family: inherit;
+  cursor: pointer;
 }
 
 a {
   color: var(--color-text-info);
-  text-decoration: none; 
+  text-decoration: none;
 }
 
-input, select { 
-  font-family: inherit; 
+input,
+select {
+  font-family: inherit;
 }
