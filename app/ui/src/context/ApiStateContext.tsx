@@ -1,8 +1,9 @@
-import { type JSX, createContext, useContext, useState } from "react";
+import { type JSX, createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { WebServerState } from "../../../src/webServer/model"
 import type { PuppetKey, PuppetRuntimeConfigInput } from "../../../src/puppet/schema";
 import type { SystemConfig } from "../../../src/system/schema";
 import type { PuppetInfoBundle } from "../../../src/puppet/model";
+import { SystemBundle } from "../../../src/system/model";
 
 
 // TODO: This is pretty much the same as the webserver mutation handlers, but I don't think it will be in the future. Check how to best keep in sync.
@@ -27,7 +28,27 @@ const ApiStateContext = createContext<ApiState | null>(null);
 
 export function ApiStateProvider({ children }: { children: JSX.Element }): JSX.Element {
 
-  const [puppets, setPuppets] = useState<PuppetInfoBundle[]>([]);
+  const [puppets, setPuppets] = useState<PuppetInfoBundle[]>([]); // TODO: Should puppets be in some sort of map? Should it contain a callback to modify that same puppet?
+  const [system, setSystem] = useState<Partial<SystemBundle>>({});
+  //TODO Check if loading and error are desired in this form.
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const applySSEPayload = useCallback((state: WebServerState) => {
+    setPuppets(state.puppets ?? []);
+    setSystem(state.system ?? {});
+
+    setError(null);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    const eventSource = new EventSource('/api/state');
+    eventSource.onmessage = (payload) => applySSEPayload(JSON.parse(payload.data));
+    eventSource.onerror = () => setError('Lost connection to the server!');
+    return () => eventSource.close();
+  }, [applySSEPayload])
 
   return (<></>);
 }
