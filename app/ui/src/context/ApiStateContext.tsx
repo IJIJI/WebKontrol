@@ -13,7 +13,7 @@ import type {
 } from "../../../src/puppet/schema";
 import type { SystemConfig } from "../../../src/system/schema";
 import type { PuppetInfoBundle } from "../../../src/puppet/model";
-import { SystemBundle } from "../../../src/system/model";
+import type { SystemBundle } from "../../../src/system/model";
 
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
@@ -71,7 +71,19 @@ export function ApiStateProvider({
     const eventSource = new EventSource("/api/state");
 
     eventSource.onmessage = (payload: MessageEvent<string>): void => {
-      const data: WebServerState = JSON.parse(payload.data);
+      
+      const parsed = JSON.parse(payload.data);
+      const data: WebServerState = { // TODO: Zod validation!!
+        puppets: parsed.puppets ?? [],
+        system: {
+          config: {
+            system_name: parsed.system.config.system_name ?? "WebKontrol"
+          },
+          info: {
+            start_moment: parsed.system.info.start_moment ?? 0
+          }
+        }
+      }
 
       const puppets = new Map<PuppetKey, UiPuppetState>();
 
