@@ -54,10 +54,11 @@ export function ApiStateProvider({
 }): JSX.Element {
   // TODO: Combine both helpers below into one?
   const [puppets, setPuppets] = useState<Map<string, UiPuppetState>>(new Map()); // TODO: Should puppets be in some sort of map? Should it contain a callback to modify that same puppet?
-  const [system, setSystem] = useState<SystemBundle>();
+  const [system, setSystem] = useState<Partial<SystemBundle> | undefined>({});
   //TODO Check if loading and error are desired in this form.
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // const [connected, setConnected] = useState(false); // TODO
 
   const applyUiWebServerState = useCallback((state: UiWebServerState) => {
     setPuppets(state.puppets);
@@ -66,7 +67,7 @@ export function ApiStateProvider({
     setError(null);
     setLoading(false);
 
-    console.log(`puppets:`, puppets, `system`, system);
+    console.debug(`Updated state. Puppets:`, puppets, `System:`, system);
   }, []);
 
   useEffect(() => {
