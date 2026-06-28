@@ -1,5 +1,5 @@
 import { AppErrorBoundary } from "./boundaries/AppErrorBoundary";
-import { ApiStateProvider } from "./context/ApiStateProvider";
+import { ApiStateProvider } from "./context/ApiStateContext";
 
 export default function App() {
   return (
