@@ -14,6 +14,7 @@ import type {
 import type { SystemConfig } from "../../../src/system/schema";
 import type { PuppetInfoBundle } from "../../../src/puppet/model";
 import type { SystemBundle } from "../../../src/system/model";
+import { Api } from "./api";
 
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
@@ -102,8 +103,13 @@ export function ApiStateProvider({
   const puppetSetRuntime = async (
     id: PuppetKey,
     runtime: PuppetRuntimeConfigInput,
-  ): Promise<void> => {};
-  const systemSetConfig = async (config: SystemConfig): Promise<void> => {};
+  ): Promise<void> => {
+    return Api.patch(`/api/puppets/${id}`, runtime);
+  };
+
+  const systemSetConfig = async (config: SystemConfig): Promise<void> => {
+    return Api.patch(`/api/system/config`, config);
+  };
 
   return (
     <ApiStateContext
