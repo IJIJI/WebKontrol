@@ -67,7 +67,7 @@ export function ApiStateProvider({
     setError(null);
     setLoading(false);
 
-    console.debug(`Updated state. Puppets:`, puppets, `System:`, system);
+    console.debug(`Updated state. Puppets:`, state.puppets, `System:`, state.system);
   }, []);
 
   useEffect(() => {
