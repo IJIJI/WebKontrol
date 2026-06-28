@@ -1,1 +1,28 @@
 @import "./variables.less";
+
+/* Zero values and define base */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  font-family: @font-base;
+  font-size: 14px;
+  background: var(--color-background-tertiary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+button { 
+  font-family: inherit; 
+  cursor: pointer; 
+}
+
+a {
+  color: var(--color-text-info);
+  text-decoration: none; 
+}
+
+input, select { 
+  font-family: inherit; 
+}
