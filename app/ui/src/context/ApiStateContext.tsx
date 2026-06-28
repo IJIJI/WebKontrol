@@ -27,6 +27,8 @@ export interface UiWebServerState {
 
 interface ApiState {
   state: UiWebServerState;
+  connected: boolean;
+  error: string | null;
   callBacks: {
     puppet: {
       setRuntime: (
@@ -58,7 +60,9 @@ export function ApiStateProvider({
   //TODO Check if loading and error are desired in this form.
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // const [connected, setConnected] = useState(false); // TODO
+  const [connected, setConnected] = useState(false);
+
+  const [lastServerPing, setLastServerPing] = useState<number>(0);
 
   const applyUiWebServerState = useCallback((state: UiWebServerState) => {
     setPuppets(state.puppets);
@@ -98,11 +102,14 @@ export function ApiStateProvider({
         system: data.system,
       };
 
+      setConnected(true);
       applyUiWebServerState(state); // TODO: Add validation?
-    };
+    });
 
-    eventSource.onerror = (): void =>
+    eventSource.onerror = (): void => {
+      setConnected(false);
       setError("Lost connection to the server!");
+    };
 
     return () => eventSource.close();
   }, [applyUiWebServerState]);
@@ -126,6 +133,8 @@ export function ApiStateProvider({
           puppets: puppets,
           system: system,
         },
+        connected,
+        error,
         callBacks: {
           puppet: {
             setRuntime: puppetSetRuntime,
