@@ -35,10 +35,11 @@ export default function useConnectionToast({state, connected_timeout = 1_000}: {
     const prev = prevStateRef.current;
     prevStateRef.current = state; // TODO: Update on state change
 
-    if (state != ConnectionStatus.CONNECTED) { // TODO: Only show if prev is different?
+    if (state != ConnectionStatus.CONNECTED && prev != state) { // TODO: Only show if prev is different?
       showToast();
     }
-    else if (!hideTimeoutRef || prev != state) {
+    else if (visible && (!hideTimeoutRef || prev != state)) {
+      showToast();
       startHideTimout();
     }
 
