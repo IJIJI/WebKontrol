@@ -3,6 +3,7 @@ import { ConnectionStatus } from "../../context/types";
 import { toast } from "react-hot-toast"
 
 import './toast.less';
+import { Icons } from "../icons/icons";
 
 const STATE_MAP: Record<ConnectionStatus, {class: string, label: string, icon: JSX.Element | null}> = {
   [ConnectionStatus.CONNECTING]: {
@@ -18,7 +19,7 @@ const STATE_MAP: Record<ConnectionStatus, {class: string, label: string, icon: J
   [ConnectionStatus.DISCONNECTED]: {
     class: "disconnected",
     label: "No Connection",
-    icon: null
+    icon: <Icons.warning />
   },
 }
 
@@ -50,11 +51,6 @@ export default function useConnectionToast({state, connected_timeout = 1_000}: {
     hideToast();
     toast.custom( // TODO: Move into toast template component? // TODO: Move to icon library
       <div className={`toast connection ${stateVars.class}`}>
-          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <path d="M6.5 1L12 11.5H1L6.5 1Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
-              <line x1="6.5" y1="5" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-              <circle cx="6.5" cy="9.8" r=".6" fill="currentColor"/>
-          </svg> 
           {stateVars.label} 
           {stateVars.icon}
       </div>, // TODO: Above in some sort of span?
