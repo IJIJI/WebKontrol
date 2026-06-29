@@ -18,6 +18,8 @@ import type { PuppetInfoBundle } from "../../../src/puppet/model";
 import type { SystemBundle } from "../../../src/system/model";
 import { Api } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
+import { ConnectionStatus } from "./types";
+
 
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
@@ -28,11 +30,6 @@ export interface UiWebServerState {
   system?: Partial<SystemBundle>;
 }
 
-export enum ConnectionStatus {
-  CONNECTING = "Connecting",
-  CONNECTED = "Connected",
-  DISCONNECTED = "Disconnected",
-} // TODO: Add difference between timed out and a closed sse.
 
 interface ApiState {
   state: UiWebServerState; // TODO: Not nested?
