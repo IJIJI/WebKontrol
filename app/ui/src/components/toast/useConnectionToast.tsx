@@ -36,7 +36,6 @@ export default function useConnectionToast({state, connected_timeout = 1_000}: {
     prevStateRef.current = state;
 
     if (state != ConnectionStatus.CONNECTED) {
-      cancelHideTimeout();
       showToast();
     }
     else if (!hideTimeoutRef || prev != state) {
