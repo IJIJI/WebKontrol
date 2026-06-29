@@ -48,7 +48,7 @@ export default function useConnectionToast({state, connected_timeout = 1_000}: {
   const showToast = (): void => {
     hideToast();
     toast.custom( // TODO: Move into toast template component? // TODO: Move to icon library
-      <div className={`toast connection ${stateVars.class}` + (!visible && "hidden")}>
+      <div className={`toast connection ${stateVars.class}`}>
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
               <path d="M6.5 1L12 11.5H1L6.5 1Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
               <line x1="6.5" y1="5" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
