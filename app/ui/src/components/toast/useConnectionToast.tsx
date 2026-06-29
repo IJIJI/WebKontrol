@@ -22,6 +22,7 @@ const STATE_MAP: Record<ConnectionStatus, {class: string, label: string, icon: J
     icon: <Icons.warning size={16}/>
   },
 }; // TODO: Add icon size as param to funct
+// TODO: Add difference between reconnecting and failed to connect after x seconds?
 
 export default function useConnectionToast({state, connected_timeout = 750}: {state: ConnectionStatus, connected_timeout?: number}): void {
   const id = useId();
