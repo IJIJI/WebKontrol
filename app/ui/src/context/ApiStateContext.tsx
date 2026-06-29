@@ -30,7 +30,7 @@ export enum ConnectionStatus {
   CONNECTING = "Connecting",
   CONNECTED = "Connected",
   DISCONNECTED = "Disconnected",
-}
+} // TODO: Add difference between timed out and a closed sse.
 
 interface ApiState {
   state: UiWebServerState; // TODO: Not nested?
