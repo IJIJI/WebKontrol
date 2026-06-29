@@ -22,7 +22,7 @@ const STATE_MAP: Record<ConnectionStatus, {class: string, label: string, icon: J
   },
 }
 
-export default function useConnectionToast({state, connected_timeout = 1_000}: {state: ConnectionStatus, connected_timeout: number}): void {
+export default function useConnectionToast({state, connected_timeout = 1_000}: {state: ConnectionStatus, connected_timeout?: number}): void {
   const id = useId();
 
   const prevStateRef = useRef(state); // TODO: Beter initial handeling?
