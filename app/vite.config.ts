@@ -38,4 +38,11 @@ export default defineConfig({
   },
   plugins: [react()],
   customLogger,
+  css: { // TODO: Is this the right way?
+    preprocessorOptions: {
+      less: {
+        additionalData: '@import "./ui/src/styles/variables.less";',
+      }
+    }
+  }
 });
