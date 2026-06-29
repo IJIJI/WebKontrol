@@ -22,10 +22,11 @@ const STATE_MAP: Record<ConnectionStatus, {class: string, label: string, icon: J
   },
 }
 
-export default function useConnectionToast({state}: {state: ConnectionStatus}): void {
+export default function useConnectionToast({state, connected_timeout = 1_000}: {state: ConnectionStatus, connected_timeout: number}): void {
   const id = useId();
 
-  const prevStateRef = useRef(state);
+  const prevStateRef = useRef(state); // TODO: Beter initial handeling?
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const stateVars = STATE_MAP[state];
   const [visible, setVisible] = useState<boolean>(false);
@@ -34,26 +35,48 @@ export default function useConnectionToast({state}: {state: ConnectionStatus}): 
     const prev = prevStateRef.current;
     prevStateRef.current = state;
 
+    if (state != ConnectionStatus.CONNECTED) {
+      cancelHideTimeout();
+      showToast();
+    }
+    else if (!hideTimeoutRef || prev != state) {
+      startHideTimout();
+    }
 
 
   }, [state]);
 
   const showToast = (): void => {
+    hideToast();
     toast.custom(
-    <div className={`toast connection ${stateVars.class}` + (!visible && "hidden")}>
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-            <path d="M6.5 1L12 11.5H1L6.5 1Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
-            <line x1="6.5" y1="5" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-            <circle cx="6.5" cy="9.8" r=".6" fill="currentColor"/>
-        </svg> // TODO: Move to icon library
-        {stateVars.label} // TODO: In some sort of span?
-        {stateVars.icon}
-    </div>,
-    { id: id, duration: Infinity },
-    )
+      <div className={`toast connection ${stateVars.class}` + (!visible && "hidden")}>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M6.5 1L12 11.5H1L6.5 1Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+              <line x1="6.5" y1="5" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+              <circle cx="6.5" cy="9.8" r=".6" fill="currentColor"/>
+          </svg> // TODO: Move to icon library
+          {stateVars.label} // TODO: In some sort of span?
+          {stateVars.icon}
+      </div>,
+      { id: id, duration: Infinity },
+    );
+    setVisible(true);
   };
 
   const hideToast = (): void => {
+    cancelHideTimeout();
+    if(!visible) return;
     toast.dismiss(id);
+    setVisible(false);
+  }
+
+  const startHideTimout = (): void => {
+    hideTimeoutRef.current = setTimeout(() => {
+      hideToast();
+    }, connected_timeout);
+  }
+
+  const cancelHideTimeout = (): void => {
+    if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
   }
 }
