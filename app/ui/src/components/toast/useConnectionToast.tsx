@@ -1,7 +1,8 @@
-import { JSX, useState } from "react";
+import { JSX, useEffect, useId, useRef, useState } from "react";
 import { ConnectionStatus } from "../../context/ApiStateContext";
+import { toast } from "react-hot-toast"
 
-
+import './toast.less';
 
 const STATE_MAP: Record<ConnectionStatus, {class: string, label: string, icon: JSX.Element | null}> = {
   [ConnectionStatus.CONNECTING]: {
@@ -21,19 +22,25 @@ const STATE_MAP: Record<ConnectionStatus, {class: string, label: string, icon: J
   },
 }
 
-export default function ServerConnectionToast({state}: {state: ConnectionStatus}) {
+export default function useConnectionToast({state}: {state: ConnectionStatus}): void {
+  const id = useId();
 
+  const prevStateRef = useRef(state);
+  
   const stateVars = STATE_MAP[state];
   const [visible, setVisible] = useState<boolean>(false);
 
-  return (
-    <div className={`toast connection ${stateVars.class}` + (!visible && "hidden")} style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '10px 14px', borderRadius: 'var(--border-radius-md)',
-          background: hard ? 'var(--color-text-danger)' : 'var(--color-text-warning)',
-          color: '#fff', fontSize: 12, fontWeight: 500,
-          boxShadow: '0 2px 8px rgba(0,0,0,.25)',
-      }}>
+  useEffect(() => {
+    const prev = prevStateRef.current;
+    prevStateRef.current = state;
+
+
+
+  }, [state]);
+
+  const showToast = (): void => {
+    toast.custom(
+    <div className={`toast connection ${stateVars.class}` + (!visible && "hidden")}>
         <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
             <path d="M6.5 1L12 11.5H1L6.5 1Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
             <line x1="6.5" y1="5" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
@@ -41,6 +48,12 @@ export default function ServerConnectionToast({state}: {state: ConnectionStatus}
         </svg> // TODO: Move to icon library
         {stateVars.label} // TODO: In some sort of span?
         {stateVars.icon}
-    </div>
-  );
+    </div>,
+    { id: id, duration: Infinity },
+    )
+  };
+
+  const hideToast = (): void => {
+    toast.dismiss(id);
+  }
 }
