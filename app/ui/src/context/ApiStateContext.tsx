@@ -191,13 +191,13 @@ export function ApiStateProvider({
     >
       <Toaster // TODO: Here or in the app.ts? Or in the layout? In the router?
         position="top-right"
-        containerStyle={{ top: 70, right: 14 }} // TODO: tweak
+        containerStyle={{ top: 25, right: 20 }} // TODO: tweak
         toastOptions={{
             style: {
                 background: 'var(--color-background-primary)',
                 color: 'var(--color-text-primary)',
                 border: '0.5px solid var(--color-border-secondary)',
-                fontSize: 13,
+                fontSize: 16,
             },
             error: { duration: 5000 },
         }}
