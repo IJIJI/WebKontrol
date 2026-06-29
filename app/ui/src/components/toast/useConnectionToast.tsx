@@ -33,7 +33,7 @@ export default function useConnectionToast({state, connected_timeout = 1_000}: {
 
   useEffect(() => {
     const prev = prevStateRef.current;
-    prevStateRef.current = state;
+    prevStateRef.current = state; // TODO: Update on state change
 
     if (state != ConnectionStatus.CONNECTED) { // TODO: Only show if prev is different?
       showToast();
@@ -47,16 +47,16 @@ export default function useConnectionToast({state, connected_timeout = 1_000}: {
 
   const showToast = (): void => {
     hideToast();
-    toast.custom( // TODO: Move into toast template component?
+    toast.custom( // TODO: Move into toast template component? // TODO: Move to icon library
       <div className={`toast connection ${stateVars.class}` + (!visible && "hidden")}>
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
               <path d="M6.5 1L12 11.5H1L6.5 1Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
               <line x1="6.5" y1="5" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
               <circle cx="6.5" cy="9.8" r=".6" fill="currentColor"/>
-          </svg> // TODO: Move to icon library
-          {stateVars.label} // TODO: In some sort of span?
+          </svg> 
+          {stateVars.label} 
           {stateVars.icon}
-      </div>,
+      </div>, // TODO: Above in some sort of span?
       { id: id, duration: Infinity },
     );
     setVisible(true);
