@@ -6,6 +6,7 @@ import { ViewStateProvider } from "./context/ViewStateProvider";
 export default function App(): JSX.Element {
   return (
     //TODO: Check if this is the right split. Different error boundary for the views?
+    // TODO: error boundary inside or outside of router? What about state providers?
     <>
       <AppErrorBoundary>
         <ApiStateProvider>
