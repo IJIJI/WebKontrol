@@ -9,21 +9,21 @@ const STATE_MAP: Record<ConnectionStatus, {class: string, label: string, icon: J
   [ConnectionStatus.CONNECTING]: {
     class: "connecting",
     label: "Connecting...",
-    icon: null
+    icon: <Icons.loading size={16}/>
   },
   [ConnectionStatus.CONNECTED]: {
     class: "connected",
     label: "Connected",
-    icon: null
+    icon: <Icons.check size={16}/>
   },
   [ConnectionStatus.DISCONNECTED]: {
     class: "disconnected",
     label: "No Connection",
     icon: <Icons.warning size={16}/>
   },
-}
+}; // TODO: Add icon size as param to funct
 
-export default function useConnectionToast({state, connected_timeout = 1_000}: {state: ConnectionStatus, connected_timeout?: number}): void {
+export default function useConnectionToast({state, connected_timeout = 750}: {state: ConnectionStatus, connected_timeout?: number}): void {
   const id = useId();
 
   const prevStateRef = useRef(state); // TODO: Beter initial handeling?
