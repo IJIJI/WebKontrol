@@ -1,0 +1,24 @@
+interface IconProps { size?: number; className?: string; style?: React.CSSProperties }
+
+export const Icons = { 
+  warning: ({ size = 16, ...p }: IconProps) => {
+    return (
+      <svg width={size} height={size} viewBox="0 0 13 13" fill="none" {...p}>
+        <path d="M6.5 1L12 11.5H1L6.5 1Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+        <line x1="6.5" y1="5" x2="6.5" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+        <circle cx="6.5" cy="9.8" r=".6" fill="currentColor"/>
+      </svg> 
+    );
+  },
+  connections: ({ size = 16, ...p }: IconProps) => {
+    return (
+      <svg width={size} height={size} viewBox="0 0 16 16" fill="none" {...p}>
+        <circle cx="4"  cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
+        <circle cx="12" cy="4" r="2" stroke="currentColor" strokeWidth="1.3"/>
+        <circle cx="12" cy="12" r="2" stroke="currentColor" strokeWidth="1.3"/>
+        <line x1="6" y1="7.2" x2="10" y2="5"  stroke="currentColor" strokeWidth="1.2"/>
+        <line x1="6" y1="8.8" x2="10" y2="11" stroke="currentColor" strokeWidth="1.2"/>
+      </svg>
+    );
+  }
+}
