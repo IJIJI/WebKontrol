@@ -17,6 +17,7 @@ import type { SystemConfig } from "../../../src/system/schema";
 import type { PuppetInfoBundle } from "../../../src/puppet/model";
 import type { SystemBundle } from "../../../src/system/model";
 import { Api } from "./Api";
+import useConnectionToast from "../components/toast/useConnectionToast";
 
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
@@ -168,6 +169,8 @@ export function ApiStateProvider({
   const systemSetConfig = async (config: SystemConfig): Promise<void> => {
     return Api.patch(`/api/system/config`, config);
   };
+
+  useConnectionToast({state: status});
 
   return (
     <ApiStateContext
