@@ -1,7 +1,9 @@
+import { JSX } from "react/jsx-runtime";
+
 interface IconProps { size?: number; className?: string; style?: React.CSSProperties }
 
 export const Icons = { 
-  warning: ({ size = 16, ...p }: IconProps) => {
+  warning: ({ size = 16, ...p }: IconProps): JSX.Element => {
     return (
       <svg width={size} height={size} viewBox="0 0 13 13" fill="none" {...p}>
         <path d="M6.5 1L12 11.5H1L6.5 1Z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
@@ -10,7 +12,7 @@ export const Icons = {
       </svg> 
     );
   },
-  connections: ({ size = 16, ...p }: IconProps) => {
+  connections: ({ size = 16, ...p }: IconProps): JSX.Element => {
     return (
       <svg width={size} height={size} viewBox="0 0 16 16" fill="none" {...p}>
         <circle cx="4"  cy="8" r="2" stroke="currentColor" strokeWidth="1.3"/>
