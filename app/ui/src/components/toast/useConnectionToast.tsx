@@ -19,7 +19,7 @@ const STATE_MAP: Record<ConnectionStatus, {class: string, label: string, icon: J
   [ConnectionStatus.DISCONNECTED]: {
     class: "disconnected",
     label: "No Connection",
-    icon: <Icons.warning />
+    icon: <Icons.warning size={16}/>
   },
 }
 
