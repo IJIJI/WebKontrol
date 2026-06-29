@@ -65,8 +65,8 @@ export default function useConnectionToast({state, connected_timeout = 1_000}: {
   const hideToast = (): void => {
     cancelHideTimeout();
     if(!visible) return;
-    toast.dismiss(id);
     setVisible(false);
+    toast.dismiss(id);
   }
 
   const startHideTimout = (): void => {
