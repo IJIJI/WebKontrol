@@ -29,16 +29,27 @@
 @glass-background: rgb(50, 50, 50);
 @glass-border: rgb(100, 100, 100);
 @glass-shadow: @glass-border;
+
+// Breakpoints:
+@breakpoint-mobile: 480;
+@breakpoint-ipad: 850;
+@breakpoint-small-pc: 1050;
+// @breakpoint-large-pc: 2600; // TODO: Add breakpoint for widescreen
+
 // TODO: Add default paddings?
 
 // TODO: Split background and foreground.
 // TODO: Also add a border color to the above. Maybe dynamic from the selected bg color? 
+// TODO: Also add a shadow color to the above?
 // color-mix(in srgb, var(--color-background-secondary) 85%, black 15%);
 // Light mode:
 .light_mode() { 
-  --color-background-primary: #ffffff;
-  --color-background-secondary: #f1f1ee;
-  --color-background-tertiary: #eeecea;
+  --color-comp-background-primary: 255, 255, 255;
+  --color-background-primary: rgb(var(var(--color-comp-background-primary)));
+  --color-comp-background-secondary: 241, 241, 238;
+  --color-background-secondary: rgb(var(--color-comp-background-secondary));
+  --color-comp-background-tertiary: 238, 236, 234;
+  --color-background-tertiary: rgb(var(--color-comp-background-tertiary));
 
   --color-background-success: #d1e9d2;
   --color-background-danger: #fadbdb;
@@ -62,9 +73,12 @@
 
 // Dark Mode:
 .dark_mode() {
-  --color-background-primary: #1c1c1c;
-  --color-background-secondary: #272727;
-  --color-background-tertiary: #111111;
+  --color-comp-background-primary: 28, 28, 28;
+  --color-background-primary: rgb(var(var(--color-comp-background-primary)));
+  --color-comp-background-secondary: 39, 39, 39;
+  --color-background-secondary: rgb(var(--color-comp-background-secondary));
+  --color-comp-background-tertiary: 17, 17, 17;
+  --color-background-tertiary: rgb(var(--color-comp-background-tertiary));
 
   --color-background-success: #04342c;
   --color-background-danger: #501313;
