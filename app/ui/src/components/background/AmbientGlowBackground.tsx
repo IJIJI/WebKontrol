@@ -26,7 +26,7 @@ type MinMax<T = number> = {
   max: T
 }
 
-const generateBlobs = (count: number, colors: string[], speed: MinMax = {min: 5, max: 50}, size: MinMax = {min: 5, max: 25}, opacity: MinMax = {min: 0.7, max: 0.9}, seed?: number): Blob[] => {
+const generateBlobs = (count: number, colors: string[], speed: MinMax = {min: 5, max: 30}, size: MinMax = {min: 5, max: 25}, opacity: MinMax = {min: 0.7, max: 0.9}, duration: MinMax = {min: 40, max: 80}, seed?: number): Blob[] => {
   const rand = seed !== undefined ? Math.random : Math.random;
 
   return Array.from({length: count}, (_v, k): Blob => ({
@@ -40,7 +40,7 @@ const generateBlobs = (count: number, colors: string[], speed: MinMax = {min: 5,
       x: speed.min + (rand() - 0.5) * (speed.max - speed.min),
       y: speed.min + (rand() - 0.5) * (speed.max - speed.min),
     },
-    duration: 20 + rand() * 40,
+    duration: duration.min + rand() * (duration.max - duration.min),
     opacity: opacity.min + rand() * (opacity.max - opacity.min)
   }));
 }

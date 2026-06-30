@@ -14,7 +14,7 @@
     transform: translate(-50%, -50%); // Blob is set from the top left, this way those coordinates correspond to its center.
   }
   
-  .ambientGlow {
+  &.ambientGlow {
     .blob.animate {
       animation: ambient-glow-drift var(--duration, 24s) ease-in-out infinite alternate;
     }
