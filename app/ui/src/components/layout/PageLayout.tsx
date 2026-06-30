@@ -65,9 +65,7 @@ export default function PageLayout(): JSX.Element {
     <div className="page-base">
       <AmbientGlowBackground />
       <section className="page-layout">
-        <ContentSection variant="glass" className="pad-s">
-          <DesktopHeader className="page-header" version="v1.0.0" setCollapsed={setIsCollapsed}/>
-        </ContentSection>
+        <DesktopHeader className="page-header" version="v1.0.0" setCollapsed={setIsCollapsed}/>
         <Sidebar className="page-sidebar" isCollapsed={isCollapsed} setCollapsed={setIsCollapsed} deviceType={deviceType} />
         <MainContentContainer className="page-content">
           <Outlet />
