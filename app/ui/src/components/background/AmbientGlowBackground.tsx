@@ -10,10 +10,10 @@ interface Vector<T = number> {
 
 interface Blob {
   color: string;
-  size: number; // TODO: Relative size to area?
+  size: number; // 0 - 100 relative to the entire area.
   
-  position: Vector; // Currently 0-100% relative to area. // TODO -50-50?
-  velocity: Vector; // TODO: Pixels? Or relative to area?
+  position: Vector; // -100 - +100 for the entire area.
+  velocity: Vector; // -100 - +100, combined with speed modifier.
   duration: number;
   
   opacity: number;
@@ -21,15 +21,15 @@ interface Blob {
 
 const DEFAULT_COLORS = ["#e85d30", "#d12e2eff", "#ed313dff"]; //TODO: Load from less variables somehow?
 
-const generateBlobs = (count: number, colors: string[], maxSpeed: number = 100, seed?: number): Blob[] => {
+const generateBlobs = (count: number, colors: string[], maxSpeed: number = 50, maxSize: number = 50, seed?: number): Blob[] => {
   const rand = seed !== undefined ? Math.random : Math.random;
 
   return Array.from({length: count}, (_v, k): Blob => ({
     color: colors[k % colors.length],
-    size: 200 + rand() * 300, // 200-500px //TODO Based on viewport size?
+    size: 5 + rand() * maxSize, 
     position: {
-      x: 10 + rand() * 80,
-      y: 10 + rand() * 80,
+      x: (rand() - 0.5) * 95,
+      y: (rand() - 0.5) * 95,
     },
     velocity:  {
       x: (rand() - 0.5) * maxSpeed,
@@ -75,13 +75,13 @@ export default function AmbientGlowBackground({
       {blobs.map((blob, i) => (
         <span
           key={i}
-          className={"blob" + animate ? " animate" : ""}
+          className={"blob" + (animate ? " animate" : "")}
           style={
             {
               width: blob.size,
               height: blob.size,
-              top: blob.position.x,
-              left: blob.position.y,
+              left: `${blob.position.x + 50}vw`,
+              top: `${blob.position.y + 50}vh`,
               background: blob.color,
               opacity: blob.opacity * intensity,
               "--duration": `${blob.duration}s`,

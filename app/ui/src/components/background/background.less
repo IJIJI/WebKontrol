@@ -1,0 +1,40 @@
+
+.background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(75px);
+    will-change: transform;
+    transform: translate(-50%, -50%); // Blob is set from the top left, this way those coordinates correspond to its center.
+  }
+  
+  .ambientGlow {
+    .blob.animate {
+      animation: ambient-glow-drift var(--duration, 24s) ease-in-out infinite alternate;
+    }
+
+    @keyframes ambient-glow-drift {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        transform: translate(calc(-50% + var(--dx, 60px)), calc(-50% + var(--dy, -40px))) scale(1.08);
+      }
+      100% {
+        transform: translate(calc(-50% + var(--dx, 60px) * -0.6), calc(-50% + var(--dy, -40px) * 0.7)) scale(0.94);
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blob.animate {
+      animation: none !important;
+    }
+  }
+}
