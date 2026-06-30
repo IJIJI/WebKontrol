@@ -5,6 +5,7 @@ import Sidebar from "./sidebar/Sidebar"
 import AmbientGlowBackground from "../background/AmbientGlowBackground"
 
 import "./layout.less";
+import MainContentContainer from "./content/MainContentContainer"
 
 const _PAGE_TITLES: Record<string, string> = { // TODO: Remove in favour of page helper component? What about paths with dynamic params?
   '/overview':        'Home',
@@ -58,16 +59,16 @@ export default function PageLayout(): JSX.Element {
     if (deviceType !== DeviceType.DESKTOP) setIsCollapsed(true)
   }, [location.pathname, deviceType])
 
-  // TODO: page-content as a component?
+  // TODO: Combine desktop and mobile header or autoswitch
   return(
     <div className="page-base">
       <AmbientGlowBackground />
       <section className="page-layout">
-        <DesktopHeader version="v1.0.0" setCollapsed={setIsCollapsed}/>
-        <Sidebar />
-        <main className="page-content"> 
+        <DesktopHeader className="page-header" version="v1.0.0" setCollapsed={setIsCollapsed}/>
+        <Sidebar className="page-sidebar" isCollapsed={isCollapsed} setCollapsed={setIsCollapsed} deviceType={deviceType} />
+        <MainContentContainer className="page-content">
           <Outlet />
-        </main>
+        </MainContentContainer>
       </section>
     </div>
   )
