@@ -41,7 +41,7 @@ export default defineConfig({
   css: { // TODO: Is this the right way?
     preprocessorOptions: {
       less: {
-        additionalData: '@import "./ui/src/styles/variables.less";',
+        additionalData: '@import "./ui/src/styles/variables/variables.less";',
       }
     }
   }
