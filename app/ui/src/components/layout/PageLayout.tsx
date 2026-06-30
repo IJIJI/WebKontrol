@@ -66,7 +66,7 @@ export default function PageLayout(): JSX.Element {
       <AmbientGlowBackground />
       <section className="page-layout">
         <DesktopHeader className="page-header" version="v1.0" collapsed={isCollapsed} setCollapsed={setIsCollapsed}/>
-        <Sidebar className="page-sidebar" isCollapsed={isCollapsed} setCollapsed={setIsCollapsed} deviceType={deviceType} />
+        <Sidebar className="page-sidebar" collapsed={isCollapsed} setCollapsed={setIsCollapsed} deviceType={deviceType} />
         <MainContentContainer className="page-content">
           <ContentSection>
           <input type="checkbox" name="" id="" onClick={() => setIsCollapsed(!isCollapsed)} checked={isCollapsed}/>

@@ -13,26 +13,21 @@ settings >
 - plugins
 - config
 */
-// TODO: Make configurable
-function Nav({collapsed}: {collapsed: boolean}) {
-  return (
-    <nav>
-      <SidebarItem collapsed /> 
-      <SidebarItem collapsed /> 
-      <SidebarSection collapsed />
-      <SidebarItem collapsed />
-      <SidebarItem collapsed />
-      <SidebarSection collapsed />
-      <SidebarItem collapsed />
-      <SidebarItem collapsed />
-    </nav>
-  );
-}
+// TODO: Make configurable?
 
-export default function Sidebar({isCollapsed, setCollapsed, deviceType, heightGrow = true, className}: {isCollapsed: boolean, setCollapsed: (state: boolean) => void, deviceType: DeviceType, heightGrow?: boolean, className?: string }): JSX.Element {
+export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow = true, className}: {collapsed: boolean, setCollapsed: (state: boolean) => void, deviceType: DeviceType, heightGrow?: boolean, className?: string }): JSX.Element {
   return(
     <ContentSection variant="glass" className={["sidebar", deviceType == DeviceType.MOBILE && "mobile", "pad-none", heightGrow && "height-100", className].filter(Boolean).join(" ")} >
-      <Nav collapsed />
+      <nav>
+        <SidebarItem collapsed to="/" label="Overview" icon={<></>} /> 
+        <SidebarItem collapsed to="/views" label="Views" icon={<></>} /> 
+        <SidebarSection collapsed label="Puppets" />
+        <SidebarItem collapsed to="/puppets/1" label="2: SDI1" icon={<></>} /> 
+        <SidebarItem collapsed to="/puppets/2" label="1: SDI2" icon={<></>} /> 
+        <SidebarSection collapsed label="Settings"/>
+        <SidebarItem collapsed to="/settings/plugins" label="Plugins" icon={<></>} /> 
+        <SidebarItem collapsed to="/settings" label="Config" icon={<></>} /> 
+      </nav>
     </ContentSection>
     
   );
