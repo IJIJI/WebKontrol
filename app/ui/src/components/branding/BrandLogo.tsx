@@ -21,7 +21,7 @@ export function BrandLogo({size = 26, subtext = true, collapsed = false, version
       </span>
     </h1>
     { subtext &&
-      <p className="subtext" style={{fontSize: size * 0.5, gap: size * 0.35}}>
+      <p className="subtext" style={{fontSize: size * 0.5, gap: collapsed ? 0 : size * 0.35, justifyContent: collapsed ? "center" : "space-between"}}>
         <span className="version">{version}</span>
         <span className={`divider${trail}`}></span>
         <span className={`producer${trail}`}>Synapt</span>
