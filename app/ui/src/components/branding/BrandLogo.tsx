@@ -1,5 +1,7 @@
 import { JSX } from "react/jsx-runtime";
 
+import "./brandLogo.less";
+
 type LogoProps = { 
   size?: number, 
   subtext?: boolean,
