@@ -16,9 +16,10 @@ const PAGE_TITLES: Record<string, string> = { // TODO: Dynamically set per page?
 
 const MOBILE_BREAKPOINT = 768
 
-export default function Layout() {
+export default function PageLayout() {
   const location = useLocation()
 
+  // TODO: (partially) In nav? Mobile open could in any case be generalised to expanded for both.
   const [isMobile,   setIsMobile]   = useState(() => window.innerWidth < MOBILE_BREAKPOINT)
   const [mobileOpen, setMobileOpen] = useState(false)
 
