@@ -3,4 +3,8 @@
   position: relative;
   min-height: 100vh;
   background-color: var(--color-background-primary); // TODO: Also defined in app base. Remove?
+
+  .page-layout, .page-layout *{
+    z-index: @z-content;
+  }
 }
