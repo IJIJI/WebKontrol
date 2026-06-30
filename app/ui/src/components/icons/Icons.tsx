@@ -45,4 +45,11 @@ export const Icons = {
       <animateTransform attributeName="transform" type="rotate" from="0 8 8" to="360 8 8" dur="0.75s" repeatCount="indefinite"/>
     </circle>
   ),
+  burger: icon("0 0 15 15",
+    <>
+      <rect y="2"  width="15" height="1.5" rx=".75" fill="currentColor"/>
+      <rect y="7"  width="15" height="1.5" rx=".75" fill="currentColor"/>
+      <rect y="12" width="15" height="1.5" rx=".75" fill="currentColor"/>
+    </>
+  ),
 } satisfies Record<string, Icon>

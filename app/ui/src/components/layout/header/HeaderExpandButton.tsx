@@ -1,6 +1,7 @@
 import { JSX } from "react/jsx-runtime";
 
 import "./header.less";
+import { Icons } from "../../icons/icons";
 
 export default function HeaderExpandButton({trigger}: { trigger: () => void}): JSX.Element {
   // TODO logo a link and autocollapse.
@@ -10,7 +11,7 @@ export default function HeaderExpandButton({trigger}: { trigger: () => void}): J
       onClick={trigger}
       aria-label="Open Menu"
     >
-    
+      <Icons.burger size={24} />
     </button>
   );
 }
