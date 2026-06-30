@@ -1,5 +1,6 @@
 
 
+// TODO: Load colors from theme?
 .brandLogo {
   display: flex;
   flex-direction: column;
@@ -8,6 +9,28 @@
   width: min-content;
 
   .projectName {
+    color: white;
     font-family: @font-brand;
+  }
+
+  .subtext{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    width: 90%;
+    justify-content: space-between;
+
+    font-family: @font-mono;
+    color: darkgrey;
+
+    .version {
+      color: @color-acc;
+    }
+    .divider {
+      height: 2px;
+      background-color: grey;
+      flex-grow: 1;
+    }
   }
 }

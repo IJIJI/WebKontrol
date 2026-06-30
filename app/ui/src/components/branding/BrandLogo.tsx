@@ -12,12 +12,12 @@ export function BrandLogo({size = 26, subtext = true, version}: LogoProps): JSX.
   return(<div className="brandLogo">
     <h1 className="projectName" style={{fontSize: size}}>WebKontrol</h1>
     { subtext &&
-      <p className="subtext" style={{fontSize: size * 0.5}}>
+      <p className="subtext" style={{fontSize: size * 0.5, gap: size * 0.35}}>
         <span className="version">
           {version}
         </span>
         <span className="divider">
-        -
+        
         </span>
         <span className="producer">
         Synapt
