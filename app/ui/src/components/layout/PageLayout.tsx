@@ -2,7 +2,9 @@ import { JSX, useEffect, useState } from "react"
 import { Outlet, useLocation } from "react-router-dom"
 import DesktopHeader from "./header/DesktopHeader"
 import Sidebar from "./sidebar/Sidebar"
+import AmbientGlowBackground from "../background/AmbientGlowBackground"
 
+import "./layout.less";
 
 const PAGE_TITLES: Record<string, string> = { // TODO: Remove in favour of page helper component? What about paths with dynamic params?
   '/overview':        'Home',
@@ -57,15 +59,16 @@ export default function PageLayout(): JSX.Element {
 
   // TODO: page-content as a component?
   return(
-    <main className="page-base">
+    <div className="page-base">
+      <AmbientGlowBackground />
       <section className="page-layout">
         <DesktopHeader version="v1.0.0" setCollapsed={setIsCollapsed}/>
         <Sidebar />
-        <section className="page-content"> 
+        <main className="page-content"> 
           <Outlet />
-        </section>
+        </main>
       </section>
-    </main>
+    </div>
   )
 
 }
