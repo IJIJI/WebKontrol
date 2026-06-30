@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { AppErrorBoundary } from "./boundaries/AppErrorBoundary";
 import { ApiStateProvider } from "./context/ApiStateContext";
-import { ViewStateProvider } from "./context/ViewStateProvider";
+import { BrandLogo } from "./components/branding/BrandLogo"
 
 export default function App(): JSX.Element {
   return (
@@ -10,14 +10,15 @@ export default function App(): JSX.Element {
     <>
       <AppErrorBoundary>
         <ApiStateProvider>
-          <h1>HI</h1>
+          {/* <h1>HI</h1> */}
+          <BrandLogo version="V1.0.0" />
         </ApiStateProvider>
       </AppErrorBoundary>
-      <AppErrorBoundary>
+      {/* <AppErrorBoundary>
         <ViewStateProvider>
           <h1>Screen!</h1>
         </ViewStateProvider>
-      </AppErrorBoundary>
+      </AppErrorBoundary> */}
     </>
   );
 }
