@@ -1,5 +1,6 @@
 @import "../font/font.less";
 @import "./z-index.less";
+@import "./sections.less";
 
 // Base vars:
 // Beacon brand. // TODO: Different WebKontrol branding?
@@ -22,6 +23,12 @@
 @border-radius-lg: 12px;
 @border-radius-xl: 16px;
 
+// For the glass Ui elements:
+@glass-blur: 15px;
+@glass-transparency: 0.5;
+@glass-background: rgb(50, 50, 50);
+@glass-border: rgb(100, 100, 100);
+@glass-shadow: @glass-border;
 // TODO: Add default paddings?
 
 // TODO: Split background and foreground.
@@ -37,6 +44,7 @@
   --color-background-danger: #fadbdb;
   --color-background-warning: #ffd98e;
   --color-background-info: #d3e4f3;
+
 
   --color-text-primary: #1a1a18;
   --color-text-secondary: #5f5e5a;

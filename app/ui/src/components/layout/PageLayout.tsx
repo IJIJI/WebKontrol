@@ -6,6 +6,7 @@ import AmbientGlowBackground from "../background/AmbientGlowBackground"
 
 import "./layout.less";
 import MainContentContainer from "./content/MainContentContainer"
+import ContentSection from "./content/ContentSection"
 
 const _PAGE_TITLES: Record<string, string> = { // TODO: Remove in favour of page helper component? What about paths with dynamic params?
   '/overview':        'Home',
@@ -64,7 +65,9 @@ export default function PageLayout(): JSX.Element {
     <div className="page-base">
       <AmbientGlowBackground />
       <section className="page-layout">
-        <DesktopHeader className="page-header" version="v1.0.0" setCollapsed={setIsCollapsed}/>
+        <ContentSection variant="glass">
+          <DesktopHeader className="page-header" version="v1.0.0" setCollapsed={setIsCollapsed}/>
+        </ContentSection>
         <Sidebar className="page-sidebar" isCollapsed={isCollapsed} setCollapsed={setIsCollapsed} deviceType={deviceType} />
         <MainContentContainer className="page-content">
           <Outlet />

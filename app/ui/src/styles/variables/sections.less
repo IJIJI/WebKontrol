@@ -1,0 +1,68 @@
+
+
+.sectionStyle(@variant: opaque) {
+  border-radius: @border-radius-lg;
+  z-index: @z-content;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: min-content; // TODO: Add an autogrow param/way to the sections?
+
+  // @glass-color-shadow: var(--color-background-tertiary);
+
+
+  // TODO: More: shadow etc.
+  border: 1px solid var(--color-background-tertiary);
+
+  & when (@variant = opaque) {
+    background: var(--color-background-secondary);
+  }
+
+  & when (@variant = glass) {
+
+    @glass-color-shadow: @glass-shadow;
+    @glass-color-background: @glass-background;
+    @glass-color-border: @glass-border;
+
+    border: 1px solid @glass-color-border;
+
+    background: rgba(@glass-color-background, @glass-transparency); // TODO: This should have transparency
+    backdrop-filter: blur(@glass-blur);
+    -webkit-backdrop-filter: blur(@glass-blur);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(@glass-color-shadow, 0.5),
+      inset 0 -1px 0 rgba(@glass-color-shadow, 0.1),
+      inset 0 0 8px 4px rgba(@glass-color-shadow, 0.4); // TODO: Derive/move to something in variables?
+   
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(@glass-color-shadow, 0.8), // TODO: From a variable somehow?
+        transparent
+      );
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient( //TODO: From a variable somehow?
+        180deg,
+        rgba(@glass-color-shadow, 0.8),
+        transparent,
+        rgba(@glass-color-shadow, 0.3)
+      );
+    }
+  }
+}
