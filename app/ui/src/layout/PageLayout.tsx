@@ -25,8 +25,20 @@ export default function PageLayout() {
 
   const { status } = useApi()
 
+  // Track Viewport. // TODO: Move to seperate component, helper or even context?
   useEffect(() => {
+    const mediaQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const handler = (e: MediaQueryListEvent) => {
+        setIsMobile(e.matches)
+        if (!e.matches) setMobileOpen(false)
+    }
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
+  }, []);
 
-  }, [status]);
+  // Autocollapse nav on mobile. (Page load or to mobile transition)
+  useEffect(() => {
+    if (isMobile) setMobileOpen(false)
+  }, [location.pathname, isMobile])
 
 }
