@@ -6,11 +6,10 @@ import { toast } from "react-hot-toast"
 
 const CONNECTION_TOAST_ID = 'toast-connection'
 
-// TODO: Needed?
 const PAGE_TITLES: Record<string, string> = { // TODO: Dynamically set per page?
-  '/devices':         'Devices',
-  '/sources':         'Sources',
-  '/connections':     'Connections',
+  '/overview':        'Home',
+  '/views':           'Views',
+  '/plugins':         'Plugins', // TODO: /settings/plugins?
   '/settings':        'Settings',
   '/settings/update': 'Update',
 }
