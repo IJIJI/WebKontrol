@@ -17,28 +17,29 @@
   }
 
   & when (@variant = glass) {
-    background: rgba(from var(--color-background-secondary) r g b / 50%);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border: 1px solid rgba(80, 80, 80, 0.75);
+    background: rgba(from var(--color-background-secondary) r g b / @glass-transparency);
+    backdrop-filter: blur(@glass-blur);
+    -webkit-backdrop-filter: blur(@glass-blur);
+    border: 1px solid @glass-border;
   }
 
   // & when (@variant = glass) {
+
 
   //   @glass-color-shadow: @glass-shadow;
   //   @glass-color-background: @glass-background;
   //   @glass-color-border: @glass-border;
 
-  //   border: 1px solid @glass-color-border;
+  //   border: 1px solid rgba(80, 80, 80, 0.75);
 
-  //   background: rgba(@glass-color-background, @glass-transparency); // TODO: This should have transparency
+  //   background: rgba(from var(--color-background-secondary) r g b / 50%);
   //   backdrop-filter: blur(@glass-blur);
   //   -webkit-backdrop-filter: blur(@glass-blur);
-  //   box-shadow:
-  //     0 8px 32px rgba(0, 0, 0, 0.1),
-  //     inset 0 1px 0 rgba(@glass-color-shadow, 0.5),
-  //     inset 0 -1px 0 rgba(@glass-color-shadow, 0.1),
-  //     inset 0 0 8px 4px rgba(@glass-color-shadow, 0.4); // TODO: Derive/move to something in variables?
+  //   // box-shadow:
+  //   //   0 8px 32px rgba(0, 0, 0, 0.1),
+  //   //   inset 0 1px 0 rgba(@glass-color-shadow, 0.5),
+  //   //   inset 0 -1px 0 rgba(@glass-color-shadow, 0.1),
+  //   //   inset 0 0 8px 4px rgba(@glass-color-shadow, 0.4); // TODO: Derive/move to something in variables?
    
   //   &::before {
   //     content: '';
