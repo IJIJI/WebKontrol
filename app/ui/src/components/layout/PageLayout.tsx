@@ -1,5 +1,5 @@
 import { JSX, useEffect, useState } from "react"
-import { useLocation } from "react-router-dom"
+import { Outlet, useLocation } from "react-router-dom"
 import DesktopHeader from "./header/DesktopHeader"
 import Sidebar from "./sidebar/Sidebar"
 
@@ -62,7 +62,7 @@ export default function PageLayout(): JSX.Element {
         <DesktopHeader version="v1.0.0" setCollapsed={setIsCollapsed}/>
         <Sidebar />
         <section className="page-content"> 
-
+          <Outlet />
         </section>
       </section>
     </main>
