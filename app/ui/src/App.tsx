@@ -3,6 +3,7 @@ import { AppErrorBoundary } from "./boundaries/AppErrorBoundary";
 import { ApiStateProvider } from "./context/ApiStateContext";
 import PageLayout from "./components/layout/PageLayout";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import OverviewPage from "./pages/Overview";
 
 export default function App(): JSX.Element {
   return (
@@ -13,7 +14,7 @@ export default function App(): JSX.Element {
       <BrowserRouter>
         <Routes>
           <Route element={<PageLayout />}>
-            <Route index element={<h1>Test!</h1>} />
+            <Route index element={<OverviewPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
