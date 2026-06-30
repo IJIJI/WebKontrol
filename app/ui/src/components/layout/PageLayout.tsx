@@ -1,48 +1,71 @@
 import { JSX, useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
-import { useApi } from "../context/ApiStateContext"
-import { toast } from "react-hot-toast"
+import DesktopHeader from "./header/DesktopHeader"
+import Sidebar from "./sidebar/Sidebar"
 
 
-const PAGE_TITLES: Record<string, string> = { // TODO: Dynamically set per page?
+const PAGE_TITLES: Record<string, string> = { // TODO: Remove in favour of page helper component? What about paths with dynamic params?
   '/overview':        'Home',
   '/views':           'Views',
-  '/plugins':         'Plugins', // TODO: /settings/plugins?
+  '/plugins':         'Plugins',
   '/settings':        'Settings',
   '/settings/update': 'Update',
 }
 
-const MOBILE_BREAKPOINT = 768
+const MOBILE_BREAKPOINT = 770
+const TABLET_BREAKPOINT = 1000
+
+enum DeviceType {
+  MOBILE = "Mobile",
+  TABLET = "Tablet",
+  DESKTOP = "Desktop"
+}
+
+const getDeviceType = (width: number): DeviceType => {
+  if (width < MOBILE_BREAKPOINT) return DeviceType.MOBILE;
+  if (width < TABLET_BREAKPOINT) return DeviceType.TABLET
+  return DeviceType.DESKTOP;
+}
 
 export default function PageLayout(): JSX.Element {
   const location = useLocation()
 
-  // TODO: (partially) In nav? Mobile open could in any case be generalised to expanded for both.
-  const [isMobile,   setIsMobile]   = useState(() => window.innerWidth < MOBILE_BREAKPOINT)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [deviceType,   setDeviceType]   = useState(() => getDeviceType(window.innerWidth) );
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // const { status } = useApi()
 
   // Track Viewport. // TODO: Move to seperate component, helper or even context?
   useEffect(() => {
-    const mediaQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const handler = (e: MediaQueryListEvent) => {
-        setIsMobile(e.matches)
-        if (!e.matches) setMobileOpen(false)
+    const queries = [
+      window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`),
+      window.matchMedia(`(max-width: ${TABLET_BREAKPOINT - 1}px)`),
+    ]
+    const handler = () => {
+      const next = getDeviceType(window.innerWidth)
+      setDeviceType(next)
+      if (next !== DeviceType.DESKTOP) setIsCollapsed(true)
     }
-    mediaQuery.addEventListener('change', handler)
-    return () => mediaQuery.removeEventListener('change', handler)
+    queries.forEach(q => q.addEventListener('change', handler))
+    return () => queries.forEach(q => q.removeEventListener('change', handler))
   }, []);
 
   // Autocollapse nav on mobile. (Page load or to mobile transition)
   useEffect(() => {
-    if (isMobile) setMobileOpen(false)
-  }, [location.pathname, isMobile])
+    if (deviceType !== DeviceType.DESKTOP) setIsCollapsed(true)
+  }, [location.pathname, deviceType])
 
+  // TODO: page-content as a component?
   return(
-    <div className="app-shell">
-      
-    </div>
+    <main className="page-base">
+      <section className="page-layout">
+        <DesktopHeader version="v1.0.0" setCollapsed={setIsCollapsed}/>
+        <Sidebar />
+        <section className="page-content"> 
+
+        </section>
+      </section>
+    </main>
   )
 
 }
