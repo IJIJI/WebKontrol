@@ -1,4 +1,4 @@
-import { JSX, useEffect, useId, useRef, useState } from "react";
+import { type JSX, useEffect, useId, useRef, useState } from "react";
 import { ConnectionStatus } from "../../context/types";
 import { toast } from "react-hot-toast"
 

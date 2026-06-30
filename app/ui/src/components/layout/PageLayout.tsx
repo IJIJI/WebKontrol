@@ -1,4 +1,4 @@
-import { JSX, useEffect, useState } from "react"
+import { type JSX, useEffect, useState } from "react"
 import { Outlet, useLocation } from "react-router-dom"
 import DesktopHeader from "./header/DesktopHeader"
 import Sidebar from "./sidebar/Sidebar"
@@ -6,7 +6,7 @@ import AmbientGlowBackground from "../background/AmbientGlowBackground"
 
 import "./layout.less";
 
-const PAGE_TITLES: Record<string, string> = { // TODO: Remove in favour of page helper component? What about paths with dynamic params?
+const _PAGE_TITLES: Record<string, string> = { // TODO: Remove in favour of page helper component? What about paths with dynamic params?
   '/overview':        'Home',
   '/views':           'Views',
   '/plugins':         'Plugins',

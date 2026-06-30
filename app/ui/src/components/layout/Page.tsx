@@ -1,4 +1,4 @@
-import { JSX, useEffect } from "react";
+import { type JSX, useEffect } from "react";
 
 
 export type MetaData = {

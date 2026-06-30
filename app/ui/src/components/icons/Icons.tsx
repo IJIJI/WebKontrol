@@ -1,4 +1,4 @@
-import { JSX } from "react/jsx-runtime";
+import type { JSX } from "react/jsx-runtime";
 
 type IconProps = { size?: number; className?: string; style?: React.CSSProperties };
 type Icon = (props: IconProps) => JSX.Element;

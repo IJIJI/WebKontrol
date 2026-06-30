@@ -1,7 +1,7 @@
-import { JSX } from "react/jsx-runtime";
+import type { JSX } from "react/jsx-runtime";
 
 import "./header.less";
-import { Icons } from "../../icons/icons";
+import { Icons } from "../../icons/Icons";
 
 export default function HeaderExpandButton({trigger}: { trigger: () => void}): JSX.Element {
   // TODO logo a link and autocollapse.

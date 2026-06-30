@@ -1,4 +1,4 @@
-import { JSX } from "react/jsx-runtime";
+import type { JSX } from "react/jsx-runtime";
 
 import "./background.less";
 import { useMemo } from "react";
@@ -46,7 +46,7 @@ const generateBlobs = (count: number, colors: string[], speed: MinMax = {min: 5,
 }
 
 export interface AmbientGlowProps {
-  /** Accent colors to draw blobs from (cycles if count > colors.length). */
+  /** Accent colors to draw blobs from (cycles if count \> colors.length). */
   colors?: string[];
   /** Number of blobs to render. */
   count?: number;

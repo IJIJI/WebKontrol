@@ -1,7 +1,6 @@
 import type { JSX } from "react";
 import { AppErrorBoundary } from "./boundaries/AppErrorBoundary";
 import { ApiStateProvider } from "./context/ApiStateContext";
-import { BrandLogo } from "./components/branding/BrandLogo"
 import PageLayout from "./components/layout/PageLayout";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
