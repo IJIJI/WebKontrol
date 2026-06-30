@@ -17,7 +17,8 @@ const _PAGE_TITLES: Record<string, string> = { // TODO: Remove in favour of page
 const MOBILE_BREAKPOINT = 770
 const TABLET_BREAKPOINT = 1000
 
-enum DeviceType {
+// TODO: Make deviceType part of the context?
+export enum DeviceType {
   MOBILE = "Mobile",
   TABLET = "Tablet",
   DESKTOP = "Desktop"
