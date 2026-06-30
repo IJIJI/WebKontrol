@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import type { JSX } from "react/jsx-runtime";
 
-export default function SidebarItem({ to, icon, label, collapsed }: { to: string, icon: JSX.Element, label: string, collapsed: boolean }): JSX.Element {
+export default function SidebarItem({ to, icon, label, collapsed, dissapearOnCollapse }: { to: string, icon: JSX.Element, label: string, collapsed: boolean, dissapearOnCollapse: boolean }): JSX.Element {
   return(
     <NavLink
       to={to}
