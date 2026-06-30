@@ -71,7 +71,7 @@ export default function AmbientGlowBackground({
   );
 
   return(
-    <div className={["bakground", "ambientGlow", className].filter(Boolean).join(" ")} aria-hidden="true">
+    <div className={["background", "ambientGlow", className].filter(Boolean).join(" ")} aria-hidden="true">
       {blobs.map((blob, i) => (
         <span
           key={i}
