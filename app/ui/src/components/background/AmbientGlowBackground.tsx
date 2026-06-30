@@ -75,7 +75,7 @@ export default function AmbientGlowBackground({
       {blobs.map((blob, i) => (
         <span
           key={i}
-          className={"blob glow" + animate ? " animate" : ""}
+          className={"blob" + animate ? " animate" : ""}
           style={
             {
               width: blob.size,
