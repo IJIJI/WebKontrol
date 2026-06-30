@@ -17,7 +17,7 @@ const withDefaultMeta = (meta?: Partial<MetaData>): MetaData => {
     ...meta,
   }
   if (meta?.title) {
-    combined.title = meta.title + " - WebKontrol";
+    combined.title = "WebKontrol - " + meta.title;
   }
   return combined;
 }
