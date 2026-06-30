@@ -6,7 +6,6 @@ import AmbientGlowBackground from "../background/AmbientGlowBackground"
 
 import "./layout.less";
 import MainContentContainer from "./content/MainContentContainer"
-import ContentSection from "./content/ContentSection"
 
 const _PAGE_TITLES: Record<string, string> = { // TODO: Remove in favour of page helper component? What about paths with dynamic params?
   '/overview':        'Home',
