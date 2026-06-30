@@ -31,26 +31,38 @@ export class AppCore {
 
     if (config) {
       this._config = SystemConfigSchema.parse(config);
-      this._store.saveRuntime(this._config).then(() => {
-        if(this._hasStarted){
-          this._syncState();
-        }
-      });
+      this._store.saveRuntime(this._config)
+        .then(() => {
+          if(this._hasStarted){
+            this._syncState();
+          }
+        })
+        .catch((reason) => {
+          this._logger.error(`Failed overwriting SystemConfig in DB. Reason:`, reason);
+        });
     }
     else {
-      this._store.loadRuntime().then((loaded) => {
-        if (loaded) {
-          this._config = loaded;
-          this._logger.info(`Loaded SystemConfig from DB:`, this._config);
-        }
-        else {
-          this._store.saveRuntime(this._config);
-          this._logger.important(`Could not find SystemConfig in DB. Using default:`, this._config);
-        }
-        if(this._hasStarted){
-          this._syncState();
-        }
-      });
+      this._store.loadRuntime()
+        .then((loaded) => {
+          if (loaded) {
+            this._config = loaded;
+            this._logger.info(`Loaded SystemConfig from DB:`, this._config);
+          }
+          else {
+            this._logger.important(`Could not find SystemConfig in DB. Using default:`, this._config);
+
+            this._store.saveRuntime(this._config)
+              .catch((reason) => {
+                this._logger.error(`Failed saving default SystemConfig to DB. Reason:`, reason)
+              });
+          }
+          if(this._hasStarted){
+            this._syncState();
+          }
+        })
+        .catch((reason) => {
+          this._logger.error(`Failed loading config from store. Reason:`, reason);
+        });
     }
 
     this._webServer = new WebServer({});
@@ -168,9 +180,9 @@ export class AppCore {
           const puppet = this._puppets.get(id);
 
           if (!puppet) {
-            throw new Error(`Puppet does not exist! Tried updating the runtime for puppet with id: ${id}. Requested runtime: ${runtime}`);
+            return this._logger.fatal(`Puppet does not exist! Tried updating the runtime for puppet with id: ${id}. Requested runtime:`, runtime);
           }
-          puppet.updateRuntime(runtime);
+          await puppet.updateRuntime(runtime);
 
           this._logger.important(
             `puppet.updateRuntime() handler called for puppet: ${id} with runtime config:`,
@@ -179,14 +191,14 @@ export class AppCore {
         },
       },
       system: {
-        updateConfig: async (config: Partial<SystemConfig>): Promise<void> => {
+        updateConfig: (config: Partial<SystemConfig>): void => {
           const parsed = SystemConfigSchema.parse({ ...this._config, ...config });
 
           this._config = parsed;
           this._syncState();
 
           this._logger.important(
-            `puppet.updateConfig() handler called with config:`,
+            `system.updateConfig() handler called with config:`,
             config, `updating the actual config to:`, this._config
           );
         },
