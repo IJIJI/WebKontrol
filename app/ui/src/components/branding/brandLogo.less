@@ -22,6 +22,25 @@
     .kontrol {
       color: inherit;
     }
+    .word {
+      display: flex;
+      flex-direction: row;
+
+      .trail {
+        display: inline-block;
+        overflow: hidden;
+        max-width: 6em;
+        opacity: 1;
+        transition: max-width 0.35s linear, opacity 0.35s linear;
+        margin: 0;
+        padding: 0;
+
+        &.collapsed {
+          max-width: 0;
+          opacity: 0;
+        }
+      }
+    }
   }
 
   .subtext{
@@ -43,9 +62,26 @@
       height: 2px;
       background-color: grey;
       flex-grow: 1;
+      opacity: 1;
+      transition: flex-grow 0.35s linear, opacity 0.2s linear;
+
+      &.collapsed {
+        flex-grow: 0;
+        opacity: 0;
+      }
     }
     .producer {
       color: inherit;
+      display: inline-block;
+      overflow: hidden;
+      max-width: 5em;
+      opacity: 1;
+      transition: max-width 0.35s linear, opacity 0.35s linear;
+
+      &.collapsed {
+        max-width: 0;
+        opacity: 0;
+      }
     }
   }
 }
