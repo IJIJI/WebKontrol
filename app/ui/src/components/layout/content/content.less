@@ -2,6 +2,32 @@
 
 section.content {
 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  &.centered {
+    align-items: center;
+  }
+
+  padding: 20px; // Default: pad-l
+
+  &.pad-none {
+    padding: 0;
+  }
+  &.pad-s {
+    padding: 5px;
+  }
+  &.pad-m {
+    padding: 10px;
+  }
+  &.pad-l {
+    padding: 20px;
+  }
+  &.pad-xl {
+    padding: 30px;
+  }
+
   &.opaque {
     .sectionStyle(opaque);
   }
