@@ -10,14 +10,14 @@
 
 
   // TODO: More: shadow etc.
-  border: 1px solid var(--color-background-tertiary);
+  border: 1px solid rgba(80, 80, 80, 1);
 
   & when (@variant = opaque) {
     background: var(--color-background-secondary);
   }
 
   & when (@variant = glass) {
-    background: rgba(var(--color-comp-background-secondary), 0.4);
+    background: rgba(from var(--color-background-secondary) r g b / 50%);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     border: 1px solid rgba(80, 80, 80, 0.75);
