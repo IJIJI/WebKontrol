@@ -3,7 +3,7 @@ import { ConnectionStatus } from "../../context/types";
 import { toast } from "react-hot-toast"
 
 import './toast.less';
-import { Icons } from "../icons/icons";
+import { Icons } from "../icons/Icons";
 
 const STATE_MAP: Record<ConnectionStatus, {class: string, label: string, icon: JSX.Element | null}> = {
   [ConnectionStatus.CONNECTING]: {
