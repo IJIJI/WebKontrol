@@ -9,10 +9,10 @@ type LogoProps = {
 }
 
 export function BrandLogo({size = 26, subtext = true, version}: LogoProps): JSX.Element {
-  return(<div className="logo">
+  return(<div className="brandLogo">
     <h1 className="projectName" style={{fontSize: size}}>WebKontrol</h1>
     { subtext &&
-      <p className="subtext" style={{fontSize: size * 0.4}}>
+      <p className="subtext" style={{fontSize: size * 0.5}}>
         <span className="version">
           {version}
         </span>
@@ -20,7 +20,7 @@ export function BrandLogo({size = 26, subtext = true, version}: LogoProps): JSX.
         -
         </span>
         <span className="producer">
-        Synapt Technologies
+        Synapt
         </span>
       </p>
     }
