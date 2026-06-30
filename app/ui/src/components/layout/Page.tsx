@@ -1,5 +1,6 @@
 import { type JSX, useEffect } from "react";
 
+// TODO: Move somewhere else, does not belong in layout
 
 export type MetaData = {
   title: string,
