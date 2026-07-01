@@ -4,6 +4,7 @@ nav.sidebar {
  // TODO Load from some variable?
   @width-animation-time: @sidebar-animation-time;
   @opacity-animation-time: @width-animation-time * 0.8;
+  @active-animation-time: 0.15s;
 
   @padding-sides: 14px;
   @item-gap: 4px;
@@ -21,10 +22,68 @@ nav.sidebar {
   }
 
   .nav.item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
     margin: @item-gap @padding-sides;
-    // width: 100%;
     border-radius: @item-border-radius;
+
+    gap: 8px;
+    padding: 6px 8px;
+    // position: relative;
+    
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+
+    transition: background-color @active-animation-time, color @active-animation-time;
+
+
+      // width: 28, height: 28, flexShrink: 0, display: 'flex',
+      // alignItems: 'center', justifyContent: 'center', borderRadius: 6,
+      // // background: isActive ? 'color-mix(in srgb, var(--acc) 12%, transparent)' : 'transparent',
+    span.icon {
+      width: 28px;
+      height: 28px;
+      // flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      // border-radius: 6px;
+    }
+
+    span.label {
+      
+      transition: opacity @opacity-animation-time;
+      opacity: 100%;
+    }
+
+    &.active {
+      background-color: var(--color-background-acc);
+    }
+    &.collapsed {
+      
+      span.label {
+        opacity: 0;
+        width: 0;
+      }
+    }
   }
+
+
+  // display: 'flex',
+  // alignItems: 'center',
+  // gap: 10,
+  // padding: '8px 14px',
+  // position: 'relative',
+  // whiteSpace: 'nowrap',
+  // color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+  // background: isActive ? 'var(--color-background-secondary)' : 'transparent',
+  // textDecoration: 'none',
+  // fontSize: 13,
+  // userSelect: 'none',
+  // transition: 'background .1s, color .1s',
 
   .nav.section {
     margin: @section-gap @padding-sides @item-gap;
@@ -43,10 +102,13 @@ nav.sidebar {
       font-weight: 500;
       color: var(--color-text-tertiary);
       text-transform: uppercase;
-      // white-space: nowrap;
       transition: opacity @opacity-animation-time;
       opacity: 100%;
     }
+
+    // &:has(.nav.item.active) .section.label {
+    //   color: @color-acc;
+    // }
 
     &.collapsed {
       .section.label {
