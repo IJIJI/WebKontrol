@@ -19,14 +19,18 @@ export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow
   return(
     <ContentSection variant="glass" className={["sidebar", deviceType == DeviceType.MOBILE && "mobile", "pad-none", heightGrow && "height-100", className].filter(Boolean).join(" ")} >
       <nav>
-        <SidebarItem collapsed={collapsed} to="/" label="Overview" icon={<></>} /> 
-        <SidebarItem collapsed={collapsed} to="/views" label="Views" icon={<></>} /> 
-        <SidebarSection collapsed={collapsed} label="Puppets" />
-        <SidebarItem collapsed={collapsed} to="/puppets/1" label="2: SDI1" icon={<></>} /> 
-        <SidebarItem collapsed={collapsed} to="/puppets/2" label="1: SDI2" icon={<></>} /> 
-        <SidebarSection collapsed={collapsed} label="Settings"/>
-        <SidebarItem collapsed={collapsed} to="/settings/plugins" label="Plugins" icon={<></>} /> 
-        <SidebarItem collapsed={collapsed} to="/settings" label="Config" icon={<></>} /> 
+        <SidebarSection collapsed={collapsed} label="Overview"> 
+          <SidebarItem collapsed={collapsed} to="/" label="Dashboard" icon={<></>} /> 
+          <SidebarItem collapsed={collapsed} to="/views" label="Views" icon={<></>} /> 
+        </SidebarSection>
+        <SidebarSection collapsed={collapsed} label="Puppets"> 
+          <SidebarItem collapsed={collapsed} to="/puppets/1" label="2: SDI1" icon={<></>} /> 
+          <SidebarItem collapsed={collapsed} to="/puppets/2" label="1: SDI2" icon={<></>} /> 
+        </SidebarSection>
+        <SidebarSection collapsed={collapsed} label="Settings">
+          <SidebarItem collapsed={collapsed} to="/settings/plugins" label="Plugins" icon={<></>} /> 
+          <SidebarItem collapsed={collapsed} to="/settings" label="Config" icon={<></>} /> 
+        </SidebarSection>
       </nav>
     </ContentSection>
     
