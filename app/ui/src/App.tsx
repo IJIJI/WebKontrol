@@ -2,7 +2,7 @@ import type { JSX } from "react";
 import { AppErrorBoundary } from "./boundaries/AppErrorBoundary";
 import { ApiStateProvider } from "./context/ApiStateContext";
 import PageLayout from "./components/layout/PageLayout";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import OverviewPage from "./pages/Overview";
 
 export default function App(): JSX.Element {
@@ -14,7 +14,13 @@ export default function App(): JSX.Element {
       <BrowserRouter>
         <Routes>
           <Route element={<PageLayout />}>
-            <Route index element={<OverviewPage />} />
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<OverviewPage />} />
+            <Route path="views" element={<OverviewPage />} />
+            
+            <Route path="settings" element={<OverviewPage />} />
+
+            <Route path="*"  element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

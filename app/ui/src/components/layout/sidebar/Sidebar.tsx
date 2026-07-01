@@ -23,7 +23,7 @@ export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow
       <nav className="sidebar">
         <SidebarItem collapsed={collapsed} to="/" label="Home" icon={<></>} /> 
         <SidebarSection collapsed={collapsed} label="Overview"> 
-          <SidebarItem collapsed={collapsed} to="/" label="Dashboard" icon={<Icons.grid/>} /> 
+          <SidebarItem collapsed={collapsed} to="/dashboard" label="Dashboard" icon={<Icons.grid/>} /> 
           <SidebarItem collapsed={collapsed} to="/views" label="Views" icon={<Icons.source/>} /> 
         </SidebarSection>
         <SidebarSection collapsed={collapsed} label="Puppets"> 
