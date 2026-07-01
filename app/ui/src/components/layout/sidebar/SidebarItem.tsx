@@ -6,7 +6,7 @@ export default function SidebarItem({ to, icon, label, collapsed, dissapearOnCol
     <NavLink
       to={to}
       className={({ isActive, isPending }) =>
-        "nav item" + (isPending ? " pending" : isActive ? " active" : "") + (collapsed ? " collapsed" : "")
+        "nav item" + (isPending ? " pending" : isActive ? " active" : "") + (collapsed ? " collapsed" : "") + (dissapearOnCollapse ? " dissapearOnCollapse" : "")
       }
       style={({ isActive }) => ({
         display: 'flex',
