@@ -1,6 +1,7 @@
+import { Children } from "react";
 import type { JSX } from "react/jsx-runtime";
 
-export default function SidebarSection({collapsed, label, dissapearOnCollapse = false}: {collapsed: boolean, label: string, dissapearOnCollapse?: boolean}): JSX.Element {
+export default function SidebarSection({children, collapsed, label, dissapearOnCollapse = false}: {children?: JSX.Element[] | JSX.Element, collapsed: boolean, label: string, dissapearOnCollapse?: boolean}): JSX.Element {
 
   return (
     <div 
@@ -15,6 +16,9 @@ export default function SidebarSection({collapsed, label, dissapearOnCollapse = 
         opacity: collapsed ? 0 : 1, 
       }}>
       <span>{label}</span>
+      <div className="content">
+        {children}
+      </div>
     </div>
   );
 }
