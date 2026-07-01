@@ -4,7 +4,7 @@ type IconProps = { size?: number; className?: string; style?: React.CSSPropertie
 type Icon = (props: IconProps) => JSX.Element;
 
 const icon = (viewBox: string, children: JSX.Element): Icon =>
-  ({ size = 16, ...p }) => (
+  ({ size = 20, ...p }) => (
     <svg width={size} height={size} viewBox={viewBox} fill="none" {...p}>
       {children}
     </svg>
