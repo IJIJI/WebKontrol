@@ -4,6 +4,7 @@ import ContentSection from "../content/ContentSection";
 import SidebarItem from "./SidebarItem";
 import SidebarSection from "./SidebarSection";
 
+import "./sidebar.less";
 /* 
 Home
 views
@@ -18,7 +19,7 @@ settings >
 export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow = true, className}: {collapsed: boolean, setCollapsed: (state: boolean) => void, deviceType: DeviceType, heightGrow?: boolean, className?: string }): JSX.Element {
   return(
     <ContentSection variant="glass" className={["sidebar", deviceType == DeviceType.MOBILE && "mobile", "pad-none", heightGrow && "height-100", className].filter(Boolean).join(" ")} >
-      <nav>
+      <nav className="sidebar">
         <SidebarSection collapsed={collapsed} label="Overview"> 
           <SidebarItem collapsed={collapsed} to="/" label="Dashboard" icon={<></>} /> 
           <SidebarItem collapsed={collapsed} to="/views" label="Views" icon={<></>} /> 
