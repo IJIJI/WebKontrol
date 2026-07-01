@@ -1,6 +1,6 @@
 import type { JSX } from "react/jsx-runtime";
 
-export default function SidebarSection({collapsed, label, dissapearOnCollapse}: {collapsed: boolean, label: string, dissapearOnCollapse: boolean}): JSX.Element {
+export default function SidebarSection({collapsed, label, dissapearOnCollapse = false}: {collapsed: boolean, label: string, dissapearOnCollapse?: boolean}): JSX.Element {
 
   return (
     <div style={{
