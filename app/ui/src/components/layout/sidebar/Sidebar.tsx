@@ -5,6 +5,7 @@ import SidebarItem from "./SidebarItem";
 import SidebarSection from "./SidebarSection";
 
 import "./sidebar.less";
+import { Icons } from "../../icons/Icons";
 /* 
 Home
 views
@@ -22,16 +23,16 @@ export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow
       <nav className="sidebar">
         <SidebarItem collapsed={collapsed} to="/" label="Home" icon={<></>} /> 
         <SidebarSection collapsed={collapsed} label="Overview"> 
-          <SidebarItem collapsed={collapsed} to="/" label="Dashboard" icon={<></>} /> 
-          <SidebarItem collapsed={collapsed} to="/views" label="Views" icon={<></>} /> 
+          <SidebarItem collapsed={collapsed} to="/" label="Dashboard" icon={<Icons.grid/>} /> 
+          <SidebarItem collapsed={collapsed} to="/views" label="Views" icon={<Icons.source/>} /> 
         </SidebarSection>
         <SidebarSection collapsed={collapsed} label="Puppets"> 
-          <SidebarItem collapsed={collapsed} to="/puppets/1" label="2: SDI1" icon={<></>} /> 
-          <SidebarItem collapsed={collapsed} to="/puppets/2" label="1: SDI2" icon={<></>} /> 
+          <SidebarItem collapsed={collapsed} to="/puppets/1" label="2: SDI1" icon={<Icons.chevronRight/>} /> 
+          <SidebarItem collapsed={collapsed} to="/puppets/2" label="1: SDI2" icon={<Icons.chevronRight/>} /> 
         </SidebarSection>
         <SidebarSection collapsed={collapsed} label="Settings">
-          <SidebarItem collapsed={collapsed} to="/settings/plugins" label="Plugins" icon={<></>} /> 
-          <SidebarItem collapsed={collapsed} to="/settings" label="Config" icon={<></>} /> 
+          <SidebarItem collapsed={collapsed} to="/settings/plugins" label="Plugins" icon={<Icons.connections/>} /> 
+          <SidebarItem collapsed={collapsed} to="/settings" label="Config" icon={<Icons.settings/>} /> 
         </SidebarSection>
       </nav>
     </ContentSection>
