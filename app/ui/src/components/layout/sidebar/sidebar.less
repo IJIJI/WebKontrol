@@ -5,21 +5,38 @@ nav.sidebar {
   @width-animation-time: @sidebar-animation-time;
   @opacity-animation-time: @width-animation-time * 0.8;
 
+  @padding-sides: 14px;
+  @item-gap: 4px;
+  @section-gap: 10px;
+  @item-border-radius: @border-radius-lg;
+
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: 0;
+  padding: @padding-sides 0 0;
 
   * {
     padding: 0;
     margin: 0;
   }
 
+  .nav.item {
+    margin: @item-gap @padding-sides;
+    // width: 100%;
+    border-radius: @item-border-radius;
+  }
+
   .nav.section {
+    margin: @section-gap @padding-sides @item-gap;
+    display: flex;
+    flex-direction: column;
+    gap: @item-gap;
+    align-items: stretch;
+    justify-content: flex-start;
 
-    @item-gap: 4px;
-
-    padding: 10px 14px @item-gap;
+    .nav.item {
+      margin: 0;
+    }
     
     .section.label {
       font-size: 11px;
