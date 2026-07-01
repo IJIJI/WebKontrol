@@ -9,9 +9,9 @@ import MainContentContainer from "./content/MainContentContainer"
 import ContentSection from "./content/ContentSection"
 
 const _PAGE_TITLES: Record<string, string> = { // TODO: Remove in favour of page helper component? What about paths with dynamic params?
-  '/overview':        'Home',
+  '/':                'Dashboard',
   '/views':           'Views',
-  '/plugins':         'Plugins',
+  '/puppets':         'Puppets',
   '/settings':        'Settings',
   '/settings/update': 'Update',
 }
