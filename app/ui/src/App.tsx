@@ -3,7 +3,11 @@ import { AppErrorBoundary } from "./boundaries/AppErrorBoundary";
 import { ApiStateProvider } from "./context/ApiStateContext";
 import PageLayout from "./components/layout/PageLayout";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import OverviewPage from "./pages/Overview";
+import OverviewPage from "./pages/OverviewPage";
+import DashboardPage from "./pages/DashboardPage";
+import ViewsPage from "./pages/ViewsPage";
+import SettingsPage from "./pages/SettingsPage";
+import PluginsPage from "./pages/PluginsPage";
 
 export default function App(): JSX.Element {
   return (
@@ -14,13 +18,14 @@ export default function App(): JSX.Element {
       <BrowserRouter>
         <Routes>
           <Route element={<PageLayout />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<OverviewPage />} />
-            <Route path="views" element={<OverviewPage />} />
+            <Route index element={<OverviewPage />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="views" element={<ViewsPage />} />
             
-            <Route path="settings" element={<OverviewPage />} />
+            <Route path="settings/plugins" element={<PluginsPage />} />
+            <Route path="settings/config" element={<SettingsPage />} />
 
-            <Route path="*"  element={<Navigate to="/dashboard" replace />} />
+            <Route path="*"  element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -33,7 +33,7 @@ export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow
         </SidebarSection>
         <SidebarSection collapsed={collapsed} label="Settings">
           <SidebarItem collapsed={collapsed} to="/settings/plugins" label="Plugins" icon={<Icons.connections/>} /> 
-          <SidebarItem collapsed={collapsed} to="/settings" label="Config" icon={<Icons.settings/>} /> 
+          <SidebarItem collapsed={collapsed} to="/settings/config" label="Config" icon={<Icons.settings/>} /> 
         </SidebarSection>
 
         <SidebarCollapseButton collapsed={collapsed} setCollapsed={setCollapsed}/>
