@@ -25,11 +25,11 @@ export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow
         <SidebarItem collapsed={collapsed} to="/" label="Home" icon={<Icons.home/>} /> 
         <SidebarSection collapsed={collapsed} label="Overview"> 
           <SidebarItem collapsed={collapsed} to="/dashboard" label="Dashboard" icon={<Icons.grid/>} /> 
-          <SidebarItem collapsed={collapsed} to="/views" label="Views" icon={<Icons.source/>} /> 
+          <SidebarItem collapsed={collapsed} to="/views" label="Views" icon={<Icons.tab/>} /> 
         </SidebarSection>
         <SidebarSection collapsed={collapsed} label="Puppets"> 
-          <SidebarItem collapsed={collapsed} to="/puppets/1" label="2: SDI1" icon={<Icons.chevronRight/>} /> 
-          <SidebarItem collapsed={collapsed} to="/puppets/2" label="1: SDI2" icon={<Icons.chevronRight/>} /> 
+          <SidebarItem collapsed={collapsed} to="/puppets/1" label="2: SDI1" icon={<Icons.screen/>} /> 
+          <SidebarItem collapsed={collapsed} to="/puppets/2" label="1: SDI2" icon={<Icons.screen/>} /> 
         </SidebarSection>
         <SidebarSection collapsed={collapsed} label="Settings">
           <SidebarItem collapsed={collapsed} to="/settings/plugins" label="Plugins" icon={<Icons.connections/>} /> 

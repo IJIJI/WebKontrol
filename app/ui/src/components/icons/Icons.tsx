@@ -93,4 +93,7 @@ export const Icons = { //TODO: Add more icons or use a standard library.
   screen: icon("0 -960 960 960", // From material design
     <path d="M240-120v-80l40-40H160q-33 0-56.5-23.5T80-320v-440q0-33 23.5-56.5T160-840h640q33 0 56.5 23.5T880-760v440q0 33-23.5 56.5T800-240H680l40 40v80H240Z"/>
   ),
+  tab: icon("0 -960 960 960", // From material design
+    <path d="M160-240h640v-320H520v-160H160v480Zm0 80q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-80v-480 480Z"/>
+  ),
 } satisfies Record<string, Icon>
