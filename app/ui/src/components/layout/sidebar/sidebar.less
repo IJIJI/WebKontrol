@@ -6,7 +6,7 @@ nav.sidebar {
   @opacity-animation-time: @width-animation-time * 0.8;
   @active-animation-time: 0.15s;
 
-  @padding-sides: 14px;
+  @padding-sides: 10px;
   @item-gap: 4px;
   @section-gap: 10px;
   @item-border-radius: @border-radius-lg;
@@ -45,8 +45,8 @@ nav.sidebar {
       // alignItems: 'center', justifyContent: 'center', borderRadius: 6,
       // // background: isActive ? 'color-mix(in srgb, var(--acc) 12%, transparent)' : 'transparent',
     span.icon {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       // flex-shrink: 0;
       display: flex;
       align-items: center;
@@ -54,6 +54,7 @@ nav.sidebar {
       flex-wrap: nowrap;
       overflow: hidden;
       // border-radius: 6px;
+      transition: width @active-animation-time;
     }
 
     span.label {
@@ -66,7 +67,11 @@ nav.sidebar {
     }
     &.collapsed {
 
-      
+      gap: 0;
+      span.icon {
+        // width: 38px;
+      }
+
       span.label {
         opacity: 0;
         width: 0;
