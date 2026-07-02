@@ -6,6 +6,7 @@ import SidebarSection from "./SidebarSection";
 
 import "./sidebar.less";
 import { Icons } from "../../icons/Icons";
+import SidebarCollapseButton from "./SidebarCollapseButton";
 /* 
 Home
 views
@@ -34,6 +35,8 @@ export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow
           <SidebarItem collapsed={collapsed} to="/settings/plugins" label="Plugins" icon={<Icons.connections/>} /> 
           <SidebarItem collapsed={collapsed} to="/settings" label="Config" icon={<Icons.settings/>} /> 
         </SidebarSection>
+
+        <SidebarCollapseButton collapsed={collapsed} setCollapsed={setCollapsed}/>
       </nav>
     </ContentSection>
     

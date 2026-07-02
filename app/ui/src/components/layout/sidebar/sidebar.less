@@ -11,10 +11,15 @@ nav.sidebar {
   @section-gap: 10px;
   @item-border-radius: @border-radius-lg;
 
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: @padding-sides 0 0;
+  padding: @padding-sides 0;
 
   * {
     padding: 0;
@@ -24,37 +29,47 @@ nav.sidebar {
 
   .nav.item {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
     gap: 0;
 
+    padding: 6px 8px;
     margin: @item-gap @padding-sides;
     border-radius: @item-border-radius;
-
-    padding: 6px 8px;
-    // position: relative;
     
+    background-color: transparent;
+    border: 0;
     color: white;
     text-decoration: none;
     font-size: 14px;
 
     transition: background-color @active-animation-time, color @active-animation-time;
 
+    &.collapse {
+      margin-bottom: 0;
+      margin-top: auto;
+      background-color: var(--color-background-primary);
+    }
 
       // width: 28, height: 28, flexShrink: 0, display: 'flex',
       // alignItems: 'center', justifyContent: 'center', borderRadius: 6,
       // // background: isActive ? 'color-mix(in srgb, var(--acc) 12%, transparent)' : 'transparent',
     span.icon {
-      width: 40px;
-      height: 36px;
-      // flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-wrap: nowrap;
       overflow: hidden;
+
+      width: 40px;
+      height: 36px;
+      // flex-shrink: 0;
       // border-radius: 6px;
       transition: width @active-animation-time;
+      
+      svg {
+        transition: transform @active-animation-time;
+      }
     }
 
     span.label {
@@ -73,6 +88,12 @@ nav.sidebar {
         opacity: 0;
         width: 0;
         padding: 0;
+      }
+      
+      &.collapse {
+        span.icon svg {
+          transform: rotateY(0.5turn);
+        }
       }
     }
   }
