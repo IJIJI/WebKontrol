@@ -22,7 +22,7 @@ export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow
   return(
     <ContentSection variant="glass" className={["sidebar", deviceType == DeviceType.MOBILE && "mobile", "pad-none", heightGrow && "height-100", className].filter(Boolean).join(" ")} >
       <nav className="sidebar">
-        <SidebarItem collapsed={collapsed} to="/" label="Home" icon={<></>} /> 
+        <SidebarItem collapsed={collapsed} to="/" label="Home" icon={<Icons.home/>} /> 
         <SidebarSection collapsed={collapsed} label="Overview"> 
           <SidebarItem collapsed={collapsed} to="/dashboard" label="Dashboard" icon={<Icons.grid/>} /> 
           <SidebarItem collapsed={collapsed} to="/views" label="Views" icon={<Icons.source/>} /> 
