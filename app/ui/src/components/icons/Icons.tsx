@@ -3,9 +3,9 @@ import type { JSX } from "react/jsx-runtime";
 type IconProps = { size?: number; className?: string; style?: React.CSSProperties };
 type Icon = (props: IconProps) => JSX.Element;
 
-const icon = (viewBox: string, children: JSX.Element): Icon =>
+const icon = (viewBox: string, children: JSX.Element, fill: boolean = false): Icon =>
   ({ size = 20, ...p }) => (
-    <svg width={size} height={size} viewBox={viewBox} fill="none" {...p}>
+    <svg width={size} height={size} viewBox={viewBox} fill={fill ? "currentColor" : "none"} {...p}>
       {children}
     </svg>
   );
@@ -85,15 +85,15 @@ export const Icons = { //TODO: Add more icons or use a standard library.
     </>
   ),
   home: icon("0 -960 960 960", // From material design
-    <path d="M160-120v-480l320-240 320 240v480H560v-280H400v280H160Z" fill="currentColor"/>
-  ),
+    <path d="M160-120v-480l320-240 320 240v480H560v-280H400v280H160Z"/>
+  , true),
   homeAndGarden: icon("0 -960 960 960", // From material design
     <path d="M160-160v-375l-72 55-47-63 440-337 439 337-16 21q-45-31-99-37t-105 14q-60-23-123.5-10.5T465-495q-48 48-60.5 111.5T415-260q-10 24-13 49t-1 51H160Zm540 95q-42 29-92.5 24.5T521-81q-36-36-40.5-86.5T505-260q-29-42-24.5-92.5T521-439q36-36 86.5-40.5T700-455q42-29 92.5-24.5T879-439q36 36 40.5 86.5T895-260q29 42 24.5 92.5T879-81q-36 36-86.5 40.5T700-65Zm35.5-159.5Q750-239 750-260t-14.5-35.5Q721-310 700-310t-35.5 14.5Q650-281 650-260t14.5 35.5Q679-210 700-210t35.5-14.5Z"/>
-  ),
+  , true),
   screen: icon("0 -960 960 960", // From material design
     <path d="M240-120v-80l40-40H160q-33 0-56.5-23.5T80-320v-440q0-33 23.5-56.5T160-840h640q33 0 56.5 23.5T880-760v440q0 33-23.5 56.5T800-240H680l40 40v80H240Z"/>
-  ),
+  , true),
   tab: icon("0 -960 960 960", // From material design
     <path d="M160-240h640v-320H520v-160H160v480Zm0 80q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm0-80v-480 480Z"/>
-  ),
+  , true),
 } satisfies Record<string, Icon>
