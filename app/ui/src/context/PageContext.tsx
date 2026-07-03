@@ -6,10 +6,27 @@ export type BackConfig = false | {
   label?: string;
 };
 
+export interface MetaTitle {
+  primary: string;
+  secondary?: string;
+}
+export type MetaTitleInput = string | MetaTitle;
+
+const normalizeMetaTitle = (t: MetaTitleInput): MetaTitle =>
+  typeof t === "string" ? { primary: t } : t;
+
+const serializeMetaTitle = (title: MetaTitle): string => {
+  return title.secondary ? `${title.primary}: ${title.secondary}` : title.primary;
+}
+
 export interface PageMeta { // TODO: Add more like og
-  title?: string;
+  title?: MetaTitle;
   description?: string;
   back?: BackConfig;
+}
+
+export interface PageMetaInput extends Omit<PageMeta, "title">{
+  title?: MetaTitleInput
 }
 
 type RequiredPageMeta = WithRequiredExept<PageMeta, "back">;
@@ -17,12 +34,14 @@ type RequiredPageMeta = WithRequiredExept<PageMeta, "back">;
 
 // TODO: Add a way to change the base for named instances
 const DEFAULT_PAGE_META: RequiredPageMeta = {
-  title: "WebKontrol",
+  title: {
+    primary: "WebKontrol",
+  },
   description: "WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel.",
 }
 
 interface PageState extends RequiredPageMeta {
-  setMeta: (meta: PageMeta, keepPrevious?: boolean) => void;
+  setMeta: (meta: PageMetaInput, keepPrevious?: boolean) => void;
 }
 
 const PageStateContext = createContext<PageState | null>(null);
@@ -35,18 +54,22 @@ export function PageStateProvider({
 
   const [meta, setMetaState] = useState<RequiredPageMeta>(DEFAULT_PAGE_META);
 
-  const setMeta = useCallback((next: PageMeta, keepPrevious?: boolean) => {
+  const setMeta = useCallback((next: PageMetaInput, keepPrevious?: boolean) => {
     setMetaState((prev) => {
+      const normalised: PageMeta = {
+        ...next,
+        title: next.title !== undefined ? normalizeMetaTitle(next.title) : undefined,
+      };
       const base = keepPrevious ? prev : DEFAULT_PAGE_META
-      const merged = { ...base, ...next };
+      const merged = { ...base, ...normalised };
       return merged;
     });
   }, []);
 
   useEffect(() => {
     document.title = meta.title
-      ? `${meta.title} - ${DEFAULT_PAGE_META.title}`
-      : DEFAULT_PAGE_META.title;
+      ? `${serializeMetaTitle(meta.title)} - ${serializeMetaTitle(DEFAULT_PAGE_META.title)}`
+      : serializeMetaTitle(DEFAULT_PAGE_META.title);
   }, [meta.title]);
 
   useEffect(() => {
