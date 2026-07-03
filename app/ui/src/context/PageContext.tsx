@@ -59,7 +59,8 @@ export function PageStateProvider({
     <PageStateContext
       value={{
         ...meta,
-        title: meta.title ?? FALLBACK_PAGE_META.title, // TODO: Should this exist?
+        // title: meta.title ?? FALLBACK_PAGE_META.title,
+        title: meta.title ?? "",
         setMeta,
       }}
     >
