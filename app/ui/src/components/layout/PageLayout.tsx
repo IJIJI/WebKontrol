@@ -8,14 +8,7 @@ import "./layout.less";
 import MainContentContainer from "./content/MainContentContainer"
 import ContentSection from "./content/ContentSection"
 import { BrandLogo } from "../branding/BrandLogo"
-
-const _PAGE_TITLES: Record<string, string> = { // TODO: Remove in favour of page helper component? What about paths with dynamic params?
-  '/':                'Dashboard',
-  '/views':           'Views',
-  '/puppets':         'Puppets',
-  '/settings':        'Settings',
-  '/settings/update': 'Update',
-}
+import { usePageContext } from "../../context/PageContext"
 
 const MOBILE_BREAKPOINT = 770
 const TABLET_BREAKPOINT = 1000
@@ -35,6 +28,7 @@ const getDeviceType = (width: number): DeviceType => {
 
 export default function PageLayout(): JSX.Element {
   const location = useLocation()
+  const { title } = usePageContext()
 
   const [deviceType,   setDeviceType]   = useState(() => getDeviceType(window.innerWidth) );
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -70,7 +64,7 @@ export default function PageLayout(): JSX.Element {
           <BrandLogo size={20} version="v1.0" collapsed={isCollapsed} /> 
         </div>
         <div className="page-header title">
-          <h1>Title!</h1>
+          <h1>{title}</h1>
         </div>
         <Sidebar className="page-sidebar" collapsed={isCollapsed} setCollapsed={setIsCollapsed} deviceType={deviceType} />
         <MainContentContainer className="page-content">
