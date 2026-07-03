@@ -75,7 +75,7 @@ export default function PageLayout(): JSX.Element {
                   {value}
                 </span>
                 :
-                <NavLink to={value.path} className="label" key={index}>
+                <NavLink to={value.path} className="label link" key={index}>
                   {value.label}
                 </NavLink>
                 }
