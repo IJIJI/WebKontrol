@@ -3,17 +3,30 @@ import { JSX } from "react/jsx-runtime";
 
 import "./settings.less";
 
+export type BaseSettingsCompProps = {
+  title: string,
+  subtitle: string,
+  inputRef: React.RefObject<any>,
+  children: JSX.Element,
+}
+
+export type BaseSettingProps<T = any> = BaseSettingsCompProps & {
+  disabled: boolean,
+  value: T,
+  setValue: (value: T) => void | Promise<void>
+}
+
 // TODO: Add an easy way to add an InfoPill
-export function BaseSetting({title, subtitle, inputRef, children}: {title: string, subtitle: string, inputRef: React.RefObject<any>, children: JSX.Element}): JSX.Element {
+export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
 
   return (
-    <div className="setting field" onClick={() => inputRef.current?.focus()}>
+    <div className="setting field" onClick={() => props.inputRef.current?.focus()}>
       <div className="title">
-        <span className="title">{title}</span>
-        <span className="subtitle">{subtitle}</span>
+        <span className="title">{props.title}</span>
+        <span className="subtitle">{props.subtitle}</span>
       </div>
       <div className="input">
-        {children}
+        {props.children}
       </div>
     </div>
   );
