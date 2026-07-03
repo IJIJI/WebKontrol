@@ -32,8 +32,25 @@
       grid-area: header-logo;
     }
     .page-header.title {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+
       padding: @gap-m;
       grid-area: header-title;
+
+      .back {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 6px;
+
+        color: var(--color-text-secondary);
+        text-transform: capitalize;
+        font-size: 18px;
+      }
     }
     .page-sidebar {
       grid-area: sidebar;

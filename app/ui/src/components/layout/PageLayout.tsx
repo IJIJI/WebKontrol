@@ -65,17 +65,15 @@ export default function PageLayout(): JSX.Element {
           <BrandLogo size={20} version="v1.0" collapsed={isCollapsed} /> 
         </div>
         <div className="page-header title">
+          <h1>{title}</h1>
           {back && 
             <NavLink to={back.path} className="back">
-              <span className="icon">
-                <Icons.chevronLeft />
-              </span>
+              <Icons.chevronLeft size={18} />
               <span className="label">
                 {back.label ? back.label : "Back"}
               </span>
             </NavLink>
             }
-          <h1>{title}</h1>
         </div>
         <Sidebar className="page-sidebar" collapsed={isCollapsed} setCollapsed={setIsCollapsed} deviceType={deviceType} />
         <MainContentContainer className="page-content">
