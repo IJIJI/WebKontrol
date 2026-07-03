@@ -1,5 +1,5 @@
 import { type JSX, useEffect, useState } from "react"
-import { Outlet, useLocation } from "react-router-dom"
+import { NavLink, Outlet, useLocation } from "react-router-dom"
 import DesktopHeader from "./header/DesktopHeader"
 import Sidebar from "./sidebar/Sidebar"
 import AmbientGlowBackground from "../background/AmbientGlowBackground"
@@ -9,6 +9,7 @@ import MainContentContainer from "./content/MainContentContainer"
 import ContentSection from "./content/ContentSection"
 import { BrandLogo } from "../branding/BrandLogo"
 import { usePageContext } from "../../context/PageContext"
+import { Icons } from "../icons/Icons"
 
 const MOBILE_BREAKPOINT = 770
 const TABLET_BREAKPOINT = 1000
@@ -28,7 +29,7 @@ const getDeviceType = (width: number): DeviceType => {
 
 export default function PageLayout(): JSX.Element {
   const location = useLocation()
-  const { title } = usePageContext()
+  const { title, back } = usePageContext()
 
   const [deviceType,   setDeviceType]   = useState(() => getDeviceType(window.innerWidth) );
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -64,6 +65,16 @@ export default function PageLayout(): JSX.Element {
           <BrandLogo size={20} version="v1.0" collapsed={isCollapsed} /> 
         </div>
         <div className="page-header title">
+          {back && 
+            <NavLink to={back.path} className="back">
+              <span className="icon">
+                <Icons.chevronLeft />
+              </span>
+              <span className="label">
+                {back.label ? back.label : "Back"}
+              </span>
+            </NavLink>
+            }
           <h1>{title}</h1>
         </div>
         <Sidebar className="page-sidebar" collapsed={isCollapsed} setCollapsed={setIsCollapsed} deviceType={deviceType} />
