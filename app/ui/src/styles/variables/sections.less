@@ -1,16 +1,20 @@
 
 // TODO: This only updates on node restart. Why?
-.sectionStyle(@variant: opaque) {
-  border-radius: @border-radius-lg;
+.sectionStyle(@variant: opaque, @standalone: false) {
   position: relative;
   overflow: hidden;
-  box-shadow: 2px 4px 40px 15px rgba(0, 0, 0, 0.3);
+
+  & when not (@standalone = false) {
+    border-radius: @border-radius-lg;
+    box-shadow: 2px 4px 40px 15px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(80, 80, 80, 1);
+  }
+
 
   // @glass-color-shadow: var(--color-background-tertiary);
 
 
   // TODO: More: shadow etc.
-  border: 1px solid rgba(80, 80, 80, 1);
 
   & when (@variant = opaque) {
     background: var(--color-background-secondary);
