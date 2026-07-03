@@ -2,7 +2,9 @@ import { createContext, type JSX, useContext, useEffect, useState } from "react"
 
 interface PageState { // TODO: Add more like og
   title?: string;
+  setTitle: (value?: string) => void;
   description?: string;
+  setDescription: (value?: string) => void;
 }
 
 const PageStateContext = createContext<PageState | null>(null);
@@ -14,17 +16,19 @@ export function PageStateProvider({
   children: JSX.Element;
 }): JSX.Element {
 
-  const [state, setState] = useState<PageState>({
-    description: "WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel."
-  });
+  const [title, setTitle] = useState<string | undefined>(undefined);
+  const [description, setDescription] = useState<string | undefined>("WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel.")
 
   useEffect(() => {
-    document.title = state.title ? state.title + "- WebKontrol" : "WebKontrol";
-  }, [state]);
+    document.title = title ? title + "- WebKontrol" : "WebKontrol";
+  }, [title]);
 
   return (
     <PageStateContext
-      value={state}
+      value={{
+        title, setTitle,
+        description, setDescription
+      }}
     >
       {children}
     </PageStateContext>
