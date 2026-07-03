@@ -17,8 +17,6 @@ export default function PuppetPage() {
   }, [puppetKey, setMeta]);
 
   return (
-    <ContentSection>
-      <h1>Puppet specific page!</h1>
-    </ContentSection>
+    <h1>Puppet specific page!</h1>
   );
 }

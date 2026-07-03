@@ -93,7 +93,9 @@ export default function PageLayout(): JSX.Element {
         </div>
         <Sidebar className="page-sidebar" collapsed={isCollapsed} setCollapsed={setIsCollapsed} deviceType={deviceType} />
         <MainContentContainer className="page-content">
-          <Outlet />
+          <ContentSection>
+            <Outlet />
+          </ContentSection>
         </MainContentContainer>
       </ContentSection>
     </div>
