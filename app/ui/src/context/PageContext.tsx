@@ -86,7 +86,7 @@ export function PageStateProvider({
     <PageStateContext
       value={{
         ...meta,
-        // title: meta.title ?? FALLBACK_PAGE_META.title,
+        // title: meta.title ?? {primary: DEFAULT_PAGE_META.title},
         setMeta,
       }}
     >

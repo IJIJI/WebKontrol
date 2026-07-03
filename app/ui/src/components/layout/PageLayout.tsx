@@ -65,7 +65,18 @@ export default function PageLayout(): JSX.Element {
           <BrandLogo size={20} version="v1.0" collapsed={isCollapsed} /> 
         </div>
         <div className="page-header title">
-          <h1>{title}</h1>
+          <h1>
+            {title.primary &&
+              <span className="primary">
+                {title.primary}
+              </span>
+            }
+            {title.secondary &&
+              <span className="secondary">
+                {title.secondary}
+              </span>
+            }
+          </h1>
           {back && 
             <NavLink to={back.path} className="back">
               <Icons.arrowBackward size={22} />
