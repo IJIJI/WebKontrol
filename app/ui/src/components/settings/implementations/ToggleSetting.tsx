@@ -1,5 +1,5 @@
 import { JSX } from "react/jsx-runtime";
-import { Toggle } from "../toggle/Toggle";
+import { Toggle } from "../../toggle/Toggle";
 
 import "./settings.less";
 

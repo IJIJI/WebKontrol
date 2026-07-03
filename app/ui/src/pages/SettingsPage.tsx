@@ -1,9 +1,9 @@
 import { useState } from "react";
 import ContentSection from "../components/layout/content/ContentSection";
 import { SettingGroup } from "../components/settings/SettingGroup";
-import { TextSetting } from "../components/settings/TextSetting";
-import { ButtonSelectSetting } from "../components/settings/ButtonSelectSetting";
-import { ToggleSetting } from "../components/settings/ToggleSetting";
+import { TextSetting } from "../components/settings/implementations/TextSetting";
+import { ButtonSelectSetting } from "../components/settings/implementations/ButtonSelectSetting";
+import { ToggleSetting } from "../components/settings/implementations/ToggleSetting";
 
 type placeHolderTheme = "light" | "dark" | "auto";
 
