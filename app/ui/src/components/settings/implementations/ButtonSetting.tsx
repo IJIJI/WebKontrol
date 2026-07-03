@@ -1,6 +1,6 @@
 import { JSX } from "react/jsx-runtime";
 
-import "./settings.less";
+import "../settings.less";
 
 export enum ButtonSettingType {
   DEFAULT = "default",

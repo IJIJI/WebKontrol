@@ -1,7 +1,8 @@
 import { JSX } from "react/jsx-runtime";
 import { Toggle } from "../../toggle/Toggle";
 
-import "./settings.less";
+import "../settings.less";
+
 
 export function ToggleSetting({title, subtitle, value, setValue, disabled}: {title: string, subtitle: string, value: boolean, setValue: (value: boolean) => void | Promise<void>, disabled?: boolean}): JSX.Element {
 
