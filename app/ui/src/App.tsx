@@ -23,8 +23,8 @@ export default function App(): JSX.Element {
           <Routes>
             <Route element={<PageLayout />}>
               <Route index element={<PageRoute><OverviewPage /></PageRoute>} />
-              <Route path="dashboard" element={<PageRoute title="Dashboard"><DashboardPage /></PageRoute>} />
-              <Route path="views" element={<PageRoute title="Views"><ViewsPage /></PageRoute>} />
+              <Route path="dashboard" element={<PageRoute title={["overview", "dashboard"]}><DashboardPage /></PageRoute>} />
+              <Route path="views" element={<PageRoute title={["overview", "views"]}><ViewsPage /></PageRoute>} />
               
               <Route path="puppets/:puppetKey" element={<PageRoute title="Puppet"><PuppetPage /></PageRoute>} />
 
