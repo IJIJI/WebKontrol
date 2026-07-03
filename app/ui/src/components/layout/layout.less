@@ -18,11 +18,14 @@
     flex-grow: 1;
 
     display: grid;
-    grid-template-areas: 
+    grid-template-areas:
       "header-logo header-title"
       "sidebar content";
     grid-template-columns: min-content auto;
     grid-template-rows: min-content 1fr;
+    // .content (content.less) sets align-items: flex-start for its flex layout;
+    // that leaks into this grid and stops header cells from stretching to equal height.
+    align-items: stretch;
 
     border-radius: @border-radius-lg;
     // gap: @gap-m @gap-l;
