@@ -59,9 +59,10 @@
 
         text-transform: capitalize;
 
-        &:has(.secondary), &:has(.separator) {
-          .primary, .separator{
-            color: var(--color-text-tertiary);
+        color: var(--color-text-tertiary);
+        .label {
+          &:last-child {
+            color: var(--color-text-primary);
           }
         }
       }

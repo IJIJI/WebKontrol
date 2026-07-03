@@ -66,21 +66,14 @@ export default function PageLayout(): JSX.Element {
         </div>
         <div className="page-header title">
           <h1 className="title-text">
-            {title.primary &&
-              <span className="primary">
-                {title.primary}
-              </span>
-            }
-            {title.secondary &&
-            <>
-              <span className="separator">
-                <Icons.chevronRight/>
-              </span>
-              <span className="secondary">
-                {title.secondary}
-              </span>
-            </>
-            }
+            {title.map((value, index) => (
+              <>
+                {index > 0 && <Icons.chevronRight size={20} className="title-separator" />}
+                <span className="label" key={index}>
+                  {value}
+                </span>
+              </>
+            ))}
           </h1>
           {back && 
             <NavLink to={back.path} className="back">
