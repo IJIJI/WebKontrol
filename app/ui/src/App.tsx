@@ -10,6 +10,7 @@ import SettingsPage from "./pages/SettingsPage";
 import PluginsPage from "./pages/PluginsPage";
 import { PageStateProvider } from "./context/PageContext";
 import { PageRoute } from "./components/layout/router/PageRoute";
+import PuppetPage from "./pages/PuppetPage";
 
 export default function App(): JSX.Element {
   return (
@@ -24,6 +25,8 @@ export default function App(): JSX.Element {
               <Route index element={<PageRoute><OverviewPage /></PageRoute>} />
               <Route path="dashboard" element={<PageRoute title="Dashboard"><DashboardPage /></PageRoute>} />
               <Route path="views" element={<PageRoute title="Views"><ViewsPage /></PageRoute>} />
+              
+              <Route path="puppets/:puppetKey" element={<PageRoute title="Puppet"><PuppetPage /></PageRoute>} />
 
               <Route path="settings/plugins" element={<PageRoute title="Plugins" back={{path: "/", label: "settings"}}><PluginsPage /></PageRoute>} />
               <Route path="settings/config" element={<PageRoute title="Settings"><SettingsPage /></PageRoute>} />
