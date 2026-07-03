@@ -65,16 +65,21 @@ export default function PageLayout(): JSX.Element {
           <BrandLogo size={20} version="v1.0" collapsed={isCollapsed} /> 
         </div>
         <div className="page-header title">
-          <h1>
+          <h1 className="title-text">
             {title.primary &&
               <span className="primary">
                 {title.primary}
               </span>
             }
             {title.secondary &&
+            <>
+              <span className="separator">
+                <Icons.chevronRight/>
+              </span>
               <span className="secondary">
                 {title.secondary}
               </span>
+            </>
             }
           </h1>
           {back && 

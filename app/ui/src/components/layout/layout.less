@@ -50,6 +50,21 @@
       grid-area: header-title;
 
       border-bottom: 1px solid var(--color-background-primary) !important;
+      .title-text {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+
+        text-transform: capitalize;
+
+        &:has(.secondary), &:has(.separator) {
+          .primary, .separator{
+            color: var(--color-text-tertiary);
+          }
+        }
+      }
       .back {
         display: flex;
         flex-direction: row;
