@@ -1,7 +1,7 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { WithRequiredExept, type WithRequired } from "../../../src/types/CommonTypes";
 
-export interface BackConfig {
+export type BackConfig = false | {
   path: string;
   label?: string;
 };
@@ -9,7 +9,7 @@ export interface BackConfig {
 export interface PageMeta { // TODO: Add more like og
   title?: string;
   description?: string;
-  back?: BackConfig | false;
+  back?: BackConfig;
 }
 
 type RequiredPageMeta = WithRequiredExept<PageMeta, "back">;
