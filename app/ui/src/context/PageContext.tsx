@@ -1,33 +1,66 @@
-import { createContext, type JSX, useContext, useEffect, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { WithRequired } from "../../../src/types/CommonTypes";
 
-interface PageState { // TODO: Add more like og
+export interface PageMeta { // TODO: Add more like og
   title?: string;
-  setTitle: (value?: string) => void;
   description?: string;
-  setDescription: (value?: string) => void;
+}
+
+type RequiredPageMetaInput = WithRequired<PageMeta, "description">;
+type RequiredPageMetaDefaults = Required<Omit<PageMeta, "description">>;
+
+export const DEFAULT_PAGE_META: RequiredPageMetaInput = {
+  description: "WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel.",
+}
+
+const FALLBACK_PAGE_META: RequiredPageMetaDefaults = {
+  title: "WebKontrol"
+}
+
+interface PageState extends Required<PageMeta> {
+  setMeta: (meta: PageMeta, keepPrevious?: boolean) => void;
 }
 
 const PageStateContext = createContext<PageState | null>(null);
 
-// TODO: Reset title and description on page load, check if a context is the best way to do this.
 export function PageStateProvider({
   children,
 }: {
-  children: JSX.Element;
-}): JSX.Element {
+  children: ReactNode;
+}): ReactNode {
 
-  const [title, setTitle] = useState<string | undefined>(undefined);
-  const [description, setDescription] = useState<string | undefined>("WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel.")
+  const [meta, setMetaState] = useState<RequiredPageMetaInput>(DEFAULT_PAGE_META);
+
+  const setMeta = useCallback((next: PageMeta, keepPrevious?: boolean) => {
+    setMetaState((prev) => {
+      const base = keepPrevious ? prev : DEFAULT_PAGE_META
+      const merged = { ...base, ...next };
+      return merged;
+    });
+  }, []);
 
   useEffect(() => {
-    document.title = title ? title + " - WebKontrol" : "WebKontrol";
-  }, [title]);
+    document.title = meta.title
+      ? `${meta.title} - ${FALLBACK_PAGE_META.title}`
+      : FALLBACK_PAGE_META.title;
+  }, [meta.title]);
+
+  useEffect(() => {
+    let tag = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!tag) {
+      tag = document.createElement("meta");
+      tag.name = "description";
+      document.head.appendChild(tag);
+    }
+    tag.content = meta.description;
+  }, [meta.description]);
 
   return (
     <PageStateContext
       value={{
-        title, setTitle,
-        description, setDescription
+        ...meta,
+        title: meta.title ?? FALLBACK_PAGE_META.title, // TODO: Should this exist?
+        setMeta,
       }}
     >
       {children}
