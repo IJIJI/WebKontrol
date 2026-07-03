@@ -56,13 +56,12 @@ export function PageStateProvider({
 
   const setMeta = useCallback((next: PageMetaInput, keepPrevious?: boolean) => {
     setMetaState((prev) => {
-      const normalised: PageMeta = {
-        ...next,
-        title: next.title !== undefined ? normalizeMetaTitle(next.title) : undefined,
-      };
       const base = keepPrevious ? prev : DEFAULT_PAGE_META
-      const merged = { ...base, ...normalised };
-      return merged;
+      return {
+        title: next.title !== undefined ? normalizeMetaTitle(next.title) : base.title,
+        description: next.description !== undefined ? next.description : base.description,
+        back: next.back !== undefined ? next.back : base.back,
+      };
     });
   }, []);
 
