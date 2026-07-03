@@ -15,7 +15,7 @@ export interface PageMeta { // TODO: Add more like og
 type RequiredPageMeta = WithRequiredExept<PageMeta, "back">;
 // type RequiredPageMetaInput = WithRequired<PageMeta, "description">;
 
-
+// TODO: Add a way to change the base for named instances
 const DEFAULT_PAGE_META: RequiredPageMeta = {
   title: "WebKontrol",
   description: "WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel.",
