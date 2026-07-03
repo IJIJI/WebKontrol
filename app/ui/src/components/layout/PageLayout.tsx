@@ -57,6 +57,7 @@ export default function PageLayout(): JSX.Element {
   }, [location.pathname, deviceType])
 
   // TODO: Combine desktop and mobile header or autoswitch
+  // TODO: Seperate breadcrumb component
   return(
     <div className="page-base">
       <AmbientGlowBackground />
