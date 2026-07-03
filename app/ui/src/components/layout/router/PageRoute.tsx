@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { type BackConfig, type PageMetaInput, usePageContext } from "../../../context/PageContext";
 
@@ -15,7 +15,7 @@ export const PageRoute = ({ children, title, description, back }: PageMetaInput 
   const location = useLocation();
   const backOverride = (location.state as PageRouteLocationState | null)?.back;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setMeta({ title, description, back: backOverride ?? back });
   }, [title, description, backOverride, setMeta]);
 
