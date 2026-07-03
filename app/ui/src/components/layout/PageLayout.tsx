@@ -68,7 +68,7 @@ export default function PageLayout(): JSX.Element {
           <h1>{title}</h1>
           {back && 
             <NavLink to={back.path} className="back">
-              <Icons.chevronLeft size={18} />
+              <Icons.arrowBackward size={22} />
               <span className="label">
                 {back.label ? back.label : "Back"}
               </span>
