@@ -10,7 +10,7 @@ export type BaseSettingsCompProps = {
   children: JSX.Element,
 }
 
-export type BaseSettingNonValProps = BaseSettingsCompProps & {
+export type BaseSettingNonValProps = Omit<BaseSettingsCompProps, "inputRef"> & {
   disabled: boolean,
 }
 
