@@ -20,7 +20,7 @@ export function PageStateProvider({
   const [description, setDescription] = useState<string | undefined>("WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel.")
 
   useEffect(() => {
-    document.title = title ? title + "- WebKontrol" : "WebKontrol";
+    document.title = title ? title + " - WebKontrol" : "WebKontrol";
   }, [title]);
 
   return (

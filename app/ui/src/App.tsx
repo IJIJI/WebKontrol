@@ -8,6 +8,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ViewsPage from "./pages/ViewsPage";
 import SettingsPage from "./pages/SettingsPage";
 import PluginsPage from "./pages/PluginsPage";
+import { PageStateProvider } from "./context/PageContext";
 
 export default function App(): JSX.Element {
   return (
@@ -15,22 +16,24 @@ export default function App(): JSX.Element {
     // TODO: error boundary inside or outside of router? What about state providers?
     <AppErrorBoundary>
     <ApiStateProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<PageLayout />}>
-            <Route index element={<OverviewPage />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="views" element={<ViewsPage />} />
-            
-            <Route path="settings/plugins" element={<PluginsPage />} />
-            <Route path="settings/config" element={<SettingsPage />} />
+    <PageStateProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<PageLayout />}>
+              <Route index element={<OverviewPage />} />
+              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="views" element={<ViewsPage />} />
+              
+              <Route path="settings/plugins" element={<PluginsPage />} />
+              <Route path="settings/config" element={<SettingsPage />} />
 
-            <Route path="*"  element={<Navigate to="/" replace />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+              <Route path="*"  element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
       {/* <h1>HI</h1> */}
       {/* <BrandLogo version="V1.0.0" /> */}
+    </PageStateProvider>
     </ApiStateProvider>
     </AppErrorBoundary>
   );
