@@ -12,7 +12,7 @@ export function TextSetting({title, subtitle, value, setValue, disabled}: {title
         <span className="title">{title}</span>
         <span className="subtitle">{subtitle}</span>
       </div>
-      <div className="input text">
+      <div className="input">
         <input type="text" ref={inputRef} value={value} onChange={(event) => setValue(event.target.value)} disabled={disabled} />
       </div>
     </div>
