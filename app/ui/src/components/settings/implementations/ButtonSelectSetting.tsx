@@ -2,28 +2,34 @@ import { JSX } from "react/jsx-runtime";
 
 import "../settings.less";
 
-export function ButtonSelectSetting<T,>({title, subtitle, value, setValue, disabled, options}: {title: string, subtitle: string, value: T, setValue: (value: T) => void | Promise<void>, disabled?: boolean, options: {label: string, value: T}[]}): JSX.Element {
+import { BaseSetting, BaseSettingProps } from "../BaseSetting";
+import { useRef } from "react";
+
+type ButtonSelectProps<OptionT> = BaseSettingProps<OptionT> & {
+  options: {label: string, value: OptionT}[],
+}
+
+export function ButtonSelectSetting<T,>(props: ButtonSelectProps<T>): JSX.Element {
+
+  const inputRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="setting field">
-      <div className="title">
-        <span className="title">{title}</span>
-        <span className="subtitle">{subtitle}</span>
-      </div>
-      <div className="input">
-        {options.map((option) => (
+    <BaseSetting {...props} inputRef={inputRef}>
+      <div className="buttonSelect">
+        {props.options.map((option, index) => (
           <button
             key={option.label}
             type="button"
-            className={option.value === value ? "selected" : ""}
-            disabled={disabled}
-            onClick={() => setValue(option.value)}
+            className={option.value === props.value ? "selected" : ""}
+            disabled={props.disabled}
+            onClick={() => props.setValue(option.value)}
+            ref={index == 0 ? inputRef : undefined}
           >
             {option.label}
           </button>
         ))}
       </div>
-    </div>
+    </BaseSetting>
   );
 
 }
