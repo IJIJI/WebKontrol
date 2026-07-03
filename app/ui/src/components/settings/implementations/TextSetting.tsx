@@ -2,20 +2,17 @@ import { useRef } from "react";
 import { JSX } from "react/jsx-runtime";
 
 import "../settings.less";
+import { BaseSetting, BaseSettingProps } from "../BaseSetting";
 
-export function TextSetting({title, subtitle, value, setValue, disabled}: {title: string, subtitle: string, value: string, setValue: (value: string) => void | Promise<void>, disabled?: boolean}): JSX.Element {
+type TextProps = BaseSettingProps<string>
+
+export function TextSetting(props: TextProps): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <div className="setting field" onClick={() => inputRef.current?.focus()}>
-      <div className="title">
-        <span className="title">{title}</span>
-        <span className="subtitle">{subtitle}</span>
-      </div>
-      <div className="input">
-        <input type="text" ref={inputRef} value={value} onChange={(event) => setValue(event.target.value)} disabled={disabled} />
-      </div>
-    </div>
+    <BaseSetting {...props} inputRef={inputRef}>
+        <input type="text" ref={inputRef} value={props.value} onChange={(event) => props.setValue(event.target.value)} disabled={props.disabled} />
+    </BaseSetting>
   );
 
 }
