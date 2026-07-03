@@ -23,7 +23,7 @@ const withDefaultMeta = (meta?: Partial<MetaData>): MetaData => {
   return combined;
 }
 
-export const Page = ({children, meta}: {children: JSX.Element, meta?: MetaData}): JSX.Element => {
+export const PageRoute = ({children, meta}: {children: JSX.Element, meta?: MetaData}): JSX.Element => {
   
   useEffect(() => {
     const parsed = withDefaultMeta(meta);
