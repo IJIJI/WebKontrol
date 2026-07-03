@@ -29,7 +29,7 @@ export default function App(): JSX.Element {
               <Route path="puppets/:puppetKey" element={<PageRoute title="Puppet"><PuppetPage /></PageRoute>} />
 
               <Route path="settings/plugins" element={<PageRoute title={["Settings", "Plugins"]} back={{path: "/", label: "settings"}}><PluginsPage /></PageRoute>} />
-              <Route path="settings/config" element={<PageRoute title={["Settings", "config"]}><SettingsPage /></PageRoute>} />
+              <Route path="settings/config" element={<PageRoute title={[{label: "Settings", path: "/"}, "config"]}><SettingsPage /></PageRoute>} />
 
               <Route path="*"  element={<Navigate to="/" replace />} />
             </Route>

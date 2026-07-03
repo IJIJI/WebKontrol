@@ -69,9 +69,15 @@ export default function PageLayout(): JSX.Element {
             {title.map((value, index) => (
               <>
                 {index > 0 && <Icons.chevronRight size={20} className="title-separator" />}
+                { typeof value == "string" ?
                 <span className="label" key={index}>
                   {value}
                 </span>
+                :
+                <NavLink to={value.path} className="label" key={index}>
+                  {value.label}
+                </NavLink>
+                }
               </>
             ))}
           </h1>

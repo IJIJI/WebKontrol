@@ -6,7 +6,8 @@ export type BackConfig = false | {
   label?: string;
 };
 
-export type MetaTitle = string[];
+export type titleSegment = string | {label: string, path: string};
+export type MetaTitle = titleSegment[];
 export type MetaTitleInput = string | MetaTitle;
 
 const normalizeMetaTitle = (t: MetaTitleInput): MetaTitle =>
