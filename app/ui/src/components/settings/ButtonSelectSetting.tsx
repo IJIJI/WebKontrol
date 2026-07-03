@@ -2,7 +2,7 @@ import { JSX } from "react/jsx-runtime";
 
 import "./settings.less";
 
-export function ButtonSelectSetting<T,>({title, subtitle, value, setValue, disabled, options}: {title: string, subtitle: string, value: T, setValue: (value: T) => void, disabled?: boolean, options: {label: string, value: T}[]}): JSX.Element {
+export function ButtonSelectSetting<T,>({title, subtitle, value, setValue, disabled, options}: {title: string, subtitle: string, value: T, setValue: (value: T) => void | Promise<void>, disabled?: boolean, options: {label: string, value: T}[]}): JSX.Element {
 
   return (
     <div className="setting field">

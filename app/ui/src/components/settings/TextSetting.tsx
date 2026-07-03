@@ -3,7 +3,7 @@ import { JSX } from "react/jsx-runtime";
 
 import "./settings.less";
 
-export function TextSetting({title, subtitle, value, setValue, disabled}: {title: string, subtitle: string, value: string, setValue: (value: string) => void, disabled?: boolean}): JSX.Element {
+export function TextSetting({title, subtitle, value, setValue, disabled}: {title: string, subtitle: string, value: string, setValue: (value: string) => void | Promise<void>, disabled?: boolean}): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
