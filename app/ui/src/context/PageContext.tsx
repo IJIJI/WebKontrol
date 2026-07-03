@@ -6,17 +6,14 @@ export type BackConfig = false | {
   label?: string;
 };
 
-export interface MetaTitle {
-  primary: string;
-  secondary?: string;
-}
+export type MetaTitle = string[];
 export type MetaTitleInput = string | MetaTitle;
 
 const normalizeMetaTitle = (t: MetaTitleInput): MetaTitle =>
-  typeof t === "string" ? { primary: t } : t;
+  typeof t === "string" ? [ t ] : t;
 
 const serializeMetaTitle = (title: MetaTitle): string => {
-  return title.secondary ? `${title.primary}: ${title.secondary}` : title.primary;
+  return title.join(" > ");
 }
 
 export interface PageMeta { // TODO: Add more like og
@@ -34,9 +31,7 @@ type RequiredPageMeta = WithRequiredExept<PageMeta, "back">;
 
 // TODO: Add a way to change the base for named instances
 const DEFAULT_PAGE_META: RequiredPageMeta = {
-  title: {
-    primary: "WebKontrol",
-  },
+  title: ["WebKontrol"],
   description: "WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel.",
 }
 
