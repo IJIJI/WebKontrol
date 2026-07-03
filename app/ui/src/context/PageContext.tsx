@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { type WithRequired } from "../../../src/types/CommonTypes";
+import { WithRequiredExept, type WithRequired } from "../../../src/types/CommonTypes";
 
 export interface BackConfig {
   path: string;
@@ -12,17 +12,16 @@ export interface PageMeta { // TODO: Add more like og
   back?: BackConfig | false;
 }
 
-type RequiredPageMeta = Required<PageMeta>;
-type RequiredPageMetaInput = WithRequired<PageMeta, "description">;
+type RequiredPageMeta = WithRequiredExept<PageMeta, "back">;
+// type RequiredPageMetaInput = WithRequired<PageMeta, "description">;
 
 
 const DEFAULT_PAGE_META: RequiredPageMeta = {
   title: "WebKontrol",
   description: "WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel.",
-  back: false,
 }
 
-interface PageState extends Required<PageMeta> {
+interface PageState extends RequiredPageMeta {
   setMeta: (meta: PageMeta, keepPrevious?: boolean) => void;
 }
 
@@ -46,8 +45,8 @@ export function PageStateProvider({
 
   useEffect(() => {
     document.title = meta.title
-      ? `${meta.title} - ${FALLBACK_PAGE_META.title}`
-      : FALLBACK_PAGE_META.title;
+      ? `${meta.title} - ${DEFAULT_PAGE_META.title}`
+      : DEFAULT_PAGE_META.title;
   }, [meta.title]);
 
   useEffect(() => {
@@ -65,8 +64,6 @@ export function PageStateProvider({
       value={{
         ...meta,
         // title: meta.title ?? FALLBACK_PAGE_META.title,
-        title: meta.title ?? "",
-
         setMeta,
       }}
     >
