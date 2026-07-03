@@ -40,14 +40,3 @@ export function ButtonSetting(props: ButtonSettingProps): JSX.Element {
   );
 }
 
-
-export function TextSetting(props: TextProps): JSX.Element {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  return (
-    <BaseSetting {...props} inputRef={inputRef}>
-        <input type="text" ref={inputRef} value={props.value} onChange={(event) => props.setValue(event.target.value)} disabled={props.disabled} />
-    </BaseSetting>
-  );
-
-}
