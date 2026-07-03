@@ -16,8 +16,8 @@ export default function SettingsPage() {
     <>
       <p>theme: {theme}<br/>disableBg: {disableBackground}</p>
       <SettingGroup title="Appearance" >
-        <ButtonSelectSetting 
-          title="Theme" 
+        <ButtonSelectSetting<placeHolderTheme>
+          title="Theme"
           subtitle="Override your system color scheme" 
           value={theme} setValue={setTheme} 
           options={[
