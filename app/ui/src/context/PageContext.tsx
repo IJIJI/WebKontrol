@@ -14,7 +14,7 @@ const normalizeMetaTitle = (t: MetaTitleInput): MetaTitle =>
   typeof t === "string" ? [ t ] : t;
 
 const serializeMetaTitle = (title: MetaTitle): string => {
-  return title.join(" > ");
+  return title.map((value) => typeof value == "string" ? value : value.label).join(" > ");
 }
 
 export interface PageMeta { // TODO: Add more like og
