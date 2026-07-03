@@ -25,7 +25,7 @@ export default function App(): JSX.Element {
               <Route path="dashboard" element={<PageRoute title="Dashboard"><DashboardPage /></PageRoute>} />
               <Route path="views" element={<PageRoute title="Views"><ViewsPage /></PageRoute>} />
 
-              <Route path="settings/plugins" element={<PageRoute title="Plugins"><PluginsPage /></PageRoute>} />
+              <Route path="settings/plugins" element={<PageRoute title="Plugins" back={{path: "/", label: "settings"}}><PluginsPage /></PageRoute>} />
               <Route path="settings/config" element={<PageRoute title="Settings"><SettingsPage /></PageRoute>} />
 
               <Route path="*"  element={<Navigate to="/" replace />} />
