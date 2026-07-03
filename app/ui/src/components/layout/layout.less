@@ -19,16 +19,21 @@
 
     display: grid;
     grid-template-areas: 
-      "header content"
+      "header-logo header-title"
       "sidebar content";
     grid-template-columns: min-content auto;
     grid-template-rows: min-content 1fr;
 
-    gap: @gap-m @gap-l;
+    // gap: @gap-m @gap-l;
 
 
-    .page-header {
-      grid-area: header;
+    .page-header.logo {
+      padding: @gap-m;
+      grid-area: header-logo;
+    }
+    .page-header.title {
+      padding: @gap-m;
+      grid-area: header-title;
     }
     .page-sidebar {
       grid-area: sidebar;

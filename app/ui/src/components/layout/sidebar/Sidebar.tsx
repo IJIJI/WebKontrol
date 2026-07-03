@@ -20,8 +20,8 @@ settings >
 
 export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow = true, className}: {collapsed: boolean, setCollapsed: (state: boolean) => void, deviceType: DeviceType, heightGrow?: boolean, className?: string }): JSX.Element {
   return(
-    <ContentSection variant="glass" className={["sidebar", deviceType == DeviceType.MOBILE && "mobile", "pad-none", heightGrow && "height-100", className].filter(Boolean).join(" ")} >
-      <nav className="sidebar">
+    // <ContentSection variant="glass" className={["sidebar", deviceType == DeviceType.MOBILE && "mobile", "pad-none", heightGrow && "height-100", className].filter(Boolean).join(" ")} >
+      <nav className={["sidebar", deviceType == DeviceType.MOBILE && "mobile", heightGrow && "height-100", className].filter(Boolean).join(" ")}>
         <SidebarItem collapsed={collapsed} to="/" label="Home" icon={<Icons.home/>} /> 
         <SidebarSection collapsed={collapsed} label="Overview"> 
           <SidebarItem collapsed={collapsed} to="/dashboard" label="Dashboard" icon={<Icons.grid/>} /> 
@@ -38,7 +38,7 @@ export default function Sidebar({collapsed, setCollapsed, deviceType, heightGrow
 
         <SidebarCollapseButton collapsed={collapsed} setCollapsed={setCollapsed}/>
       </nav>
-    </ContentSection>
+    // </ContentSection>
     
   );
 }
