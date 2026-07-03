@@ -10,3 +10,4 @@
   - [ ] DB?
 - [ ] More puppet controll. Overlay, time, borders etc
 - [ ] Add Beacon integration!
+- [ ] rewrite section styling
