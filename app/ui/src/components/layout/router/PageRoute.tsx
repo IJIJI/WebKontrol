@@ -1,34 +1,14 @@
-import { type JSX, useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
+import { type PageMeta, usePageContext } from "../../../context/PageContext";
 
 // TODO: Move somewhere else, does not belong in layout
 
-export type MetaData = {
-  title: string,
-  description: string,
-}
+export const PageRoute = ({ children, title, description }: PageMeta & { children: ReactNode }): ReactNode => {
+  const { setMeta } = usePageContext();
 
-export const DEFAULT_METADATA: MetaData = {
-  title: "WebKontrol",
-  description: "WebKontrol remote browser - An intuitive web kiosk with a web-based admin panel."
-}
-
-const withDefaultMeta = (meta?: Partial<MetaData>): MetaData => {
-  const combined = {
-    ...DEFAULT_METADATA,
-    ...meta,
-  }
-  if (meta?.title) {
-    combined.title = "WebKontrol - " + meta.title;
-  }
-  return combined;
-}
-
-export const PageRoute = ({children, meta}: {children: JSX.Element, meta?: MetaData}): JSX.Element => {
-  
   useEffect(() => {
-    const parsed = withDefaultMeta(meta);
+    setMeta({ title, description });
+  }, [title, description, setMeta]);
 
-    document.title = parsed.title;
-  }, [meta]);
   return children;
 };
