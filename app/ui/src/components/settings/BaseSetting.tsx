@@ -10,7 +10,11 @@ export type BaseSettingsCompProps = {
   children: JSX.Element,
 }
 
-export type BaseSettingProps<T = any> = BaseSettingsCompProps & {
+export type BaseSettingNonValProps = BaseSettingsCompProps & {
+  disabled: boolean,
+}
+
+export type BaseSettingProps<T = any> = BaseSettingNonValProps & {
   disabled: boolean,
   value: T,
   setValue: (value: T) => void | Promise<void>

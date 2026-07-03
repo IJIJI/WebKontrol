@@ -1,6 +1,14 @@
 import { JSX } from "react/jsx-runtime";
 
 import "../settings.less";
+import { BaseSetting, BaseSettingNonValProps, BaseSettingProps } from "../BaseSetting";
+import { useRef } from "react";
+
+type ButtonSettingProps = BaseSettingNonValProps & {
+  onClick: () => void | Promise<void>,
+  type?: ButtonSettingType,
+  label: string
+};
 
 export enum ButtonSettingType {
   DEFAULT = "default",
@@ -11,27 +19,35 @@ export enum ButtonSettingType {
   INFO = "info",
 }
 
-export function ButtonSetting<T,>({title, subtitle, onClick, disabled, type, label}: {title: string, subtitle: string, onClick: () => void | Promise<void>, disabled?: boolean, type: ButtonSettingType, label: string}): JSX.Element {
-  if (!type)
-    type = ButtonSettingType.DEFAULT;
+export function ButtonSetting(props: ButtonSettingProps): JSX.Element {
+  if (!props.type)
+    props.type = ButtonSettingType.DEFAULT;
+
+  const inputRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="setting field">
-      <div className="title">
-        <span className="title">{title}</span>
-        <span className="subtitle">{subtitle}</span>
-      </div>
-      <div className="input">
+    <BaseSetting {...props} inputRef={inputRef}>
         <button
           type="button"
-          className={type}
-          disabled={disabled}
-          onClick={() => !disabled && onClick()}
+          className={props.type}
+          disabled={props.disabled}
+          onClick={() => !props.disabled && props.onClick()}
+          ref={inputRef}
         >
-          {label}
+          {props.label}
         </button>
-      </div>
-    </div>
+    </BaseSetting>
+  );
+}
+
+
+export function TextSetting(props: TextProps): JSX.Element {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <BaseSetting {...props} inputRef={inputRef}>
+        <input type="text" ref={inputRef} value={props.value} onChange={(event) => props.setValue(event.target.value)} disabled={props.disabled} />
+    </BaseSetting>
   );
 
 }
