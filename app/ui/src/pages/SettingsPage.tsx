@@ -14,6 +14,7 @@ export default function SettingsPage() {
 
   return (
     <>
+      <p>theme: {theme}<br/>disableBg: {disableBackground}</p>
       <SettingGroup title="Appearance" >
         <ButtonSelectSetting 
           title="Theme" 
@@ -26,8 +27,8 @@ export default function SettingsPage() {
           ]}
         />
         <ToggleSetting 
-          title="Theme" 
-          subtitle="Override your system color scheme" 
+          title="Disable Background" 
+          subtitle="Disable the moving background" 
           value={disableBackground} setValue={setDisableBackground} 
         />
       </SettingGroup>
