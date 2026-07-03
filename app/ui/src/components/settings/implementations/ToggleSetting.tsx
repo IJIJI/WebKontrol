@@ -3,15 +3,17 @@ import { Toggle } from "../../toggle/Toggle";
 
 import "../settings.less";
 
-import { BaseSetting } from "../BaseSetting";
+import { BaseSetting, BaseSettingProps } from "../BaseSetting";
 import { useRef } from "react";
 
-export function ToggleSetting({title, subtitle, value, setValue, disabled}: {title: string, subtitle: string, value: boolean, setValue: (value: boolean) => void | Promise<void>, disabled?: boolean}): JSX.Element {
+type ToggleProps = BaseSettingProps<boolean>;
+
+export function ToggleSetting(props: ToggleProps): JSX.Element {
   const inputRef = useRef<HTMLDivElement>(null);
 
   return (
-    <BaseSetting inputRef={inputRef} title={title} subtitle={subtitle}>
-        <Toggle ref={inputRef} checked={value} setChecked={setValue} disabled={disabled} />
+    <BaseSetting {...props} inputRef={inputRef}>
+        <Toggle ref={inputRef} checked={props.value} setChecked={props.setValue} disabled={props.disabled} />
     </BaseSetting>
   );
 
