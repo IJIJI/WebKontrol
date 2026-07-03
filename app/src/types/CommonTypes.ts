@@ -27,6 +27,9 @@ export type ConnectionStateInput = z.input<typeof ConnectionStateInputSchema>;
 export type WithRequired<T, K extends keyof T> = Partial<T> &
   Required<Pick<T, K>>;
 
+export type WithRequiredExept<T, K extends keyof T> = Partial<T> &
+  Required<Omit<T, K>>;
+
 export abstract class CommonTools {
   static areDisplayNamesEqual(a: DisplayName, b: DisplayName): boolean {
     return a.long === b.long && a.short === b.short;
