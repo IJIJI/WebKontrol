@@ -40,6 +40,7 @@ export default function SettingsPage(): JSX.Element {
           subtitle="Disable the moving background"
           value={disableBackground}
           setValue={setDisableBackground}
+          // disabled={true}
         />
       </SettingGroup>
       <TextSetting 

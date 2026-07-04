@@ -1,0 +1,44 @@
+div.toggle {
+  @width: 47px;
+  @height: 27px;
+  @knob-gap: 2px;
+
+  width: @width;
+  height: @height;
+  border-radius: calc(@height/2);
+
+  position: relative;
+  
+  background-color: var(--color-border-secondary);
+  transition: background @button-animation-time ease;
+  cursor: pointer;
+
+  flex-shrink: 0;
+
+  .knob {
+    position: absolute;
+    top: @knob-gap;
+    left: @knob-gap;
+
+    width: calc(@height - @knob-gap*2);
+    height: calc(@height - @knob-gap*2);
+    border-radius: 50%;
+
+    background-color: white;
+
+    transition: transform @button-animation-time ease;
+  }
+
+  &.checked {
+    background-color: @color-acc;
+
+    .knob {
+      transform: translateX(calc(@width - @height));
+    }
+  }
+
+  &.disabled {
+    opacity: 50%;
+    cursor: not-allowed;
+  }
+}
