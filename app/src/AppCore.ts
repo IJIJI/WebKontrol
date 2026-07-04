@@ -1,13 +1,9 @@
+import type { CoreInfo } from "./core/model";
+import { CoreRuntimeConfigSchema, type CoreRuntimeConfig, type CoreRuntimeConfigInput } from "./core/schema";
 import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { type PuppetKey, type PuppetRuntimeConfigInput } from "./puppet/schema";
 import { AppCoreStore } from "./storage/AppCoreStore";
-import type { SystemInfo } from "./system/model";
-import {
-  SystemConfigSchema,
-  type SystemConfig,
-  type SystemConfigInput,
-} from "./system/schema";
 import { WebServer } from "./webServer/WebServer";
 
 export class AppCore {
@@ -18,11 +14,11 @@ export class AppCore {
   private _webServer: WebServer;
   private _puppets: Map<PuppetKey, AbstractPuppet> = new Map();
 
-  private _info: SystemInfo = {
+  private _info: CoreInfo = {
     start_moment: Date.now(),
   };
 
-  private _config: SystemConfig = {
+  private _config: CoreRuntimeConfig = {
     system_name: "WebKontrol",
   };
   protected _store: AppCoreStore = new AppCoreStore();
@@ -30,9 +26,9 @@ export class AppCore {
   // TODO: This can be massively cleaned up.
   // TODO: Runtime should not be an argument, there should be a config bundle for the "real" runtime unchangable config. e.g. webserver port
   // TODO: Move async code into init function.
-  constructor(config?: SystemConfigInput) {
+  constructor(config?: CoreRuntimeConfigInput) {
     if (config) {
-      this._config = SystemConfigSchema.parse(config);
+      this._config = CoreRuntimeConfigSchema.parse(config);
       this._store
         .saveRuntime(this._config)
         .then(() => {
@@ -175,10 +171,12 @@ export class AppCore {
         .values()
         .map((puppet) => puppet.getInfo())
         .toArray(),
-      system: {
-        info: this._info,
-        config: this._config,
+      config: {
+        core: this._config,
       },
+      info: {
+        core: this._info,
+      }
     });
   }
 
@@ -207,9 +205,9 @@ export class AppCore {
           );
         },
       },
-      system: {
-        updateConfig: (config: Partial<SystemConfig>): void => {
-          const parsed = SystemConfigSchema.parse({
+      core: {
+        updateConfig: (config: Partial<CoreRuntimeConfigInput>): void => {
+          const parsed = CoreRuntimeConfigSchema.parse({
             ...this._config,
             ...config,
           });
@@ -224,22 +222,21 @@ export class AppCore {
             this._config,
           );
         },
-
-        update: {
-          check: async (): Promise<void> => {
-            this._logger.important(`update.check() handler called.`);
-          },
-          apply: async (
-            ref: string,
-            type: "release" | "branch",
-          ): Promise<void> => {
-            this._logger.important(
-              `update.apply() handler called with ref: ${ref} of type: ${type}`,
-            );
-          },
-          getStatus: async (): Promise<void> => {
-            this._logger.important(`update.getStatus() handler called.`);
-          },
+      },
+      update: {
+        check: async (): Promise<void> => {
+          this._logger.important(`update.check() handler called.`);
+        },
+        apply: async (
+          ref: string,
+          type: "release" | "branch",
+        ): Promise<void> => {
+          this._logger.important(
+            `update.apply() handler called with ref: ${ref} of type: ${type}`,
+          );
+        },
+        getStatus: async (): Promise<void> => {
+          this._logger.important(`update.getStatus() handler called.`);
         },
       },
     });

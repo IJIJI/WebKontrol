@@ -13,12 +13,11 @@ import type {
   PuppetKey,
   PuppetRuntimeConfigInput,
 } from "../../../src/puppet/schema";
-import type { SystemConfig } from "../../../src/system/schema";
 import type { PuppetInfoBundle } from "../../../src/puppet/model";
-import type { SystemBundle } from "../../../src/system/model";
 import { Api } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
 import { ConnectionStatus } from "./types";
+import { CoreRuntimeConfigInput } from "../../../src/core/schema";
 
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
@@ -41,7 +40,7 @@ interface ApiState {
       ) => Promise<void>;
     };
     system: {
-      setConfig: (config: SystemConfig) => Promise<void>;
+      setConfig: (config: CoreRuntimeConfigInput) => Promise<void>;
       // update: {
       //   check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
       //   apply: (ref: string, type: 'release' | 'branch') => Promise<void>; // TODO: Check arguments

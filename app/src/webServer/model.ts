@@ -1,11 +1,21 @@
+import type { CoreInfo } from "../core/model";
+import type { CoreRuntimeConfig, CoreRuntimeConfigInput } from "../core/schema";
 import type { PuppetInfoBundle } from "../puppet/model";
 import type { PuppetKey, PuppetRuntimeConfigInput } from "../puppet/schema";
-import type { SystemBundle } from "../system/model";
-import type { SystemConfig } from "../system/schema";
+
+
+export interface WebServerRuntimeConfigState {// Only Runtime Configs. Standard configs are done from the config file.
+  core: CoreRuntimeConfig;
+
+}
+export interface WebServerInfoState {
+  core: CoreInfo;
+}
 
 export interface WebServerState {
   puppets: PuppetInfoBundle[];
-  system: SystemBundle;
+  config: WebServerRuntimeConfigState; // TODO: Rename to runtime?
+  info: WebServerInfoState;
 }
 
 export interface WebServerMutationHandlers {
@@ -15,13 +25,26 @@ export interface WebServerMutationHandlers {
       runtime: Partial<PuppetRuntimeConfigInput>,
     ) => Promise<void>;
   };
-  system: {
-    updateConfig: (config: Partial<SystemConfig>) => void | Promise<void>;
-
-    update: {
-      check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
-      apply: (ref: string, type: "release" | "branch") => Promise<void>; // TODO: Check arguments
-      getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
-    };
+  core: {
+    updateConfig: (config: Partial<CoreRuntimeConfigInput>) => void | Promise<void>;
   };
+  update: {
+    check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
+    apply: (ref: string, type: "release" | "branch") => Promise<void>; // TODO: Check arguments
+    getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
+  };
+}
+
+export enum WebServerStatus {
+  SETTING_UP = "Setting up...",
+  ONLINE = "Online",
+  FAILED = "Failed",
+}
+
+export interface AppInfo {
+  status: {
+    key: keyof WebServerStatus;
+    message: WebServerStatus;
+  }
+  core?: CoreInfo;
 }

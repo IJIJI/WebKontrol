@@ -1,5 +1,4 @@
 import { Logger } from "../logging/Logger";
-import { SystemConfigSchema, type SystemConfig } from "../system/schema";
 import type {
   AbstractView,
   ViewConfig,

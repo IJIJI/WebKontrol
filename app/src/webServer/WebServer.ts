@@ -2,15 +2,15 @@ import express from "express";
 import ViteExpress from "vite-express";
 import type http from "http";
 import { Logger } from "../logging/Logger";
-import type { WebServerMutationHandlers, WebServerState } from "./model";
+import type { WebServerMutationHandlers, WebServerState, WebServerStatus } from "./model";
 import { jsonReplacer } from "../helpers/json";
 import {
   WebServerConfigSchema,
   type WebServerConfig,
   type WebServerConfigInput,
 } from "./schema";
-import { SystemConfigSchema } from "../system/schema";
 import { PuppetKeySchema, PuppetRuntimeConfigSchema } from "../puppet/schema";
+import { CoreRuntimeConfigSchema } from "../core/schema";
 
 export class WebServer {
   private _app = express();
@@ -19,29 +19,14 @@ export class WebServer {
 
   private _config: WebServerConfig;
 
-  private _state: WebServerState = {
-    puppets: [],
-    system: {
-      info: {
-        start_moment: 0,
-      },
-      config: {
-        system_name: "WebKontrol",
-      },
-    },
-  };
+  private _state: WebServerState | null = null;
 
   private _handlers!: WebServerMutationHandlers;
-
-  // private _updateManager: UpdateManager;
 
   private _sseClients: Set<express.Response> = new Set();
 
   protected _isInit = false;
 
-  // constructor(updateManager: UpdateManager) {
-  //   this.updateManager = updateManager;
-  // }
   constructor(config: WebServerConfigInput) {
     this._config = WebServerConfigSchema.parse(config);
   }
@@ -51,6 +36,10 @@ export class WebServer {
   }
   private get _getSsePingPayload() {
     return `event: ping\ndata: ${Date.now()}\n\n`;
+  }
+
+  public get hasState(): boolean { // TODO: Convert into a getStatus that returns a WebServerStatus
+    return this._state !== null;
   }
 
   public setState(state: WebServerState): void {
@@ -78,6 +67,16 @@ export class WebServer {
 
     this._app.use(express.json());
     this._app.set("json replacer", jsonReplacer);
+
+    // Middleware that returns the still setting up message before the state is set:
+    this._app.use("/api", (req, res, next) => {
+      if( this.hasState || req.path == "/state" ) return next();
+      res.setHeader("Retry-After", "2");
+      res.status(503).json({ 
+        message: "Server starting...",
+        error: "SERVER_NOT_STARTED_YET",
+      });
+    });
 
     // TODO: Check if (when implemented) production is loaded correctly.
     ViteExpress.config({
@@ -147,7 +146,13 @@ export class WebServer {
 
   private _registerRoutes(): void {
     this._app.get("/api/info", (_req, res) => {
-      res.json(this._state.system.info); // TODO: Different payload? If so, make /api/system this._state.system again.
+      const info: WebServerStatus = {
+        status: {
+
+        },
+        core: this._state?.info.core
+      }
+      res.json(this._state?.info); // TODO: Different payload? If so, make /api/system this._state.system again.
     });
 
     this._app.get("/api/state", (req, res) => {
@@ -155,7 +160,8 @@ export class WebServer {
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
       res.flushHeaders();
-      res.write(this._getSseDataPayload);
+      if(this.hasState)
+        res.write(this._getSseDataPayload);
       this._sseClients.add(res);
       this._logger.debug(
         `New client connected to /api/state. Now a total of ${this._sseClients.size} clients are listening.`,
@@ -174,21 +180,21 @@ export class WebServer {
     });
 
     this._app.get("/api/system", (_req, res) => {
-      res.json(this._state.system.config);
+      res.json(this._state?.info.core);
     });
 
-    this._app.patch("/api/system/config", async (req, res) => {
-      const result = SystemConfigSchema.partial().safeParse(req.body);
+    this._app.patch("/api/config/core", async (req, res) => {
+      const result = CoreRuntimeConfigSchema.partial().safeParse(req.body);
 
       if (!result.success) {
         return res.status(400).json({ errors: result.error.format() });
       }
 
-      await this._handlers.system.updateConfig(result.data);
+      await this._handlers.core.updateConfig(result.data);
     });
 
     this._app.get("/api/puppets", (_req, res) => {
-      res.json(this._state.puppets);
+      res.json(this._state?.puppets);
     });
 
     this._app.patch("/api/puppets/:id", async (req, res) => {

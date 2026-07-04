@@ -1,5 +1,5 @@
+import { CoreRuntimeConfigSchema, type CoreRuntimeConfig } from "../core/schema";
 import { Logger } from "../logging/Logger";
-import { SystemConfigSchema, type SystemConfig } from "../system/schema";
 import { CoreDatabase } from "./CoreDatabase";
 
 export class AppCoreStore {
@@ -11,7 +11,7 @@ export class AppCoreStore {
     this._logger.debug(`Constructed store.`);
   }
 
-  public async saveRuntime(config: SystemConfig): Promise<void> {
+  public async saveRuntime(config: CoreRuntimeConfig): Promise<void> {
     this._logger.debug(`Saving runtime...`);
     await this._db.updateSetting(
       "app",
@@ -22,7 +22,7 @@ export class AppCoreStore {
     this._logger.debug(`Successfully saved runtime!`);
   }
 
-  public async loadRuntime(): Promise<SystemConfig | null> {
+  public async loadRuntime(): Promise<CoreRuntimeConfig | null> {
     try {
       this._logger.debug(`Loading runtime...`);
       const raw = await this._db.getSetting("app", "core", "runtime");
@@ -30,7 +30,7 @@ export class AppCoreStore {
         this._logger.info(`Failed loading runtime! Got null`);
         return null;
       }
-      const object = SystemConfigSchema.parse(JSON.parse(raw));
+      const object = CoreRuntimeConfigSchema.parse(JSON.parse(raw));
       this._logger.debug(`Successfully loaded runtime!`, object);
       return object;
     } catch (error) {
