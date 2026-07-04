@@ -1,4 +1,4 @@
-import { JSX } from "react/jsx-runtime";
+import { type JSX } from "react/jsx-runtime";
 
 import "./settings.less";
 

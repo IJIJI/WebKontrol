@@ -1,13 +1,11 @@
-import { useState } from "react";
-import ContentSection from "../components/layout/content/ContentSection";
+import { type JSX, useState } from "react";
 import { SettingGroup } from "../components/settings/SettingGroup";
-import { TextSetting } from "../components/settings/implementations/TextSetting";
 import { ButtonSelectSetting } from "../components/settings/implementations/ButtonSelectSetting";
 import { ToggleSetting } from "../components/settings/implementations/ToggleSetting";
 
 type placeHolderTheme = "light" | "dark" | "auto";
 
-export default function SettingsPage() {
+export default function SettingsPage(): JSX.Element {
 
   const [theme, setTheme] = useState<placeHolderTheme>("auto");
   const [disableBackground, setDisableBackground] = useState<boolean>(false);

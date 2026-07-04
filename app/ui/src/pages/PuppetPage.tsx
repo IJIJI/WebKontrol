@@ -1,11 +1,10 @@
 import { useParams } from "react-router-dom";
-import ContentSection from "../components/layout/content/ContentSection";
 import { useApi } from "../context/ApiStateContext";
 import { usePageContext } from "../context/PageContext";
-import { useEffect } from "react";
+import { type JSX, useEffect } from "react";
 
 
-export default function PuppetPage() {
+export default function PuppetPage(): JSX.Element {
   const { puppetKey } = useParams();
   const { state } = useApi();
   const { setMeta } = usePageContext();

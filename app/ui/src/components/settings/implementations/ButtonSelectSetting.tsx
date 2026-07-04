@@ -1,8 +1,8 @@
-import { JSX } from "react/jsx-runtime";
+import { type JSX } from "react/jsx-runtime";
 
 import "../settings.less";
 
-import { BaseSetting, BaseSettingProps } from "../BaseSetting";
+import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
 import { useRef } from "react";
 
 type ButtonSelectProps<OptionT> = BaseSettingProps<OptionT> & {
@@ -22,7 +22,7 @@ export function ButtonSelectSetting<T,>(props: ButtonSelectProps<T>): JSX.Elemen
             type="button"
             className={option.value === props.value ? "selected" : ""}
             disabled={props.disabled}
-            onClick={() => props.setValue(option.value)}
+            onClick={() => { props.setValue(option.value) }}
             ref={index == 0 ? inputRef : undefined}
           >
             {option.label}

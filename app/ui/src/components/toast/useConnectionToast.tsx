@@ -33,21 +33,6 @@ export default function useConnectionToast({state, connected_timeout = 750}: {st
   const stateVars = STATE_MAP[state];
   const [visible, setVisible] = useState<boolean>(false);
 
-  useEffect(() => {
-    const prev = prevStateRef.current;
-    prevStateRef.current = state; // TODO: Update on state change
-
-    if (state != ConnectionStatus.CONNECTED && prev != state) { // TODO: Only show if prev is different?
-      showToast();
-    }
-    else if (visible && (!hideTimeoutRef || prev != state)) {
-      showToast();
-      startHideTimout();
-    }
-
-
-  }, [state]);
-
   const showToast = (): void => {
     hideToast();
     toast.custom( // TODO: Move into toast template component? // TODO: Move to icon library
@@ -76,4 +61,19 @@ export default function useConnectionToast({state, connected_timeout = 750}: {st
   const cancelHideTimeout = (): void => {
     if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
   }
+
+  useEffect(() => {
+    const prev = prevStateRef.current;
+    prevStateRef.current = state; // TODO: Update on state change
+
+    if (state != ConnectionStatus.CONNECTED && prev != state) { // TODO: Only show if prev is different?
+      showToast();
+    }
+    else if (visible && (!hideTimeoutRef || prev != state)) {
+      showToast();
+      startHideTimout();
+    }
+
+
+  }, [state, showToast, startHideTimout, visible]);
 }

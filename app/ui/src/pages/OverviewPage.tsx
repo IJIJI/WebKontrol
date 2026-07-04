@@ -1,8 +1,8 @@
 import { NavLink } from "react-router-dom";
-import ContentSection from "../components/layout/content/ContentSection";
+import { type JSX } from "react/jsx-runtime";
 
 
-export default function OverviewPage() {
+export default function OverviewPage(): JSX.Element {
 
   return (
     <>

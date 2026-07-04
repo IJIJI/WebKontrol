@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { WithRequiredExept, type WithRequired } from "../../../src/types/CommonTypes";
+import { type WithRequiredExept } from "../../../src/types/CommonTypes";
 
 export type BackConfig = false | {
   path: string;

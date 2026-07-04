@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { JSX } from "react/jsx-runtime";
+import { type JSX } from "react/jsx-runtime";
 
 import "./settings.less";
 
@@ -23,7 +22,7 @@ export type BaseSettingProps<T = any> = BaseSettingNonValProps & {
 export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
 
   return (
-    <div className="setting field" onClick={() => props.inputRef.current?.focus()}>
+    <div className="setting field" onClick={() => { props.inputRef.current?.focus() }}>
       <div className="title">
         <span className="title">{props.title}</span>
         <span className="subtitle">{props.subtitle}</span>

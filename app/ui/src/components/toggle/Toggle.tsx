@@ -1,4 +1,4 @@
-import { JSX } from 'react/jsx-runtime';
+import { type JSX } from 'react/jsx-runtime';
 import './toggle.less';
 
 export function Toggle({checked, setChecked, disabled, ref}: {checked: boolean, setChecked: (value: boolean) => void, disabled?: boolean, ref?: React.RefObject<HTMLDivElement | null>}): JSX.Element {

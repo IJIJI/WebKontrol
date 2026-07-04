@@ -1,8 +1,8 @@
 import { useRef } from "react";
-import { JSX } from "react/jsx-runtime";
+import { type JSX } from "react/jsx-runtime";
 
 import "../settings.less";
-import { BaseSetting, BaseSettingProps } from "../BaseSetting";
+import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
 
 type TextProps = BaseSettingProps<string>
 
@@ -11,7 +11,7 @@ export function TextSetting(props: TextProps): JSX.Element {
 
   return (
     <BaseSetting {...props} inputRef={inputRef}>
-        <input type="text" ref={inputRef} value={props.value} onChange={(event) => props.setValue(event.target.value)} disabled={props.disabled} />
+        <input type="text" ref={inputRef} value={props.value} onChange={(event) => { props.setValue(event.target.value) }} disabled={props.disabled} />
     </BaseSetting>
   );
 

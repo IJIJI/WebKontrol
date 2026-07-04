@@ -1,6 +1,5 @@
 import { type JSX, useEffect, useState } from "react"
 import { NavLink, Outlet, useLocation } from "react-router-dom"
-import DesktopHeader from "./header/DesktopHeader"
 import Sidebar from "./sidebar/Sidebar"
 import AmbientGlowBackground from "../background/AmbientGlowBackground"
 

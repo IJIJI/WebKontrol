@@ -1,6 +1,5 @@
 import type { JSX } from "react/jsx-runtime";
 import { DeviceType } from "../PageLayout";
-import ContentSection from "../content/ContentSection";
 import SidebarItem from "./SidebarItem";
 import SidebarSection from "./SidebarSection";
 

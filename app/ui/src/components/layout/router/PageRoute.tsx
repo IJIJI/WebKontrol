@@ -17,7 +17,7 @@ export const PageRoute = ({ children, title, description, back }: PageMetaInput 
 
   useLayoutEffect(() => {
     setMeta({ title, description, back: backOverride ?? back });
-  }, [title, description, backOverride, setMeta]);
+  }, [title, description, back, backOverride, setMeta]);
 
   return children;
 };

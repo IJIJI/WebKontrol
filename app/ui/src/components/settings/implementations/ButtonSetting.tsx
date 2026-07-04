@@ -1,7 +1,7 @@
-import { JSX } from "react/jsx-runtime";
+import { type JSX } from "react/jsx-runtime";
 
 import "../settings.less";
-import { BaseSetting, BaseSettingNonValProps, BaseSettingProps } from "../BaseSetting";
+import { BaseSetting, type BaseSettingNonValProps } from "../BaseSetting";
 import { useRef } from "react";
 
 type ButtonSettingProps = BaseSettingNonValProps & {
@@ -31,7 +31,7 @@ export function ButtonSetting(props: ButtonSettingProps): JSX.Element {
           type="button"
           className={props.type}
           disabled={props.disabled}
-          onClick={() => !props.disabled && props.onClick()}
+          onClick={() => { !props.disabled && props.onClick() }}
           ref={inputRef}
         >
           {props.label}
