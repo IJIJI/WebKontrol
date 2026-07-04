@@ -1,9 +1,9 @@
-import { JSX } from "react/jsx-runtime";
+import { type JSX } from "react/jsx-runtime";
 import { Toggle } from "../../toggle/Toggle";
 
 import "../settings.less";
 
-import { BaseSetting, BaseSettingProps } from "../BaseSetting";
+import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
 import { useRef } from "react";
 
 type ToggleProps = BaseSettingProps<boolean>;
