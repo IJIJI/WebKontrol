@@ -12,10 +12,9 @@ type ButtonSelectProps<OptionT> = BaseSettingProps<OptionT> & {
 export function ButtonSelectSetting<T>(
   props: ButtonSelectProps<T>,
 ): JSX.Element {
-  const inputRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <BaseSetting {...props} inputRef={inputRef}>
+    <BaseSetting {...props} >
       <div className="buttonSelect">
         {props.options.map((option, index) => (
           <button
@@ -26,7 +25,6 @@ export function ButtonSelectSetting<T>(
             onClick={() => {
               props.setValue(option.value);
             }}
-            ref={index == 0 ? inputRef : undefined}
           >
             {option.label}
           </button>
