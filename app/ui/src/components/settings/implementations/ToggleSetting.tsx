@@ -15,7 +15,7 @@ export function ToggleSetting(props: ToggleProps): JSX.Element {
     <BaseSetting {...props} inputRef={inputRef}>
       <Toggle
         ref={inputRef}
-        className={"toggleSetting"}
+        className={"toggleField"}
         checked={props.value}
         setChecked={props.setValue}
         disabled={props.disabled}
