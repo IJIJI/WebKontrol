@@ -8,29 +8,42 @@ import { BaseSetting } from "../components/settings/BaseSetting";
 
 type placeHolderTheme = "light" | "dark" | "auto";
 
-export default function SettingsPage(): JSX.Element {
-  const [theme, setTheme] = useState<placeHolderTheme>("auto");
-  const [disableBackground, setDisableBackground] = useState<boolean>(false);
+type SettingsValues = {
+  theme: placeHolderTheme;
+  disableBackground: boolean;
+  systemName: string;
+};
 
-  const [systemName, setSystemName] = useState<string>("WebKontrol");
-  const [systemNameChanged, setSystemNameChanged] = useState<boolean>(false);
+const defaultValues: SettingsValues = {
+  theme: "auto",
+  disableBackground: false,
+  systemName: "WebKontrol",
+};
+
+export default function SettingsPage(): JSX.Element {
+  const [savedValues, setSavedValues] = useState<SettingsValues>(defaultValues);
+  const [draftValues, setDraftValues] = useState<SettingsValues>(defaultValues);
+
+  function updateDraft<K extends keyof SettingsValues>(key: K, value: SettingsValues[K]): void {
+    setDraftValues((prev) => ({ ...prev, [key]: value }));
+  }
 
   return (
     <>
       <p style={{marginBottom: 50}}>
-        theme: {theme}
+        theme: {draftValues.theme}
         <br />
-        disableBg: {disableBackground}
+        disableBg: {draftValues.disableBackground}
         <br />
-        systemName: {systemName}
+        systemName: {draftValues.systemName}
       </p>
       <SettingGroup title="Appearance">
         <ButtonSelectSetting<placeHolderTheme>
           title="Theme"
           subtitle="Override your system color scheme"
-          value={theme}
-          setValue={setTheme}
-          changed={true}
+          value={draftValues.theme}
+          savedVal={savedValues.theme}
+          setValue={(value) => updateDraft("theme", value)}
           options={[
             { label: "Auto", value: "auto" },
             { label: "Light", value: "light" },
@@ -40,24 +53,18 @@ export default function SettingsPage(): JSX.Element {
         <ToggleSetting
           title="Disable Background"
           subtitle="Disable the moving background"
-          value={disableBackground}
-          setValue={setDisableBackground}
+          value={draftValues.disableBackground}
+          savedVal={savedValues.disableBackground}
+          setValue={(value) => updateDraft("disableBackground", value)}
           // disabled={true}
         />
       </SettingGroup>
-      <TextSetting 
+      <TextSetting
           title="System Name"
           subtitle="Set a name for this system to easily identify it"
-          value={systemName}
-          setValue={(value) => {
-            setSystemName(value);
-            setSystemNameChanged(true)
-          }}
-          changed={systemNameChanged}
-          onRestore={() => {
-            setSystemName("WebKontrol");
-            setSystemNameChanged(false);
-          }}
+          value={draftValues.systemName}
+          savedVal={savedValues.systemName}
+          setValue={(value) => updateDraft("systemName", value)}
       />
       <SettingGroup title="Configuration">
         <ButtonSetting 
