@@ -1,4 +1,4 @@
-import type { CoreInfo } from "../core/model";
+import type { CoreInfo, CoreInfoBundle } from "../core/model";
 import type { CoreRuntimeConfig, CoreRuntimeConfigInput } from "../core/schema";
 import type { PuppetInfoBundle } from "../puppet/model";
 import type { PuppetKey, PuppetRuntimeConfigInput } from "../puppet/schema";
@@ -46,5 +46,5 @@ export interface AppInfo {
     key: keyof WebServerStatus;
     message: WebServerStatus;
   }
-  core?: CoreInfo;
+  core?: Partial<CoreInfoBundle>;
 }

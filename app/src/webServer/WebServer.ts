@@ -150,7 +150,10 @@ export class WebServer {
         status: {
 
         },
-        core: this._state?.info.core
+        core: {
+          info: this._state?.info.core,
+          config: this._state?.config.core,
+        }
       }
       res.json(this._state?.info); // TODO: Different payload? If so, make /api/system this._state.system again.
     });
