@@ -2,7 +2,7 @@ import express from "express";
 import ViteExpress from "vite-express";
 import type http from "http";
 import { Logger } from "../logging/Logger";
-import type { WebServerMutationHandlers, WebServerState, WebServerStatus } from "./model";
+import { WebServerStatus, type AppInfo, type WebServerMutationHandlers, type WebServerState } from "./model";
 import { jsonReplacer } from "../helpers/json";
 import {
   WebServerConfigSchema,
@@ -146,9 +146,13 @@ export class WebServer {
 
   private _registerRoutes(): void {
     this._app.get("/api/info", (_req, res) => {
-      const info: WebServerStatus = {
-        status: {
-
+      const info: AppInfo = {
+        status: this.hasState ? {
+          key: "ONLINE",
+          message: WebServerStatus.ONLINE,
+        } : {
+          key: "SETTING_UP",
+          message: WebServerStatus.SETTING_UP,
         },
         core: {
           info: this._state?.info.core,
@@ -180,10 +184,6 @@ export class WebServer {
           `A client disconnected to /api/state. Now a total of ${this._sseClients.size} clients are listening.`,
         );
       });
-    });
-
-    this._app.get("/api/system", (_req, res) => {
-      res.json(this._state?.info.core);
     });
 
     this._app.patch("/api/config/core", async (req, res) => {

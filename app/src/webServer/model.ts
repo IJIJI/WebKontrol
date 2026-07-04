@@ -39,7 +39,7 @@ export enum WebServerStatus {
   SETTING_UP = "Setting up...",
   ONLINE = "Online",
   FAILED = "Failed",
-}
+};
 
 export interface AppInfo {
   status: {
