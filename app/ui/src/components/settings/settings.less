@@ -77,5 +77,34 @@
         color: var(--color-text-tertiary);
       }
     }
+
+    .buttonSelect {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+
+      // height: 26px;
+
+      border: @border-config;
+      border-radius: @border-radius-md;
+      overflow: hidden;
+
+      background-color: var(--color-border-tertiary);
+      gap: 2px;
+
+      button {
+        box-sizing: border-box;
+        border: 0;
+        padding: 4px 8px;
+        color: var(--color-text-primary);
+
+        background-color: var(--color-background-tertiary);
+
+        &.active {
+        background-color: var(--color-border-tertiary);
+
+        }
+      }
+    }
   }
 }

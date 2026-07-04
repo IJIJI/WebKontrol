@@ -21,7 +21,7 @@ export function ButtonSelectSetting<T>(
           <button
             key={option.label}
             type="button"
-            className={option.value === props.value ? "selected" : ""}
+            className={option.value === props.value ? "active" : ""}
             disabled={props.disabled}
             onClick={() => {
               props.setValue(option.value);
