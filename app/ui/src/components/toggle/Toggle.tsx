@@ -6,16 +6,18 @@ export function Toggle({
   setChecked,
   disabled,
   ref,
+  className
 }: {
   checked: boolean;
   setChecked: (value: boolean) => void;
   disabled?: boolean;
   ref?: React.RefObject<HTMLDivElement | null>;
+  className?: string
 }): JSX.Element {
   return (
     <div
       className={
-        "toggle" + (disabled ? " disabled" : "") + (checked ? " checked" : "")
+        "toggle" + (disabled ? " disabled" : "") + (checked ? " checked" : "") + (className  ? ` ${className}` : "")
       }
       role="switch"
       aria-checked={checked}

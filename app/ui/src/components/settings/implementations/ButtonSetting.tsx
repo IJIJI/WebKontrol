@@ -28,7 +28,7 @@ export function ButtonSetting(props: ButtonSettingProps): JSX.Element {
     <BaseSetting {...props} inputRef={inputRef}>
       <button
         type="button"
-        className={type}
+        className={"buttonSetting " + type}
         disabled={props.disabled}
         onClick={() => {
           !props.disabled && props.onClick();
