@@ -8,12 +8,11 @@ export type BaseSettingsCompProps = {
   inputRef?: React.RefObject<any>;
   children: JSX.Element | JSX.Element[];
   changed?: boolean;
-  onRestore?: () => void | Promise<void>;
 };
 
 export type BaseSettingNonValProps = Omit<
   BaseSettingsCompProps,
-  "inputRef" | "children"
+  "inputRef" | "children" | "changed"
 > & {
   disabled?: boolean;
 };
@@ -21,6 +20,7 @@ export type BaseSettingNonValProps = Omit<
 export type BaseSettingProps<T = any> = BaseSettingNonValProps & {
   value: T;
   setValue: (value: T) => void | Promise<void>;
+  savedVal?: T;
 };
 
 // TODO: Add an easy way to add an InfoPill

@@ -10,9 +10,15 @@ type TextProps = BaseSettingProps<string>;
 export function TextSetting(props: TextProps): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const changed = props.savedVal !== undefined && props.savedVal !== props.value;
+  const restore = (): void => {
+    if (props.savedVal === undefined) return;
+    props.setValue(props.savedVal);
+  };
+
   return (
     <BaseSetting {...props} inputRef={inputRef}>
-      {props.changed && props.onRestore ? <RestoreButton onClick={props.onRestore} /> : <></>}
+      {changed ? <RestoreButton onClick={restore} /> : <></>}
       <input
         className="textfield"
         type="text"
