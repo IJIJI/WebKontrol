@@ -3,6 +3,7 @@ import { type JSX } from "react/jsx-runtime";
 
 import "../settings.less";
 import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
+import { RestoreButton } from "../RestoreButton";
 
 type TextProps = BaseSettingProps<string>;
 
@@ -11,6 +12,7 @@ export function TextSetting(props: TextProps): JSX.Element {
 
   return (
     <BaseSetting {...props} inputRef={inputRef}>
+      <RestoreButton onClick={() => {alert("undo not implemented yet...")}} />
       <input
         className="textfield"
         type="text"

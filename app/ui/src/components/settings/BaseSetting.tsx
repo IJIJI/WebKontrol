@@ -6,7 +6,7 @@ export type BaseSettingsCompProps = {
   title: string;
   subtitle: string;
   inputRef?: React.RefObject<any>;
-  children: JSX.Element;
+  children: JSX.Element | JSX.Element[];
   changed?: boolean;
 };
 
