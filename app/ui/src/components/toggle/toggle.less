@@ -1,10 +1,10 @@
 div.toggle {
-  @width: 47px;
-  @height: 27px;
-  @knob-gap: 2px;
+  @width: 50px;
+  @height: 30px;
+  @knob-gap: 3px;
 
-  width: @width;
-  height: @height;
+  width: @width !important;
+  height: @height !important;
   border-radius: calc(@height/2);
 
   position: relative;
@@ -20,8 +20,8 @@ div.toggle {
     top: @knob-gap;
     left: @knob-gap;
 
-    width: calc(@height - @knob-gap*2);
-    height: calc(@height - @knob-gap*2);
+    width: calc(@height - @knob-gap*2) !important;
+    height: calc(@height - @knob-gap*2) !important;
     border-radius: 50%;
 
     background-color: white;
