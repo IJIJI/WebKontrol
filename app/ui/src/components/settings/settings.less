@@ -176,33 +176,45 @@
 
         &, &.default {
           color: var(--color-text-primary);
-          background-color: var(--color-background-secondary);
           border: @border-width solid var(--color-border-tertiary);
+          &:hover, &:focus, &:active {
+            background-color: var(--color-border-tertiary);
+          }
         }
         &.accent {
           color: var(--color-text-acc);
-          background-color: var(--color-background-acc);
           border: @border-width solid var(--color-text-acc);
+          &:hover, &:focus, &:active {
+            background-color: var(--color-background-acc);
+          }
         }
         &.success {
           color: var(--color-text-success);
-          background-color: var(--color-background-success);
           border: @border-width solid var(--color-text-success);
+          &:hover, &:focus, &:active {
+            background-color: var(--color-background-success);
+          }
         }
         &.danger {
           color: var(--color-text-danger);
-          background-color: var(--color-background-danger);
           border: @border-width solid var(--color-text-danger);
+          &:hover, &:focus, &:active {
+            background-color: var(--color-background-danger);
+          }
         }
         &.warning {
           color: var(--color-text-warning);
-          background-color: var(--color-background-warning);
           border: @border-width solid var(--color-text-warning);
+          &:hover, &:focus, &:active {
+            background-color: var(--color-background-warning);
+          }
         }
         &.info {
           color: var(--color-text-info);
-          background-color: var(--color-background-info);
           border: @border-width solid var(--color-text-info);
+          &:hover, &:focus, &:active {
+            background-color: var(--color-background-info);
+          }
         }
       }
 
