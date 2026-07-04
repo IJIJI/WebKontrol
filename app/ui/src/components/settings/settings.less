@@ -157,6 +157,21 @@
         padding: 7px 10px;
       }
 
+      .buttonSetting {
+        
+        border: @border-config;
+        border-radius: @border-radius-fields;
+        padding: 4px 13px;
+        color: var(--color-text-primary);
+        transition: background-color @button-animation-time ease;
+
+        background-color: var(--color-background-secondary);
+        &:hover, &:focus, &:active {
+          background-color: var(--color-border-tertiary);
+
+        }
+      }
+
     }
   }
 }
