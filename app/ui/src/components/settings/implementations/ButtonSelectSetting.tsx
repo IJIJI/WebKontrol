@@ -7,6 +7,7 @@ import { RestoreButton } from "../RestoreButton";
 
 type ButtonSelectProps<OptionT> = BaseSettingProps<OptionT> & {
   options: { label: string; value: OptionT }[];
+  // TODO: Add ButtonSettingType per button?
 };
 
 export function ButtonSelectSetting<T>(
