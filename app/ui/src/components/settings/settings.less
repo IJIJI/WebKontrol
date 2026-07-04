@@ -162,7 +162,7 @@
 
       .buttonSetting {
         
-        border: @border-config;
+        border: @border-width solid var(--color-border-tertiary);
         border-radius: @border-radius-fields;
         padding: 4px 13px;
         color: var(--color-text-primary);
@@ -172,6 +172,37 @@
         &:hover, &:focus, &:active {
           background-color: var(--color-border-tertiary);
 
+        }
+
+        &, &.default {
+          color: var(--color-text-primary);
+          background-color: var(--color-background-secondary);
+          border: @border-width solid var(--color-border-tertiary);
+        }
+        &.accent {
+          color: var(--color-text-acc);
+          background-color: var(--color-background-acc);
+          border: @border-width solid var(--color-text-acc);
+        }
+        &.success {
+          color: var(--color-text-success);
+          background-color: var(--color-background-success);
+          border: @border-width solid var(--color-text-success);
+        }
+        &.danger {
+          color: var(--color-text-danger);
+          background-color: var(--color-background-danger);
+          border: @border-width solid var(--color-text-danger);
+        }
+        &.warning {
+          color: var(--color-text-warning);
+          background-color: var(--color-background-warning);
+          border: @border-width solid var(--color-text-warning);
+        }
+        &.info {
+          color: var(--color-text-info);
+          background-color: var(--color-background-info);
+          border: @border-width solid var(--color-text-info);
         }
       }
 
