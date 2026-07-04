@@ -3,7 +3,6 @@ import { type JSX } from "react/jsx-runtime";
 import "../settings.less";
 
 import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
-import { useRef } from "react";
 
 type ButtonSelectProps<OptionT> = BaseSettingProps<OptionT> & {
   options: { label: string; value: OptionT }[];
