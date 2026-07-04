@@ -6,6 +6,7 @@
   @border-radius-container: @border-radius-lg;
   @border-radius-fields: @border-radius-md;
 
+  @setting-gap: 6px;
   @setting-group-gap: 20px;
 
   &.group {
@@ -34,24 +35,11 @@
       width: 100%;
 
       border-radius: @border-radius-container;
-      overflow: hidden;
 
-      border: @border-config;
-
+      gap: @setting-gap;
 
       .field {
-        border-radius: 0;
         margin: 0 !important;
-
-        &:not(:last-child) {
-          border-top: 0;
-          border-left: 0;
-          border-right: 0;
-          border-bottom: @border-config;
-        }
-        &:last-child {
-          border: 0;
-        }
       }
     }
   }
@@ -59,9 +47,14 @@
   &.field {
     background-color: var(--color-background-primary);
 
-    border: @border-config;
     width: 100%;
     border-radius: @border-radius-container;
+
+    box-shadow: 0 0 6px 0 var(--color-border-tertiary);
+
+    &.changed {
+      box-shadow: 0 0 6px 0 var(--color-text-acc);
+    }
 
     // height: 60px;
     box-sizing: border-box;
