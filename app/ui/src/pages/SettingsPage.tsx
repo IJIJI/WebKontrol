@@ -2,12 +2,14 @@ import { type JSX, useState } from "react";
 import { SettingGroup } from "../components/settings/SettingGroup";
 import { ButtonSelectSetting } from "../components/settings/implementations/ButtonSelectSetting";
 import { ToggleSetting } from "../components/settings/implementations/ToggleSetting";
+import { TextSetting } from "../components/settings/implementations/TextSetting";
 
 type placeHolderTheme = "light" | "dark" | "auto";
 
 export default function SettingsPage(): JSX.Element {
   const [theme, setTheme] = useState<placeHolderTheme>("auto");
   const [disableBackground, setDisableBackground] = useState<boolean>(false);
+  const [systemName, setSystemName] = useState<string>("WebKontrol");
 
   return (
     <>
@@ -15,6 +17,8 @@ export default function SettingsPage(): JSX.Element {
         theme: {theme}
         <br />
         disableBg: {disableBackground}
+        <br />
+        systemName: {systemName}
       </p>
       <SettingGroup title="Appearance">
         <ButtonSelectSetting<placeHolderTheme>
@@ -35,6 +39,12 @@ export default function SettingsPage(): JSX.Element {
           setValue={setDisableBackground}
         />
       </SettingGroup>
+      <TextSetting 
+          title="System Name"
+          subtitle="Set a name for this system to easily identify it"
+          value={systemName}
+          setValue={setSystemName}
+      />
     </>
   );
 }
