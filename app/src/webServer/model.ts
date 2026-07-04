@@ -43,7 +43,7 @@ export enum WebServerStatus {
 
 export interface AppInfo {
   status: {
-    key: keyof WebServerStatus;
+    key: keyof typeof WebServerStatus;
     message: WebServerStatus;
   }
   core?: Partial<CoreInfoBundle>;
