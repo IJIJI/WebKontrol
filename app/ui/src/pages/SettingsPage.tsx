@@ -13,7 +13,7 @@ export default function SettingsPage(): JSX.Element {
 
   return (
     <>
-      <p>
+      <p style={{marginBottom: 50}}>
         theme: {theme}
         <br />
         disableBg: {disableBackground}
