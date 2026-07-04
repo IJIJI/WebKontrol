@@ -103,18 +103,27 @@
         color: var(--color-text-primary);
         transition: background-color @button-animation-time ease;
 
-        background-color: var(--color-background-tertiary);
+        background-color: var(--color-background-secondary);
 
         &:hover, &:focus, &:active {
           background-color: var(--color-border-tertiary);
 
         }
         &.active {
-          background-color: var(--color-border-primary);
+          background-color: var(--color-border-secondary);
         // background-color: var(--color-text-acc); // TODO: Highlight changed vars
 
         }
       }
+    }
+
+    .textfield {
+      color: var(--color-text-primary);
+      background-color: var(--color-background-secondary);
+
+      border: @border-config;
+      border-radius: @border-radius-fields;
+      padding: 7px 10px;
     }
   }
 }
