@@ -11,7 +11,9 @@ type placeHolderTheme = "light" | "dark" | "auto";
 export default function SettingsPage(): JSX.Element {
   const [theme, setTheme] = useState<placeHolderTheme>("auto");
   const [disableBackground, setDisableBackground] = useState<boolean>(false);
+
   const [systemName, setSystemName] = useState<string>("WebKontrol");
+  const [systemNameChanged, setSystemNameChanged] = useState<boolean>(false);
 
   return (
     <>
@@ -47,7 +49,15 @@ export default function SettingsPage(): JSX.Element {
           title="System Name"
           subtitle="Set a name for this system to easily identify it"
           value={systemName}
-          setValue={setSystemName}
+          setValue={(value) => {
+            setSystemName(value);
+            setSystemNameChanged(true)
+          }}
+          changed={systemNameChanged}
+          onRestore={() => {
+            setSystemName("WebKontrol");
+            setSystemNameChanged(false);
+          }}
       />
       <SettingGroup title="Configuration">
         <ButtonSetting 

@@ -8,6 +8,7 @@ export type BaseSettingsCompProps = {
   inputRef?: React.RefObject<any>;
   children: JSX.Element | JSX.Element[];
   changed?: boolean;
+  onRestore?: () => void | Promise<void>;
 };
 
 export type BaseSettingNonValProps = Omit<

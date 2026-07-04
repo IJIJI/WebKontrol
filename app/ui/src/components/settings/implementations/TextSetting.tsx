@@ -12,7 +12,7 @@ export function TextSetting(props: TextProps): JSX.Element {
 
   return (
     <BaseSetting {...props} inputRef={inputRef}>
-      {props.changed ? <RestoreButton onClick={() => {alert("undo not implemented yet...")}} /> : <></>}
+      {props.changed && props.onRestore ? <RestoreButton onClick={props.onRestore} /> : <></>}
       <input
         className="textfield"
         type="text"
