@@ -20,7 +20,7 @@ export enum ButtonSettingType {
 }
 
 export function ButtonSetting(props: ButtonSettingProps): JSX.Element {
-  if (!props.type) props.type = ButtonSettingType.DEFAULT;
+  const type = props.type ?? ButtonSettingType.DEFAULT;
 
   const inputRef = useRef<HTMLButtonElement>(null);
 
@@ -28,7 +28,7 @@ export function ButtonSetting(props: ButtonSettingProps): JSX.Element {
     <BaseSetting {...props} inputRef={inputRef}>
       <button
         type="button"
-        className={props.type}
+        className={type}
         disabled={props.disabled}
         onClick={() => {
           !props.disabled && props.onClick();
