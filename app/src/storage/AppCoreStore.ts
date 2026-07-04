@@ -3,7 +3,6 @@ import { SystemConfigSchema, type SystemConfig } from "../system/schema";
 import { CoreDatabase } from "./CoreDatabase";
 
 export class AppCoreStore {
-
   private _db = CoreDatabase.getInstance();
   private _logger: Logger;
 
@@ -35,10 +34,7 @@ export class AppCoreStore {
       this._logger.debug(`Successfully loaded runtime!`, object);
       return object;
     } catch (error) {
-      this._logger.error(
-        `Failed loading runtime with error:`,
-        error,
-      );
+      this._logger.error(`Failed loading runtime with error:`, error);
       return null;
     }
   }

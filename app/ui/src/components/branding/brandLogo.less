@@ -1,8 +1,5 @@
-
-
 // TODO: Load colors from theme?
 .brandLogo {
-
   @width-animation-time: @sidebar-animation-time; //TODO: Make general for the whole sidebar?
   @opacity-animation-time: @width-animation-time * 0.8;
 
@@ -35,7 +32,9 @@
         overflow: hidden;
         max-width: 6em;
         opacity: 1;
-        transition: max-width @width-animation-time ease, opacity @opacity-animation-time ease;
+        transition:
+          max-width @width-animation-time ease,
+          opacity @opacity-animation-time ease;
         margin: 0;
         padding: 0;
 
@@ -47,7 +46,7 @@
     }
   }
 
-  .subtext{
+  .subtext {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -68,7 +67,9 @@
       background-color: grey;
       flex-grow: 1;
       opacity: 1;
-      transition: flex-grow @width-animation-time * 0.5 ease, opacity @opacity-animation-time * 0.5 ease;
+      transition:
+        flex-grow @width-animation-time * 0.5 ease,
+        opacity @opacity-animation-time * 0.5 ease;
 
       &.collapsed {
         flex-grow: 0;
@@ -81,7 +82,9 @@
       overflow: hidden;
       max-width: 5em;
       opacity: 1;
-      transition: max-width @width-animation-time ease, opacity @opacity-animation-time ease;
+      transition:
+        max-width @width-animation-time ease,
+        opacity @opacity-animation-time ease;
       font-weight: bold;
 
       &.collapsed {

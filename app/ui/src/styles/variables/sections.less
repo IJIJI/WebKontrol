@@ -1,4 +1,3 @@
-
 // TODO: This only updates on node restart. Why?
 .sectionStyle(@variant: opaque, @standalone: false) {
   position: relative;
@@ -13,9 +12,7 @@
     height: min-content;
   }
 
-
   // @glass-color-shadow: var(--color-background-tertiary);
-
 
   // TODO: More: shadow etc.
 
@@ -24,14 +21,15 @@
   }
 
   & when (@variant = glass) {
-    background: rgba(from var(--color-background-secondary) r g b / @glass-transparency);
+    background: rgba(
+      from var(--color-background-secondary) r g b / @glass-transparency
+    );
     backdrop-filter: blur(@glass-blur);
     -webkit-backdrop-filter: blur(@glass-blur);
     border: 1px solid @glass-border;
   }
 
   // & when (@variant = glass) {
-
 
   //   @glass-color-shadow: @glass-shadow;
   //   @glass-color-background: @glass-background;
@@ -47,7 +45,7 @@
   //   //   inset 0 1px 0 rgba(@glass-color-shadow, 0.5),
   //   //   inset 0 -1px 0 rgba(@glass-color-shadow, 0.1),
   //   //   inset 0 0 8px 4px rgba(@glass-color-shadow, 0.4); // TODO: Derive/move to something in variables?
-   
+
   //   &::before {
   //     content: '';
   //     position: absolute;

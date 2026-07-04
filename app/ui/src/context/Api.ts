@@ -10,7 +10,7 @@ export class ApiError extends Error {
   }
 }
 
-type ErrorResponse = {error?: string}; // TODO: App wide and more fields?
+type ErrorResponse = { error?: string }; // TODO: App wide and more fields?
 
 async function request<T = void>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, init);
@@ -18,7 +18,7 @@ async function request<T = void>(path: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     let message = `${init?.method ?? "GET"} ${path} failed: ${res.status}`;
     try {
-      const body: ErrorResponse = await res.json() as ErrorResponse; // TODO: Response type assignment
+      const body: ErrorResponse = (await res.json()) as ErrorResponse; // TODO: Response type assignment
       if (body?.error) message = body.error;
     } catch {
       try {

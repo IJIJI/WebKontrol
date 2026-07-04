@@ -45,21 +45,22 @@
 // TODO: Add default paddings?
 
 // TODO: Split background and foreground.
-// TODO: Also add a border color to the above. Maybe dynamic from the selected bg color? 
+// TODO: Also add a border color to the above. Maybe dynamic from the selected bg color?
 // TODO: Also add a shadow color to the above?
 // color-mix(in srgb, var(--color-background-secondary) 85%, black 15%);
 // Light mode:
-.light_mode() { 
+.light_mode() {
   --color-background-primary: rgb(255, 255, 255);
   --color-background-secondary: rgb(241, 241, 238);
   --color-background-tertiary: rgb(238, 236, 234);
 
-  --color-background-acc: rgba(from @color-acc r g b / 50%); // TODO: Template these colors from the actual colors?
+  --color-background-acc: rgba(
+    from @color-acc r g b / 50%
+  ); // TODO: Template these colors from the actual colors?
   --color-background-success: #d1e9d2;
   --color-background-danger: #fadbdb;
   --color-background-warning: #ffd98e;
   --color-background-info: #d3e4f3;
-
 
   --color-text-primary: #1a1a18;
   --color-text-secondary: #5f5e5a;
@@ -102,4 +103,3 @@
   --color-border-secondary: rgba(255, 255, 255, 0.16);
   --color-border-primary: rgba(255, 255, 255, 0.24);
 }
-

@@ -13,8 +13,12 @@ export function ToggleSetting(props: ToggleProps): JSX.Element {
 
   return (
     <BaseSetting {...props} inputRef={inputRef}>
-        <Toggle ref={inputRef} checked={props.value} setChecked={props.setValue} disabled={props.disabled} />
+      <Toggle
+        ref={inputRef}
+        checked={props.value}
+        setChecked={props.setValue}
+        disabled={props.disabled}
+      />
     </BaseSetting>
   );
-
 }

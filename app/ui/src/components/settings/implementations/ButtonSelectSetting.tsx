@@ -6,11 +6,12 @@ import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
 import { useRef } from "react";
 
 type ButtonSelectProps<OptionT> = BaseSettingProps<OptionT> & {
-  options: {label: string, value: OptionT}[],
-}
+  options: { label: string; value: OptionT }[];
+};
 
-export function ButtonSelectSetting<T,>(props: ButtonSelectProps<T>): JSX.Element {
-
+export function ButtonSelectSetting<T>(
+  props: ButtonSelectProps<T>,
+): JSX.Element {
   const inputRef = useRef<HTMLButtonElement>(null);
 
   return (
@@ -22,7 +23,9 @@ export function ButtonSelectSetting<T,>(props: ButtonSelectProps<T>): JSX.Elemen
             type="button"
             className={option.value === props.value ? "selected" : ""}
             disabled={props.disabled}
-            onClick={() => { props.setValue(option.value) }}
+            onClick={() => {
+              props.setValue(option.value);
+            }}
             ref={index == 0 ? inputRef : undefined}
           >
             {option.label}
@@ -31,5 +34,4 @@ export function ButtonSelectSetting<T,>(props: ButtonSelectProps<T>): JSX.Elemen
       </div>
     </BaseSetting>
   );
-
 }

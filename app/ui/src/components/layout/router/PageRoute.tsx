@@ -1,6 +1,10 @@
 import { type ReactNode, useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { type BackConfig, type PageMetaInput, usePageContext } from "../../../context/PageContext";
+import {
+  type BackConfig,
+  type PageMetaInput,
+  usePageContext,
+} from "../../../context/PageContext";
 
 // TODO: Move somewhere else, does not belong in layout
 
@@ -10,7 +14,12 @@ interface PageRouteLocationState {
   back?: BackConfig | false;
 }
 
-export const PageRoute = ({ children, title, description, back }: PageMetaInput & { children: ReactNode }): ReactNode => {
+export const PageRoute = ({
+  children,
+  title,
+  description,
+  back,
+}: PageMetaInput & { children: ReactNode }): ReactNode => {
   const { setMeta } = usePageContext();
   const location = useLocation();
   const backOverride = (location.state as PageRouteLocationState | null)?.back;

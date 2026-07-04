@@ -1,10 +1,13 @@
 import { Logger } from "../logging/Logger";
 import { SystemConfigSchema, type SystemConfig } from "../system/schema";
-import type { AbstractView, ViewConfig, ViewKey } from "../views/types/AbstractView";
+import type {
+  AbstractView,
+  ViewConfig,
+  ViewKey,
+} from "../views/types/AbstractView";
 import { CoreDatabase } from "./CoreDatabase";
 
 export class AppCoreStore {
-
   private _db = CoreDatabase.getInstance();
   private _logger: Logger;
 
@@ -49,7 +52,5 @@ export class AppCoreStore {
     return new Map();
   }
 
-  public async updateView(config: ViewConfig): Promise<void> {
-
-  }
+  public async updateView(config: ViewConfig): Promise<void> {}
 }

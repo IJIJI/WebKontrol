@@ -11,39 +11,51 @@ interface Vector<T = number> {
 interface Blob {
   color: string;
   size: number; // 0 - 100 relative to the entire area.
-  
+
   position: Vector; // -100 - +100 for the entire area.
   velocity: Vector; // -100 - +100, combined with speed modifier.
   duration: number;
-  
+
   opacity: number;
 }
 
 const DEFAULT_COLORS = ["#e85d30", "#d12e2eff", "#ed313dff"]; //TODO: Load from less variables somehow?
 
 type MinMax<T = number> = {
-  min: T,
-  max: T
-}
+  min: T;
+  max: T;
+};
 
-const generateBlobs = (count: number, colors: string[], speed: MinMax = {min: 5, max: 30}, size: MinMax = {min: 5, max: 25}, opacity: MinMax = {min: 0.7, max: 0.9}, duration: MinMax = {min: 40, max: 80}, seed?: number): Blob[] => {
+const generateBlobs = (
+  count: number,
+  colors: string[],
+  speed: MinMax = { min: 5, max: 30 },
+  size: MinMax = { min: 5, max: 25 },
+  opacity: MinMax = { min: 0.7, max: 0.9 },
+  duration: MinMax = { min: 40, max: 80 },
+  seed?: number,
+): Blob[] => {
   const rand = seed !== undefined ? Math.random : Math.random;
 
-  return Array.from({length: count}, (_v, k): Blob => ({
-    color: colors[k % colors.length],
-    size: size.min + rand() * (size.max - size.min), 
-    position: {
-      x: (rand() - 0.5) * 95,
-      y: (rand() - 0.5) * 95,
-    },
-    velocity:  { // TODO: Make sure min speed is in the right direction.
-      x: speed.min + (rand() - 0.5) * (speed.max - speed.min),
-      y: speed.min + (rand() - 0.5) * (speed.max - speed.min),
-    },
-    duration: duration.min + rand() * (duration.max - duration.min),
-    opacity: opacity.min + rand() * (opacity.max - opacity.min)
-  }));
-}
+  return Array.from(
+    { length: count },
+    (_v, k): Blob => ({
+      color: colors[k % colors.length],
+      size: size.min + rand() * (size.max - size.min),
+      position: {
+        x: (rand() - 0.5) * 95,
+        y: (rand() - 0.5) * 95,
+      },
+      velocity: {
+        // TODO: Make sure min speed is in the right direction.
+        x: speed.min + (rand() - 0.5) * (speed.max - speed.min),
+        y: speed.min + (rand() - 0.5) * (speed.max - speed.min),
+      },
+      duration: duration.min + rand() * (duration.max - duration.min),
+      opacity: opacity.min + rand() * (opacity.max - opacity.min),
+    }),
+  );
+};
 
 export interface AmbientGlowProps {
   /** Accent colors to draw blobs from (cycles if count \> colors.length). */
@@ -60,13 +72,13 @@ export interface AmbientGlowProps {
   className?: string;
 }
 
-export default function AmbientGlowBackground({ 
-  colors = DEFAULT_COLORS, 
-  count = 8, 
-  animate = true, 
-  intensity = 1, 
+export default function AmbientGlowBackground({
+  colors = DEFAULT_COLORS,
+  count = 8,
+  animate = true,
+  intensity = 1,
   seed,
-  className
+  className,
 }: AmbientGlowProps): JSX.Element {
   const blobs = useMemo(
     () => generateBlobs(count, colors), // TODO: Seed, and the rest of the vars.
@@ -75,8 +87,13 @@ export default function AmbientGlowBackground({
     [count, colors, seed],
   );
 
-  return(
-    <div className={["background", "ambientGlow", className].filter(Boolean).join(" ")} aria-hidden="true">
+  return (
+    <div
+      className={["background", "ambientGlow", className]
+        .filter(Boolean)
+        .join(" ")}
+      aria-hidden="true"
+    >
       {blobs.map((blob, i) => (
         <span
           key={i}

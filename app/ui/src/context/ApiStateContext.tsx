@@ -20,7 +20,6 @@ import { Api } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
 import { ConnectionStatus } from "./types";
 
-
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
 }
@@ -29,7 +28,6 @@ export interface UiWebServerState {
   puppets: Map<PuppetKey, UiPuppetState>;
   system?: Partial<SystemBundle>;
 }
-
 
 interface ApiState {
   state: UiWebServerState; // TODO: Not nested?
@@ -67,7 +65,6 @@ const ApiStateContext = createContext<ApiState | null>(null);
 //   )
 // }
 
-
 export function ApiStateProvider({
   children,
   pingTimeoutMs = 7_500,
@@ -88,7 +85,12 @@ export function ApiStateProvider({
 
     setError(null);
 
-    console.debug(`Updated state. Puppets:`, state.puppets, `System:`, state.system);
+    console.debug(
+      `Updated state. Puppets:`,
+      state.puppets,
+      `System:`,
+      state.system,
+    );
   }, []);
 
   useEffect(() => {
@@ -102,34 +104,41 @@ export function ApiStateProvider({
       }, pingTimeoutMs);
     };
 
-    eventSource.addEventListener("ping", (_payload: MessageEvent<string>): void => {
-      resetPingTimeout();
-    });
+    eventSource.addEventListener(
+      "ping",
+      (_payload: MessageEvent<string>): void => {
+        resetPingTimeout();
+      },
+    );
 
-    eventSource.addEventListener("data", (payload: MessageEvent<string>): void => {
-      const data = JSON.parse(payload.data) as WebServerState;
+    eventSource.addEventListener(
+      "data",
+      (payload: MessageEvent<string>): void => {
+        const data = JSON.parse(payload.data) as WebServerState;
 
-      const puppets = new Map<PuppetKey, UiPuppetState>();
+        const puppets = new Map<PuppetKey, UiPuppetState>();
 
-      for (const pup of data.puppets) {
-        const key: PuppetKey = pup.config.specific.id;
-        const full: UiPuppetState = {
-          ...pup,
-          setRuntime: async (config: PuppetRuntimeConfigInput): Promise<void> =>
-            puppetSetRuntime(key, config),
+        for (const pup of data.puppets) {
+          const key: PuppetKey = pup.config.specific.id;
+          const full: UiPuppetState = {
+            ...pup,
+            setRuntime: async (
+              config: PuppetRuntimeConfigInput,
+            ): Promise<void> => puppetSetRuntime(key, config),
+          };
+          puppets.set(key, full);
+        }
+
+        const state: UiWebServerState = {
+          puppets: puppets,
+          system: data.system,
         };
-        puppets.set(key, full);
-      }
 
-      const state: UiWebServerState = {
-        puppets: puppets,
-        system: data.system,
-      };
-
-      setStatus(ConnectionStatus.CONNECTED);
-      resetPingTimeout();
-      applyUiWebServerState(state); // TODO: Add validation?
-    });
+        setStatus(ConnectionStatus.CONNECTED);
+        resetPingTimeout();
+        applyUiWebServerState(state); // TODO: Add validation?
+      },
+    );
 
     eventSource.onerror = (): void => {
       setStatus(ConnectionStatus.DISCONNECTED);
@@ -143,7 +152,7 @@ export function ApiStateProvider({
   }, [applyUiWebServerState, pingTimeoutMs]);
 
   useEffect(() => {
-    switch(status) {
+    switch (status) {
       case ConnectionStatus.CONNECTED:
         console.log(`Connected to server!`);
         break;
@@ -154,7 +163,7 @@ export function ApiStateProvider({
       default:
         console.debug(`Connection state is now ${status}`);
     }
-  }, [status])
+  }, [status]);
 
   const puppetSetRuntime = async (
     id: PuppetKey,
@@ -167,7 +176,7 @@ export function ApiStateProvider({
     return Api.patch(`/api/system/config`, config);
   };
 
-  useConnectionToast({state: status});
+  useConnectionToast({ state: status });
 
   return (
     <ApiStateContext
@@ -193,13 +202,13 @@ export function ApiStateProvider({
         position="top-right"
         containerStyle={{ top: 25, right: 20 }} // TODO: tweak
         toastOptions={{
-            style: {
-                background: 'var(--color-background-primary)',
-                color: 'var(--color-text-primary)',
-                border: '0.5px solid var(--color-border-secondary)',
-                fontSize: 16,
-            },
-            error: { duration: 5000 },
+          style: {
+            background: "var(--color-background-primary)",
+            color: "var(--color-text-primary)",
+            border: "0.5px solid var(--color-border-secondary)",
+            fontSize: 16,
+          },
+          error: { duration: 5000 },
         }}
       />
       {children}

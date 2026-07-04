@@ -3,9 +3,12 @@ import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { type PuppetKey, type PuppetRuntimeConfigInput } from "./puppet/schema";
 import { AppCoreStore } from "./storage/AppCoreStore";
 import type { SystemInfo } from "./system/model";
-import { SystemConfigSchema, type SystemConfig, type SystemConfigInput } from "./system/schema";
+import {
+  SystemConfigSchema,
+  type SystemConfig,
+  type SystemConfigInput,
+} from "./system/schema";
 import { WebServer } from "./webServer/WebServer";
-
 
 export class AppCore {
   private _logger = new Logger(["CORE"]);
@@ -20,48 +23,58 @@ export class AppCore {
   };
 
   private _config: SystemConfig = {
-    system_name: "WebKontrol"
-  }; 
+    system_name: "WebKontrol",
+  };
   protected _store: AppCoreStore = new AppCoreStore();
 
-  // TODO: This can be massively cleaned up. 
+  // TODO: This can be massively cleaned up.
   // TODO: Runtime should not be an argument, there should be a config bundle for the "real" runtime unchangable config. e.g. webserver port
   // TODO: Move async code into init function.
   constructor(config?: SystemConfigInput) {
-
     if (config) {
       this._config = SystemConfigSchema.parse(config);
-      this._store.saveRuntime(this._config)
+      this._store
+        .saveRuntime(this._config)
         .then(() => {
-          if(this._hasStarted){
+          if (this._hasStarted) {
             this._syncState();
           }
         })
         .catch((reason) => {
-          this._logger.error(`Failed overwriting SystemConfig in DB. Reason:`, reason);
+          this._logger.error(
+            `Failed overwriting SystemConfig in DB. Reason:`,
+            reason,
+          );
         });
-    }
-    else {
-      this._store.loadRuntime()
+    } else {
+      this._store
+        .loadRuntime()
         .then((loaded) => {
           if (loaded) {
             this._config = loaded;
             this._logger.info(`Loaded SystemConfig from DB:`, this._config);
-          }
-          else {
-            this._logger.important(`Could not find SystemConfig in DB. Using default:`, this._config);
+          } else {
+            this._logger.important(
+              `Could not find SystemConfig in DB. Using default:`,
+              this._config,
+            );
 
-            this._store.saveRuntime(this._config)
-              .catch((reason) => {
-                this._logger.error(`Failed saving default SystemConfig to DB. Reason:`, reason)
-              });
+            this._store.saveRuntime(this._config).catch((reason) => {
+              this._logger.error(
+                `Failed saving default SystemConfig to DB. Reason:`,
+                reason,
+              );
+            });
           }
-          if(this._hasStarted){
+          if (this._hasStarted) {
             this._syncState();
           }
         })
         .catch((reason) => {
-          this._logger.error(`Failed loading config from store. Reason:`, reason);
+          this._logger.error(
+            `Failed loading config from store. Reason:`,
+            reason,
+          );
         });
     }
 
@@ -154,7 +167,8 @@ export class AppCore {
     // this._puppets.set(testpuppet.getKey(), testpuppet);
   }
 
-  private _syncState(): void { // Add init check
+  private _syncState(): void {
+    // Add init check
     this._logger.debug(`Syncing state to webserver...`);
     this._webServer.setState({
       puppets: this._puppets
@@ -180,7 +194,10 @@ export class AppCore {
           const puppet = this._puppets.get(id);
 
           if (!puppet) {
-            return this._logger.fatal(`Puppet does not exist! Tried updating the runtime for puppet with id: ${id}. Requested runtime:`, runtime);
+            return this._logger.fatal(
+              `Puppet does not exist! Tried updating the runtime for puppet with id: ${id}. Requested runtime:`,
+              runtime,
+            );
           }
           await puppet.updateRuntime(runtime);
 
@@ -192,14 +209,19 @@ export class AppCore {
       },
       system: {
         updateConfig: (config: Partial<SystemConfig>): void => {
-          const parsed = SystemConfigSchema.parse({ ...this._config, ...config });
+          const parsed = SystemConfigSchema.parse({
+            ...this._config,
+            ...config,
+          });
 
           this._config = parsed;
           this._syncState();
 
           this._logger.important(
             `system.updateConfig() handler called with config:`,
-            config, `updating the actual config to:`, this._config
+            config,
+            `updating the actual config to:`,
+            this._config,
           );
         },
 

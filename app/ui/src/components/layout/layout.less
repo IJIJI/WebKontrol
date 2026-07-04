@@ -1,15 +1,17 @@
-
 .page-base {
   position: relative;
   min-height: 100vh;
   padding: 50px 0;
-  background-color: var(--color-background-primary); // TODO: Also defined in app base. Remove?
+  background-color: var(
+    --color-background-primary
+  ); // TODO: Also defined in app base. Remove?
 
   display: flex;
   flex-direction: column;
   align-items: center;
 
-  .page-layout, .page-layout *{
+  .page-layout,
+  .page-layout * {
     z-index: @z-content;
   }
 
@@ -29,7 +31,6 @@
 
     border-radius: @border-radius-lg;
     // gap: @gap-m @gap-l;
-
 
     .page-header.logo {
       padding: @gap-m;
@@ -63,7 +64,9 @@
           color: var(--color-text-tertiary);
           transition: @button-animation-time color ease;
 
-          &.link:hover, &.link:focus, &.link:active {
+          &.link:hover,
+          &.link:focus,
+          &.link:active {
             color: var(--color-text-acc);
           }
 

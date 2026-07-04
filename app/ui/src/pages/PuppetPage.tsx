@@ -3,7 +3,6 @@ import { useApi } from "../context/ApiStateContext";
 import { usePageContext } from "../context/PageContext";
 import { type JSX, useEffect } from "react";
 
-
 export default function PuppetPage(): JSX.Element {
   const { puppetKey } = useParams();
   const { state } = useApi();
@@ -15,7 +14,5 @@ export default function PuppetPage(): JSX.Element {
     setMeta({ title: ["Puppets", puppetKey ?? "Unkown"] }, true);
   }, [puppetKey, setMeta]);
 
-  return (
-    <h1>Puppet specific page!</h1>
-  );
+  return <h1>Puppet specific page!</h1>;
 }
