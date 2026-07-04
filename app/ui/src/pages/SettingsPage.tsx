@@ -30,13 +30,6 @@ export default function SettingsPage(): JSX.Element {
 
   return (
     <>
-      <p style={{marginBottom: 50}}>
-        theme: {draftValues.theme}
-        <br />
-        disableBg: {draftValues.disableBackground}
-        <br />
-        systemName: {draftValues.systemName}
-      </p>
       <SettingGroup title="Appearance">
         <ButtonSelectSetting<placeHolderTheme>
           title="Theme"
