@@ -28,6 +28,7 @@ export default function SettingsPage(): JSX.Element {
           subtitle="Override your system color scheme"
           value={theme}
           setValue={setTheme}
+          changed={true}
           options={[
             { label: "Auto", value: "auto" },
             { label: "Light", value: "light" },
