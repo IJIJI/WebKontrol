@@ -12,6 +12,7 @@ export function TextSetting(props: TextProps): JSX.Element {
   return (
     <BaseSetting {...props} inputRef={inputRef}>
       <input
+        className="textfield"
         type="text"
         ref={inputRef}
         value={props.value}
