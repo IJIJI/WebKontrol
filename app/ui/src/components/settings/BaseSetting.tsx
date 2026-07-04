@@ -7,6 +7,7 @@ export type BaseSettingsCompProps = {
   subtitle: string;
   inputRef?: React.RefObject<any>;
   children: JSX.Element;
+  changed?: boolean;
 };
 
 export type BaseSettingNonValProps = Omit<
@@ -25,7 +26,7 @@ export type BaseSettingProps<T = any> = BaseSettingNonValProps & {
 export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
   return (
     <div
-      className="setting field"
+      className={"setting field" + (props.changed ? " changed" : "")}
       onClick={() => {
         props.inputRef && props.inputRef.current?.focus();
       }}
