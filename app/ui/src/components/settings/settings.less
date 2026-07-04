@@ -47,12 +47,13 @@
   }
 
   &.field {
-    background-color: var(--color-background-tertiary);
+    background-color: var(--color-background-primary);
 
     border: @border-config;
     width: 100%;
     border-radius: @border-radius-md;
 
+    // height: 60px;
     box-sizing: border-box;
     padding: 10px 14px;
 
@@ -60,5 +61,21 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+
+    .title {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+
+      .title {
+        font-size: 14px;
+        color: var(--color-text-primary);
+      }
+      .subtitle {
+        font-size: 11px;
+        color: var(--color-text-tertiary);
+      }
+    }
   }
 }
