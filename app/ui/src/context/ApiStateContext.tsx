@@ -23,30 +23,31 @@ export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
 }
 
-export interface UiWebServerState {
+
+
+export interface UiWebServerState extends Omit<WebServerState, "puppets"> {
   puppets: Map<PuppetKey, UiPuppetState>;
-  system?: Partial<SystemBundle>;
 }
 
 interface ApiState {
-  state: UiWebServerState; // TODO: Not nested?
+  state: UiWebServerState | null;
   status: ConnectionStatus;
   error: string | null;
-  callBacks: {
+  callBacks: { // TODO: Load directly from WebServerMutationHandlers?
     puppet: {
-      setRuntime: (
+      updateRuntime: (
         id: PuppetKey,
-        runtime: PuppetRuntimeConfigInput,
+        runtime: Partial<PuppetRuntimeConfigInput>,
       ) => Promise<void>;
     };
-    system: {
-      setConfig: (config: CoreRuntimeConfigInput) => Promise<void>;
-      // update: {
-      //   check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
-      //   apply: (ref: string, type: 'release' | 'branch') => Promise<void>; // TODO: Check arguments
-      //   getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
-      // }
+    core: {
+      updateConfig: (config: Partial<CoreRuntimeConfigInput>) => Promise<void>;
     };
+    // update: {
+    //   check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
+    //   apply: (ref: string, type: "release" | "branch") => Promise<void>; // TODO: Check arguments
+    //   getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
+    // };
   };
 }
 
@@ -71,24 +72,24 @@ export function ApiStateProvider({
   children: JSX.Element;
   pingTimeoutMs?: number;
 }): JSX.Element {
-  const [puppets, setPuppets] = useState<Map<string, UiPuppetState>>(new Map());
-  const [system, setSystem] = useState<Partial<SystemBundle> | undefined>({});
+  const [state, setState] = useState<UiWebServerState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState(ConnectionStatus.CONNECTING);
 
   const pingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const applyUiWebServerState = useCallback((state: UiWebServerState) => {
-    setPuppets(state.puppets);
-    setSystem(state.system);
+    setState(state);
 
     setError(null);
 
     console.debug(
       `Updated state. Puppets:`,
       state.puppets,
-      `System:`,
-      state.system,
+      `Info:`,
+      state.info,
+      `Config:`,
+      state.config
     );
   }, []);
 
@@ -123,14 +124,14 @@ export function ApiStateProvider({
             ...pup,
             setRuntime: async (
               config: PuppetRuntimeConfigInput,
-            ): Promise<void> => puppetSetRuntime(key, config),
+            ): Promise<void> => puppetUpdateRuntime(key, config),
           };
           puppets.set(key, full);
         }
 
         const state: UiWebServerState = {
+          ...data,
           puppets: puppets,
-          system: data.system,
         };
 
         setStatus(ConnectionStatus.CONNECTED);
@@ -164,14 +165,14 @@ export function ApiStateProvider({
     }
   }, [status]);
 
-  const puppetSetRuntime = async (
+  const puppetUpdateRuntime = async (
     id: PuppetKey,
-    runtime: PuppetRuntimeConfigInput,
+    runtime: Partial<PuppetRuntimeConfigInput>,
   ): Promise<void> => {
     return Api.patch(`/api/puppets/${id}`, runtime);
   };
 
-  const systemSetConfig = async (config: SystemConfig): Promise<void> => {
+  const coreUpdateRuntimeConfig = async (config: Partial<CoreRuntimeConfigInput>): Promise<void> => {
     return Api.patch(`/api/system/config`, config);
   };
 
@@ -180,20 +181,16 @@ export function ApiStateProvider({
   return (
     <ApiStateContext
       value={{
-        state: {
-          // TODO: Not nested for easier access?
-          puppets: puppets,
-          system: system,
-        },
+        state: state,
         status,
         error,
         callBacks: {
           puppet: {
-            setRuntime: puppetSetRuntime,
+            updateRuntime: puppetUpdateRuntime,
           },
-          system: {
-            setConfig: systemSetConfig,
-          },
+          core: {
+            updateConfig: coreUpdateRuntimeConfig,
+          }
         },
       }}
     >

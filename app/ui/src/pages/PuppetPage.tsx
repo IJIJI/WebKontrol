@@ -7,7 +7,7 @@ export default function PuppetPage(): JSX.Element {
   const { puppetKey } = useParams();
   const { state } = useApi();
   const { setMeta } = usePageContext();
-  const puppet = puppetKey ? state.puppets.get(puppetKey) : undefined;
+  const puppet = puppetKey ? state?.puppets.get(puppetKey) : undefined;
 
   useEffect(() => {
     // if (puppet) setMeta({ title: ["Puppet", puppet.displayName] }, true);
