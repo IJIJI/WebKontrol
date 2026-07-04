@@ -3,6 +3,8 @@
 
   @border-width: 1px;
   @border-config: @border-width solid var(--color-border-tertiary);
+  @border-radius-container: @border-radius-lg;
+  @border-radius-fields: @border-radius-md;
 
   &.group {
     display: flex;
@@ -26,7 +28,7 @@
       justify-content: flex-start;
       width: 100%;
 
-      border-radius: @border-radius-md;
+      border-radius: @border-radius-container;
       overflow: hidden;
 
       border: @border-config;
@@ -51,7 +53,7 @@
 
     border: @border-config;
     width: 100%;
-    border-radius: @border-radius-md;
+    border-radius: @border-radius-container;
 
     // height: 60px;
     box-sizing: border-box;
@@ -86,7 +88,7 @@
       // height: 26px;
 
       border: @border-config;
-      border-radius: @border-radius-md;
+      border-radius: @border-radius-fields;
       overflow: hidden;
 
       background-color: var(--color-border-tertiary);
@@ -97,11 +99,17 @@
         border: 0;
         padding: 4px 8px;
         color: var(--color-text-primary);
+        transition: background-color @button-animation-time ease;
 
         background-color: var(--color-background-tertiary);
 
+        &:hover, &:focus, &:active {
+          background-color: var(--color-border-tertiary);
+
+        }
         &.active {
-        background-color: var(--color-border-tertiary);
+          background-color: var(--color-border-primary);
+        // background-color: var(--color-text-acc); // TODO: Highlight changed vars
 
         }
       }
