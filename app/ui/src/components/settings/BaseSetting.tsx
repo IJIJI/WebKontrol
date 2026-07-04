@@ -31,7 +31,7 @@ export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
         props.inputRef && props.inputRef.current?.focus();
       }}
     >
-      <div className="title">
+      <div className="titletext">
         <span className="title">{props.title}</span>
         <span className="subtitle">{props.subtitle}</span>
       </div>
