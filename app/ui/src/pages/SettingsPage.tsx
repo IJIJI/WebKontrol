@@ -3,6 +3,8 @@ import { SettingGroup } from "../components/settings/SettingGroup";
 import { ButtonSelectSetting } from "../components/settings/implementations/ButtonSelectSetting";
 import { ToggleSetting } from "../components/settings/implementations/ToggleSetting";
 import { TextSetting } from "../components/settings/implementations/TextSetting";
+import { ButtonSetting, ButtonSettingType } from "../components/settings/implementations/ButtonSetting";
+import { BaseSetting } from "../components/settings/BaseSetting";
 
 type placeHolderTheme = "light" | "dark" | "auto";
 
@@ -45,6 +47,43 @@ export default function SettingsPage(): JSX.Element {
           value={systemName}
           setValue={setSystemName}
       />
+      <SettingGroup title="Configuration">
+        <ButtonSetting 
+          title="Export Config"
+          subtitle="Download the config file"
+          label="Export"
+          onClick={() => { alert("Huh why export?? I don't know her")}}
+        />
+        <ButtonSetting 
+          title="Import Config"
+          subtitle="Restore from a config file"
+          label="Import"
+          onClick={() => { alert("Huh why import?? He's scary...")}}
+        />
+      </SettingGroup>
+      <SettingGroup title="About">
+        <ButtonSetting 
+          title="Firmware"
+          subtitle="v1.0.0"
+          label="Update"
+          onClick={() => { alert("Yeah you wish, this don't exist yet.")}}
+        />
+        <BaseSetting
+          title="Hardware"
+          subtitle="Hardware Type"
+        >
+          <span>WebKontrol v3</span>
+        </BaseSetting>
+      </SettingGroup>
+      <SettingGroup title="Reset">
+        <ButtonSetting 
+          title="Reset System"
+          subtitle="Restore all configuration to factory defaults"
+          label="Reset"
+          onClick={() => { alert("I DON'T WANT TO DIE")}}
+          type={ButtonSettingType.DANGER}
+        />
+      </SettingGroup>
     </>
   );
 }
