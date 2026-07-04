@@ -157,7 +157,7 @@ export function ApiStateProvider({
         console.log(`Connected to server!`);
         break;
       case ConnectionStatus.DISCONNECTED:
-        console.warn(`Lost connection to server!`);
+        console.warn(`Lost connection to server!`); // TODO: Add auto reconnect.
         break;
       case ConnectionStatus.CONNECTING:
       default:
