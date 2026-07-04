@@ -5,7 +5,7 @@ import "./settings.less";
 export type BaseSettingsCompProps = {
   title: string;
   subtitle: string;
-  inputRef: React.RefObject<any>;
+  inputRef?: React.RefObject<any>;
   children: JSX.Element;
 };
 
@@ -27,7 +27,7 @@ export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
     <div
       className="setting field"
       onClick={() => {
-        props.inputRef.current?.focus();
+        props.inputRef && props.inputRef.current?.focus();
       }}
     >
       <div className="title">
