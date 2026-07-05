@@ -23,15 +23,17 @@
   justify-content: stretch;
 
   .bottomBar.content {
-    background-color: var(--color-background-primary);
-    border-radius: @border-radius-xl;
-    padding: 10px 15px;
-    box-shadow: 0 0 6px 0 var(--color-border-primary);  
+    height: calc(100%);
+    padding: 8px 12px;
     
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+
+    background-color: var(--color-background-primary);
+    border-radius: @border-radius-xl;
+    box-shadow: 0 0 6px 0 var(--color-border-primary);  
 
     transform: translateY(0);
     opacity: 100%;
