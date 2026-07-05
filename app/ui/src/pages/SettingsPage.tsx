@@ -10,6 +10,8 @@ import { SaveBar } from "../components/bottomBar/SaveBar";
 import { Button, ButtonStyle, ButtonType } from "../components/button/Button";
 import { PillStyle, PillType, InfoPill } from "../components/pill/InfoPill";
 import { BottomBar } from "../components/bottomBar/BottomBar";
+import { StatusPill } from "../components/pill/statusPill/StatusPill";
+import { ConnectionState } from "../../../src/types/CommonTypes";
 
 type placeHolderTheme = "light" | "dark" | "auto";
 
@@ -143,6 +145,12 @@ export default function SettingsPage(): JSX.Element {
           <InfoPill type={PillType.DEFAULT} style={PillStyle.FILLED}>
             <span>WebKontrol v3</span>
           </InfoPill>
+        </BaseSetting>
+        <BaseSetting
+          title="Status"
+          subtitle="SystemStatus"
+        >
+          <StatusPill status={ConnectionState.ONLINE} label="ONLINE" style={PillStyle.FILLED} />
         </BaseSetting>
       </SettingGroup>
     </>
