@@ -212,13 +212,14 @@ export class AppCore {
         },
       },
       core: {
-        updateConfig: (config: Partial<CoreRuntimeConfigInput>): void => { // TODO: Is this parse double? Here or in the api?
+        updateConfig: async (config: Partial<CoreRuntimeConfigInput>): Promise<void> => { // TODO: Is this parse double? Here or in the api?
           const parsed = CoreRuntimeConfigSchema.parse({
             ...this._config,
             ...config,
           });
 
           this._config = parsed;
+          await this._store.saveRuntime(this._config);
           this._syncState();
 
           this._logger.important(
