@@ -23,8 +23,8 @@ export function Button(props: {
   type?: ButtonType;
   style?: ButtonStyle;
   label: string;
-  disabled: boolean;
-  ref: RefObject<HTMLButtonElement>;
+  disabled?: boolean;
+  ref?: RefObject<HTMLButtonElement>;
 }): JSX.Element {
   const type = props.type ?? ButtonType.DEFAULT;
   const style = props.style ?? ButtonStyle.FILLED;
