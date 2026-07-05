@@ -1,27 +1,35 @@
-import type { CoreInfo } from "../core/model";
-import type { CoreRuntimeConfig } from "../core/schema";
 import { Logger } from "../logging/Logger";
-import { AppCoreStore } from "../storage/AppCoreStore";
+import type { PuppetKey, PuppetRuntimeConfig } from "../puppet/schema";
 import type { UiManager } from "../ui/UiManager";
 import type { WebServer } from "../webServer/WebServer";
+import type { PuppetManager } from "./puppet/PuppetManager";
 
+export interface OrchestratorConfig {
+  puppetManager: PuppetManager;
+  webServer: WebServer;
+  uiManager: UiManager;
+}
 
 export class Orchestrator { // TODO: Move every non-puppet management from the appcore to this.
   private _logger = new Logger(["LifeCycle", "ORCHESTRATOR"]);
 
   private _hasStarted: boolean = false;
 
-  private _webServer!: WebServer;
-  private _uiManager!: UiManager;
+  private _puppetManager: PuppetManager;
 
-  private _info: CoreInfo = {
-    start_moment: Date.now(),
-  };
+  private _webServer: WebServer;
+  private _uiManager: UiManager;
 
-  private _config: CoreRuntimeConfig = {
-    system_name: "WebKontrol",
-  };
+  constructor(config: OrchestratorConfig) {
+    this._puppetManager = config.puppetManager;
+    this._webServer = config.webServer;
+    this._uiManager = config.uiManager;
+  }
 
-  protected _store: AppCoreStore = new AppCoreStore();
+  public getPuppetManager(): PuppetManager {
+    return this._puppetManager;
+  }
+  
+
 
 }
