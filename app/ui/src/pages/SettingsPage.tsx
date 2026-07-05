@@ -13,7 +13,7 @@ import { PillStyle, PillType, InfoPill } from "../components/pill/InfoPill";
 import { BottomBar } from "../components/bottomBar/BottomBar";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../src/types/CommonTypes";
-import { UiTheme } from "../../../src/types/UiTypes";
+import { UiTheme } from "../../../src/ui/schema";
 import { useApi } from "../context/ApiStateContext";
 import { Icons } from "../components/icons/Icons";
 

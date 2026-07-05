@@ -18,7 +18,7 @@ import { Api } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
 import { ConnectionStatus } from "./types";
 import { CoreRuntimeConfigInput } from "../../../src/core/schema";
-import { UiRuntimeConfigInput, UiTheme } from "../../../src/types/UiTypes";
+import { UiRuntimeConfigInput, UiTheme } from "../../../src/ui/schema";
 
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;

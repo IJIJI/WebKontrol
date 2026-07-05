@@ -1,5 +1,5 @@
 import { UiStore } from "../storage/UiStore";
-import { UiTheme, type UiRuntimeConfig } from "../types/UiTypes";
+import { UiTheme, type UiRuntimeConfig } from "./schema";
 import { Logger } from "../logging/Logger";
 
 

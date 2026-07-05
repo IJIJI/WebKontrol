@@ -4,7 +4,7 @@ import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { type PuppetKey, type PuppetRuntimeConfigInput } from "./puppet/schema";
 import { AppCoreStore } from "./storage/AppCoreStore";
-import { type UiRuntimeConfig } from "./types/UiTypes";
+import { type UiRuntimeConfig } from "./ui/schema";
 import { UiManager } from "./ui/UiManager";
 import { WebServer } from "./webServer/WebServer";
 

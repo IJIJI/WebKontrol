@@ -1,5 +1,5 @@
 import { Logger } from "../logging/Logger";
-import { UiRuntimeConfigSchema, type UiRuntimeConfig, type UiRuntimeConfigInput } from "../types/UiTypes";
+import { UiRuntimeConfigSchema, type UiRuntimeConfig } from "../ui/schema";
 import { CoreDatabase } from "./CoreDatabase";
 
 export class UiStore {

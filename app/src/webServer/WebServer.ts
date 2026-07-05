@@ -11,7 +11,7 @@ import {
 } from "./schema";
 import { PuppetKeySchema, PuppetRuntimeConfigSchema } from "../puppet/schema";
 import { CoreRuntimeConfigSchema } from "../core/schema";
-import { UiRuntimeConfigSchema } from "../types/UiTypes";
+import { UiRuntimeConfigSchema } from "../ui/schema";
 
 export class WebServer {
   private _app = express();
