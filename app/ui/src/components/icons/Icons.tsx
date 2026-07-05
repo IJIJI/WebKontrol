@@ -146,16 +146,9 @@ export const Icons = {
     </>,
   ),
   check: icon(
-    "0 0 16 16",
+    "0 0 13 13",
     <>
-      <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3" />
-      <path
-        d="M4.5 8L7 10.5L11.5 5.5"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M2 6.5L5 9.5L11 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </>,
   ),
   alert: icon(
