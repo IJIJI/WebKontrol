@@ -173,15 +173,15 @@ export function ApiStateProvider({
     id: PuppetKey,
     runtime: Partial<PuppetRuntimeConfigInput>,
   ): Promise<void> => {
-    return Api.patch(`/api/puppets/${id}`, runtime);
+    return Api.patch(`/puppets/${id}`, runtime);
   };
 
   const coreUpdateRuntimeConfig = async (config: Partial<CoreRuntimeConfigInput>): Promise<void> => {
-    return Api.patch(`/api/system/config`, config);
+    return Api.patch(`/system/config`, config);
   };
 
   const uiUpdateRuntimeConfig = async (config: Partial<UiRuntimeConfigInput>): Promise<void> => {
-    return Api.patch(`/api/config/ui`, config)
+    return Api.patch(`/config/ui`, config)
   }
 
   useConnectionToast({ state: status });
