@@ -150,7 +150,7 @@ export default function SettingsPage(): JSX.Element {
           title="Status"
           subtitle="SystemStatus"
         >
-          <StatusPill status={ConnectionState.ONLINE} label="ONLINE" style={PillStyle.FILLED} />
+          <StatusPill status={ConnectionState.UNKNOWN}/>
         </BaseSetting>
       </SettingGroup>
     </>
