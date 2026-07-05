@@ -1,12 +1,13 @@
-import { type JSX, useState } from "react";
+import { type JSX } from "react";
 import { SettingGroup } from "../components/settings/SettingGroup";
 import { ButtonSelectSetting } from "../components/settings/implementations/ButtonSelectSetting";
 import { ToggleSetting } from "../components/settings/implementations/ToggleSetting";
 import { TextSetting } from "../components/settings/implementations/TextSetting";
-import { ButtonSetting, ButtonSettingType } from "../components/settings/implementations/ButtonSetting";
+import { ButtonSetting } from "../components/settings/implementations/ButtonSetting";
 import { BaseSetting } from "../components/settings/BaseSetting";
 import { useDraft } from "../helpers/DraftSave";
 import { SaveBar } from "../components/bottomBar/SaveBar";
+import { ButtonStyle, ButtonType } from "../components/button/Button";
 
 type placeHolderTheme = "light" | "dark" | "auto";
 
@@ -112,7 +113,8 @@ export default function SettingsPage(): JSX.Element {
           subtitle="Restore all configuration to factory defaults"
           label="Reset"
           onClick={() => { alert("I DON'T WANT TO DIE")}}
-          type={ButtonSettingType.DANGER}
+          type={ButtonType.DANGER}
+          style={ButtonStyle.SKELETON}
         />
       </SettingGroup>
     </>
