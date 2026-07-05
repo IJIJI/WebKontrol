@@ -2,11 +2,12 @@ import type { CoreInfo, CoreInfoBundle } from "../core/model";
 import type { CoreRuntimeConfig, CoreRuntimeConfigInput } from "../core/schema";
 import type { PuppetInfoBundle } from "../puppet/model";
 import type { PuppetKey, PuppetRuntimeConfigInput } from "../puppet/schema";
+import type { UiRuntimeConfig } from "../types/UiTypes";
 
 
 export interface WebServerRuntimeConfigState {// Only Runtime Configs. Standard configs are done from the config file.
   core: CoreRuntimeConfig;
-
+  ui: UiRuntimeConfig;
 }
 export interface WebServerInfoState {
   core: CoreInfo;
