@@ -6,6 +6,7 @@ import { TextSetting } from "../components/settings/implementations/TextSetting"
 import { ButtonSetting, ButtonSettingType } from "../components/settings/implementations/ButtonSetting";
 import { BaseSetting } from "../components/settings/BaseSetting";
 import { useDraft } from "../helpers/DraftSave";
+import { SaveBar } from "../components/bottomBar/SaveBar";
 
 type placeHolderTheme = "light" | "dark" | "auto";
 
@@ -23,11 +24,29 @@ const defaultValues: SettingsValues = {
 
 export default function SettingsPage(): JSX.Element {
 
-  const {saved, values, setField, revertAll} = useDraft(defaultValues);
+  const {saved, values, setField, revertAll, anyChanged} = useDraft(defaultValues);
 
 
   return (
     <>
+      {/* <BottomBar visible={true}>
+        <Button label="save" type={ButtonSettingType.DEFAULT} style={ButtonSettingStyle.FILLED}/>
+        <Button label="save" type={ButtonSettingType.ACCENT} style={ButtonSettingStyle.FILLED}/>
+        <Button label="save" type={ButtonSettingType.DANGER} style={ButtonSettingStyle.FILLED}/>
+        <Button label="save" type={ButtonSettingType.INFO} style={ButtonSettingStyle.FILLED}/>
+        <Button label="save" type={ButtonSettingType.SUCCESS} style={ButtonSettingStyle.FILLED}/>
+        <Button label="save" type={ButtonSettingType.WARNING} style={ButtonSettingStyle.FILLED}/>
+        <Button label="save" type={ButtonSettingType.DEFAULT} style={ButtonSettingStyle.SKELETON}/>
+        <Button label="save" type={ButtonSettingType.ACCENT} style={ButtonSettingStyle.SKELETON}/>
+        <Button label="save" type={ButtonSettingType.DANGER} style={ButtonSettingStyle.SKELETON}/>
+        <Button label="save" type={ButtonSettingType.INFO} style={ButtonSettingStyle.SKELETON}/>
+        <Button label="save" type={ButtonSettingType.SUCCESS} style={ButtonSettingStyle.SKELETON}/>
+        <Button label="save" type={ButtonSettingType.WARNING} style={ButtonSettingStyle.SKELETON}/>
+      </BottomBar> */}
+      <SaveBar visible={anyChanged()} onSave={async (): Promise<void> => {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        revertAll();
+      }} onDiscard={revertAll} />
       <SettingGroup title="Appearance">
         <ButtonSelectSetting<placeHolderTheme>
           title="Theme"
