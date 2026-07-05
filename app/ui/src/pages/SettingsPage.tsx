@@ -5,6 +5,7 @@ import { ToggleSetting } from "../components/settings/implementations/ToggleSett
 import { TextSetting } from "../components/settings/implementations/TextSetting";
 import { ButtonSetting, ButtonSettingType } from "../components/settings/implementations/ButtonSetting";
 import { BaseSetting } from "../components/settings/BaseSetting";
+import { useDraft } from "../helpers/DraftSave";
 
 type placeHolderTheme = "light" | "dark" | "auto";
 
@@ -21,12 +22,9 @@ const defaultValues: SettingsValues = {
 };
 
 export default function SettingsPage(): JSX.Element {
-  const [savedValues, setSavedValues] = useState<SettingsValues>(defaultValues);
-  const [draftValues, setDraftValues] = useState<SettingsValues>(defaultValues);
 
-  function updateDraft<K extends keyof SettingsValues>(key: K, value: SettingsValues[K]): void {
-    setDraftValues((prev) => ({ ...prev, [key]: value }));
-  }
+  const {saved, values, setField, revertAll} = useDraft(defaultValues);
+
 
   return (
     <>
@@ -34,9 +32,9 @@ export default function SettingsPage(): JSX.Element {
         <ButtonSelectSetting<placeHolderTheme>
           title="Theme"
           subtitle="Override your system color scheme"
-          value={draftValues.theme}
-          savedVal={savedValues.theme}
-          setValue={(value) => updateDraft("theme", value)}
+          value={values.theme}
+          savedVal={saved.theme}
+          setValue={(value) => setField("theme", value)}
           options={[
             { label: "Auto", value: "auto" },
             { label: "Light", value: "light" },
@@ -46,18 +44,18 @@ export default function SettingsPage(): JSX.Element {
         <ToggleSetting
           title="Disable Background"
           subtitle="Disable the moving background"
-          value={draftValues.disableBackground}
-          savedVal={savedValues.disableBackground}
-          setValue={(value) => updateDraft("disableBackground", value)}
+          value={values.disableBackground}
+          savedVal={saved.disableBackground}
+          setValue={(value) => setField("disableBackground", value)}
           // disabled={true}
         />
       </SettingGroup>
       <TextSetting
           title="System Name"
           subtitle="Set a name for this system to easily identify it"
-          value={draftValues.systemName}
-          savedVal={savedValues.systemName}
-          setValue={(value) => updateDraft("systemName", value)}
+          value={values.systemName}
+          savedVal={saved.systemName}
+          setValue={(value) => setField("systemName", value)}
       />
       <SettingGroup title="Configuration">
         <ButtonSetting 
