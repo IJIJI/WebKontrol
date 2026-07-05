@@ -24,10 +24,11 @@ export function InfoPill({type, style, children, size, className}: {
   size?: number;
   className?: string;
 }): JSX.Element {
+  const compStyle = style ?? PillStyle.FILLED;
 
   return (
     <div 
-      className={"infoPill " + (className ? className+" " : "") + type + " " + style}
+      className={"infoPill " + (className ? className+" " : "") + type + " " + compStyle}
       style={{ fontSize: size }}
     >
       {children}
