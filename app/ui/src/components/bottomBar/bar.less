@@ -1,0 +1,51 @@
+
+.bottomBar.container {
+
+  @gap-around: 20px;
+  @gap-top: 10px;
+  @height: 60px;
+
+  position: absolute;
+
+  z-index: @z-bottomBar;
+
+  bottom: 0;
+  right: 0;
+  left: 0;
+  padding: @gap-top @gap-around @gap-around @gap-around;
+  overflow: hidden;
+
+  height: calc(@height + @gap-around + @gap-top);
+  
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+
+  .bottomBar.content {
+    background-color: var(--color-background-primary);
+    border-radius: @border-radius-xl;
+    padding: 10px 15px;
+    box-shadow: 0 0 6px 0 var(--color-border-primary);  
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    transform: translateY(0);
+    opacity: 100%;
+    transition: opacity @button-animation-time ease, transform @button-animation-time ease;
+
+    &.hidden {
+      opacity: 0;
+      transform: translateY(calc(@height/3));
+    }
+  }
+
+
+
+
+
+
+}
