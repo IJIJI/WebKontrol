@@ -22,7 +22,7 @@ export function Button(props: {
   onClick: () => void | Promise<void>;
   type?: ButtonType;
   style?: ButtonStyle;
-  label: string;
+  children: string | JSX.Element | JSX.Element[];
   disabled?: boolean;
   ref?: RefObject<HTMLButtonElement>;
 }): JSX.Element {
@@ -39,7 +39,7 @@ export function Button(props: {
       }}
       ref={props.ref}
     >
-      {props.label}
+      {props.children}
     </button>
   );
 }
