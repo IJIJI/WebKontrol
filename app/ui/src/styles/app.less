@@ -21,6 +21,27 @@ body,
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
 }
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.15);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.25);
+}
 
 button {
   font-family: inherit;
