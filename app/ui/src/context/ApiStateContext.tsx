@@ -177,7 +177,7 @@ export function ApiStateProvider({
   };
 
   const coreUpdateRuntimeConfig = async (config: Partial<CoreRuntimeConfigInput>): Promise<void> => {
-    return Api.patch(`/system/config`, config);
+    return Api.patch(`/config/core`, config);
   };
 
   const uiUpdateRuntimeConfig = async (config: Partial<UiRuntimeConfigInput>): Promise<void> => {

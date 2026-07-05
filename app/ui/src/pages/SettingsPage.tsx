@@ -17,17 +17,6 @@ import { useApi } from "../context/ApiStateContext";
 import { Icons } from "../components/icons/Icons";
 
 
-type SettingsValues = {
-  theme: UiTheme;
-  disableBackground: boolean;
-  system_name: string;
-};
-
-const defaultValues: SettingsValues = {
-  theme: UiTheme.AUTO,
-  disableBackground: false,
-  system_name: "WebKontrol",
-};
 
 export default function SettingsPage(): JSX.Element {
 
@@ -38,13 +27,15 @@ export default function SettingsPage(): JSX.Element {
 
   // const {saved, values, setField, revertAll, anyChanged} = useDraft(config?.ui);
   // const uiDraft = useDraft(config?.ui);
-  const uiDraft = useDraft(config?.ui);
-  const coreDraft = useDraft(defaultValues);
+  const uiDraft = useDraft(config.ui);
+  const coreDraft = useDraft(config.core);
 
   const { anyChanged, revertAll } = aggregateDrafts({"UI": uiDraft, "CORE": coreDraft});
 
   const onSave = async (): Promise<void> => {
     await handlers.ui.updateConfig(uiDraft.patch);
+    await handlers.core.updateConfig(coreDraft.patch);
+    revertAll();
   }
 
 
