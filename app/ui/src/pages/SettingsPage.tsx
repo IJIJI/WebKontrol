@@ -5,7 +5,7 @@ import { ToggleSetting } from "../components/settings/implementations/ToggleSett
 import { TextSetting } from "../components/settings/implementations/TextSetting";
 import { ButtonSetting } from "../components/settings/implementations/ButtonSetting";
 import { BaseSetting } from "../components/settings/BaseSetting";
-import { useDraft } from "../helpers/DraftSave";
+import { aggregateDrafts, useDraft } from "../helpers/DraftSave";
 import { SaveBar } from "../components/bottomBar/SaveBar";
 import { Button, ButtonStyle, ButtonType } from "../components/button/Button";
 import { PillStyle, PillType, InfoPill } from "../components/pill/InfoPill";
@@ -13,23 +13,39 @@ import { BottomBar } from "../components/bottomBar/BottomBar";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../src/types/CommonTypes";
 import { UiTheme } from "../../../src/types/UiTypes";
+import { useApi } from "../context/ApiStateContext";
+import { Icons } from "../components/icons/Icons";
 
 
 type SettingsValues = {
   theme: UiTheme;
   disableBackground: boolean;
-  systemName: string;
+  system_name: string;
 };
 
 const defaultValues: SettingsValues = {
   theme: UiTheme.AUTO,
   disableBackground: false,
-  systemName: "WebKontrol",
+  system_name: "WebKontrol",
 };
 
 export default function SettingsPage(): JSX.Element {
 
-  const {saved, values, setField, revertAll, anyChanged} = useDraft(defaultValues);
+  const config = useApi().state?.config;
+  const handlers = useApi().callBacks;
+
+  if (!config) return <Icons.loading />;
+
+  // const {saved, values, setField, revertAll, anyChanged} = useDraft(config?.ui);
+  // const uiDraft = useDraft(config?.ui);
+  const uiDraft = useDraft(config?.ui);
+  const coreDraft = useDraft(defaultValues);
+
+  const { anyChanged, revertAll } = aggregateDrafts({"UI": uiDraft, "CORE": coreDraft});
+
+  const onSave = async (): Promise<void> => {
+    await handlers.ui.updateConfig(uiDraft.patch);
+  }
 
 
   return (
@@ -72,17 +88,14 @@ export default function SettingsPage(): JSX.Element {
           save
         </Button>
       </BottomBar> */}
-      <SaveBar visible={anyChanged()} onSave={async (): Promise<void> => {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        revertAll();
-      }} onDiscard={revertAll} />
+      <SaveBar visible={anyChanged} onSave={onSave} onDiscard={revertAll} />
       <SettingGroup title="Appearance">
         <ButtonSelectSetting<UiTheme>
           title="Theme"
           subtitle="Override your system color scheme"
-          value={values.theme}
-          savedVal={saved.theme}
-          setValue={(value) => setField("theme", value)}
+          value={uiDraft.values.theme}
+          savedVal={uiDraft.saved.theme}
+          setValue={(value) => uiDraft.setField("theme", value)}
           options={[
             { label: "Auto", value: UiTheme.AUTO },
             { label: "Light", value: UiTheme.LIGHT },
@@ -92,9 +105,9 @@ export default function SettingsPage(): JSX.Element {
         <ToggleSetting
           title="Disable Background"
           subtitle="Disable the moving background"
-          value={values.disableBackground}
-          savedVal={saved.disableBackground}
-          setValue={(value) => setField("disableBackground", value)}
+          value={uiDraft.values.disableBackground}
+          savedVal={uiDraft.saved.disableBackground}
+          setValue={(value) => uiDraft.setField("disableBackground", value)}
           // disabled={true}
         />
       </SettingGroup>
@@ -102,9 +115,9 @@ export default function SettingsPage(): JSX.Element {
         <TextSetting
             title="System Name"
             subtitle="Set a name for this system to easily identify it"
-            value={values.systemName}
-            savedVal={saved.systemName}
-            setValue={(value) => setField("systemName", value)}
+            value={coreDraft.values.system_name}
+            savedVal={coreDraft.saved.system_name}
+            setValue={(value) => coreDraft.setField("system_name", value)}
         />
       </SettingGroup>
       <SettingGroup title="Configuration">
