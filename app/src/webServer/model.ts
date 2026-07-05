@@ -19,7 +19,7 @@ export interface WebServerState {
   info: WebServerInfoState;
 }
 
-export interface WebServerMutationHandlers {
+export interface WebServerMutationHandlers { // TODO: UiManager to manage ui settings?
   puppet: {
     updateRuntime: (
       id: PuppetKey,
