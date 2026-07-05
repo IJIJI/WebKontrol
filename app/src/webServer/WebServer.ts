@@ -194,7 +194,15 @@ export class WebServer {
         return res.status(400).json({ errors: result.error.format() });
       }
 
-      await this._handlers.core.updateConfig(result.data);
+      try {
+        await this._handlers.core.updateConfig(result.data);
+        res.status(204).send();
+      } catch (e) {
+        this._logger.error("Failed to update core config:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to update core config",
+        });
+      }
     });
 
     this._app.get("/api/puppets", (_req, res) => {
@@ -242,7 +250,15 @@ export class WebServer {
         return res.status(400).json({ errors: result.error.format() });
       }
 
-      await this._handlers.ui.updateConfig(result.data);
+      try {
+        await this._handlers.ui.updateConfig(result.data);
+        res.status(204).send();
+      } catch (e) {
+        this._logger.error("Failed to update ui config:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to update ui config",
+        });
+      }
     });
 
     // ? Update
