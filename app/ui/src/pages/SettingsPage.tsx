@@ -153,6 +153,17 @@ export default function SettingsPage(): JSX.Element {
           </InfoPill>
         </BaseSetting>
       </SettingGroup>
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "stretch",
+        justifyContent: "flex-start",
+        width: "100%",
+        height: "100vh",
+        minHeight: "100vh"
+      }}>
+
+      </div>
     </>
   );
 }
