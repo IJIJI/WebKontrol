@@ -23,7 +23,9 @@ export class ConfigManager {
   }
 
   public async init(): Promise<void> {
+    
     const path = ConfigManager.CONFIG_PATH; // TODO: Env override?
+    this._logger.debug("Loading config from config file: ", path);
 
     try {
       const file = fs.readFileSync(path, 'utf8');
@@ -34,6 +36,8 @@ export class ConfigManager {
     } catch(error) {
       return this._logger.fatal("Failed loading config from file. Path:", path, "Error", error);
     }
+    
+    this._logger.info("Loaded config from file:", path, "data:", this._config);
   }
 
   public getConfig(): AppConfig {
