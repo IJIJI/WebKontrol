@@ -26,7 +26,7 @@ export function SaveBar({
 
   return (
     <BottomBar visible={visible} className="saveBar">
-      <span>Unsaved changes</span>
+      <span className="saveTitle">Unsaved changes</span>
       <div className="saveButtons">
         <Button type={ButtonType.DANGER} onClick={onDiscard} disabled={isSaving}> 
           <Icons.undo size={20} />
