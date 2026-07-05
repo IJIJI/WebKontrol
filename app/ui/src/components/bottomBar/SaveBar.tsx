@@ -20,8 +20,11 @@ export function SaveBar({
 
   const doSave = async (): Promise<void> => {
     setIsSaving(true);
-    await onSave();
-    setIsSaving(false);
+    try {
+      await onSave();
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
