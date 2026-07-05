@@ -4,14 +4,16 @@ import "./bar.less";
 
 export function BottomBar({
   visible,
-  children
+  children,
+  className
 }: {
   visible: boolean,
   children: JSX.Element | JSX.Element[]
+  className?: string
 }): JSX.Element {
   return (
-    <div className="bottomBar container">
-      <div className={"bottomBar content" + (!visible ? " hidden" : "")}>
+    <div className={"bottomBar container " + (className ?? "")}>
+      <div className={"bottomBar content" + (!visible ? " hidden " : " ") + (className ?? "")}>
         {children}
       </div>
     </div>
