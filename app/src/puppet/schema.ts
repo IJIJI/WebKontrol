@@ -17,6 +17,7 @@ export const PuppetKeySchema = z
   .string()
   .min(2)
   .max(12)
+  .toLowerCase()
   .regex(/^[a-z0-9_-]+$/);
 export type PuppetKey = z.infer<typeof PuppetKeySchema>;
 
