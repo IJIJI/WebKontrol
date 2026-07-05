@@ -11,6 +11,7 @@ import {
 } from "./schema";
 import { PuppetKeySchema, PuppetRuntimeConfigSchema } from "../puppet/schema";
 import { CoreRuntimeConfigSchema } from "../core/schema";
+import { UiRuntimeConfigSchema } from "../types/UiTypes";
 
 export class WebServer {
   private _app = express();
@@ -232,6 +233,16 @@ export class WebServer {
           error: e instanceof Error ? e.message : "Failed to update producer",
         });
       }
+    });
+
+    this._app.patch("/api/config/ui", async (req, res) => {
+      const result = UiRuntimeConfigSchema.partial().safeParse(req.body);
+
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+      }
+
+      await this._handlers.ui.updateConfig(result.data);
     });
 
     // ? Update

@@ -34,6 +34,9 @@ export interface WebServerMutationHandlers { // TODO: UiManager to manage ui set
     apply: (ref: string, type: "release" | "branch") => Promise<void>; // TODO: Check arguments
     getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
   };
+  ui: {
+    updateConfig: (config: Partial<UiRuntimeConfig>) => void | Promise<void>;
+  }
 }
 
 export enum WebServerStatus {

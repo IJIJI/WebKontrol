@@ -18,6 +18,7 @@ import { Api } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
 import { ConnectionStatus } from "./types";
 import { CoreRuntimeConfigInput } from "../../../src/core/schema";
+import { UiRuntimeConfigInput } from "../../../src/types/UiTypes";
 
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
@@ -43,6 +44,9 @@ interface ApiState {
     core: {
       updateConfig: (config: Partial<CoreRuntimeConfigInput>) => Promise<void>;
     };
+    ui: {
+      updateConfig: (config: Partial<UiRuntimeConfigInput>) => Promise<void>;
+    }
     // update: {
     //   check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
     //   apply: (ref: string, type: "release" | "branch") => Promise<void>; // TODO: Check arguments
@@ -176,6 +180,10 @@ export function ApiStateProvider({
     return Api.patch(`/api/system/config`, config);
   };
 
+  const uiUpdateRuntimeConfig = async (config: Partial<UiRuntimeConfigInput>): Promise<void> => {
+    return Api.patch(`/api/config/ui`, config)
+  }
+
   useConnectionToast({ state: status });
 
   return (
@@ -190,6 +198,9 @@ export function ApiStateProvider({
           },
           core: {
             updateConfig: coreUpdateRuntimeConfig,
+          },
+          ui: {
+            updateConfig: uiUpdateRuntimeConfig,
           }
         },
       }}
