@@ -4,7 +4,7 @@ import "./button.less";
 import { RefObject, useRef } from "react";
 
 
-export enum ButtonSettingType {
+export enum ButtonType {
   DEFAULT = "default",
   ACCENT = "accent",
   SUCCESS = "success",
@@ -13,21 +13,21 @@ export enum ButtonSettingType {
   INFO = "info",
 }
 
-export enum ButtonSettingStyle {
+export enum ButtonStyle {
   FILLED = "filled",
   SKELETON = "skeleton",
 }
 
 export function Button(props: {
   onClick: () => void | Promise<void>;
-  type?: ButtonSettingType;
-  style?: ButtonSettingStyle;
+  type?: ButtonType;
+  style?: ButtonStyle;
   label: string;
   disabled: boolean;
   ref: RefObject<HTMLButtonElement>;
 }): JSX.Element {
-  const type = props.type ?? ButtonSettingType.DEFAULT;
-  const style = props.style ?? ButtonSettingStyle.FILLED;
+  const type = props.type ?? ButtonType.DEFAULT;
+  const style = props.style ?? ButtonStyle.FILLED;
 
   return (
     <button
