@@ -19,11 +19,11 @@ export function SaveBar({
       <span>Unsaved changes</span>
       <div className="saveButtons">
         <Button type={ButtonType.DANGER} onClick={onDiscard} > 
-          <Icons.undo />
+          <Icons.undo size={20} />
           <p>Discard</p>
         </Button>
         <Button type={ButtonType.SUCCESS} onClick={onSave} > 
-          <Icons.check />
+          <Icons.check size={19} />
           <p>Save</p>
         </Button>
       </div>
