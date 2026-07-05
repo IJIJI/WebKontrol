@@ -255,8 +255,6 @@ export class AppCore {
           this._logger.important(
             `ui.updateConfig() handler called with config:`,
             config,
-            `updating the actual config to:`,
-            this._config,
           );
         } 
       }
