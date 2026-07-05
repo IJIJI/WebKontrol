@@ -12,17 +12,17 @@ import { PillStyle, PillType, InfoPill } from "../components/pill/InfoPill";
 import { BottomBar } from "../components/bottomBar/BottomBar";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../src/types/CommonTypes";
+import { UiTheme } from "../../../src/types/UiTypes";
 
-type placeHolderTheme = "light" | "dark" | "auto";
 
 type SettingsValues = {
-  theme: placeHolderTheme;
+  theme: UiTheme;
   disableBackground: boolean;
   systemName: string;
 };
 
 const defaultValues: SettingsValues = {
-  theme: "auto",
+  theme: UiTheme.AUTO,
   disableBackground: false,
   systemName: "WebKontrol",
 };
@@ -77,16 +77,16 @@ export default function SettingsPage(): JSX.Element {
         revertAll();
       }} onDiscard={revertAll} />
       <SettingGroup title="Appearance">
-        <ButtonSelectSetting<placeHolderTheme>
+        <ButtonSelectSetting<UiTheme>
           title="Theme"
           subtitle="Override your system color scheme"
           value={values.theme}
           savedVal={saved.theme}
           setValue={(value) => setField("theme", value)}
           options={[
-            { label: "Auto", value: "auto" },
-            { label: "Light", value: "light" },
-            { label: "Dark", value: "dark" },
+            { label: "Auto", value: UiTheme.AUTO },
+            { label: "Light", value: UiTheme.LIGHT },
+            { label: "Dark", value: UiTheme.DARK },
           ]}
         />
         <ToggleSetting
