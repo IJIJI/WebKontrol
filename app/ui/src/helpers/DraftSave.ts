@@ -47,3 +47,24 @@ export function useDraft<T extends Record<string, unknown>>(saved: T): Draft<T> 
     isChanged
   }
 }
+
+// TODO: Add apply hook in draft and applyAll here?
+export function aggregateDrafts<V extends Record<string, Draft<any>>>(
+  drafts: V,
+): {
+  anyChanged: boolean;
+  patches: { [W in keyof V]: V[W]["patch"] };
+  revertAll: () => void;
+} {
+  const entries = Object.entries(drafts) as [keyof V, Draft<any>][];
+
+  const anyChanged = entries.some(([, draft]) => Object.keys(draft.patch).length > 0);
+  
+  const patches = Object.fromEntries(
+    entries.map(([key, draft]) => [key, draft.patch]),
+  ) as { [W in keyof V]: V[W]["patch"] };
+
+  const revertAll = (): void => entries.forEach(([, draft]) => draft.revertAll());
+
+  return {anyChanged, patches, revertAll};
+}
