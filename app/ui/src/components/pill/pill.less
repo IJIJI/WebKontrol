@@ -22,7 +22,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 4px;
+  gap: 8px;
 
   height: @height;
   border-radius: @height;
@@ -32,7 +32,7 @@
   border: @border-width solid var(--color-border-tertiary);
   font-size: @size;
 
-  &, &.default {
+  &, &.default { // TODO: Refactor to work like the StatusPill
     color: var(--color-text-primary);
     .transBrdrColor(var(--color-background-tertiary));
     .boxShadow(var(--color-background-tertiary));
