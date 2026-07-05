@@ -1,4 +1,5 @@
 import { type JSX } from "react";
+import toast from "react-hot-toast";
 import { SettingGroup } from "../components/settings/SettingGroup";
 import { ButtonSelectSetting } from "../components/settings/implementations/ButtonSelectSetting";
 import { ToggleSetting } from "../components/settings/implementations/ToggleSetting";
@@ -33,8 +34,17 @@ export default function SettingsPage(): JSX.Element {
   const { anyChanged, revertAll } = aggregateDrafts({"UI": uiDraft, "CORE": coreDraft});
 
   const onSave = async (): Promise<void> => {
-    await handlers.ui.updateConfig(uiDraft.patch);
-    await handlers.core.updateConfig(coreDraft.patch);
+    await toast.promise(
+      Promise.all([
+        handlers.ui.updateConfig(uiDraft.patch, false),
+        handlers.core.updateConfig(coreDraft.patch, false),
+      ]),
+      {
+        loading: "Saving…",
+        success: "Saved",
+        error: (e: unknown) => (e instanceof Error ? e.message : "Failed to save settings"),
+      },
+    );
     revertAll();
   }
 
