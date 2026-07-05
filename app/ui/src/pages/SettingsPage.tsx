@@ -132,6 +132,12 @@ export default function SettingsPage(): JSX.Element {
         />
       </SettingGroup>
       <SettingGroup title="About">
+        <BaseSetting
+          title="Status"
+          subtitle="SystemStatus"
+        >
+          <StatusPill status={ConnectionState.ONLINE}/>
+        </BaseSetting>
         <ButtonSetting 
           title="Firmware"
           subtitle="v1.0.0"
@@ -145,12 +151,6 @@ export default function SettingsPage(): JSX.Element {
           <InfoPill type={PillType.DEFAULT} style={PillStyle.FILLED}>
             <span>WebKontrol v3</span>
           </InfoPill>
-        </BaseSetting>
-        <BaseSetting
-          title="Status"
-          subtitle="SystemStatus"
-        >
-          <StatusPill status={ConnectionState.UNKNOWN}/>
         </BaseSetting>
       </SettingGroup>
     </>
