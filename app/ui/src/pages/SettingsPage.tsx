@@ -33,18 +33,42 @@ export default function SettingsPage(): JSX.Element {
   return (
     <>
       {/* <BottomBar visible={true}>
-        <Button label="save" type={ButtonSettingType.DEFAULT} style={ButtonSettingStyle.FILLED}/>
-        <Button label="save" type={ButtonSettingType.ACCENT} style={ButtonSettingStyle.FILLED}/>
-        <Button label="save" type={ButtonSettingType.DANGER} style={ButtonSettingStyle.FILLED}/>
-        <Button label="save" type={ButtonSettingType.INFO} style={ButtonSettingStyle.FILLED}/>
-        <Button label="save" type={ButtonSettingType.SUCCESS} style={ButtonSettingStyle.FILLED}/>
-        <Button label="save" type={ButtonSettingType.WARNING} style={ButtonSettingStyle.FILLED}/>
-        <Button label="save" type={ButtonSettingType.DEFAULT} style={ButtonSettingStyle.SKELETON}/>
-        <Button label="save" type={ButtonSettingType.ACCENT} style={ButtonSettingStyle.SKELETON}/>
-        <Button label="save" type={ButtonSettingType.DANGER} style={ButtonSettingStyle.SKELETON}/>
-        <Button label="save" type={ButtonSettingType.INFO} style={ButtonSettingStyle.SKELETON}/>
-        <Button label="save" type={ButtonSettingType.SUCCESS} style={ButtonSettingStyle.SKELETON}/>
-        <Button label="save" type={ButtonSettingType.WARNING} style={ButtonSettingStyle.SKELETON}/>
+        <Button type={ButtonType.DEFAULT} style={ButtonStyle.FILLED} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.ACCENT} style={ButtonStyle.FILLED} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.DANGER} style={ButtonStyle.FILLED} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.INFO} style={ButtonStyle.FILLED} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.SUCCESS} style={ButtonStyle.FILLED} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.WARNING} style={ButtonStyle.FILLED} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.DEFAULT} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.ACCENT} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.DANGER} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.INFO} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.SUCCESS} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+          save
+        </Button>
+        <Button type={ButtonType.WARNING} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+          save
+        </Button>
       </BottomBar> */}
       <SaveBar visible={anyChanged()} onSave={async (): Promise<void> => {
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -95,6 +119,16 @@ export default function SettingsPage(): JSX.Element {
           onClick={() => { alert("Huh why import?? He's scary...")}}
         />
       </SettingGroup>
+      <SettingGroup title="Reset">
+        <ButtonSetting 
+          title="Reset System"
+          subtitle="Restore all configuration to factory defaults"
+          label="Reset"
+          onClick={() => { alert("I DON'T WANT TO DIE")}}
+          type={ButtonType.DANGER}
+          style={ButtonStyle.SKELETON}
+        />
+      </SettingGroup>
       <SettingGroup title="About">
         <ButtonSetting 
           title="Firmware"
@@ -106,20 +140,10 @@ export default function SettingsPage(): JSX.Element {
           title="Hardware"
           subtitle="Hardware Type"
         >
-          <InfoPill type={PillType.INFO} style={PillStyle.FILLED}>
+          <InfoPill type={PillType.DEFAULT} style={PillStyle.FILLED}>
             <span>WebKontrol v3</span>
           </InfoPill>
         </BaseSetting>
-      </SettingGroup>
-      <SettingGroup title="Reset">
-        <ButtonSetting 
-          title="Reset System"
-          subtitle="Restore all configuration to factory defaults"
-          label="Reset"
-          onClick={() => { alert("I DON'T WANT TO DIE")}}
-          type={ButtonType.DANGER}
-          style={ButtonStyle.SKELETON}
-        />
       </SettingGroup>
     </>
   );
