@@ -74,7 +74,7 @@ export interface AmbientGlowProps {
 
 export default function AmbientGlowBackground({
   colors = DEFAULT_COLORS,
-  count = 8,
+  count = 10,
   animate = true,
   intensity = 1,
   seed,

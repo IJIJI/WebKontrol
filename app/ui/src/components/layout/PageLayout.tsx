@@ -9,6 +9,7 @@ import ContentSection from "./content/ContentSection";
 import { BrandLogo } from "../branding/BrandLogo";
 import { usePageContext } from "../../context/PageContext";
 import { Icons } from "../icons/Icons";
+import { useApi } from "../../context/ApiStateContext";
 
 const MOBILE_BREAKPOINT = 770;
 const TABLET_BREAKPOINT = 1000;
@@ -29,6 +30,7 @@ const getDeviceType = (width: number): DeviceType => {
 export default function PageLayout(): JSX.Element {
   const location = useLocation();
   const { title, back } = usePageContext();
+  const uiConfig = useApi().state?.config.ui;
 
   const [deviceType, setDeviceType] = useState(() =>
     getDeviceType(window.innerWidth),
@@ -62,7 +64,7 @@ export default function PageLayout(): JSX.Element {
   // TODO: Seperate breadcrumb component
   return (
     <div className="page-base">
-      <AmbientGlowBackground />
+      {(uiConfig?.disableBackground == true) ? <></> : <AmbientGlowBackground className="hidden"/>}
       <ContentSection
         variant="glass"
         className={["page-layout", "pad-none"].filter(Boolean).join(" ")}
