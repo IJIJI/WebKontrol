@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 
 
 export interface Draft<T extends Record<string, unknown>> {
-  values: T;
+  saved: T;
   patch: Partial<T>;
+  values: T;
 
   setField: <U extends keyof T>(key: U, value: T[U]) => void;
   revertField: (key: keyof T) => void;
@@ -41,7 +42,7 @@ export function useDraft<T extends Record<string, unknown>>(saved: T): Draft<T> 
   const isChanged = (key: keyof T): boolean => key in patch;
 
   return {
-    values, patch,
+    saved, values, patch,
     setField, 
     revertField, revertAll,
     isChanged
