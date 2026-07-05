@@ -13,12 +13,16 @@
   padding: 4px 13px;
   font-size: 15px;
   color: var(--color-text-primary);
-  transition: background-color @button-animation-time ease;
+  transition: background-color @button-animation-time ease, opacity @button-animation-time ease;
 
   background-color: var(--color-background-secondary);
   &:hover, &:focus, &:active {
     background-color: var(--color-border-tertiary);
+  }
 
+  &.disabled {
+    opacity: 50%;
+    cursor: not-allowed;
   }
 
   &, &.default {

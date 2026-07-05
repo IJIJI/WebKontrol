@@ -32,7 +32,7 @@ export function Button(props: {
   return (
     <button
       type="button"
-      className={"buttonComp " + type + " " + style}
+      className={"buttonComp " + (props.disabled ? "disabled " : "") + type + " " + style}
       disabled={props.disabled}
       onClick={() => {
         !props.disabled && props.onClick();
