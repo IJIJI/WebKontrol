@@ -4,6 +4,8 @@ import { Logger } from "./logging/Logger";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { type PuppetKey, type PuppetRuntimeConfigInput } from "./puppet/schema";
 import { AppCoreStore } from "./storage/AppCoreStore";
+import { type UiRuntimeConfig } from "./types/UiTypes";
+import { UiManager } from "./ui/UiManager";
 import { WebServer } from "./webServer/WebServer";
 
 export class AppCore {
@@ -13,6 +15,7 @@ export class AppCore {
 
   private _webServer: WebServer;
   private _puppets: Map<PuppetKey, AbstractPuppet> = new Map();
+  private _uiManager: UiManager;
 
   private _info: CoreInfo = {
     start_moment: Date.now(),
@@ -75,6 +78,8 @@ export class AppCore {
     }
 
     this._webServer = new WebServer({});
+
+    this._uiManager = new UiManager();
   }
 
   public async start(): Promise<void> {
@@ -173,6 +178,7 @@ export class AppCore {
         .toArray(),
       config: {
         core: this._config,
+        ui: this._uiManager.getRuntime(),
       },
       info: {
         core: this._info,
@@ -206,7 +212,7 @@ export class AppCore {
         },
       },
       core: {
-        updateConfig: (config: Partial<CoreRuntimeConfigInput>): void => {
+        updateConfig: (config: Partial<CoreRuntimeConfigInput>): void => { // TODO: Is this parse double? Here or in the api?
           const parsed = CoreRuntimeConfigSchema.parse({
             ...this._config,
             ...config,
@@ -239,6 +245,21 @@ export class AppCore {
           this._logger.important(`update.getStatus() handler called.`);
         },
       },
+      ui: {
+        updateConfig: async (config: Partial<UiRuntimeConfig>): Promise<void> => {// TODO: Is this parse double? Here or in the api?
+
+          await this._uiManager.updateRuntime(config);
+
+          this._syncState();
+
+          this._logger.important(
+            `ui.updateConfig() handler called with config:`,
+            config,
+            `updating the actual config to:`,
+            this._config,
+          );
+        } 
+      }
     });
   }
 }
