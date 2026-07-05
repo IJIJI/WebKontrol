@@ -37,11 +37,11 @@
 
     transform: translateY(0);
     opacity: 100%;
-    transition: opacity @button-animation-time ease, transform @button-animation-time ease;
+    transition: opacity @button-animation-time ease, transform @button-animation-time*2 ease;
 
     &.hidden {
       opacity: 0;
-      transform: translateY(calc(@height/3));
+      transform: translateY(@height + @gap-around);
     }
 
     &.saveBar {
