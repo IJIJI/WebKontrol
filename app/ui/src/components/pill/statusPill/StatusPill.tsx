@@ -4,24 +4,27 @@ import "./statusPill.less";
 import { ConnectionState } from "../../../../../src/types/CommonTypes";
 import { InfoPill, PillStyle, PillType } from "../InfoPill";
 
-const STATE_MAP: Record<ConnectionState, PillType> = {
-  [ConnectionState.DISABLED]: PillType.DEFAULT,
-  [ConnectionState.ERROR]: PillType.DANGER,
-  [ConnectionState.FAILED]: PillType.DANGER,
-  [ConnectionState.OFFLINE]: PillType.WARNING,
-  [ConnectionState.ONLINE]: PillType.SUCCESS,
-  [ConnectionState.UNKNOWN]: PillType.DEFAULT,
+const STATE_MAP: Record<ConnectionState, {type: PillType, style: PillStyle, label: string}> = {
+  [ConnectionState.DISABLED]: { type: PillType.DEFAULT, style: PillStyle.SKELETON, label: "Disabled" },
+  [ConnectionState.ERROR]: { type: PillType.WARNING, style: PillStyle.FILLED, label: "Error" },
+  [ConnectionState.FAILED]: { type: PillType.DANGER, style: PillStyle.FILLED, label: "Failed" },
+  [ConnectionState.OFFLINE]: { type: PillType.WARNING, style: PillStyle.FILLED, label: "Offline" },
+  [ConnectionState.ONLINE]: { type: PillType.SUCCESS, style: PillStyle.SKELETON, label: "Online" },
+  [ConnectionState.UNKNOWN]: { type: PillType.WARNING, style: PillStyle.FILLED, label: "Unknown" },
 }
 
-export function StatusPill({size, label, status}: {
+export function StatusPill(props: {
   size?: number;
-  label: string;
+  label?: string;
   status: ConnectionState;
   style?: PillStyle;
 }): JSX.Element {
+  const state = STATE_MAP[props.status];
+  const style = props.style ? props.style : state.style;
+  const label = props.label ? props.label : state.label;
 
   return (
-    <InfoPill className="statusPill" type={STATE_MAP[status]} size={size}>
+    <InfoPill className="statusPill" style={style} type={state.type} size={props.size}>
       <span className="dotContainter">
         <div className="dot"></div>
       </span> 
