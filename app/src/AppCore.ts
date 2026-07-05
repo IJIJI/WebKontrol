@@ -1,6 +1,7 @@
 import type { CoreInfo } from "./core/model";
 import { CoreRuntimeConfigSchema, type CoreRuntimeConfig, type CoreRuntimeConfigInput } from "./core/schema";
 import { Logger } from "./logging/Logger";
+import { ConfigManager } from "./orchestration/config/ConfigManager";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
 import { type PuppetKey, type PuppetRuntimeConfigInput } from "./puppet/schema";
 import { AppCoreStore } from "./storage/AppCoreStore";
@@ -17,6 +18,8 @@ export class AppCore {
   private _puppets: Map<PuppetKey, AbstractPuppet> = new Map();
   private _uiManager: UiManager;
 
+  private _configManager: ConfigManager;
+
   private _info: CoreInfo = {
     start_moment: Date.now(),
   };
@@ -30,6 +33,9 @@ export class AppCore {
   // TODO: Runtime should not be an argument, there should be a config bundle for the "real" runtime unchangable config. e.g. webserver port
   // TODO: Move async code into init function.
   constructor(config?: CoreRuntimeConfigInput) {
+
+    this._configManager = new ConfigManager();
+
     if (config) {
       this._config = CoreRuntimeConfigSchema.parse(config);
       this._store
@@ -84,6 +90,8 @@ export class AppCore {
 
   public async start(): Promise<void> {
     this._logger.important("Starting AppCore...");
+
+    this._configManager.init();
 
     // this._registerShutdownHandlers(); // TODO
 
