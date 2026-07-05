@@ -24,7 +24,8 @@ export function Button(props: {
   style?: ButtonStyle;
   children: string | JSX.Element | JSX.Element[];
   disabled?: boolean;
-  ref?: RefObject<HTMLButtonElement>;
+  ref?: RefObject<HTMLButtonElement | null>;
+  size?: number;
 }): JSX.Element {
   const type = props.type ?? ButtonType.DEFAULT;
   const style = props.style ?? ButtonStyle.FILLED;
@@ -38,6 +39,7 @@ export function Button(props: {
         !props.disabled && props.onClick();
       }}
       ref={props.ref}
+      style={{ fontSize: props.size }}
     >
       {props.children}
     </button>

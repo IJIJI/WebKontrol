@@ -160,64 +160,6 @@
         padding: 7px 10px;
       }
 
-      .buttonSetting {
-        
-        border: @border-width solid var(--color-border-tertiary);
-        border-radius: @border-radius-fields;
-        padding: 4px 13px;
-        color: var(--color-text-primary);
-        transition: background-color @button-animation-time ease;
-
-        background-color: var(--color-background-secondary);
-        &:hover, &:focus, &:active {
-          background-color: var(--color-border-tertiary);
-
-        }
-
-        &, &.default {
-          color: var(--color-text-primary);
-          border: @border-width solid var(--color-border-tertiary);
-          &:hover, &:focus, &:active {
-            background-color: var(--color-border-tertiary);
-          }
-        }
-        &.accent {
-          color: var(--color-text-acc);
-          border: @border-width solid var(--color-text-acc);
-          &:hover, &:focus, &:active {
-            background-color: var(--color-background-acc);
-          }
-        }
-        &.success {
-          color: var(--color-text-success);
-          border: @border-width solid var(--color-text-success);
-          &:hover, &:focus, &:active {
-            background-color: var(--color-background-success);
-          }
-        }
-        &.danger {
-          color: var(--color-text-danger);
-          border: @border-width solid var(--color-text-danger);
-          &:hover, &:focus, &:active {
-            background-color: var(--color-background-danger);
-          }
-        }
-        &.warning {
-          color: var(--color-text-warning);
-          border: @border-width solid var(--color-text-warning);
-          &:hover, &:focus, &:active {
-            background-color: var(--color-background-warning);
-          }
-        }
-        &.info {
-          color: var(--color-text-info);
-          border: @border-width solid var(--color-text-info);
-          &:hover, &:focus, &:active {
-            background-color: var(--color-background-info);
-          }
-        }
-      }
-
     }
   }
 }

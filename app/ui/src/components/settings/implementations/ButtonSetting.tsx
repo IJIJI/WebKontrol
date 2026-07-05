@@ -3,40 +3,32 @@ import { type JSX } from "react/jsx-runtime";
 import "../settings.less";
 import { BaseSetting, type BaseSettingNonValProps } from "../BaseSetting";
 import { useRef } from "react";
+import { Button, ButtonStyle, ButtonType } from "../../button/Button";
 
 type ButtonSettingProps = BaseSettingNonValProps & {
   onClick: () => void | Promise<void>;
-  type?: ButtonSettingType;
+  type?: ButtonType;
+  style?: ButtonStyle;
   label: string;
 };
 
-export enum ButtonSettingType {
-  DEFAULT = "default",
-  ACCENT = "accent",
-  SUCCESS = "success",
-  DANGER = "danger",
-  WARNING = "warning",
-  INFO = "info",
-}
 
 export function ButtonSetting(props: ButtonSettingProps): JSX.Element {
-  const type = props.type ?? ButtonSettingType.DEFAULT;
 
   const inputRef = useRef<HTMLButtonElement>(null);
 
   return (
     <BaseSetting {...props} inputRef={inputRef}>
-      <button
-        type="button"
-        className={"buttonSetting " + type}
+      <Button 
+        onClick={props.onClick} 
+        size={14}
         disabled={props.disabled}
-        onClick={() => {
-          !props.disabled && props.onClick();
-        }}
         ref={inputRef}
+        type={props.type}
+        style={props.style}
       >
         {props.label}
-      </button>
+      </Button>
     </BaseSetting>
   );
 }
