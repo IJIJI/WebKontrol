@@ -7,7 +7,9 @@ import { ButtonSetting } from "../components/settings/implementations/ButtonSett
 import { BaseSetting } from "../components/settings/BaseSetting";
 import { useDraft } from "../helpers/DraftSave";
 import { SaveBar } from "../components/bottomBar/SaveBar";
-import { ButtonStyle, ButtonType } from "../components/button/Button";
+import { Button, ButtonStyle, ButtonType } from "../components/button/Button";
+import { PillStyle, PillType, InfoPill } from "../components/pill/InfoPill";
+import { BottomBar } from "../components/bottomBar/BottomBar";
 
 type placeHolderTheme = "light" | "dark" | "auto";
 
@@ -104,7 +106,9 @@ export default function SettingsPage(): JSX.Element {
           title="Hardware"
           subtitle="Hardware Type"
         >
-          <span>WebKontrol v3</span>
+          <InfoPill type={PillType.INFO} style={PillStyle.FILLED}>
+            <span>WebKontrol v3</span>
+          </InfoPill>
         </BaseSetting>
       </SettingGroup>
       <SettingGroup title="Reset">
