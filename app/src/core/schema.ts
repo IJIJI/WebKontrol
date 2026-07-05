@@ -1,7 +1,11 @@
 import z from "zod";
 
-export const CoreRuntimeConfigSchema = z.object({
-  system_name: z.string().max(15).default("WebKontrol"),
+export const CoreRuntimeConfigShape = z.object({
+  system_name: z.string().max(15),
+});
+
+export const CoreRuntimeConfigSchema = CoreRuntimeConfigShape.extend({
+  system_name: CoreRuntimeConfigShape.shape.system_name.default("WebKontrol"),
 });
 
 export type CoreRuntimeConfig = z.infer<typeof CoreRuntimeConfigSchema>;

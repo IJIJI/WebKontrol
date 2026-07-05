@@ -12,9 +12,14 @@ export const UiThemeSchema = z.enum(UiTheme);
 
 // }
 
-export const UiRuntimeConfigSchema = z.object({
-  theme: UiThemeSchema.default(UiTheme.AUTO),
-  disableBackground: z.boolean().default(false),
+export const UiRuntimeConfigShape = z.object({
+  theme: UiThemeSchema,
+  disableBackground: z.boolean(),
+});
+
+export const UiRuntimeConfigSchema = UiRuntimeConfigShape.extend({
+  theme: UiRuntimeConfigShape.shape.theme.default(UiTheme.AUTO),
+  disableBackground: UiRuntimeConfigShape.shape.disableBackground.default(false),
 });
 
 export type UiRuntimeConfig = z.infer<typeof UiRuntimeConfigSchema>;

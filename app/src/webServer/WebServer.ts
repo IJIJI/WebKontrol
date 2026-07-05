@@ -10,8 +10,8 @@ import {
   type WebServerConfigInput,
 } from "./schema";
 import { PuppetKeySchema, PuppetRuntimeConfigSchema } from "../puppet/schema";
-import { CoreRuntimeConfigSchema } from "../core/schema";
-import { UiRuntimeConfigSchema } from "../ui/schema";
+import { CoreRuntimeConfigShape } from "../core/schema";
+import { UiRuntimeConfigShape } from "../ui/schema";
 
 export class WebServer {
   private _app = express();
@@ -188,7 +188,7 @@ export class WebServer {
     });
 
     this._app.patch("/api/config/core", async (req, res) => {
-      const result = CoreRuntimeConfigSchema.partial().safeParse(req.body);
+      const result = CoreRuntimeConfigShape.partial().safeParse(req.body);
 
       if (!result.success) {
         return res.status(400).json({ errors: result.error.format() });
@@ -244,7 +244,7 @@ export class WebServer {
     });
 
     this._app.patch("/api/config/ui", async (req, res) => {
-      const result = UiRuntimeConfigSchema.partial().safeParse(req.body);
+      const result = UiRuntimeConfigShape.partial().safeParse(req.body);
 
       if (!result.success) {
         return res.status(400).json({ errors: result.error.format() });
