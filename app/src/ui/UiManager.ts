@@ -14,16 +14,16 @@ export class UiManager {
 
   constructor() {
     this._logger = new Logger(["UI"]);
-    this._store = new UiStore;
+    this._store = new UiStore();
+  }
+
+  async init() {
     
-    this._store.loadRuntime()
-      .then((loaded) => {
-        if (loaded)
-          this._config = loaded;
-      })
-      .catch((error) => {
-        this._logger.warn("Failed loading runtime from store, using defaults. Current config:", this._config, "error:", error);
-      });
+    const loaded = await this._store.loadRuntime();
+    if (loaded)
+      this._config = loaded;
+    else
+      this._logger.warn("Failed loading runtime from store, using defaults.");
   }
 
   async updateRuntime(config: Partial<UiRuntimeConfig>): Promise<void> {

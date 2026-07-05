@@ -95,6 +95,8 @@ export class AppCore {
     //   this.logger.fatal("Failed to start Lifecycle.", error);
     // }
 
+    await this._uiManager.init();
+
     try {
       this._wireWebServer();
 
