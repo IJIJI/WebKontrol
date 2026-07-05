@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import type { WebServerState } from "../../../src/webServer/model";
 import type {
   PuppetKey,
@@ -39,13 +39,20 @@ interface ApiState {
       updateRuntime: (
         id: PuppetKey,
         runtime: Partial<PuppetRuntimeConfigInput>,
+        notify?: boolean,
       ) => Promise<void>;
     };
     core: {
-      updateConfig: (config: Partial<CoreRuntimeConfigInput>) => Promise<void>;
+      updateConfig: (
+        config: Partial<CoreRuntimeConfigInput>,
+        notify?: boolean,
+      ) => Promise<void>;
     };
     ui: {
-      updateConfig: (config: Partial<UiRuntimeConfigInput>) => Promise<void>;
+      updateConfig: (
+        config: Partial<UiRuntimeConfigInput>,
+        notify?: boolean,
+      ) => Promise<void>;
     }
     // update: {
     //   check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
@@ -57,17 +64,19 @@ interface ApiState {
 
 const ApiStateContext = createContext<ApiState | null>(null);
 
-// TODO: Add toasts!
-// const addProducer = async (type: string, config: ProducerConfig & Record<string, unknown>) => {
-//   await toast.promise(
-//     api.addProducer(type, config),
-//     {
-//       loading: 'Adding connection…',
-//       success: 'Connection added',
-//       error:   (e: unknown) => e instanceof Error ? e.message : 'Failed to add connection',
-//     }
-//   )
-// }
+// Wraps a mutation in a toast unless the caller opts out (e.g. to batch several
+// calls under one toast of its own).
+function withToast<T>(
+  promise: Promise<T>,
+  messages: { loading: string; success: string },
+  notify = true,
+): Promise<T> {
+  if (!notify) return promise;
+  return toast.promise(promise, {
+    ...messages,
+    error: (e: unknown) => (e instanceof Error ? e.message : "Something went wrong"),
+  });
+}
 
 export function ApiStateProvider({
   children,
@@ -172,17 +181,36 @@ export function ApiStateProvider({
   const puppetUpdateRuntime = async (
     id: PuppetKey,
     runtime: Partial<PuppetRuntimeConfigInput>,
+    notify = true,
   ): Promise<void> => {
-    return Api.patch(`/puppets/${id}`, runtime);
+    return withToast(
+      Api.patch(`/puppets/${id}`, runtime),
+      { loading: "Updating puppet…", success: "Puppet updated" },
+      notify,
+    );
   };
 
-  const coreUpdateRuntimeConfig = async (config: Partial<CoreRuntimeConfigInput>): Promise<void> => {
-    return Api.patch(`/config/core`, config);
+  const coreUpdateRuntimeConfig = async (
+    config: Partial<CoreRuntimeConfigInput>,
+    notify = false,
+  ): Promise<void> => {
+    return withToast(
+      Api.patch(`/config/core`, config),
+      { loading: "Saving settings…", success: "Settings saved" },
+      notify,
+    );
   };
 
-  const uiUpdateRuntimeConfig = async (config: Partial<UiRuntimeConfigInput>): Promise<void> => {
-    return Api.patch(`/config/ui`, config)
-  }
+  const uiUpdateRuntimeConfig = async (
+    config: Partial<UiRuntimeConfigInput>,
+    notify = false,
+  ): Promise<void> => {
+    return withToast(
+      Api.patch(`/config/ui`, config),
+      { loading: "Saving settings…", success: "Settings saved" },
+      notify,
+    );
+  };
 
   useConnectionToast({ state: status });
 
