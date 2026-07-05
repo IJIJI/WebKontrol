@@ -17,16 +17,17 @@ export enum PillStyle { // TODO: Move to a more general type? It is used in more
   SKELETON = "skeleton",
 }
 
-export function InfoPill({type, style, children, size}: {
+export function InfoPill({type, style, children, size, className}: {
   type?: PillType;
   style?: PillStyle;
   children: string | JSX.Element | JSX.Element[];
   size?: number;
+  className?: string;
 }): JSX.Element {
 
   return (
     <div 
-      className={"infoPill " + type + " " + style}
+      className={"infoPill " + (className ? className+" " : "") + type + " " + style}
       style={{ fontSize: size }}
     >
       {children}
