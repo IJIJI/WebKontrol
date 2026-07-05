@@ -3,6 +3,7 @@ import { type JSX } from "react/jsx-runtime";
 import "./bar.less";
 import { BottomBar } from "./BottomBar";
 import { Button, ButtonType } from "../button/Button";
+import { Icons } from "../icons/Icons";
 
 export function SaveBar({
   visible,
@@ -17,8 +18,14 @@ export function SaveBar({
     <BottomBar visible={visible} className="saveBar">
       <span>Unsaved changes</span>
       <div className="saveButtons">
-        <Button label={"Discard"} type={ButtonType.DANGER} onClick={onDiscard} />
-        <Button label={"Save"} type={ButtonType.SUCCESS} onClick={onSave}/>
+        <Button type={ButtonType.DANGER} onClick={onDiscard} > 
+          <Icons.undo />
+          <p>Discard</p>
+        </Button>
+        <Button type={ButtonType.SUCCESS} onClick={onSave} > 
+          <Icons.check />
+          <p>Save</p>
+        </Button>
       </div>
     </BottomBar>
   );
