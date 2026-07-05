@@ -50,13 +50,15 @@ export default function SettingsPage(): JSX.Element {
           // disabled={true}
         />
       </SettingGroup>
-      <TextSetting
-          title="System Name"
-          subtitle="Set a name for this system to easily identify it"
-          value={values.systemName}
-          savedVal={saved.systemName}
-          setValue={(value) => setField("systemName", value)}
-      />
+      <SettingGroup title="System">
+        <TextSetting
+            title="System Name"
+            subtitle="Set a name for this system to easily identify it"
+            value={values.systemName}
+            savedVal={saved.systemName}
+            setValue={(value) => setField("systemName", value)}
+        />
+      </SettingGroup>
       <SettingGroup title="Configuration">
         <ButtonSetting 
           title="Export Config"
@@ -94,13 +96,6 @@ export default function SettingsPage(): JSX.Element {
           type={ButtonSettingType.DANGER}
         />
       </SettingGroup>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas vestibulum pellentesque sem quis mattis. Nullam pretium dui vel eros sodales facilisis. Cras viverra vitae lorem non fermentum. Proin ut varius lorem. Maecenas eget lacinia neque. Etiam pretium sodales enim, at lacinia eros sollicitudin vel. Phasellus pulvinar sagittis facilisis. Morbi lacinia scelerisque velit ac luctus. Nunc vitae nulla libero. Donec et congue sapien, dignissim dignissim lorem. Quisque mollis dolor eu turpis lobortis fringilla. Maecenas id pharetra libero, ac eleifend tellus. Etiam at tellus turpis. Sed quis arcu aliquam, condimentum nisl quis, fringilla ligula.
-
-Suspendisse nisl risus, commodo eu posuere ac, maximus vel risus. Aliquam mollis odio vehicula, dictum nisl vel, venenatis neque. Vivamus efficitur ultrices mi, ut sollicitudin dolor aliquet at. Fusce vitae rhoncus diam. Suspendisse eu dui nec nulla dictum sagittis in in sem. Etiam vitae viverra risus, at varius nibh. Phasellus maximus commodo porta. Nam non augue consectetur tortor sagittis hendrerit. Aenean fringilla libero vitae turpis condimentum egestas. Fusce ullamcorper dictum enim non finibus. Vestibulum pharetra eu felis sit amet eleifend. Nunc ipsum lectus, venenatis feugiat arcu quis, accumsan porttitor nunc. Praesent finibus urna nec libero commodo ultrices in sit amet mauris. Cras in enim eu diam volutpat feugiat. Aliquam blandit sagittis enim at laoreet.
-
-Donec sagittis sollicitudin augue vitae sollicitudin. Sed at consequat est, in lacinia ex. Etiam augue orci, finibus sed mattis et, tincidunt et arcu. Quisque congue sodales mi, non venenatis elit ullamcorper non. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Morbi ullamcorper lectus ut auctor varius. Etiam quis finibus sem. Praesent ipsum tellus, interdum ac libero nec, dignissim aliquam odio. Aenean non dui nec felis vulputate commodo egestas id metus. Sed a vulputate odio, at venenatis neque.
-      </p>
     </>
   );
 }
