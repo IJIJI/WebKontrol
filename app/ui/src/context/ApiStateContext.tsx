@@ -18,7 +18,7 @@ import { Api } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
 import { ConnectionStatus } from "./types";
 import { CoreRuntimeConfigInput } from "../../../src/core/schema";
-import { UiRuntimeConfigInput } from "../../../src/types/UiTypes";
+import { UiRuntimeConfigInput, UiTheme } from "../../../src/types/UiTypes";
 
 export interface UiPuppetState extends PuppetInfoBundle {
   setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
@@ -95,6 +95,7 @@ export function ApiStateProvider({
     setState(state);
 
     setError(null);
+    applyUiTheme(state.config.ui.theme);
 
     console.debug(
       `Updated state. Puppets:`,
@@ -104,6 +105,11 @@ export function ApiStateProvider({
       `Config:`,
       state.config
     );
+  }, []);
+
+  const applyUiTheme = useCallback((theme: UiTheme) => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('ui-theme', theme);
   }, []);
 
   useEffect(() => {
