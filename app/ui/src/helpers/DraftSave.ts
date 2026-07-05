@@ -10,6 +10,7 @@ export interface Draft<T extends Record<string, unknown>> {
   revertField: (key: keyof T) => void;
   revertAll: () => void;
   isChanged: (key: keyof T) => boolean;
+  anyChanged: () => boolean;
 }
 
 export function useDraft<T extends Record<string, unknown>>(saved: T): Draft<T> {
@@ -40,12 +41,13 @@ export function useDraft<T extends Record<string, unknown>>(saved: T): Draft<T> 
   const revertAll = (): void => setPatch({});
 
   const isChanged = (key: keyof T): boolean => key in patch;
+  const anyChanged = () => Object.keys(patch).length > 0;
 
   return {
     saved, values, patch,
     setField, 
     revertField, revertAll,
-    isChanged
+    isChanged, anyChanged
   }
 }
 
@@ -59,7 +61,7 @@ export function aggregateDrafts<V extends Record<string, Draft<any>>>(
 } {
   const entries = Object.entries(drafts) as [keyof V, Draft<any>][];
 
-  const anyChanged = entries.some(([, draft]) => Object.keys(draft.patch).length > 0);
+  const anyChanged = entries.some(([, draft]) => draft.anyChanged());
   
   const patches = Object.fromEntries(
     entries.map(([key, draft]) => [key, draft.patch]),
