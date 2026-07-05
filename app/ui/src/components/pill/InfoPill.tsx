@@ -1,7 +1,6 @@
 import { type JSX } from "react/jsx-runtime";
 
 import "./pill.less";
-import { RefObject } from "react";
 
 
 export enum PillType { // TODO: Move to a more general type? It is used in more places.
