@@ -4,6 +4,19 @@
   @height: 15px;
   @size: 12px;
   @border-width: 1px;
+  @transparency-filled: 70%;
+  @transparency-skeleton: 20%;
+  @transparency-border: 50%;
+
+  .transBgColor(@color, @transparency) {
+    background-color: rgba(from @color r g b / @transparency);
+  }
+  .transBrdrColor(@color, @transparency: @transparency-border) {
+    border: @border-width solid rgba(from @color r g b / @transparency);
+  }
+  .boxShadow(@color) {
+    box-shadow: 0 0 8px -3px @color;
+  }
 
   display: flex;
   flex-direction: row;
@@ -21,75 +34,77 @@
 
   &, &.default {
     color: var(--color-text-primary);
-    border: @border-width solid var(--color-border-tertiary);
+    .transBrdrColor(var(--color-background-tertiary));
+    .boxShadow(var(--color-background-tertiary));
 
     &.filled {
-      background-color: var(--color-background-secondary);
+      .transBgColor(var(--color-background-tertiary), @transparency-filled);
     }
     &.skeleton {
-      border: @border-width solid var(--color-text-primary);
-      background-color: var(--color-background-secondary);
+      .transBgColor(var(--color-background-tertiary), @transparency-skeleton); // Was secondary
+      .transBrdrColor(var(--color-background-secondary));
     }
 
   }
   &.accent {
     color: var(--color-text-acc);
-    border: @border-width solid var(--color-text-acc);
+    .transBrdrColor(var(--color-background-acc));
+    .boxShadow(var(--color-background-acc));
 
     &.filled {
       color: white;
-      background-color: var(--color-text-acc);
+      .transBgColor(var(--color-background-acc), @transparency-filled);
     }
     &.skeleton {
-      background-color: var(--color-background-secondary);
+      .transBgColor(var(--color-background-acc), @transparency-skeleton);
     }
   }
   &.success {
     color: var(--color-text-success);
-    border: @border-width solid var(--color-text-success);
+    .transBrdrColor(var(--color-background-success));
+    .boxShadow(var(--color-background-success));
 
     &.filled {
-      color: white;
-      background-color: var(--color-text-success);
+      .transBgColor(var(--color-background-success), @transparency-filled);
     }
     &.skeleton {
-      background-color: var(--color-background-secondary);
+      .transBgColor(var(--color-background-success), @transparency-skeleton);
     }
   }
   &.danger {
     color: var(--color-text-danger);
-    border: @border-width solid var(--color-text-danger);
+    .transBrdrColor(var(--color-background-danger));
+    .boxShadow(var(--color-background-danger));
 
     &.filled {
-      color: white;
-      background-color: var(--color-text-danger);
+      .transBgColor(var(--color-background-danger), @transparency-filled);
     }
     &.skeleton {
-      background-color: var(--color-background-secondary);
+      .transBgColor(var(--color-background-danger), @transparency-skeleton);
     }
   }
   &.warning {
     color: var(--color-text-warning);
-    border: @border-width solid var(--color-text-warning);
+    .transBrdrColor(var(--color-background-warning));
+    .boxShadow(var(--color-background-warning));
 
     &.filled {
-      color: white;
-      background-color: var(--color-text-warning);
+      .transBgColor(var(--color-background-warning), @transparency-filled);
     }
     &.skeleton {
-      background-color: var(--color-background-secondary);
+      .transBgColor(var(--color-background-warning), @transparency-skeleton);
     }
   }
   &.info {
     color: var(--color-text-info);
-    border: @border-width solid var(--color-text-info);
+    .transBrdrColor(var(--color-background-info));
+    .boxShadow(var(--color-background-info));
 
     &.filled {
-      color: white;
-      background-color: var(--color-text-info);
+      .transBgColor(var(--color-background-info), @transparency-filled);
     }
     &.skeleton {
-      background-color: var(--color-background-secondary);
+      .transBgColor(var(--color-background-info), @transparency-skeleton);
     }
   }
 }
