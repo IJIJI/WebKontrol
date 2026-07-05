@@ -6,7 +6,7 @@
   @height: 60px;
   @padded-height: @height + @gap-around + @gap-top;
 
-  position: absolute;
+  position: fixed;
 
   z-index: @z-bottomBar;
 
@@ -24,7 +24,7 @@
   align-items: stretch;
   justify-content: stretch;
 
-  pointer-events: audo;
+  pointer-events: auto;
 
   &.hidden {
     pointer-events: none;
@@ -39,10 +39,12 @@
     align-items: center;
     justify-content: space-between;
 
-    background-color: var(--color-background-primary);
     border-radius: @border-radius-xl;
-    box-shadow: 0 0 6px 0 var(--color-border-primary);  
-
+    box-shadow: 0 0 2px 0 var(--color-border-primary);  
+    & {
+    .sectionStyle(glass);
+    }
+    
     transform: translateY(0);
     opacity: 100%;
     transition: opacity @button-animation-time*2 ease, transform @button-animation-time*2 ease;
