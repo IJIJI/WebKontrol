@@ -4,6 +4,7 @@
   @gap-around: 20px;
   @gap-top: 10px;
   @height: 60px;
+  @padded-height: @height + @gap-around + @gap-top;
 
   position: absolute;
 
@@ -15,12 +16,19 @@
   padding: @gap-top @gap-around @gap-around @gap-around;
   overflow: hidden;
 
-  height: calc(@height + @gap-around + @gap-top);
+  height: @padded-height;
+  box-sizing: border-box !important;
   
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: stretch;
+
+  pointer-events: audo;
+
+  &.hidden {
+    pointer-events: none;
+  }
 
   .bottomBar.content {
     height: calc(100%);
@@ -37,11 +45,11 @@
 
     transform: translateY(0);
     opacity: 100%;
-    transition: opacity @button-animation-time ease, transform @button-animation-time*2 ease;
+    transition: opacity @button-animation-time*2 ease, transform @button-animation-time*2 ease;
 
     &.hidden {
       opacity: 0;
-      transform: translateY(@height + @gap-around);
+      transform: translateY(@padded-height);
     }
 
     &.saveBar {

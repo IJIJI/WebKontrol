@@ -12,8 +12,8 @@ export function BottomBar({
   className?: string
 }): JSX.Element {
   return (
-    <div className={"bottomBar container " + (className ?? "")}>
-      <div className={"bottomBar content" + (!visible ? " hidden " : " ") + (className ?? "")}>
+    <div className={"bottomBar container " + (className ?? "") + (!visible ? " hidden" : "")}>
+      <div className={"bottomBar content " + (className ?? "") + (!visible ? " hidden" : "")}>
         {children}
       </div>
     </div>
