@@ -20,7 +20,7 @@ export function TextSetting(props: TextProps): JSX.Element {
     <BaseSetting {...props} changed={changed} inputRef={inputRef}>
       {changed ? <RestoreButton onClick={restore} /> : <></>}
       <input
-        className="textfield"
+        className={"textfield" + (changed ? " changed" : "")}
         type="text"
         ref={inputRef}
         value={props.value}

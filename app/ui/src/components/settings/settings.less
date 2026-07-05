@@ -158,6 +158,11 @@
         border: @border-config;
         border-radius: @border-radius-fields;
         padding: 7px 10px;
+        box-sizing: border-box;
+
+        &.changed {
+          box-shadow: 0 0 4px -1px var(--color-text-acc);
+        }
       }
 
     }
