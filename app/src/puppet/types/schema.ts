@@ -27,7 +27,8 @@ export type PuppetTarget = z.infer<typeof PuppetTargetSchema>;
 
 // Puppet Runtime
 export const PuppetRuntimeSchema = z.object({
-  target: PuppetTargetSchema, // TODO should this be a view? Or should the viewmanager supply the target?
+  target: PuppetTargetSchema, // TODO should this be a view? Or should the viewmanager supply the target? Should it have a target field with the url and timeout + etc?
+  load_timout: z.number().min(500).or(z.literal(Infinity)).default(20000)
 })
 
 export type PuppetRuntime = z.infer<typeof PuppetRuntimeSchema>;

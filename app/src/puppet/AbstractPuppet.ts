@@ -102,16 +102,19 @@ export abstract class AbstractPuppet<
 
   // TODO: Add target info? -> Needs a caller for some implementations?
   // TODO: Load url from the puppet?
-  getInfo(): PuppetInfo {
-    return this._info;
+  async getInfo(): Promise<PuppetInfo> {
+    return {
+      ...this._info,
+      target_info: await this._getTargetInfo(),
+    };
   }
 
-  protected _updateInfo(info?: Partial<PuppetInfo>): void {
+  protected async _updateInfo(info?: Partial<PuppetInfo>): Promise<void> {
     this._info = { ...this._info, ...info };
 
     // TODO: Add async callback to allow for target_info loading?
 
-    (this as EventEmitter<PuppetEvents>).emit("info_update", this.getInfo());
+    (this as EventEmitter<PuppetEvents>).emit("info_update", await this.getInfo());
   }
 
   async updateRuntime(runtime: Partial<PuppetRuntime>): Promise<void> {

@@ -1,9 +1,9 @@
 import puppeteer, { type Browser, type Page } from "puppeteer";
 import { AbstractPuppet } from "../AbstractPuppet";
 import type { TargetInfo } from "../types/model";
-import type { PuppetTarget } from "../schema.old";
 import { type PuppeteerPuppetConfig } from "./schema";
 import type { PuppeteerPuppetInfo } from "./model";
+import type { PuppetTarget } from "../types/schema";
 
 export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
   protected override _getLogLabelExtensions(): Array<string> {
@@ -44,8 +44,8 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
       // timeout: 0 // Time to wait for browser start
     };
 
-    if (this._config.specific.chromiumExecutablePath) {
-      settings.executablePath = this._config.specific.chromiumExecutablePath;
+    if (this._config.chromiumExecutablePath) {
+      settings.executablePath = this._config.chromiumExecutablePath;
     }
 
     this._browser = await puppeteer.launch(settings);
@@ -61,7 +61,7 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
   }
 
   protected async _doSetTarget(target: PuppetTarget): Promise<void> {
-    await this._page.goto(target, { timeout: this._config.global.load_timout });
+    await this._page.goto(target, { timeout: this._runtime.load_timout });
   }
 
   protected async _getTargetInfo(): Promise<TargetInfo> {
