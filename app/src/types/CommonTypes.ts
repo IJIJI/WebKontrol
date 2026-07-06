@@ -2,11 +2,17 @@ import z from "zod";
 
 export const DisplayNameSchema = z.object({
   long: z.string().min(3).max(25),
-  short: z.string().max(10).optional(),
+  short: z.string().min(1).max(10),
 });
 
 export type DisplayName = z.infer<typeof DisplayNameSchema>;
 export type DisplayNameInput = z.input<typeof DisplayNameSchema>;
+
+export const DisplayNameOptionalSchema = DisplayNameSchema.extend({
+  short: DisplayNameSchema.shape.short.optional(),
+});
+export type DisplayNameOptional = z.infer<typeof DisplayNameOptionalSchema>;
+export type DisplayNameOptionalInput = z.input<typeof DisplayNameOptionalSchema>;
 
 export enum ConnectionState {
   DISABLED = "Disabled",

@@ -9,7 +9,7 @@ import {
   type WebServerConfig,
   type WebServerConfigInput,
 } from "./schema";
-import { PuppetKeySchema, PuppetRuntimeConfigSchema } from "../puppet/schema";
+import { PuppetKeySchema, PuppetRuntimeConfigSchema } from "../puppet/schema.old";
 import { CoreRuntimeConfigShape } from "../core/schema";
 import { UiRuntimeConfigShape } from "../ui/schema";
 

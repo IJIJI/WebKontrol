@@ -1,6 +1,6 @@
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
 import { PuppeteerPuppet } from "../../puppet/puppeteer/PuppeteerPuppet";
-import type { PuppetGlobalConfig } from "../../puppet/schema";
+import type { PuppetGlobalConfig } from "../../puppet/schema.old";
 import type { AnyPuppetConfig, AnyPuppetSpecificConfig } from "../../puppet/validation";
 
 

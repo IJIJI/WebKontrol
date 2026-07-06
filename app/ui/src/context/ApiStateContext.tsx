@@ -12,7 +12,7 @@ import type { WebServerState } from "../../../src/webServer/model";
 import type {
   PuppetKey,
   PuppetRuntimeConfigInput,
-} from "../../../src/puppet/schema";
+} from "../../../src/puppet/schema.old";
 import type { PuppetInfoBundle } from "../../../src/puppet/model";
 import { Api } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";

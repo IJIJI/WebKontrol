@@ -18,7 +18,7 @@ import {
   type PuppetKey,
   type PuppetRuntimeConfig,
   type PuppetTarget,
-} from "./schema";
+} from "./schema.old";
 import { PuppetStore } from "../storage/PuppetStore";
 
 export type PuppetEvents = {

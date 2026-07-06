@@ -1,6 +1,4 @@
 import { Logger } from "../logging/Logger";
-import type { AbstractPuppet } from "../puppet/AbstractPuppet";
-import type { PuppetKey } from "../puppet/schema";
 import { UiManager } from "../ui/UiManager";
 import { WebServer } from "../webServer/WebServer";
 import { ConfigManager } from "./config/ConfigManager";

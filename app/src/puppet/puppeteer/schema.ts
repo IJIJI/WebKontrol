@@ -1,5 +1,5 @@
 import z from "zod";
-import { extendPuppetConfig, extendPuppetSpecificConfig } from "../schema";
+import { extendPuppetConfig, extendPuppetSpecificConfig } from "../schema.old";
 
 // TODO: Implement this to be able to configure window locations
 // export const PuppeteerPuppetWindowConfigSchema = z.object({

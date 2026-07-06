@@ -1,6 +1,6 @@
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
-import type { PuppetKey, PuppetRuntimeConfig } from "../../puppet/schema";
+import type { PuppetKey, PuppetRuntimeConfig } from "../../puppet/schema.old";
 
 
 export class PuppetManager { // TODO: Make this manage the puppets, remove the rest from appcore

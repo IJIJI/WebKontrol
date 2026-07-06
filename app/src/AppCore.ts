@@ -3,7 +3,7 @@ import { CoreRuntimeConfigSchema, type CoreRuntimeConfig, type CoreRuntimeConfig
 import { Logger } from "./logging/Logger";
 import { ConfigManager } from "./orchestration/config/ConfigManager";
 import type { AbstractPuppet } from "./puppet/AbstractPuppet";
-import { type PuppetKey, type PuppetRuntimeConfigInput } from "./puppet/schema";
+import { type PuppetKey, type PuppetRuntimeConfigInput } from "./puppet/schema.old";
 import { AppCoreStore } from "./storage/AppCoreStore";
 import { type UiRuntimeConfig } from "./ui/schema";
 import { UiManager } from "./ui/UiManager";

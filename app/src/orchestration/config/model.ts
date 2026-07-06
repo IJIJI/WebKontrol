@@ -1,6 +1,6 @@
 import z from "zod";
 import { ConfigFilePuppetSpecificSchema } from "../../puppet/validation";
-import { PuppetGlobalConfigSchema } from "../../puppet/schema";
+import { PuppetGlobalConfigSchema } from "../../puppet/schema.old";
 import { WebServerConfigSchema } from "../../webServer/schema";
 
 

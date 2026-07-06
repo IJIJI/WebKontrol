@@ -3,7 +3,7 @@ import {
   PuppetRuntimeConfigSchema,
   type PuppetKey,
   type PuppetRuntimeConfig,
-} from "../puppet/schema";
+} from "../puppet/schema.old";
 import { CoreDatabase } from "./CoreDatabase";
 
 export class PuppetStore {
