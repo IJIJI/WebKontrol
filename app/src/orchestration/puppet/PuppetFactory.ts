@@ -1,25 +1,18 @@
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
 import { PuppeteerPuppet } from "../../puppet/puppeteer/PuppeteerPuppet";
-import type { PuppetGlobalConfig } from "../../puppet/schema.old";
-import type { AnyPuppetConfig, AnyPuppetSpecificConfig } from "../../puppet/validation";
+import type { AnyPuppetConfig } from "../../puppet/validation";
 
 
 export class PuppetFactory {
 
-  private _global: PuppetGlobalConfig;
 
-  constructor(global: PuppetGlobalConfig) { // TODO: Add default runtime to globalConfig, so runtime can be excluded from puppetConfig.
-    this._global = global;
-  }
-
-  private _getFullConfig(config: AnyPuppetSpecificConfig): AnyPuppetConfig {
-    return {global: this._global, specific: config}; // TODO: Puppet config should not contain runtime, it is managed by the puppet itself.
-  }
-
-  public createPuppet(config: AnyPuppetSpecificConfig): AbstractPuppet {
+  public createPuppet(config: AnyPuppetConfig): AbstractPuppet {
     switch (config.type) {
       case "puppeteer":
-        return new PuppeteerPuppet(this._getFullConfig(config));
+        return new PuppeteerPuppet(config);
+        break;
+      default:
+        throw new Error("Could not find given puppet type!");
     }
   }
 }
