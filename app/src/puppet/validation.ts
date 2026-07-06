@@ -1,20 +1,16 @@
 import z from "zod";
 import {
   PuppeteerPuppetConfigSchema,
-  PuppeteerPuppetSpecificConfigSchema,
 } from "./puppeteer/schema";
-
-export const IncomingPuppetSpecificConfigSchema = z.discriminatedUnion("type", [
-  PuppeteerPuppetSpecificConfigSchema,
-]);
-
-export type AnyPuppetSpecificConfig = z.infer<
-  typeof IncomingPuppetSpecificConfigSchema
->;
 
 export const IncomingPuppetConfigSchema = z.discriminatedUnion("type", [
   PuppeteerPuppetConfigSchema,
 ]);
+
+export type AnyPuppetConfig = z.infer<
+  typeof IncomingPuppetConfigSchema
+>;
+
 
 // TODO: Feels brittle. Add type on base config as default puppeteer?
 export const ConfigFilePuppetSpecificSchema = z.preprocess(
@@ -22,7 +18,6 @@ export const ConfigFilePuppetSpecificSchema = z.preprocess(
     typeof data === "object" && data !== null && !("type" in data)
       ? { ...(data as Record<string, unknown>), type: "puppeteer" }
       : data,
-  IncomingPuppetSpecificConfigSchema,
+  IncomingPuppetConfigSchema,
 );
 
-export type AnyPuppetConfig = z.infer<typeof IncomingPuppetConfigSchema>;
