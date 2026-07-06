@@ -16,14 +16,19 @@ export const BasePuppetConfigSchema = z.object({
   name: DisplayNameSchema.optional(),
 });
 
-export type BaseSpecificConfig = z.infer<typeof BasePuppetConfigSchema>;
-export type BaseSpecificConfigInput = z.input<typeof BasePuppetConfigSchema>;
+export type BasePuppetConfig = z.infer<typeof BasePuppetConfigSchema>;
+export type BasePuppetConfigInput = z.input<typeof BasePuppetConfigSchema>;
 
+
+// TODO: Move to view?
 export const PuppetTargetSchema = z.url();
 export type PuppetTarget = z.infer<typeof PuppetTargetSchema>;
 
 
 // Puppet Runtime
-export const BasePuppetRuntime = z.object({
+export const BasePuppetRuntimeSchema = z.object({
   view: z.string(), // TODO
 })
+
+export type BasePuppetRuntime = z.infer<typeof BasePuppetRuntimeSchema>;
+export type BasePuppetRuntimeInput = z.input<typeof BasePuppetRuntimeSchema>;
