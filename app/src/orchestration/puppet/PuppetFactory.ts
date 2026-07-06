@@ -5,8 +5,7 @@ import type { AnyPuppetConfig } from "../../puppet/validation";
 
 export class PuppetFactory {
 
-
-  public createPuppet(config: AnyPuppetConfig): AbstractPuppet {
+  public static createPuppet(config: AnyPuppetConfig): AbstractPuppet {
     switch (config.type) {
       case "puppeteer":
         return new PuppeteerPuppet(config);
