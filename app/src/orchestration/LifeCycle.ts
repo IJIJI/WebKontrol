@@ -14,7 +14,7 @@ export class LifeCycle {
 
   private _configManager: ConfigManager;
 
-  constructor() {
+  constructor() { // TODO: All static?
     this._configManager = new ConfigManager();
   }
 
@@ -25,12 +25,10 @@ export class LifeCycle {
 
     const appConfig: AppConfig = this._configManager.getConfig();
 
-    const puppetFactory = new PuppetFactory(appConfig.puppets.global);
-
     const puppetManager: PuppetManager = new PuppetManager();
 
     for (const pupConfig of appConfig.puppets.entries) {
-      const puppet = puppetFactory.createPuppet(pupConfig);
+      const puppet = PuppetFactory.createPuppet(pupConfig);
       puppetManager.addPuppet(puppet);
     }
 
