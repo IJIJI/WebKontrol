@@ -1,6 +1,7 @@
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
-import type { PuppetKey, PuppetRuntimeConfig } from "../../puppet/schema.old";
+import type { PuppetKey } from "../../puppet/schema.old";
+import type { PuppetRuntime } from "../../puppet/types/schema";
 
 
 export class PuppetManager { // TODO: Make this manage the puppets, remove the rest from appcore
@@ -19,7 +20,7 @@ export class PuppetManager { // TODO: Make this manage the puppets, remove the r
     this._puppets.set(puppet.getKey(), puppet);
   }
 
-  public setPuppetRuntime(key: PuppetKey, runtime: PuppetRuntimeConfig): void {
+  public setPuppetRuntime(key: PuppetKey, runtime: PuppetRuntime): void {
     if (!this._puppets.has(key))
       return this._logger.error(`Attempted to update runtime for puppet ${key}. It does not exist. Provided runtime:`, runtime);
 
