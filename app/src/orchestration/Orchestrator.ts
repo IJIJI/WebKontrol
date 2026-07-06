@@ -28,6 +28,12 @@ export class Orchestrator { // TODO: Move every non-puppet management from the a
   public getPuppetManager(): PuppetManager {
     return this._puppetManager;
   }
+
+  public async init(): Promise<void> {
+    await this._puppetManager.init();
+    await this._uiManager.init();
+    await this._webServer.start(); // TODO rename to init? Or split?
+  }
   
 
 
