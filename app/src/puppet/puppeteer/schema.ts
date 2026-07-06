@@ -1,12 +1,12 @@
 import z from "zod";
-import { BasePuppetConfigSchema } from "../types/schema";
+import { BasePuppetConfigSchema, extendPuppetConfig } from "../types/schema";
 
 // TODO: Implement this to be able to configure window locations
 // export const PuppeteerPuppetWindowConfigSchema = z.object({
   
 // });
 
-export const PuppeteerPuppetConfigSchema = BasePuppetConfigSchema.extend({
+export const PuppeteerPuppetConfigSchema = extendPuppetConfig("puppeteer",{
   chromiumExecutablePath: z.string().optional(),
   // TODO: Add settings to choose browser (chrome / firefox)
 });

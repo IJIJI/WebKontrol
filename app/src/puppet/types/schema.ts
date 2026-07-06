@@ -19,6 +19,16 @@ export const BasePuppetConfigSchema = z.object({
 export type BasePuppetConfig = z.infer<typeof BasePuppetConfigSchema>;
 export type BasePuppetConfigInput = z.input<typeof BasePuppetConfigSchema>;
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function extendPuppetConfig<
+  const B extends string,
+  T extends z.ZodRawShape,
+>(typeLiteral: B, shape: T) {
+  return BasePuppetConfigSchema.extend({
+    type: z.literal(typeLiteral).optional().default(typeLiteral),
+    ...shape,
+  });
+}
 
 // TODO: Move to view?
 export const PuppetTargetSchema = z.url();
