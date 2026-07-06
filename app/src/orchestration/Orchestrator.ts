@@ -30,6 +30,7 @@ export class Orchestrator { // TODO: Move every non-puppet management from the a
   }
 
   public async init(): Promise<void> {
+    //TODO: Wire WebServer, ...
     await this._puppetManager.init();
     await this._uiManager.init();
     await this._webServer.start(); // TODO rename to init? Or split?
