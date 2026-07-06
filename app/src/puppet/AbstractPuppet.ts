@@ -4,44 +4,37 @@ import { Logger } from "../logging/Logger";
 import { ConnectionState } from "../types/CommonTypes";
 import type {
   PuppetInfo,
-  PuppetInfoBundle,
-  PuppetScreenshotFail,
-  PuppetScreenshotResult,
-  SetTargetFail,
-  SetTargetResult,
-  SetTargetSuccess,
   TargetInfo,
 } from "./types/model";
-import {
-  PuppetRuntimeConfigSchema,
-  type PuppetConfig,
-  type PuppetKey,
-  type PuppetRuntimeConfig,
-  type PuppetTarget,
-} from "./schema.old";
 import { PuppetStore } from "../storage/PuppetStore";
+import type { BasePuppetConfig, PuppetKey, PuppetRuntime, PuppetTarget } from "./types/schema";
 
 export type PuppetEvents = {
-  load_success: [result: SetTargetSuccess];
-  load_fail: [result: SetTargetFail];
-  info_update: [info: PuppetInfoBundle];
+  load_success: [info: TargetInfo];
+  load_fail: [taret: PuppetTarget];
+  info_update: [info: PuppetInfo];
+  runtime_update: [info: PuppetRuntime];
 };
 
 export abstract class AbstractPuppet<
-  TConfig extends PuppetConfig = PuppetConfig,
+  TConfig extends BasePuppetConfig = BasePuppetConfig,
   TEvents extends PuppetEvents & Record<string, unknown[]> = PuppetEvents,
 > extends EventEmitter<TEvents> {
+
+  private readonly IMG_FOLDER: string;
+
   protected _logger!: Logger;
   protected _store!: PuppetStore;
   protected _isInit = false;
 
   protected _getLogLabels(): Array<string> {
-    return ["PPT", ...this._getLogLabelExtensions(), this._config.specific.id];
+    return ["PPT", ...this._getLogLabelExtensions(), this._config.id];
   }
 
   protected abstract _getLogLabelExtensions(): Array<string>;
 
   protected _config: TConfig;
+  protected _runtime: PuppetRuntime; // TODO: Make a way to set a default
 
   protected _info: PuppetInfo = {
     state: ConnectionState.OFFLINE,
@@ -50,14 +43,21 @@ export abstract class AbstractPuppet<
   constructor(config: TConfig) {
     super();
     this._config = config;
+
+    this.IMG_FOLDER = path.join(
+      process.cwd(),
+      "db",
+      "images",
+      `${this._config.id}`,
+    );
   }
 
-  getConfig(): PuppetConfig {
+  getConfig(): TConfig {
     return this._config;
   }
 
   getKey(): PuppetKey {
-    return this._config.specific.id;
+    return this._config.id;
   }
 
   protected abstract _doInit(): Promise<void>;
@@ -72,19 +72,14 @@ export abstract class AbstractPuppet<
     throw new Error("Screenshot not implemented for this puppet"); // TODO: Fail Silently or add another way to differentiate between fails and not implemented? Error type?
   }
 
-  async init(clear_runtime: boolean = false): Promise<void> {
+  async init(): Promise<void> {
     try {
       this._logger = new Logger(this._getLogLabels());
       this._logger.info("Initializing...");
 
-      this._store = new PuppetStore(this._config.specific.id);
+      this._store = new PuppetStore(this._config.id);
 
-      if (clear_runtime) {
-        await this._store.saveRuntime(this._config.runtime);
-      } else {
-        this._config.runtime =
-          (await this._store.loadRuntime()) ?? this._config.runtime;
-      }
+      this._runtime = await this._store.loadRuntime();
 
       await this._doInit();
       this._isInit = true;
@@ -92,7 +87,7 @@ export abstract class AbstractPuppet<
 
       this._logger.info("Initialized.");
 
-      await this.updateRuntime(this._config.runtime);
+      await this.updateRuntime(this._runtime);
 
       this._logger.info("Appied runtime.");
     } catch (error) {
@@ -101,16 +96,14 @@ export abstract class AbstractPuppet<
     }
   }
 
+  async clearRuntime(): Promise<void> {
+    this._store.clearRuntime();
+  }
+
   // TODO: Add target info? -> Needs a caller for some implementations?
   // TODO: Load url from the puppet?
-  getInfo(): PuppetInfoBundle {
-    return {
-      ...this._info,
-      config: {
-        runtime: this._config.runtime,
-        specific: this._config.specific,
-      },
-    };
+  getInfo(): PuppetInfo {
+    return this._info;
   }
 
   protected _updateInfo(info?: Partial<PuppetInfo>): void {
@@ -121,58 +114,36 @@ export abstract class AbstractPuppet<
     (this as EventEmitter<PuppetEvents>).emit("info_update", this.getInfo());
   }
 
-  async updateRuntime(config: Partial<PuppetRuntimeConfig>): Promise<void> {
+  async updateRuntime(runtime: Partial<PuppetRuntime>): Promise<void> {
     try {
       if (!this._isInit) throw new Error("Puppet not initialized");
 
-      let targetChange: boolean = false;
+      const old = this._runtime;
+      this._runtime = { ...this._runtime, ...runtime };
 
       if (
-        config.target_url &&
-        config.target_url !== this._config.runtime.target_url
+        old.target !== this._runtime.target
       )
-        targetChange = true;
+        await this._setTarget(this._runtime.target);
 
-      this._config.runtime = PuppetRuntimeConfigSchema.parse({
-        ...this._config.runtime,
-        ...config,
-      });
-
-      if (targetChange) await this._setTarget(this._config.runtime.target_url);
-
-      await this._store.saveRuntime(this._config.runtime);
+      await this._store.saveRuntime(this._runtime);
     } catch (error) {
       this._logger.error("Failed to update runtime", error);
       // TODO: Add some sort of feedback to caller.
     }
   }
 
-  protected async _setTarget(target: PuppetTarget): Promise<SetTargetResult> {
-    // TODO: Remove try catch?
+  protected async _setTarget(target: PuppetTarget): Promise<void> {
     try {
-      // TODO: Consolidate return types. SetTargetResult -> UpdateRuntimeResult.
-
-      this._config.runtime.target_url = target;
 
       await this._doSetTarget(target);
-      const result: SetTargetSuccess = {
-        success: true,
-      };
-      // this._updateInfo(result.info); //TODO
-      (this as EventEmitter<PuppetEvents>).emit("load_success", result);
-      return result;
+      // this._updateInfo(result.info); //TODO instead of success and fail just a bundle with target info, puppet info and state?
+
+      (this as EventEmitter<PuppetEvents>).emit("load_success", await this._getTargetInfo());
     } catch (error) {
       this._logger.error("Failed to set target", error);
-      const result: SetTargetFail = {
-        success: false,
-      };
-      if (error instanceof Error) {
-        result.error = error;
-      }
-      // this._updateInfo(result.info); //TODO
       this._setFailedLoadingState();
-      (this as EventEmitter<PuppetEvents>).emit("load_fail", result);
-      return result;
+      (this as EventEmitter<PuppetEvents>).emit("load_fail", target);
     }
   }
 
@@ -183,27 +154,19 @@ export abstract class AbstractPuppet<
   }
 
   // TODO: Errors if the folder does not exist. Fix!
-  // TODO: Store in db?
-  async getScreenshot(): Promise<PuppetScreenshotResult> {
-    try {
-      if (!this._isInit) throw new Error("Puppet not initialized");
+  // TODO: Should this have try and catch?
+  // TODO: Use some sort of filename generator and store index in db
+  // TODO: Use db entry as return type.
+  async getScreenshot(): Promise<string> {
+    if (!this._isInit) throw new Error("Puppet not initialized");
 
-      const imgPath: string = path.join(
-        process.cwd(),
-        "db",
-        "images",
-        `${this._config.specific.id}.png`,
-      );
+    const imgPath: string = path.join( // TODO: Make generate folders in a better way.
+      this.IMG_FOLDER,
+      `${new Date().toISOString()}.png`,
+    );
 
-      await this._doScreenshot(imgPath); // TODO: Multiple image history storage? In DB?
+    await this._doScreenshot(imgPath); // TODO: Multiple image history storage? In DB?
 
-      return { success: true, path: imgPath };
-    } catch (error) {
-      const result: PuppetScreenshotFail = { success: false };
-      if (error instanceof Error) {
-        result.error = error;
-      }
-      return result;
-    }
+    return imgPath;
   }
 }

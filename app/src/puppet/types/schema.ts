@@ -26,9 +26,9 @@ export type PuppetTarget = z.infer<typeof PuppetTargetSchema>;
 
 
 // Puppet Runtime
-export const BasePuppetRuntimeSchema = z.object({
-  view: z.string(), // TODO
+export const PuppetRuntimeSchema = z.object({
+  target: PuppetTargetSchema, // TODO should this be a view? Or should the viewmanager supply the target?
 })
 
-export type BasePuppetRuntime = z.infer<typeof BasePuppetRuntimeSchema>;
-export type BasePuppetRuntimeInput = z.input<typeof BasePuppetRuntimeSchema>;
+export type PuppetRuntime = z.infer<typeof PuppetRuntimeSchema>;
+export type PuppetRuntimeInput = z.input<typeof PuppetRuntimeSchema>;
