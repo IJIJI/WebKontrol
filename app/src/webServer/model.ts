@@ -1,6 +1,6 @@
 import type { CoreInfo, CoreInfoBundle } from "../core/model";
 import type { CoreRuntimeConfig, CoreRuntimeConfigInput } from "../core/schema";
-import type { PuppetInfoBundle } from "../puppet/model";
+import type { PuppetInfoBundle } from "../puppet/types/model";
 import type { PuppetKey, PuppetRuntimeConfigInput } from "../puppet/schema.old";
 import type { UiRuntimeConfig } from "../ui/schema";
 

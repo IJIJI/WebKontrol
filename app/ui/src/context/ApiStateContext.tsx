@@ -13,7 +13,7 @@ import type {
   PuppetKey,
   PuppetRuntimeConfigInput,
 } from "../../../src/puppet/schema.old";
-import type { PuppetInfoBundle } from "../../../src/puppet/model";
+import type { PuppetInfoBundle } from "../../../src/puppet/types/model";
 import { Api } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
 import { ConnectionStatus } from "./types";

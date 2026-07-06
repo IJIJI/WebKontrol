@@ -11,7 +11,7 @@ import type {
   SetTargetResult,
   SetTargetSuccess,
   TargetInfo,
-} from "./model";
+} from "./types/model";
 import {
   PuppetRuntimeConfigSchema,
   type PuppetConfig,

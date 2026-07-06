@@ -1,6 +1,6 @@
 import puppeteer, { type Browser, type Page } from "puppeteer";
 import { AbstractPuppet } from "../AbstractPuppet";
-import type { TargetInfo } from "../model";
+import type { TargetInfo } from "../types/model";
 import type { PuppetTarget } from "../schema.old";
 import { type PuppeteerPuppetConfig } from "./schema";
 import type { PuppeteerPuppetInfo } from "./model";
