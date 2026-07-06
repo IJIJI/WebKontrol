@@ -34,7 +34,7 @@ export abstract class AbstractPuppet<
   protected abstract _getLogLabelExtensions(): Array<string>;
 
   protected _config: TConfig;
-  protected _runtime: PuppetRuntime; // TODO: Make a way to set a default
+  protected _runtime!: PuppetRuntime; // TODO: Make a way to set a default
 
   protected _info: PuppetInfo = {
     state: ConnectionState.OFFLINE,
@@ -74,6 +74,10 @@ export abstract class AbstractPuppet<
 
   async init(): Promise<void> {
     try {
+      if (this._isInit) {
+        this._logger.warn("Attempted init, after it has already been done. Disregarding.");
+        return;
+      }
       this._logger = new Logger(this._getLogLabels());
       this._logger.info("Initializing...");
 
@@ -97,6 +101,7 @@ export abstract class AbstractPuppet<
   }
 
   async clearRuntime(): Promise<void> {
+    if (!this._isInit) throw new Error("Puppet not initialized");
     this._store.clearRuntime();
   }
 
@@ -118,7 +123,7 @@ export abstract class AbstractPuppet<
   }
 
   async updateRuntime(runtime: Partial<PuppetRuntime>): Promise<void> {
-    try {
+    try { // TODO: Should this be in try catch?
       if (!this._isInit) throw new Error("Puppet not initialized");
 
       const old = this._runtime;
