@@ -91,6 +91,24 @@ export class CoreDatabase {
     });
     return result?.value ?? null;
   }
+
+  public async deleteSetting(
+    domain: string,
+    type: string,
+    key: string,
+  ): Promise<void> {
+    await this._db
+      .delete(schema.settings)
+      .where(
+        and(
+          eq(schema.settings.domain, domain),
+          eq(schema.settings.type, type),
+          eq(schema.settings.key, key),
+        ),
+      );
+
+    this._logger.info("Setting deleted:", { domain, type, key });
+  }
 }
 // TODO: Autogen DB!
 // TODO: Add migration support between versions. In supervisor?

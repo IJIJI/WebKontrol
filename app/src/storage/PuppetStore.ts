@@ -58,4 +58,8 @@ export class PuppetStore {
       return PuppetStore._getDefaultRuntime;
     }
   }
+
+  public async clearRuntime(): Promise<void> {
+    this._db.deleteSetting("puppet", this._id, "runtime");
+  }
 }
