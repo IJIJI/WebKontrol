@@ -48,7 +48,7 @@ export class SystemManager {
 
   public getHandlers(): SystemWebhandlers {
     return {
-      updateRuntime: this.updateRuntime,
+      updateRuntime: (config: Partial<SystemRuntime>) => this.updateRuntime(config),
     }
   }
 }
