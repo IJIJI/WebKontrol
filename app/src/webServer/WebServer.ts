@@ -11,7 +11,7 @@ import {
 } from "./schema";
 import { PuppetKeySchema, PuppetRuntimeConfigSchema } from "../puppet/schema.old";
 import { CoreRuntimeConfigShape } from "../core/schema";
-import { UiRuntimeConfigShape } from "../ui/schema";
+import { UiRuntimeSchema } from "../ui/schema";
 
 export class WebServer {
   private _app = express();
@@ -244,7 +244,7 @@ export class WebServer {
     });
 
     this._app.patch("/api/config/ui", async (req, res) => {
-      const result = UiRuntimeConfigShape.partial().safeParse(req.body);
+      const result = UiRuntimeSchema.partial().safeParse(req.body);
 
       if (!result.success) {
         return res.status(400).json({ errors: result.error.format() });
