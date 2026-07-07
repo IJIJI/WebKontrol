@@ -11,7 +11,7 @@ import {
 } from "./schema";
 import { UiRuntimeShape } from "../ui/schema";
 import { SystemRuntimeShape } from "../system/schema";
-import { PuppetKeySchema, PuppetRuntimeSchema } from "../puppet/types/schema";
+import { PuppetKeySchema, PuppetRuntimeShape } from "../puppet/types/schema";
 
 export class WebServer {
   private _app = express();
@@ -204,7 +204,7 @@ export class WebServer {
         return res.status(400).json({ errors: resultId.error.format() });
       }
 
-      const resultBody = PuppetRuntimeSchema.partial().safeParse(
+      const resultBody = PuppetRuntimeShape.partial().safeParse(
         req.body,
       );
 
