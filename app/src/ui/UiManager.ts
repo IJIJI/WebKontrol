@@ -1,13 +1,14 @@
 import { UiStore } from "../storage/UiStore";
-import { UiTheme, type UiRuntimeConfig } from "./schema";
+import { UiTheme, type UiRuntime } from "./schema";
 import { Logger } from "../logging/Logger";
+import type { UiWebhandlers } from "../webServer/model";
 
 
 export class UiManager {
   private _store: UiStore;
   private _logger: Logger;
 
-  private _config: UiRuntimeConfig = {
+  private _config: UiRuntime = {
     theme: UiTheme.AUTO,
     disableBackground: false,
   }
@@ -26,14 +27,20 @@ export class UiManager {
       this._logger.warn("Failed loading runtime from store, using defaults.");
   }
 
-  async updateRuntime(config: Partial<UiRuntimeConfig>): Promise<void> {
+  async updateRuntime(config: Partial<UiRuntime>): Promise<void> {
     
     this._config = {...this._config, ...config};
     
     await this._store.saveRuntime(this._config);
   }
 
-  getRuntime(): UiRuntimeConfig {
+  getRuntime(): UiRuntime {
     return this._config;
+  }
+
+  public getHandlers(): UiWebhandlers {
+    return {
+      updateRuntime: this.updateRuntime,
+    }
   }
 }

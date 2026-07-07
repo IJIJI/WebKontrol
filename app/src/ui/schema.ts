@@ -12,16 +12,16 @@ export const UiThemeSchema = z.enum(UiTheme);
 
 // }
 
-export const UiRuntimeConfigShape = z.object({
+export const UiRuntimeShape = z.object({
   theme: UiThemeSchema,
   disableBackground: z.boolean(),
 });
 
-export const UiRuntimeConfigSchema = UiRuntimeConfigShape.extend({
-  theme: UiRuntimeConfigShape.shape.theme.default(UiTheme.AUTO),
-  disableBackground: UiRuntimeConfigShape.shape.disableBackground.default(false),
+export const UiRuntimeSchema = UiRuntimeShape.extend({
+  theme: UiRuntimeShape.shape.theme.default(UiTheme.AUTO),
+  disableBackground: UiRuntimeShape.shape.disableBackground.default(false),
 });
 
-export type UiRuntimeConfig = z.infer<typeof UiRuntimeConfigSchema>;
-export type UiRuntimeConfigInput = z.input<typeof UiRuntimeConfigSchema>;
+export type UiRuntime = z.infer<typeof UiRuntimeSchema>;
+export type UiRuntimeInput = z.input<typeof UiRuntimeSchema>;
 

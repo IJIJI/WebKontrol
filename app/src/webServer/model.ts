@@ -34,7 +34,7 @@ export interface UpdateWebhandlers {
   getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
 }
 export interface UiWebhandlers {
-  updateConfig: (config: Partial<UiRuntimeConfig>) => void | Promise<void>;
+  updateRuntime: (runtime: Partial<UiRuntimeConfig>) => void | Promise<void>;
 }
 
 export interface WebServerMutationHandlers { // TODO: UiManager to manage ui settings?
