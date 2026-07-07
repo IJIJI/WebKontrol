@@ -29,9 +29,9 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     this._webServer = config.webServer;
     this._uiManager = config.uiManager;
 
-    this._systemManager.on('info_update', () => this._sysncWebState());
-    this._puppetOrchestrator.on('info_update', () => this._sysncWebState());
-    this._uiManager.on('info_update', () => this._sysncWebState());
+    this._systemManager.on('info_update', () => this._syncWebState());
+    this._puppetOrchestrator.on('info_update', () => this._syncWebState());
+    this._uiManager.on('info_update', () => this._syncWebState());
   }
 
   public getPuppetManager(): PuppetOrchestrator {
