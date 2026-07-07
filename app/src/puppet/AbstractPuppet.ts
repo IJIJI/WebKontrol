@@ -93,7 +93,7 @@ export abstract class AbstractPuppet<
 
       await this._doInit();
       this._isInit = true;
-      this._updateInfo({ state: ConnectionState.ONLINE }); // TODO: Make sure this is kept up to date.
+      await this._updateInfo({ state: ConnectionState.ONLINE }); // TODO: Make sure this is kept up to date.
 
       this._logger.info("Initialized.");
 
@@ -163,7 +163,11 @@ export abstract class AbstractPuppet<
       await this._doSetTarget(target);
       // this._updateInfo(result.info); //TODO instead of success and fail just a bundle with target info, puppet info and state?
 
-      (this as EventEmitter<PuppetEvents>).emit("load_success", await this._getTargetInfo());
+      // The blank placeholder has no content to read, and evaluating against it races with
+      // Chromium tearing down/recreating its execution context right after navigation resolves.
+      const targetInfo = target === BLANK_PUPPET_TARGET.target ? {} : await this._getTargetInfo();
+
+      (this as EventEmitter<PuppetEvents>).emit("load_success", targetInfo);
     } catch (error) {
       this._logger.error("Failed to set target", error);
       this._setFailedLoadingState();
