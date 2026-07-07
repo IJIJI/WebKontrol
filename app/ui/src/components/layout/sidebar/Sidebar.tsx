@@ -6,6 +6,8 @@ import SidebarSection from "./SidebarSection";
 import "./sidebar.less";
 import { Icons } from "../../icons/Icons";
 import SidebarCollapseButton from "./SidebarCollapseButton";
+import { UiPuppetState, useApi } from "../../../context/ApiStateContext";
+import SidebarLoader from "./SidebarLoader";
 /* 
 Home
 views
@@ -30,6 +32,9 @@ export default function Sidebar({
   heightGrow?: boolean;
   className?: string;
 }): JSX.Element {
+
+  const puppets = useApi().state?.puppets;
+  
   return (
     // <ContentSection variant="glass" className={["sidebar", deviceType == DeviceType.MOBILE && "mobile", "pad-none", heightGrow && "height-100", className].filter(Boolean).join(" ")} >
     <nav
@@ -63,18 +68,18 @@ export default function Sidebar({
         />
       </SidebarSection>
       <SidebarSection collapsed={collapsed} label="Puppets">
-        <SidebarItem
-          collapsed={collapsed}
-          to="/puppets/1"
-          label="2: SDI1"
-          icon={<Icons.screen />}
-        />
-        <SidebarItem
-          collapsed={collapsed}
-          to="/puppets/2"
-          label="1: SDI2"
-          icon={<Icons.screen />}
-        />
+        {puppets?.size ?
+          [...puppets].map(([key, value]: [string, UiPuppetState]) => (
+            <SidebarItem
+              key={key}
+              collapsed={collapsed}
+              to={`/puppets/${key}`}
+              label={value.config.name.short}
+              icon={<Icons.screen />}
+            />
+          ))
+          : <SidebarLoader collapsed={collapsed} />
+        }
       </SidebarSection>
       <SidebarSection collapsed={collapsed} label="Settings">
         <SidebarItem
