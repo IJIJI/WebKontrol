@@ -28,6 +28,8 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     this._puppetOrchestrator = config.puppetOrchestrator;
     this._webServer = config.webServer;
     this._uiManager = config.uiManager;
+
+    this._puppetOrchestrator.on('info_update', () => this._sysncWebState());
   }
 
   public getPuppetManager(): PuppetOrchestrator {

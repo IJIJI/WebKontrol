@@ -1,3 +1,4 @@
+import EventEmitter from "node:events";
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
 import type { PuppetInfoBundle } from "../../puppet/types/model";
@@ -5,18 +6,33 @@ import type { PuppetKey, PuppetRuntime } from "../../puppet/types/schema";
 import type { PuppetWebhandlers } from "../../webServer/model";
 
 
-export class PuppetOrchestrator { // TODO: Make this manage the puppets, remove the rest from appcore
+export type PuppetOrchestratorEvents = {
+  info_update: [], // TODO: Should info be included in the event?
+}
+
+export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  { // TODO: Add store and manage default runtime?
   private _logger = new Logger(["LifeCycle", "ORCHESTRATOR"]);
 
   private _hasStarted: boolean = false;
 
   private _puppets: Map<PuppetKey, AbstractPuppet> = new Map();
 
+  constructor() {
+    super();
+  }
+  
+  private _updateInfo(): void { 
+    this.emit("info_update");
+  }
+
   public addPuppet(puppet: AbstractPuppet): void {
     if (this._hasStarted)
       return this._logger.error("Cannot add puppets to PuppetManager after it has started!");
 
-    //TODO: Event hooks!
+    puppet.on('info_update', () => this._updateInfo());
+    puppet.on('load_fail', () => this._updateInfo());
+    puppet.on('load_success', () => this._updateInfo());
+    puppet.on('runtime_update', () => this._updateInfo());
 
     this._puppets.set(puppet.getKey(), puppet);
   }
