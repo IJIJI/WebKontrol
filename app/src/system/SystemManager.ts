@@ -1,12 +1,16 @@
 
+import EventEmitter from "node:events";
 import { Logger } from "../logging/Logger";
 import { SystemStore } from "../storage/stores/SystemStore";
 import type { SystemWebhandlers } from "../webServer/model";
 import type { SystemInfo } from "./model";
 import { SystemRuntimeSchema, type SystemRuntime } from "./schema";
 
+export type SystemManagerEvents = {
+  info_update: [], // TODO: Should info be included in the event?
+}
 
-export class SystemManager {
+export class SystemManager extends EventEmitter<SystemManagerEvents>  {
   private _logger: Logger;
   private _store: SystemStore;
 
@@ -14,9 +18,10 @@ export class SystemManager {
 
   private _info: SystemInfo = { 
     start_moment: Date.now() 
-  }; // computed, never persisted
+  };
 
   constructor() {
+    super();
     this._logger = new Logger(["SYSTEM"]);
     this._store = new SystemStore();
   }
@@ -35,7 +40,7 @@ export class SystemManager {
   async updateRuntime(config: Partial<SystemRuntime>): Promise<void> {
     
     this._runtime = {...this._runtime, ...config};
-    
+    this.emit('info_update');
     await this._store.saveRuntime(this._runtime);
   }
 

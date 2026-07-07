@@ -1,16 +1,21 @@
+import EventEmitter from "node:events";
 import { UiStore } from "../storage/stores/UiStore";
 import { UiRuntimeSchema, type UiRuntime } from "./schema";
 import { Logger } from "../logging/Logger";
 import type { UiWebhandlers } from "../webServer/model";
 
+export type UiManagerEvents = {
+  info_update: [], // TODO: Should info be included in the event?
+}
 
-export class UiManager {
+export class UiManager extends EventEmitter<UiManagerEvents>  {
   private _store: UiStore;
   private _logger: Logger;
 
   private _runtime: UiRuntime = UiRuntimeSchema.parse({});
 
   constructor() {
+    super();
     this._logger = new Logger(["UI"]);
     this._store = new UiStore();
   }
@@ -28,6 +33,7 @@ export class UiManager {
     
     this._runtime = {...this._runtime, ...config};
     
+    this.emit('info_update');
     await this._store.saveRuntime(this._runtime);
   }
 
