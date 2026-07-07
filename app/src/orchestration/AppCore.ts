@@ -3,13 +3,13 @@ import type { UiManager } from "../ui/UiManager";
 import type { WebServer } from "../webServer/WebServer";
 import type { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
 
-export interface OrchestratorConfig {
+export interface AppCoreConfig {
   puppetOrchestrator: PuppetOrchestrator;
   webServer: WebServer;
   uiManager: UiManager;
 }
 
-export class Orchestrator { // TODO: Move every non-puppet management from the appcore to this.
+export class AppCore { // TODO: Move every non-puppet management from the appcore to this.
   private _logger = new Logger(["LifeCycle", "ORCHESTRATOR"]);
 
   private _hasStarted: boolean = false;
@@ -19,7 +19,7 @@ export class Orchestrator { // TODO: Move every non-puppet management from the a
   private _webServer: WebServer;
   private _uiManager: UiManager;
 
-  constructor(config: OrchestratorConfig) {
+  constructor(config: AppCoreConfig) {
     this._puppetOrchestrator = config.puppetOrchestrator;
     this._webServer = config.webServer;
     this._uiManager = config.uiManager;

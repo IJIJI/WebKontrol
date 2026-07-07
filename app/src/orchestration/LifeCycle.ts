@@ -3,7 +3,7 @@ import { UiManager } from "../ui/UiManager";
 import { WebServer } from "../webServer/WebServer";
 import { ConfigManager } from "./config/ConfigManager";
 import type { AppConfig } from "./config/model";
-import { Orchestrator, type OrchestratorConfig } from "./Orchestrator";
+import { AppCore, type AppCoreConfig } from "./AppCore";
 import { PuppetFactory } from "./puppet/PuppetFactory";
 import { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
 
@@ -18,7 +18,7 @@ export class LifeCycle {
     this._configManager = new ConfigManager();
   }
 
-  public async construct(): Promise<Orchestrator> {
+  public async construct(): Promise<AppCore> {
     this._logger.important("Initiating app from config...");
 
     await this._configManager.init();
@@ -35,13 +35,13 @@ export class LifeCycle {
     const webServer: WebServer = new WebServer(appConfig.web);
     const uiManager: UiManager = new UiManager();
 
-    const orchestratorConf: OrchestratorConfig = {
+    const orchestratorConf: AppCoreConfig = {
       puppetOrchestrator: puppetOrchestrator,
       webServer: webServer,
       uiManager: uiManager,
     }
 
-    return new Orchestrator(orchestratorConf);    
+    return new AppCore(orchestratorConf);    
 
   }
   
