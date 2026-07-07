@@ -2,6 +2,7 @@ import type { CoreInfo, CoreInfoBundle } from "../core/model";
 import type { CoreRuntimeConfig, CoreRuntimeConfigInput } from "../core/schema";
 import type { PuppetInfoBundle } from "../puppet/types/model";
 import type { PuppetKey, PuppetRuntime } from "../puppet/types/schema";
+import type { SystemRuntime } from "../system/schema";
 import type { UiRuntime } from "../ui/schema";
 
 
@@ -25,8 +26,8 @@ export interface PuppetWebhandlers {
     runtime: Partial<PuppetRuntime>,
   ) => Promise<void>;
 }
-export interface CoreWebhandlers {
-  updateRuntime: (config: Partial<CoreRuntimeConfigInput>) => void | Promise<void>;
+export interface SystemWebhandlers {
+  updateRuntime: (config: Partial<SystemRuntime>) => void | Promise<void>;
 }
 export interface UpdateWebhandlers {
   check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
@@ -38,7 +39,7 @@ export interface UiWebhandlers {
 }
 
 export interface WebServerMutationHandlers { // TODO: UiManager to manage ui settings?
-  core: CoreWebhandlers;
+  system: SystemWebhandlers;
   update: UpdateWebhandlers;
   ui: UiWebhandlers;
   puppet: PuppetWebhandlers;

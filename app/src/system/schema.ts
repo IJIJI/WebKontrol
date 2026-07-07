@@ -8,5 +8,5 @@ export const SystemRuntimeSchema = SystemRuntimeShape.extend({
   system_name: SystemRuntimeShape.shape.system_name.default("WebKontrol"),
 });
 
-export type CoreRuntimeConfig = z.infer<typeof SystemRuntimeSchema>;
-export type CoreRuntimeConfigInput = z.input<typeof SystemRuntimeSchema>;
+export type SystemRuntime = z.infer<typeof SystemRuntimeSchema>;
+export type SystemRuntimeInput = z.input<typeof SystemRuntimeSchema>;
