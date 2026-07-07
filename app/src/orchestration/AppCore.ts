@@ -69,6 +69,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
       ui: this._uiManager.getHandlers(),
     });
     await this._webServer.start(); // TODO rename to init? Or split?
+    await this._sysncWebState();
   }
 
   private async _sysncWebState(): Promise<void> {
