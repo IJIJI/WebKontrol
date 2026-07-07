@@ -110,6 +110,10 @@ export function ApiStateProvider({
   useEffect(() => {
     const eventSource = new EventSource("/api/state");
 
+    eventSource.addEventListener("open", (): void => {
+      console.log("SSE connection to /api/state opened, awaiting initial state...");
+    });
+
     const resetPingTimeout = (): void => {
       if (pingTimeoutRef.current) clearTimeout(pingTimeoutRef.current);
       pingTimeoutRef.current = setTimeout(() => {
