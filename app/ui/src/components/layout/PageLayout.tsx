@@ -30,7 +30,7 @@ const getDeviceType = (width: number): DeviceType => {
 export default function PageLayout(): JSX.Element {
   const location = useLocation();
   const { title, back } = usePageContext();
-  const uiConfig = useApi().state?.config.ui;
+  const uiConfig = useApi().state?.runtime.ui;
 
   const [deviceType, setDeviceType] = useState(() =>
     getDeviceType(window.innerWidth),

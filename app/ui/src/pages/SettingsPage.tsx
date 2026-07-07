@@ -21,23 +21,23 @@ import { Icons } from "../components/icons/Icons";
 
 export default function SettingsPage(): JSX.Element {
 
-  const config = useApi().state?.config;
+  const runtime = useApi().state?.runtime;
   const handlers = useApi().callBacks;
 
-  if (!config) return <Icons.loading />;
+  if (!runtime) return <Icons.loading />;
 
   // const {saved, values, setField, revertAll, anyChanged} = useDraft(config?.ui);
   // const uiDraft = useDraft(config?.ui);
-  const uiDraft = useDraft(config.ui);
-  const coreDraft = useDraft(config.core);
+  const uiDraft = useDraft(runtime.ui);
+  const systemDraft = useDraft(runtime.system);
 
-  const { anyChanged, revertAll } = aggregateDrafts({"UI": uiDraft, "CORE": coreDraft});
+  const { anyChanged, revertAll } = aggregateDrafts({"UI": uiDraft, "SYSTEM": systemDraft});
 
   const onSave = async (): Promise<void> => {
     await toast.promise(
       Promise.all([
-        handlers.ui.updateConfig(uiDraft.patch, false),
-        handlers.core.updateConfig(coreDraft.patch, false),
+        handlers.ui.updateRuntime(uiDraft.patch, false),
+        handlers.system.updateRuntime(systemDraft.patch, false),
       ]),
       {
         loading: "Saving…",
@@ -116,9 +116,9 @@ export default function SettingsPage(): JSX.Element {
         <TextSetting
             title="System Name"
             subtitle="Set a name for this system to easily identify it"
-            value={coreDraft.values.system_name}
-            savedVal={coreDraft.saved.system_name}
-            setValue={(value) => coreDraft.setField("system_name", value)}
+            value={systemDraft.values.system_name}
+            savedVal={systemDraft.saved.system_name}
+            setValue={(value) => systemDraft.setField("system_name", value)}
         />
       </SettingGroup>
       <SettingGroup title="Configuration">

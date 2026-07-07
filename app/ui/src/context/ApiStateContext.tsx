@@ -9,22 +9,17 @@ import {
 } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import type { WebServerState } from "../../../src/webServer/model";
-import type {
-  PuppetKey,
-  PuppetRuntimeConfigInput,
-} from "../../../src/puppet/schema.old";
 import type { PuppetInfoBundle } from "../../../src/puppet/types/model";
 import { Api } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
 import { ConnectionStatus } from "./types";
-import { CoreRuntimeConfigInput } from "../../../src/core/schema";
-import { UiRuntimeConfigInput, UiTheme } from "../../../src/ui/schema";
+import { PuppetKey, PuppetRuntime, PuppetRuntimeInput } from "../../../src/puppet/types/schema";
+import { SystemRuntimeInput } from "../../../src/system/schema";
+import { UiRuntimeInput, UiTheme } from "../../../src/ui/schema";
 
 export interface UiPuppetState extends PuppetInfoBundle {
-  setRuntime: (config: PuppetRuntimeConfigInput) => Promise<void>;
+  setRuntime: (config: PuppetRuntime) => Promise<void>;
 }
-
-
 
 export interface UiWebServerState extends Omit<WebServerState, "puppets"> {
   puppets: Map<PuppetKey, UiPuppetState>;
@@ -35,30 +30,30 @@ interface ApiState {
   status: ConnectionStatus;
   error: string | null;
   callBacks: { // TODO: Load directly from WebServerMutationHandlers?
-    puppet: {
-      updateRuntime: (
-        id: PuppetKey,
-        runtime: Partial<PuppetRuntimeConfigInput>,
+    system: {
+      updateRuntime: ( // TODO: Base update/api call template with the notify? Or base runtime update with generic runtime?
+        config: Partial<SystemRuntimeInput>,
         notify?: boolean,
       ) => Promise<void>;
     };
-    core: {
-      updateConfig: (
-        config: Partial<CoreRuntimeConfigInput>,
-        notify?: boolean,
-      ) => Promise<void>;
-    };
-    ui: {
-      updateConfig: (
-        config: Partial<UiRuntimeConfigInput>,
-        notify?: boolean,
-      ) => Promise<void>;
-    }
     // update: {
     //   check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
     //   apply: (ref: string, type: "release" | "branch") => Promise<void>; // TODO: Check arguments
     //   getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
     // };
+    ui: {
+      updateRuntime: (
+        config: Partial<UiRuntimeInput>,
+        notify?: boolean,
+      ) => Promise<void>;
+    };
+    puppet: {
+      updateRuntime: (
+        id: PuppetKey,
+        runtime: Partial<PuppetRuntimeInput>,
+        notify?: boolean,
+      ) => Promise<void>;
+    };
   };
 }
 
@@ -95,15 +90,15 @@ export function ApiStateProvider({
     setState(state);
 
     setError(null);
-    applyUiTheme(state.config.ui.theme);
+    applyUiTheme(state.runtime.ui.theme);
 
     console.debug(
       `Updated state. Puppets:`,
       state.puppets,
       `Info:`,
       state.info,
-      `Config:`,
-      state.config
+      `Runtime:`,
+      state.runtime
     );
   }, []);
 
@@ -138,11 +133,11 @@ export function ApiStateProvider({
         const puppets = new Map<PuppetKey, UiPuppetState>();
 
         for (const pup of data.puppets) {
-          const key: PuppetKey = pup.config.specific.id;
+          const key: PuppetKey = pup.config.id;
           const full: UiPuppetState = {
             ...pup,
             setRuntime: async (
-              config: PuppetRuntimeConfigInput,
+              config: PuppetRuntimeInput,
             ): Promise<void> => puppetUpdateRuntime(key, config),
           };
           puppets.set(key, full);
@@ -186,7 +181,7 @@ export function ApiStateProvider({
 
   const puppetUpdateRuntime = async (
     id: PuppetKey,
-    runtime: Partial<PuppetRuntimeConfigInput>,
+    runtime: Partial<PuppetRuntimeInput>,
     notify = true,
   ): Promise<void> => {
     return withToast(
@@ -196,8 +191,8 @@ export function ApiStateProvider({
     );
   };
 
-  const coreUpdateRuntimeConfig = async (
-    config: Partial<CoreRuntimeConfigInput>,
+  const systemUpdateRuntime = async (
+    config: Partial<SystemRuntimeInput>,
     notify = false,
   ): Promise<void> => {
     return withToast(
@@ -207,8 +202,8 @@ export function ApiStateProvider({
     );
   };
 
-  const uiUpdateRuntimeConfig = async (
-    config: Partial<UiRuntimeConfigInput>,
+  const uiUpdateRuntime = async (
+    config: Partial<UiRuntimeInput>,
     notify = false,
   ): Promise<void> => {
     return withToast(
@@ -227,15 +222,15 @@ export function ApiStateProvider({
         status,
         error,
         callBacks: {
+          system: {
+            updateRuntime: systemUpdateRuntime,
+          },
+          ui: {
+            updateRuntime: uiUpdateRuntime,
+          },
           puppet: {
             updateRuntime: puppetUpdateRuntime,
           },
-          core: {
-            updateConfig: coreUpdateRuntimeConfig,
-          },
-          ui: {
-            updateConfig: uiUpdateRuntimeConfig,
-          }
         },
       }}
     >
