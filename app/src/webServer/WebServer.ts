@@ -147,7 +147,7 @@ export class WebServer {
         },
         system: this._state?.info.system,
       }
-      res.json(this._state?.info); // TODO: Different payload? If so, make /api/system this._state.system again.
+      res.json(info); // TODO: Different payload? If so, make /api/system this._state.system again.
     });
 
     this._app.get("/api/state", (req, res) => {
