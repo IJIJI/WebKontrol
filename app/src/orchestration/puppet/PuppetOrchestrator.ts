@@ -4,7 +4,7 @@ import type { PuppetKey } from "../../puppet/schema.old";
 import type { PuppetRuntime } from "../../puppet/types/schema";
 
 
-export class PuppetManager { // TODO: Make this manage the puppets, remove the rest from appcore
+export class PuppetOrchestrator { // TODO: Make this manage the puppets, remove the rest from appcore
   private _logger = new Logger(["LifeCycle", "ORCHESTRATOR"]);
 
   private _hasStarted: boolean = false;

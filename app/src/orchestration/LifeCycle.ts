@@ -5,7 +5,7 @@ import { ConfigManager } from "./config/ConfigManager";
 import type { AppConfig } from "./config/model";
 import { Orchestrator, type OrchestratorConfig } from "./Orchestrator";
 import { PuppetFactory } from "./puppet/PuppetFactory";
-import { PuppetManager } from "./puppet/PuppetManager";
+import { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
 
 
 
@@ -25,18 +25,18 @@ export class LifeCycle {
 
     const appConfig: AppConfig = this._configManager.getConfig();
 
-    const puppetManager: PuppetManager = new PuppetManager();
+    const puppetOrchestrator: PuppetOrchestrator = new PuppetOrchestrator();
 
     for (const pupConfig of appConfig.puppets.entries) {
       const puppet = PuppetFactory.createPuppet(pupConfig);
-      puppetManager.addPuppet(puppet);
+      puppetOrchestrator.addPuppet(puppet);
     }
 
     const webServer: WebServer = new WebServer(appConfig.web);
     const uiManager: UiManager = new UiManager();
 
     const orchestratorConf: OrchestratorConfig = {
-      puppetManager: puppetManager,
+      puppetOrchestrator: puppetOrchestrator,
       webServer: webServer,
       uiManager: uiManager,
     }
