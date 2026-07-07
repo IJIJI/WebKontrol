@@ -1,5 +1,5 @@
 import { UiStore } from "../storage/stores/UiStore";
-import { UiTheme, type UiRuntime } from "./schema";
+import { UiRuntimeSchema, UiTheme, type UiRuntime } from "./schema";
 import { Logger } from "../logging/Logger";
 import type { UiWebhandlers } from "../webServer/model";
 
@@ -8,10 +8,7 @@ export class UiManager {
   private _store: UiStore;
   private _logger: Logger;
 
-  private _config: UiRuntime = {
-    theme: UiTheme.AUTO,
-    disableBackground: false,
-  }
+  private _config: UiRuntime = UiRuntimeSchema.parse({});
 
   constructor() {
     this._logger = new Logger(["UI"]);
