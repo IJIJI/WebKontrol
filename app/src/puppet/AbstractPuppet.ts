@@ -124,9 +124,15 @@ export abstract class AbstractPuppet<
   // TODO: Load url from the puppet?
   async getInfo(): Promise<PuppetInfoBundle> {
     // Evaluating against the page while it's navigating races the execution
-    // context being torn down, so fall back to the last known info instead.
+    // context being torn down. _isNavigating avoids starting that work in the
+    // common case, but a call already in flight when navigation starts can
+    // still lose the race, so fall back to the last known info on failure too.
     if (!this._isNavigating) {
-      this._lastTargetInfo = await this._getTargetInfo();
+      try {
+        this._lastTargetInfo = await this._getTargetInfo();
+      } catch (error) {
+        this._logger.debug("Failed to read target info, likely due to a concurrent navigation. Using last known info.", error);
+      }
     }
 
     return {
