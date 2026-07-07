@@ -1,12 +1,11 @@
 import z from "zod";
-import { ConfigFilePuppetSpecificSchema } from "../../puppet/validation";
-import { PuppetGlobalConfigSchema } from "../../puppet/schema.old";
+import { ConfigFilePuppetSpecificSchema, IncomingPuppetConfigSchema } from "../../puppet/types/validation";
 import { WebServerConfigSchema } from "../../webServer/schema";
 
 
 export const AppConfigSchema = z.object({
   puppets: z.object({
-    global: PuppetGlobalConfigSchema,
+    global: IncomingPuppetConfigSchema,
     entries: z.array(ConfigFilePuppetSpecificSchema),
   }),
   web: WebServerConfigSchema.default(WebServerConfigSchema.parse({}))

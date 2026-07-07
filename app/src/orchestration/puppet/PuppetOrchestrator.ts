@@ -1,7 +1,6 @@
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
-import type { PuppetKey } from "../../puppet/schema.old";
-import type { PuppetRuntime } from "../../puppet/types/schema";
+import type { PuppetKey, PuppetRuntime } from "../../puppet/types/schema";
 import type { PuppetWebhandlers } from "../../webServer/model";
 
 

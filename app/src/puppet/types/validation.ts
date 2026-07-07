@@ -1,7 +1,7 @@
 import z from "zod";
 import {
   PuppeteerPuppetConfigSchema,
-} from "./puppeteer/schema";
+} from "../puppeteer/schema";
 
 export const IncomingPuppetConfigSchema = z.discriminatedUnion("type", [
   PuppeteerPuppetConfigSchema,

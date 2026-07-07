@@ -1,5 +1,4 @@
 import type { ConnectionState } from "../../types/CommonTypes";
-import type { PuppetTarget } from "../schema.old";
 import type { BasePuppetConfig, PuppetRuntime } from "./schema";
 
 /**
