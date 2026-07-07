@@ -10,7 +10,7 @@ export class SystemManager {
   private _logger: Logger;
   private _store: SystemStore;
 
-  private _config: SystemRuntime = SystemRuntimeSchema.parse({});
+  private _runtime: SystemRuntime = SystemRuntimeSchema.parse({});
 
   private _info: SystemInfo = { 
     start_moment: Date.now() 
@@ -25,20 +25,22 @@ export class SystemManager {
     
     const loaded = await this._store.loadRuntime();
     if (loaded)
-      this._config = loaded;
-    else
-      this._logger.warn("Failed loading runtime from store, using defaults.");
+      this._runtime = loaded;
+    else {
+      this._logger.info("Failed loading runtime from store, using defaults.");
+      await this._store.saveRuntime(this._runtime); // TODO: Should this save?
+    }
   }
 
   async updateRuntime(config: Partial<SystemRuntime>): Promise<void> {
     
-    this._config = {...this._config, ...config};
+    this._runtime = {...this._runtime, ...config};
     
-    await this._store.saveRuntime(this._config);
+    await this._store.saveRuntime(this._runtime);
   }
 
   getRuntime(): SystemRuntime {
-    return this._config;
+    return this._runtime;
   }
   getInfo(): SystemInfo {
     return this._info;
