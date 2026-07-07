@@ -1,6 +1,5 @@
-import { CoreRuntimeConfigSchema, type CoreRuntimeConfig } from "../core/schema";
 import { Logger } from "../../logging/Logger";
-import type { SystemRuntime } from "../../system/schema";
+import { SystemRuntimeSchema, type SystemRuntime } from "../../system/schema";
 import { CoreDatabase } from "../CoreDatabase";
 
 export class SystemStore {
@@ -31,7 +30,7 @@ export class SystemStore {
         this._logger.info(`Failed loading runtime! Got null`);
         return null;
       }
-      const object = CoreRuntimeConfigSchema.parse(JSON.parse(raw));
+      const object = SystemRuntimeSchema.parse(JSON.parse(raw));
       this._logger.debug(`Successfully loaded runtime!`, object);
       return object;
     } catch (error) {
