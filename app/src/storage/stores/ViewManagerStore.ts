@@ -6,7 +6,7 @@ import type {
 } from "../../views/types/AbstractView";
 import { CoreDatabase } from "../CoreDatabase";
 
-export class AppCoreStore {
+export class ViewManagerStore {
   private _db = CoreDatabase.getInstance();
   private _logger: Logger;
 
