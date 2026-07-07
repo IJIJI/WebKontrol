@@ -73,22 +73,25 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
       ui: this._uiManager.getHandlers(),
     });
     await this._webServer.start(); // TODO rename to init? Or split?
-    await this._sysncWebState();
+    await this._syncWebState();
   }
 
-  private async _sysncWebState(): Promise<void> {
-
-    this._logger.debug(`Syncing state to webserver...`);
-    this._webServer.setState({
-      puppets: await this._puppetOrchestrator.getPuppetInfoBundles(),
-      runtime: {
-        system: this._systemManager.getRuntime(),
-        ui: this._uiManager.getRuntime(),
-      },
-      info: {
-        system: this._systemManager.getInfo(),
-      }
-    });
+  private async _syncWebState(): Promise<void> {
+    try {
+      this._logger.debug(`Syncing state to webserver...`);
+      this._webServer.setState({
+        puppets: await this._puppetOrchestrator.getPuppetInfoBundles(),
+        runtime: {
+          system: this._systemManager.getRuntime(),
+          ui: this._uiManager.getRuntime(),
+        },
+        info: {
+          system: this._systemManager.getInfo(),
+        }
+      });
+    } catch (error) {
+      this._logger.error("Failed to sync state to webserver:", error);
+    }
   }
   
 
