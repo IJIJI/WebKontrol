@@ -1,17 +1,17 @@
-import type { CoreInfo, CoreInfoBundle } from "../core/model";
-import type { CoreRuntimeConfig, CoreRuntimeConfigInput } from "../core/schema";
 import type { PuppetInfoBundle } from "../puppet/types/model";
 import type { PuppetKey, PuppetRuntime } from "../puppet/types/schema";
+import type { SystemInfo } from "../system/model";
 import type { SystemRuntime } from "../system/schema";
+import type { ConnectionState } from "../types/CommonTypes";
 import type { UiRuntime } from "../ui/schema";
 
 
 export interface WebServerRuntimeConfigState {// Only Runtime Configs. Standard configs are done from the config file.
-  core: CoreRuntimeConfig;
-  ui:  UiRuntime ;
+  system: SystemRuntime;
+  ui:  UiRuntime;
 }
 export interface WebServerInfoState {
-  core: CoreInfo;
+  system: SystemInfo;
 }
 
 export interface WebServerState {
@@ -56,5 +56,5 @@ export interface AppInfo {
     key: keyof typeof WebServerStatus;
     message: WebServerStatus;
   }
-  core?: Partial<CoreInfoBundle>;
+  system?: SystemInfo;
 }

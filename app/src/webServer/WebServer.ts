@@ -9,9 +9,9 @@ import {
   type WebServerConfig,
   type WebServerConfigInput,
 } from "./schema";
-import { PuppetKeySchema, PuppetRuntimeConfigSchema } from "../puppet/schema.old";
-import { CoreRuntimeConfigShape } from "../core/schema";
 import { UiRuntimeSchema } from "../ui/schema";
+import { SystemRuntimeShape } from "../system/schema";
+import { PuppetKeySchema, PuppetRuntimeSchema } from "../puppet/types/schema";
 
 export class WebServer {
   private _app = express();
@@ -25,8 +25,6 @@ export class WebServer {
   private _handlers!: WebServerMutationHandlers;
 
   private _sseClients: Set<express.Response> = new Set();
-
-  protected _isInit = false;
 
   constructor(config: WebServerConfigInput) {
     this._config = WebServerConfigSchema.parse(config);
@@ -58,10 +56,9 @@ export class WebServer {
     this._handlers = handlers;
   }
 
-  public async start(): Promise<void> { // TODO rename to init? Or split?
+  public async start(): Promise<void> {
     if (this._handlers === undefined) {
-      // TODO: Continue without and set state to ERROR, until they are set?
-      throw new Error("Handlers where not set before the server was started!"); // TODO: Check if this should error. Check if there should be an info for the state.
+      throw new Error("Handlers where not set before the server was started!");
     }
 
     this._logger.info("Starting WebServer...");
@@ -101,13 +98,6 @@ export class WebServer {
   }
 
   public async destroy(): Promise<void> {
-    if (!this._isInit) {
-      this._logger.warn(
-        "Tried destroying an uninitialised WebServer. Ignoring.",
-      );
-    }
-
-    this._isInit = false; // TODO: Add isDestroying variables?
 
     this._logger.info("Attempting graceful shutdown...");
 
@@ -155,10 +145,7 @@ export class WebServer {
           key: "SETTING_UP",
           message: WebServerStatus.SETTING_UP,
         },
-        core: {
-          info: this._state?.info.core,
-          config: this._state?.config.core,
-        }
+        system: this._state?.info.system,
       }
       res.json(this._state?.info); // TODO: Different payload? If so, make /api/system this._state.system again.
     });
@@ -187,15 +174,15 @@ export class WebServer {
       });
     });
 
-    this._app.patch("/api/config/core", async (req, res) => {
-      const result = CoreRuntimeConfigShape.partial().safeParse(req.body);
+    this._app.patch("/api/config/system", async (req, res) => {
+      const result = SystemRuntimeShape.partial().safeParse(req.body);
 
       if (!result.success) {
         return res.status(400).json({ errors: result.error.format() });
       }
 
       try {
-        await this._handlers.core.updateConfig(result.data);
+        await this._handlers.system.updateRuntime(result.data);
         res.status(204).send();
       } catch (e) {
         this._logger.error("Failed to update core config:", e);
@@ -217,7 +204,7 @@ export class WebServer {
         return res.status(400).json({ errors: resultId.error.format() });
       }
 
-      const resultBody = PuppetRuntimeConfigSchema.partial().safeParse(
+      const resultBody = PuppetRuntimeSchema.partial().safeParse(
         req.body,
       );
 
@@ -251,7 +238,7 @@ export class WebServer {
       }
 
       try {
-        await this._handlers.ui.updateConfig(result.data);
+        await this._handlers.ui.updateRuntime(result.data);
         res.status(204).send();
       } catch (e) {
         this._logger.error("Failed to update ui config:", e);
