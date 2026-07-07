@@ -2,6 +2,7 @@ import { Logger } from "../../logging/Logger";
 import { UiRuntimeSchema, type UiRuntime } from "../../ui/schema";
 import { CoreDatabase } from "../CoreDatabase";
 
+// TODO: Make a generic runtime store? Most functions are the same.
 export class UiStore {
 
   private _db = CoreDatabase.getInstance();

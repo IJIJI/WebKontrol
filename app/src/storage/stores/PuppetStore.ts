@@ -2,6 +2,7 @@ import { Logger } from "../../logging/Logger";
 import { PuppetRuntimeSchema, type PuppetKey, type PuppetRuntime } from "../../puppet/types/schema";
 import { CoreDatabase } from "../CoreDatabase";
 
+// TODO: Make a generic runtime store? Most functions are the same.
 export class PuppetStore {
   private _id: PuppetKey;
 
@@ -10,7 +11,7 @@ export class PuppetStore {
 
   constructor(id: PuppetKey) {
     this._id = id;
-    this._logger = new Logger(["STORE", "PUPPET", id]);
+    this._logger = new Logger(["STORE", "PUPPET", "ENTRY", id]);
     this._logger.debug(`Constructed store.`);
   }
 
