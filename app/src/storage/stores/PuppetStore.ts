@@ -31,14 +31,14 @@ export class PuppetStore {
       this._logger.debug(`Loading runtime...`);
       const raw = await this._db.getSetting("puppet", this._id, "runtime");
       if (raw === null) {
-        this._logger.error(`Failed loading runtime! Returning null`);
+        this._logger.info(`Failed loading runtime! Returning null`);
         return null;
       }
       const object = PuppetRuntimeSchema.parse(JSON.parse(raw));
       this._logger.debug(`Successfully loaded runtime!`, object);
       return object;
     } catch (error) {
-      this._logger.error(
+      this._logger.info(
         `Failed loading runtime for puppet ${this._id} with error:`,
         error,
         `Returning null.`
