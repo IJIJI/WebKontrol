@@ -4,7 +4,7 @@ import { WebServerConfigSchema } from "../../webServer/schema";
 
 
 export const AppConfigSchema = z.object({
-  puppets: z.array(ConfigFilePuppetSpecificSchema),
+  puppets: z.array(ConfigFilePuppetSpecificSchema), // TODO: Autoderive short name from ID? (Without the lowercase conversion)
   web: WebServerConfigSchema.default(WebServerConfigSchema.parse({}))
 });
 

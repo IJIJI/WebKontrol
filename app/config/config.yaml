@@ -1,5 +1,5 @@
 puppets:
-  - id: SDI-1
+  - id: SDI-1 # Note: ID's will be made lowercase
     name: 
       long: SDI Output 1
       short: SDI-1

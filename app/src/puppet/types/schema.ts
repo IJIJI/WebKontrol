@@ -13,7 +13,7 @@ export type PuppetKey = z.infer<typeof PuppetKeySchema>;
 
 export const BasePuppetConfigSchema = z.object({
   id: PuppetKeySchema,
-  name: DisplayNameSchema,
+  name: DisplayNameSchema, // TODO: Autoderive short name from ID? (Without the lowercase conversion)
 });
 
 export type BasePuppetConfig = z.infer<typeof BasePuppetConfigSchema>;
