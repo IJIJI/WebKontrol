@@ -2,6 +2,7 @@ import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
 import type { PuppetKey } from "../../puppet/schema.old";
 import type { PuppetRuntime } from "../../puppet/types/schema";
+import type { PuppetWebhandlers } from "../../webServer/model";
 
 
 export class PuppetOrchestrator { // TODO: Make this manage the puppets, remove the rest from appcore
@@ -20,11 +21,11 @@ export class PuppetOrchestrator { // TODO: Make this manage the puppets, remove 
     this._puppets.set(puppet.getKey(), puppet);
   }
 
-  public setPuppetRuntime(key: PuppetKey, runtime: PuppetRuntime): void {
-    if (!this._puppets.has(key))
-      return this._logger.error(`Attempted to update runtime for puppet ${key}. It does not exist. Provided runtime:`, runtime);
+  public async updatePuppetRuntime(id: PuppetKey, runtime: Partial<PuppetRuntime>): Promise<void> {
+    if (!this._puppets.has(id))
+      return this._logger.error(`Attempted to update runtime for puppet ${id}. It does not exist. Provided runtime:`, runtime);
 
-    this._puppets.get(key)?.updateRuntime(runtime);
+    await this._puppets.get(id)?.updateRuntime(runtime);
   }
 
   public async init(): Promise<void> {
@@ -34,5 +35,11 @@ export class PuppetOrchestrator { // TODO: Make this manage the puppets, remove 
     this._puppets.forEach(async (puppet, key) => {
       await puppet.init();
     });
+  }
+
+  public getHandlers(): PuppetWebhandlers {
+    return {
+      updateRuntime: this.updatePuppetRuntime,
+    }
   }
 }
