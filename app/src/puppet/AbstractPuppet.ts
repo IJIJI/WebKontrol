@@ -4,6 +4,7 @@ import { Logger } from "../logging/Logger";
 import { ConnectionState } from "../types/CommonTypes";
 import type {
   PuppetInfo,
+  PuppetInfoBundle,
   TargetInfo,
 } from "./types/model";
 import { PuppetStore } from "../storage/stores/PuppetStore";
@@ -107,10 +108,14 @@ export abstract class AbstractPuppet<
 
   // TODO: Add target info? -> Needs a caller for some implementations?
   // TODO: Load url from the puppet?
-  async getInfo(): Promise<PuppetInfo> {
+  async getInfo(): Promise<PuppetInfoBundle> {
     return {
-      ...this._info,
-      target_info: await this._getTargetInfo(),
+      info: {
+        ...this._info,
+        target_info: await this._getTargetInfo(),
+      },
+      config: this._config,
+      runtime: this._runtime,
     };
   }
 
@@ -119,7 +124,7 @@ export abstract class AbstractPuppet<
 
     // TODO: Add async callback to allow for target_info loading?
 
-    (this as EventEmitter<PuppetEvents>).emit("info_update", await this.getInfo());
+    (this as EventEmitter<PuppetEvents>).emit("info_update", (await this.getInfo()).info);
   }
 
   async updateRuntime(runtime: Partial<PuppetRuntime>): Promise<void> {

@@ -26,9 +26,8 @@ export interface PuppetInfo {
 }
 
 // Puppet runtime info + derived info. e.g. from config.
-export interface PuppetInfoBundle extends PuppetInfo {
-  config: {
-    config: BasePuppetConfig;
-    runtime: PuppetRuntime;
-  };
+export interface PuppetInfoBundle {
+  info: PuppetInfo,
+  config: BasePuppetConfig;
+  runtime: PuppetRuntime;
 }
