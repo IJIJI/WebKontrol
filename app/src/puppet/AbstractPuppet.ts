@@ -8,7 +8,8 @@ import type {
   TargetInfo,
 } from "./types/model";
 import { PuppetStore } from "../storage/stores/PuppetStore";
-import type { BasePuppetConfig, PuppetKey, PuppetRuntime, PuppetTarget } from "./types/schema";
+import { BLANK_PUPPET_TARGET, PuppetRuntimeSchema, type BasePuppetConfig, type PuppetKey, type PuppetRuntime, type PuppetTarget } from "./types/schema";
+
 
 export type PuppetEvents = {
   load_success: [info: TargetInfo];
@@ -35,7 +36,7 @@ export abstract class AbstractPuppet<
   protected abstract _getLogLabelExtensions(): Array<string>;
 
   protected _config: TConfig;
-  protected _runtime!: PuppetRuntime; // TODO: Make a way to set a default
+  protected _runtime: PuppetRuntime = BLANK_PUPPET_TARGET;
 
   protected _info: PuppetInfo = {
     state: ConnectionState.OFFLINE,
@@ -84,7 +85,11 @@ export abstract class AbstractPuppet<
 
       this._store = new PuppetStore(this._config.id);
 
-      this._runtime = await this._store.loadRuntime();
+      const loaded = await this._store.loadRuntime();
+      if (loaded)
+        this._runtime = loaded;
+      else
+        this._logger.debug("No runtime found in store, showing a blank page until one is set.");
 
       await this._doInit();
       this._isInit = true;
@@ -92,7 +97,7 @@ export abstract class AbstractPuppet<
 
       this._logger.info("Initialized.");
 
-      await this.updateRuntime(this._runtime);
+      await this._setTarget(this._runtime.target);
 
       this._logger.info("Appied runtime.");
     } catch (error) {
@@ -103,7 +108,13 @@ export abstract class AbstractPuppet<
 
   async clearRuntime(): Promise<void> {
     if (!this._isInit) throw new Error("Puppet not initialized");
-    this._store.clearRuntime();
+    await this._store.clearRuntime();
+
+    const old = this._runtime;
+    this._runtime = BLANK_PUPPET_TARGET;
+
+    if (old.target !== this._runtime.target)
+      await this._setTarget(this._runtime.target);
   }
 
   // TODO: Add target info? -> Needs a caller for some implementations?

@@ -43,3 +43,5 @@ export const PuppetRuntimeSchema = z.object({
 
 export type PuppetRuntime = z.infer<typeof PuppetRuntimeSchema>;
 export type PuppetRuntimeInput = z.input<typeof PuppetRuntimeSchema>;
+
+export const BLANK_PUPPET_TARGET = PuppetRuntimeSchema.parse({ target: "about:blank" })
