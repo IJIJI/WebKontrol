@@ -6,6 +6,7 @@ import type { AppConfig } from "./config/model";
 import { AppCore, type AppCoreConfig } from "./AppCore";
 import { PuppetFactory } from "./puppet/PuppetFactory";
 import { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
+import { SystemManager } from "../system/SystemManager";
 
 
 
@@ -24,6 +25,8 @@ export class LifeCycle {
     await this._configManager.init();
 
     const appConfig: AppConfig = this._configManager.getConfig();
+
+    const systemManager: SystemManager = new SystemManager();
 
     const puppetOrchestrator: PuppetOrchestrator = new PuppetOrchestrator();
 

@@ -1,9 +1,11 @@
 import { Logger } from "../logging/Logger";
+import type { SystemManager } from "../system/SystemManager";
 import type { UiManager } from "../ui/UiManager";
 import type { WebServer } from "../webServer/WebServer";
 import type { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
 
 export interface AppCoreConfig {
+  systemManager: SystemManager;
   puppetOrchestrator: PuppetOrchestrator;
   webServer: WebServer;
   uiManager: UiManager;
@@ -12,7 +14,9 @@ export interface AppCoreConfig {
 export class AppCore { // TODO: Move every non-puppet management from the appcore to this.
   private _logger = new Logger(["LifeCycle", "ORCHESTRATOR"]);
 
-  private _hasStarted: boolean = false;
+  private _isInit: boolean = false;
+
+  private _systemManager: SystemManager;
 
   private _puppetOrchestrator: PuppetOrchestrator;
 
@@ -20,6 +24,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
   private _uiManager: UiManager;
 
   constructor(config: AppCoreConfig) {
+    this._systemManager = config.systemManager;
     this._puppetOrchestrator = config.puppetOrchestrator;
     this._webServer = config.webServer;
     this._uiManager = config.uiManager;
@@ -30,7 +35,12 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
   }
 
   public async init(): Promise<void> {
+    if(this._isInit){
+      this._logger.warn("Init called on already initialised AppCore. Disregarding.");
+    }
+
     //TODO: Wire WebServer, ...
+    await this._systemManager.init();
     await this._puppetOrchestrator.init();
     await this._uiManager.init();
     await this._webServer.start(); // TODO rename to init? Or split?
