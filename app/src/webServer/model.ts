@@ -2,12 +2,12 @@ import type { CoreInfo, CoreInfoBundle } from "../core/model";
 import type { CoreRuntimeConfig, CoreRuntimeConfigInput } from "../core/schema";
 import type { PuppetInfoBundle } from "../puppet/types/model";
 import type { PuppetKey, PuppetRuntime } from "../puppet/types/schema";
-import type { UiRuntimeConfig } from "../ui/schema";
+import type { UiRuntime } from "../ui/schema";
 
 
 export interface WebServerRuntimeConfigState {// Only Runtime Configs. Standard configs are done from the config file.
   core: CoreRuntimeConfig;
-  ui: UiRuntimeConfig;
+  ui:  UiRuntime ;
 }
 export interface WebServerInfoState {
   core: CoreInfo;
@@ -34,7 +34,7 @@ export interface UpdateWebhandlers {
   getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
 }
 export interface UiWebhandlers {
-  updateRuntime: (runtime: Partial<UiRuntimeConfig>) => void | Promise<void>;
+  updateRuntime: (runtime: Partial<UiRuntime>) => void | Promise<void>;
 }
 
 export interface WebServerMutationHandlers { // TODO: UiManager to manage ui settings?
