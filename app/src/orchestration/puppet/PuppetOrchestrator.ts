@@ -1,5 +1,6 @@
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
+import type { PuppetInfoBundle } from "../../puppet/types/model";
 import type { PuppetKey, PuppetRuntime } from "../../puppet/types/schema";
 import type { PuppetWebhandlers } from "../../webServer/model";
 
@@ -40,5 +41,14 @@ export class PuppetOrchestrator { // TODO: Make this manage the puppets, remove 
     return {
       updateRuntime: this.updatePuppetRuntime,
     }
+  }
+
+  public async getPuppetInfoBundles(): Promise<PuppetInfoBundle[]> {
+    return await Promise.all(
+        this._puppets
+            .values()
+            .map((puppet) => puppet.getInfo())
+            .toArray()
+    )
   }
 }
