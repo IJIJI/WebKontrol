@@ -37,7 +37,7 @@ export class UiManager {
 
   public getHandlers(): UiWebhandlers {
     return {
-      updateRuntime: this.updateRuntime,
+      updateRuntime: (config: Partial<UiRuntime>) => this.updateRuntime(config),
     }
   }
 }
