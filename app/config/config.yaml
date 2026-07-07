@@ -1,3 +1,5 @@
 puppets:
   - id: SDI-1
-    name: SDI Output 1
+    name: 
+      long: SDI Output 1
+      short: SDI-1

@@ -13,7 +13,7 @@ export type PuppetKey = z.infer<typeof PuppetKeySchema>;
 
 export const BasePuppetConfigSchema = z.object({
   id: PuppetKeySchema,
-  name: DisplayNameSchema.optional(),
+  name: DisplayNameSchema,
 });
 
 export type BasePuppetConfig = z.infer<typeof BasePuppetConfigSchema>;

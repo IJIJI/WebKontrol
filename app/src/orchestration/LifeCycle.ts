@@ -29,7 +29,7 @@ export class LifeCycle {
 
     const puppetOrchestrator: PuppetOrchestrator = new PuppetOrchestrator();
 
-    for (const pupConfig of appConfig.puppets.entries) {
+    for (const pupConfig of appConfig.puppets) {
       const puppet = PuppetFactory.createPuppet(pupConfig);
       puppetOrchestrator.addPuppet(puppet);
     }

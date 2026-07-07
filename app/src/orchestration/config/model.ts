@@ -4,10 +4,7 @@ import { WebServerConfigSchema } from "../../webServer/schema";
 
 
 export const AppConfigSchema = z.object({
-  puppets: z.object({
-    global: IncomingPuppetConfigSchema,
-    entries: z.array(ConfigFilePuppetSpecificSchema),
-  }),
+  puppets: z.array(ConfigFilePuppetSpecificSchema),
   web: WebServerConfigSchema.default(WebServerConfigSchema.parse({}))
 });
 

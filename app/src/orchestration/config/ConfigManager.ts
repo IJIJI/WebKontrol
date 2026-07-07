@@ -31,6 +31,8 @@ export class ConfigManager {
       const file = fs.readFileSync(path, 'utf8');
       const data = YAML.parse(file);
 
+      this._logger.info(`Parsed YAML from config file:`, data);
+
       const parsed = AppConfigSchema.parse(data);
       this._config = parsed;
     } catch(error) {
