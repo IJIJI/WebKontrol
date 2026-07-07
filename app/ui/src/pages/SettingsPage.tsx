@@ -16,6 +16,7 @@ import { ConnectionState } from "../../../src/types/CommonTypes";
 import { UiTheme } from "../../../src/ui/schema";
 import { useApi } from "../context/ApiStateContext";
 import { Icons } from "../components/icons/Icons";
+import { LoadingPage } from "../components/layout/loading/LoadingPage";
 
 
 
@@ -24,7 +25,7 @@ export default function SettingsPage(): JSX.Element {
   const runtime = useApi().state?.runtime;
   const handlers = useApi().callBacks;
 
-  if (!runtime) return <Icons.loading />;
+  if (!runtime) return <LoadingPage />;
 
   // const {saved, values, setField, revertAll, anyChanged} = useDraft(config?.ui);
   // const uiDraft = useDraft(config?.ui);

@@ -201,7 +201,7 @@ export const Icons = {
         type="rotate"
         from="0 8 8"
         to="360 8 8"
-        dur="0.75s"
+        dur="1.0s"
         repeatCount="indefinite"
       />
     </circle>,
