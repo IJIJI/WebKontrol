@@ -1,5 +1,5 @@
 import { Logger } from "../../logging/Logger";
-import { UiRuntimeConfigSchema, type UiRuntimeConfig } from "../../ui/schema";
+import { UiRuntimeSchema, type UiRuntime } from "../../ui/schema";
 import { CoreDatabase } from "../CoreDatabase";
 
 export class UiStore {
@@ -12,7 +12,7 @@ export class UiStore {
     this._logger.debug(`Constructed store.`);
   }
 
-  public async saveRuntime(config: UiRuntimeConfig): Promise<void> {
+  public async saveRuntime(config: UiRuntime): Promise<void> {
     this._logger.debug(`Saving runtime...`);
     await this._db.updateSetting(
       "app",
@@ -23,7 +23,7 @@ export class UiStore {
     this._logger.debug(`Successfully saved runtime!`);
   }
 
-  public async loadRuntime(): Promise<UiRuntimeConfig | null> {
+  public async loadRuntime(): Promise<UiRuntime | null> {
     try {
       this._logger.debug(`Loading runtime...`);
       const raw = await this._db.getSetting("app", "ui", "runtime");
@@ -31,7 +31,7 @@ export class UiStore {
         this._logger.error(`Failed loading runtime! Got null`);
         return null;
       }
-      const object = UiRuntimeConfigSchema.parse(JSON.parse(raw));
+      const object = UiRuntimeSchema.parse(JSON.parse(raw));
       this._logger.debug(`Successfully loaded runtime!`, object);
       return object;
     } catch (error) {
