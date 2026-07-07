@@ -26,7 +26,6 @@ export class LifeCycle {
 
     const appConfig: AppConfig = this._configManager.getConfig();
 
-    const systemManager: SystemManager = new SystemManager();
 
     const puppetOrchestrator: PuppetOrchestrator = new PuppetOrchestrator();
 
@@ -35,13 +34,11 @@ export class LifeCycle {
       puppetOrchestrator.addPuppet(puppet);
     }
 
-    const webServer: WebServer = new WebServer(appConfig.web);
-    const uiManager: UiManager = new UiManager();
-
     const orchestratorConf: AppCoreConfig = {
       puppetOrchestrator: puppetOrchestrator,
-      webServer: webServer,
-      uiManager: uiManager,
+      webServer: new WebServer(appConfig.web),
+      uiManager: new UiManager(),
+      systemManager: new SystemManager(),
     }
 
     return new AppCore(orchestratorConf);    
