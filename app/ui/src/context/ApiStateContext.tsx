@@ -196,7 +196,7 @@ export function ApiStateProvider({
     notify = false,
   ): Promise<void> => {
     return withToast(
-      Api.patch(`/config/core`, config),
+      Api.patch(`/config/system`, config),
       { loading: "Saving system settings…", success: "Saved" },
       notify,
     );
