@@ -42,6 +42,9 @@ export abstract class AbstractPuppet<
     state: ConnectionState.OFFLINE,
   };
 
+  private _isNavigating = false;
+  private _lastTargetInfo: TargetInfo = {};
+
   constructor(config: TConfig) {
     super();
     this._config = config;
@@ -120,10 +123,16 @@ export abstract class AbstractPuppet<
   // TODO: Add target info? -> Needs a caller for some implementations?
   // TODO: Load url from the puppet?
   async getInfo(): Promise<PuppetInfoBundle> {
+    // Evaluating against the page while it's navigating races the execution
+    // context being torn down, so fall back to the last known info instead.
+    if (!this._isNavigating) {
+      this._lastTargetInfo = await this._getTargetInfo();
+    }
+
     return {
       info: {
         ...this._info,
-        target_info: await this._getTargetInfo(),
+        target_info: this._lastTargetInfo,
       },
       config: this._config,
       runtime: this._runtime,
@@ -151,6 +160,8 @@ export abstract class AbstractPuppet<
         await this._setTarget(this._runtime.target);
 
       await this._store.saveRuntime(this._runtime);
+
+      (this as EventEmitter<PuppetEvents>).emit("runtime_update", this._runtime);
     } catch (error) {
       this._logger.error("Failed to update runtime", error);
       // TODO: Add some sort of feedback to caller.
@@ -158,6 +169,7 @@ export abstract class AbstractPuppet<
   }
 
   protected async _setTarget(target: PuppetTarget): Promise<void> {
+    this._isNavigating = true;
     try {
 
       await this._doSetTarget(target);
@@ -166,12 +178,15 @@ export abstract class AbstractPuppet<
       // The blank placeholder has no content to read, and evaluating against it races with
       // Chromium tearing down/recreating its execution context right after navigation resolves.
       const targetInfo = target === BLANK_PUPPET_TARGET.target ? {} : await this._getTargetInfo();
+      this._lastTargetInfo = targetInfo;
 
       (this as EventEmitter<PuppetEvents>).emit("load_success", targetInfo);
     } catch (error) {
       this._logger.error("Failed to set target", error);
       this._setFailedLoadingState();
       (this as EventEmitter<PuppetEvents>).emit("load_fail", target);
+    } finally {
+      this._isNavigating = false;
     }
   }
 
