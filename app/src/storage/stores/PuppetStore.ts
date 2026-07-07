@@ -1,6 +1,6 @@
-import { Logger } from "../logging/Logger";
-import { PuppetRuntimeSchema, type PuppetKey, type PuppetRuntime } from "../puppet/types/schema";
-import { CoreDatabase } from "./CoreDatabase";
+import { Logger } from "../../logging/Logger";
+import { PuppetRuntimeSchema, type PuppetKey, type PuppetRuntime } from "../../puppet/types/schema";
+import { CoreDatabase } from "../CoreDatabase";
 
 export class PuppetStore {
   private _id: PuppetKey;

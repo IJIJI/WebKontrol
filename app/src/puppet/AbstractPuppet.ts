@@ -6,7 +6,7 @@ import type {
   PuppetInfo,
   TargetInfo,
 } from "./types/model";
-import { PuppetStore } from "../storage/PuppetStore";
+import { PuppetStore } from "../storage/stores/PuppetStore";
 import type { BasePuppetConfig, PuppetKey, PuppetRuntime, PuppetTarget } from "./types/schema";
 
 export type PuppetEvents = {

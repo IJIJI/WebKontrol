@@ -1,7 +1,7 @@
 import { CoreRuntimeConfigSchema, type CoreRuntimeConfig } from "../core/schema";
-import { Logger } from "../logging/Logger";
-import type { SystemRuntime } from "../system/schema";
-import { CoreDatabase } from "./CoreDatabase";
+import { Logger } from "../../logging/Logger";
+import type { SystemRuntime } from "../../system/schema";
+import { CoreDatabase } from "../CoreDatabase";
 
 export class SystemStore {
   private _db = CoreDatabase.getInstance();

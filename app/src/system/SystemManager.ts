@@ -1,6 +1,6 @@
 
 import { Logger } from "../logging/Logger";
-import { SystemStore } from "../storage/SystemStore";
+import { SystemStore } from "../storage/stores/SystemStore";
 import type { SystemWebhandlers } from "../webServer/model";
 import type { SystemInfo } from "./model";
 import { SystemRuntimeSchema, type SystemRuntime } from "./schema";

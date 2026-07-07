@@ -1,10 +1,10 @@
-import { Logger } from "../logging/Logger";
+import { Logger } from "../../logging/Logger";
 import type {
   AbstractView,
   ViewConfig,
   ViewKey,
-} from "../views/types/AbstractView";
-import { CoreDatabase } from "./CoreDatabase";
+} from "../../views/types/AbstractView";
+import { CoreDatabase } from "../CoreDatabase";
 
 export class AppCoreStore {
   private _db = CoreDatabase.getInstance();

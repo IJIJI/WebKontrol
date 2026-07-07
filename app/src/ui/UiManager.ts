@@ -1,4 +1,4 @@
-import { UiStore } from "../storage/UiStore";
+import { UiStore } from "../storage/stores/UiStore";
 import { UiTheme, type UiRuntime } from "./schema";
 import { Logger } from "../logging/Logger";
 import type { UiWebhandlers } from "../webServer/model";
