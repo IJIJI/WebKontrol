@@ -53,6 +53,10 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     // TODO: Docs use await broser.newPage(); Check which is better.
     this._page = await this._browser.pages().then((pages) => pages[0]);
 
+    const client = await this._page.createCDPSession();
+    await client.send("Emulation.setDefaultBackgroundColorOverride", {
+      color: { r: 0, g: 0, b: 0, a: 1 },
+    });
     // Navigate the page to a URL.
     // TODO: Load defaults from some central place?
 
