@@ -2,7 +2,7 @@ import { Logger } from "../logging/Logger";
 import { UiManager } from "../ui/UiManager";
 import { WebServer } from "../webServer/WebServer";
 import { ConfigManager } from "./config/ConfigManager";
-import type { AppConfig } from "./config/model";
+import type { AppConfig } from "./config/schema";
 import { AppCore, type AppCoreConfig } from "./AppCore";
 import { PuppetFactory } from "./puppet/PuppetFactory";
 import { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";

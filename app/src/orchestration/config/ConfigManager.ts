@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { AppConfigSchema, type AppConfig } from "./model";
+import { AppConfigSchema, type AppConfig } from "./schema";
 import YAML from "yaml";
 import { Logger } from "../../logging/Logger";
 
