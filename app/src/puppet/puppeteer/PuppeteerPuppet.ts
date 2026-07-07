@@ -65,7 +65,7 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
   }
 
   protected async _doSetTarget(target: PuppetTarget): Promise<void> {
-    await this._page.goto(target, { timeout: this._runtime.load_timout }); // TODO: Check if this works with the Infinite literal.
+    await this._page.goto(target, { timeout: this._runtime.load_timout });
   }
 
   protected async _getTargetInfo(): Promise<TargetInfo> {

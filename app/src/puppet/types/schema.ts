@@ -38,7 +38,7 @@ export type PuppetTarget = z.infer<typeof PuppetTargetSchema>;
 // Puppet Runtime
 export const PuppetRuntimeSchema = z.object({
   target: PuppetTargetSchema, // TODO should this be a view? Or should the viewmanager supply the target? Should it have a target field with the url and timeout + etc?
-  load_timout: z.number().min(500).or(z.literal(Infinity)).default(20_000)
+  load_timout: z.number().min(500).or(z.literal(0)).default(20_000) // 0 disables the timeout, matching Puppeteer's own convention (and unlike Infinity, it survives a JSON round-trip through storage).
 })
 
 export type PuppetRuntime = z.infer<typeof PuppetRuntimeSchema>;
