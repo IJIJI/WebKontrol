@@ -8,20 +8,7 @@ export class PuppetStore {
   private _db = CoreDatabase.getInstance();
   private _logger: Logger;
 
-  private static _default_runtime: PuppetRuntime;
-
-  public static setDefualtRuntime(runtime: PuppetRuntime): void {
-    this._default_runtime = runtime;
-  }
-
-  private static get _getDefaultRuntime(): PuppetRuntime {
-    if (!this._default_runtime) { // TODO: Should this check happen on construction and not here?
-      throw new Error("Default runtime was not set!");
-    }
-    return this._default_runtime;
-  }
-
-  constructor(id: string) {
+  constructor(id: PuppetKey) {
     this._id = id;
     this._logger = new Logger(["STORE", "PUPPET", id]);
     this._logger.debug(`Constructed store.`);
@@ -38,13 +25,13 @@ export class PuppetStore {
     this._logger.debug(`Successfully saved runtime!`);
   }
 
-  public async loadRuntime(): Promise<PuppetRuntime> {
+  public async loadRuntime(): Promise<PuppetRuntime | null> {
     try {
       this._logger.debug(`Loading runtime...`);
       const raw = await this._db.getSetting("puppet", this._id, "runtime");
       if (raw === null) {
-        this._logger.error(`Failed loading runtime! Returning default`);
-        return PuppetStore._getDefaultRuntime;
+        this._logger.error(`Failed loading runtime! Returning null`);
+        return null;
       }
       const object = PuppetRuntimeSchema.parse(JSON.parse(raw));
       this._logger.debug(`Successfully loaded runtime!`, object);
@@ -53,9 +40,9 @@ export class PuppetStore {
       this._logger.error(
         `Failed loading runtime for puppet ${this._id} with error:`,
         error,
-        `Returning default.`
+        `Returning null.`
       );
-      return PuppetStore._getDefaultRuntime;
+      return null;
     }
   }
 
