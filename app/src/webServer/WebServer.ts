@@ -9,7 +9,7 @@ import {
   type WebServerConfig,
   type WebServerConfigInput,
 } from "./schema";
-import { UiRuntimeSchema } from "../ui/schema";
+import { UiRuntimeShape } from "../ui/schema";
 import { SystemRuntimeShape } from "../system/schema";
 import { PuppetKeySchema, PuppetRuntimeSchema } from "../puppet/types/schema";
 
@@ -231,7 +231,7 @@ export class WebServer {
     });
 
     this._app.patch("/api/config/ui", async (req, res) => {
-      const result = UiRuntimeSchema.partial().safeParse(req.body);
+      const result = UiRuntimeShape.partial().safeParse(req.body);
 
       if (!result.success) {
         return res.status(400).json({ errors: result.error.format() });
