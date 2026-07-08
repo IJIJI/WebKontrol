@@ -2,19 +2,33 @@ import z from "zod";
 
 const slug = z.string().min(2).max(18).toLowerCase().regex(/^[a-z0-9_-]+$/);
 
-export const BlockProviderIdSchema = slug;
-export type BlockProviderId = z.infer<typeof BlockProviderIdSchema>;
+export const ProviderIdSchema = slug;
+export type ProviderId = z.infer<typeof ProviderIdSchema>;
 
 export const BlockTypeSchema = slug;
 export type BlockType = z.infer<typeof BlockTypeSchema>;
 
 export const BlockIdSchema = z.object({
-  provider: BlockProviderIdSchema,
+  provider: ProviderIdSchema,
   type: BlockTypeSchema,
 });
 
 export type BlockId = z.infer<typeof BlockIdSchema>;
-export type BlockKey = `${BlockProviderId}::${BlockType}`; // TODO: Zod Type?
+
+export const BlockKeySchema = z.templateLiteral([ProviderIdSchema, "::block::", BlockTypeSchema]);
+export type BlockKey = z.infer<typeof BlockKeySchema>;
+
+export const DataFieldSchema = slug;
+export type DataField = z.infer<typeof DataFieldSchema>;
+
+export const DataIdSchema = z.object({
+  provider: ProviderIdSchema,
+  id: DataFieldSchema,
+});
+export type DataId = z.infer<typeof DataIdSchema>;
+
+export const DataKeySchema = z.templateLiteral([ProviderIdSchema, "::data::", DataFieldSchema]);
+export type DataKey = z.infer<typeof DataKeySchema>;
 
 //* Block Config:
 export const BaseBlockConfigSchema = z.object({
@@ -66,7 +80,7 @@ export const ContainerBlockConfigSchema = extendBlockConfig("webkontrol::contain
 });
 
 // TextBlock: You can do text things!
-export const TextBlockConfigSchema = extendBlockConfig("webkontrol::containter",{
+export const TextBlockConfigSchema = extendBlockConfig("webkontrol::text",{
   text: z.string(),
   style: TextBlockStyleSchema,
 });
@@ -76,8 +90,12 @@ export const FreeFormBlockConfigSchema = extendBlockConfig("webkontrol::freeform
   blocks: z.array(z.object({ // TODO: Should theze objects have their own schema?
       block: BaseBlockConfigSchema,
       position: z.object({
-        x: z.number(), // TODO: How should coordinates work? 0-100?
-        y: z.number(),
+        x: z.number().min(0).max(100), // Coordinate between 0.00 and 100.00, being from one end to the other of the screen.
+        y: z.number().min(0).max(100),
+      }),
+      size: z.object({
+        x: z.number().min(0).max(100), // Coordinate between 0.00 and 100.00, being from one end to the other of the screen.
+        y: z.number().min(0).max(100),
       }),
     })), // TODO: This should work for all extensions of it, BaseBlockConfig itself should not work as it is not a usable block
 });
