@@ -61,6 +61,17 @@ export function extendBlockConfig<
     ...shape,
   });
 }
+
+//* Data Types:
+export const DimensionSchema = z.number().min(0).max(100);
+export type Dimension = z.infer<typeof DimensionSchema>;
+
+export const CoordinateSchema = z.object({
+  x: DimensionSchema, // Coordinate between 0.00 and 100.00, being from one end to the other of the screen.
+  y: DimensionSchema,
+});
+export type Coordinate = z.infer<typeof CoordinateSchema>;
+
 //* Block Styling, added as fields in blocks that need them.
 export const BackgroundStyleShape = { background: z.string().optional() };
 export const PaddingStyleShape = { padding: z.string().optional() }; // TODO: Add top right bottom left?
@@ -82,6 +93,19 @@ export type ContainerBlockStyle = z.infer<typeof ContainerBlockStyleSchema>;
 export const TextBlockStyleSchema = ContainerBlockStyleSchema.extend({
   ...FontStyleShape,
 });
+
+//* Block Definitions:
+export interface BlockTypeDefinition<TConfig = unknown> {
+  key: BlockKey;
+  configSchema: z.ZodType<TConfig>;
+  component: string;
+  fixedDataDependencies?: DataKey[]; // Data sources that are not user configurable
+}
+
+
+
+
+
 
 //* Some blocks:
 // Grid: Auto aranges the blocks in to the best grid for them.
@@ -105,13 +129,7 @@ export const TextBlockConfigSchema = extendBlockConfig("webkontrol::text",{
 export const FreeFormBlockConfigSchema = extendBlockConfig("webkontrol::freeform",{
   blocks: z.array(z.object({ // TODO: Should theze objects have their own schema?
       block: BaseBlockConfigSchema,
-      position: z.object({
-        x: z.number().min(0).max(100), // Coordinate between 0.00 and 100.00, being from one end to the other of the screen.
-        y: z.number().min(0).max(100),
-      }),
-      size: z.object({
-        x: z.number().min(0).max(100), // Coordinate between 0.00 and 100.00, being from one end to the other of the screen.
-        y: z.number().min(0).max(100),
-      }),
+      position: CoordinateSchema,
+      size: CoordinateSchema,
     })), // TODO: This should work for all extensions of it, BaseBlockConfig itself should not work as it is not a usable block
 });
