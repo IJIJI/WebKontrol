@@ -92,6 +92,17 @@ export class CoreDatabase {
     return result?.value ?? null;
   }
 
+  public async getSettingsByType(
+    domain: string,
+    type: string,
+  ): Promise<Map<string, string>> {
+    const results = await this._db.query.settings.findMany({
+      where: (settings) =>
+        and(eq(settings.domain, domain), eq(settings.type, type)),
+    });
+    return new Map(results.map(({ key, value }) => [key, value]));
+  }
+
   public async deleteSetting(
     domain: string,
     type: string,
