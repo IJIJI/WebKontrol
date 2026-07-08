@@ -66,6 +66,14 @@ export interface ResolvedBlock<TConfig = unknown> { // TODO: Move to registry ty
 //   if (!def) throw new Error(`Unknown block type "${envelope.type}"`);
 //   return { type: envelope.type, content: def.configSchema.parse(envelope) };
 // }
+// function findChildBlocks(value: unknown): unknown[] {
+//   if (Array.isArray(value)) return value.flatMap(findChildBlocks);
+//   if (value && typeof value === "object") {
+//     if (AnyBlockConfigSchema.safeParse(value).success) return [value];
+//     return Object.values(value).flatMap(findChildBlocks);
+//   }
+//   return [];
+// }
 
 //* Data Types:
 export const DimensionSchema = z.number().min(0).max(100);
