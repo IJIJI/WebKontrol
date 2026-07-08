@@ -29,37 +29,33 @@ export const BlockIdCodec = z.codec(BlockKeySchema, BlockIdSchema, {
 export const DataFieldSchema = slug;
 export type DataField = z.infer<typeof DataFieldSchema>;
 
-export const DataProviderSchema = z.object({
+export const DataSourceSchema = z.object({
   namespace: NamespaceIdSchema,
   field: DataFieldSchema,
 });
-export type DataProvider = z.infer<typeof DataProviderSchema>;
+export type DataSource = z.infer<typeof DataSourceSchema>;
 
-export const DataKeySchema = z.templateLiteral([NamespaceIdSchema, "::data::", DataFieldSchema]);
-export type DataKey = z.infer<typeof DataKeySchema>;
+export const DataSourceKeySchema = z.templateLiteral([NamespaceIdSchema, "::data::", DataFieldSchema]);
+export type DataSourceKey = z.infer<typeof DataSourceKeySchema>;
 
-export const DataIdCodec = z.codec(DataKeySchema, DataProviderSchema, {
+export const DataIdCodec = z.codec(DataSourceKeySchema, DataSourceSchema, {
   decode: (key) => {
     const [namespace, , field] = key.split("::");
     return { namespace, field };
   },
-  encode: (id) => `${id.namespace}::block::${id.field}` as DataKey,
+  encode: (id) => `${id.namespace}::data::${id.field}` as DataSourceKey,
 });
 
 //* Block Definitions:
 export interface BlockTypeDefinition<TConfig = unknown> {
   key: BlockKey;
   configSchema: z.ZodType<TConfig>;
-  fixedDataDependencies?: DataKey[]; // Data sources that are not user configurable
+  fixedDataDependencies?: DataSourceKey[]; // Data sources that are not user configurable
 }
 
 export const AnyBlockConfigSchema = z.looseObject({ type: BlockKeySchema });
 
-//* Resolved Blocks:
-export interface ResolvedBlock<TConfig = unknown> { // TODO: Move to registry types?
-  type: BlockKey,
-  config: TConfig,
-}
+
 // export function resolveBlock(raw: unknown): ResolvedBlock {
 //   const envelope = AnyBlockConfigSchema.parse(raw);
 //   const def = registry.get(envelope.type);

@@ -2,7 +2,7 @@ import z from "zod";
 import { AnyBlockConfigSchema, ContainerBlockStyleSchema, CoordinateSchema, TextBlockStyleSchema, type BlockTypeDefinition } from "../../types/schema";
 
 // WebsiteBlock: You can display websites!
-export const WebsiteBlockTypeSchema: BlockTypeDefinition = {
+export const WebsiteBlockTypeDefinition: BlockTypeDefinition = {
   key: "webkontrol::block::website",
   configSchema: z.object({
     url: z.url(),
@@ -11,7 +11,7 @@ export const WebsiteBlockTypeSchema: BlockTypeDefinition = {
 };
 
 // TextBlock: You can do text things!
-export const TextBlockTypeSchema: BlockTypeDefinition = {
+export const TextBlockTypeDefinition: BlockTypeDefinition = {
   key: "webkontrol::block::text",
   configSchema: z.object({
     text: z.string(),
@@ -21,7 +21,7 @@ export const TextBlockTypeSchema: BlockTypeDefinition = {
 };
 
 // ContainerBlock: Allows you to add styling to blocks that do not have it.
-export const ContainerBlockTypeSchema: BlockTypeDefinition = {
+export const ContainerBlockTypeDefinition: BlockTypeDefinition = {
   key: "webkontrol::block::containter",
   configSchema: z.object({
     block: AnyBlockConfigSchema,
@@ -31,7 +31,7 @@ export const ContainerBlockTypeSchema: BlockTypeDefinition = {
 };
 
 // Grid: Auto aranges the blocks in to the best grid for them.
-export const GridBlockTypeSchema: BlockTypeDefinition = {
+export const GridBlockTypeDefinition: BlockTypeDefinition = {
   key: "webkontrol::block::grid",
   configSchema: z.object({
     blocks: z.array(AnyBlockConfigSchema),
@@ -40,7 +40,7 @@ export const GridBlockTypeSchema: BlockTypeDefinition = {
 };
 
 // FreeFormContainer: Position the blocks wherever you want!
-export const FreeFormBlockTypeSchema: BlockTypeDefinition = {
+export const FreeFormBlockTypeDefinition: BlockTypeDefinition = {
   key: "webkontrol::block::freeform",
   configSchema: z.object({
   blocks: z.array(
@@ -54,8 +54,8 @@ export const FreeFormBlockTypeSchema: BlockTypeDefinition = {
 };
 
 // TextBlock: You can do text things!
-export const DateTimeBlockTypeSchema: BlockTypeDefinition = {
-  key: "webkontrol::block::text",
+export const DateTimeBlockTypeDefinition: BlockTypeDefinition = {
+  key: "webkontrol::block::datetime",
   configSchema: z.object({
     format: z.string().regex(/^(?:[dDjlNSwzWFmMntLoYyaABgGhHisuveIOPpTZcrU]|\\.|[\s\-\/\:\.,\|])+$/).optional().default("H:i:s"),
     style: TextBlockStyleSchema,
