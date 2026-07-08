@@ -1,13 +1,13 @@
-import type { PuppetInfoBundle } from "../puppet/types/model";
+import type { PuppetOrchestratorRuntime } from "../orchestration/puppet/schema";
+import type { PuppetDataBundle } from "../puppet/types/model";
 import type { PuppetKey, PuppetRuntime } from "../puppet/types/schema";
 import type { SystemInfo } from "../system/model";
 import type { SystemRuntime } from "../system/schema";
-import type { ConnectionState } from "../types/CommonTypes";
 import type { UiRuntime } from "../ui/schema";
 
-
-export interface WebServerRuntimeConfigState {// Only Runtime Configs. Standard configs are done from the config file.
+export interface WebServerRuntimeState {// Only Runtime Configs. Standard configs are done from the config file.
   system: SystemRuntime;
+  puppetOrchestrator: PuppetOrchestratorRuntime;
   ui:  UiRuntime;
 }
 export interface WebServerInfoState {
@@ -15,12 +15,15 @@ export interface WebServerInfoState {
 }
 
 export interface WebServerState {
-  puppets: PuppetInfoBundle[];
-  runtime: WebServerRuntimeConfigState; // TODO: Rename to runtime?
+  puppets: PuppetDataBundle[];
+  runtime: WebServerRuntimeState; // TODO: Rename to runtime?
   info: WebServerInfoState;
 }
 
 export interface PuppetWebhandlers {
+  updateOrchestratorRuntime: (
+    runtime: Partial<PuppetOrchestratorRuntime>,
+  ) => Promise<void>;
   updateRuntime: (
     id: PuppetKey,
     runtime: Partial<PuppetRuntime>,
