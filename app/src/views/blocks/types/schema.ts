@@ -2,33 +2,49 @@ import z from "zod";
 
 const slug = z.string().min(2).max(18).toLowerCase().regex(/^[a-z0-9_-]+$/);
 
-export const ProviderIdSchema = slug;
-export type ProviderId = z.infer<typeof ProviderIdSchema>;
+export const NamespaceIdSchema = slug;
+export type NamespaceId = z.infer<typeof NamespaceIdSchema>;
 
 export const BlockTypeSchema = slug;
 export type BlockType = z.infer<typeof BlockTypeSchema>;
 
 export const BlockIdSchema = z.object({
-  provider: ProviderIdSchema,
+  namespace: NamespaceIdSchema,
   type: BlockTypeSchema,
 });
 
 export type BlockId = z.infer<typeof BlockIdSchema>;
 
-export const BlockKeySchema = z.templateLiteral([ProviderIdSchema, "::block::", BlockTypeSchema]);
+export const BlockKeySchema = z.templateLiteral([NamespaceIdSchema, "::block::", BlockTypeSchema]);
 export type BlockKey = z.infer<typeof BlockKeySchema>;
+
+export const BlockIdCodec = z.codec(BlockKeySchema, BlockIdSchema, {
+  decode: (key) => {
+    const [namespace, , type] = key.split("::");
+    return { namespace, type };
+  },
+  encode: (id) => `${id.namespace}::block::${id.type}` as BlockKey,
+});
 
 export const DataFieldSchema = slug;
 export type DataField = z.infer<typeof DataFieldSchema>;
 
 export const DataIdSchema = z.object({
-  provider: ProviderIdSchema,
-  id: DataFieldSchema,
+  namespace: NamespaceIdSchema,
+  field: DataFieldSchema,
 });
 export type DataId = z.infer<typeof DataIdSchema>;
 
-export const DataKeySchema = z.templateLiteral([ProviderIdSchema, "::data::", DataFieldSchema]);
+export const DataKeySchema = z.templateLiteral([NamespaceIdSchema, "::data::", DataFieldSchema]);
 export type DataKey = z.infer<typeof DataKeySchema>;
+
+export const DataIdCodec = z.codec(DataKeySchema, DataIdSchema, {
+  decode: (key) => {
+    const [namespace, , field] = key.split("::");
+    return { namespace, field };
+  },
+  encode: (id) => `${id.namespace}::block::${id.field}` as DataKey,
+});
 
 //* Block Config:
 export const BaseBlockConfigSchema = z.object({
