@@ -53,6 +53,7 @@ export interface BlockTypeDefinition<TConfig = unknown> {
   fixedDataDependencies?: DataKey[]; // Data sources that are not user configurable
 }
 
+export const AnyBlockConfigSchema = z.looseObject({ type: BlockKeySchema });
 
 //* Data Types:
 export const DimensionSchema = z.number().min(0).max(100);
