@@ -1,5 +1,4 @@
 import type { ConnectionState } from "../../types/CommonTypes";
-import type { BasePuppetConfig, PuppetRuntime } from "./schema";
 
 /**
  * This file contains all model definitions for the puppets. That means types that don't need validation.
@@ -17,17 +16,12 @@ export type TargetInfo = {
   title?: string;
   description?: string;
   og?: OgTargetInfo;
+  url?: string;
+  screenshot?: string;
 };
 
 // Puppet runtime info
 export interface PuppetInfo {
   state: ConnectionState;
   target_info?: TargetInfo;
-}
-
-// Puppet runtime info + derived info. e.g. from config.
-export interface PuppetInfoBundle {
-  info: PuppetInfo,
-  config: BasePuppetConfig;
-  runtime: PuppetRuntime;
 }
