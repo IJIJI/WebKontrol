@@ -1,6 +1,6 @@
 import z from "zod";
 
-const slug = z.string().min(2).max(18).toLowerCase().regex(/^[a-z0-9_-]+$/);
+const slug = z.string().min(2).max(18).toLowerCase().regex(/^[a-z][a-z0-9_-]*$/);
 
 export const NamespaceIdSchema = slug;
 export type NamespaceId = z.infer<typeof NamespaceIdSchema>;
