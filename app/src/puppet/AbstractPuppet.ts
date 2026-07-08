@@ -4,24 +4,21 @@ import { Logger } from "../logging/Logger";
 import { ConnectionState } from "../types/CommonTypes";
 import type {
   PuppetInfo,
-  PuppetInfoBundle,
   TargetInfo,
 } from "./types/model";
 import { PuppetStore } from "../storage/stores/PuppetStore";
 import { BLANK_PUPPET_TARGET, PuppetRuntimeSchema, type BasePuppetConfig, type PuppetKey, type PuppetRuntime, type PuppetTarget } from "./types/schema";
 
 
-export type PuppetEvents = {
-  load_success: [info: TargetInfo];
-  load_fail: [taret: PuppetTarget];
+export type PuppetEvents<TConfig extends BasePuppetConfig> = {
   info_update: [info: PuppetInfo];
-  runtime_update: [info: PuppetRuntime];
+  runtime_update: [runtime: PuppetRuntime];
+  config_update: [config: TConfig];
 };
 
 export abstract class AbstractPuppet<
   TConfig extends BasePuppetConfig = BasePuppetConfig,
-  TEvents extends PuppetEvents & Record<string, unknown[]> = PuppetEvents,
-> extends EventEmitter<TEvents> {
+> extends EventEmitter<PuppetEvents<TConfig>> {
 
   private readonly IMG_FOLDER: string;
 
@@ -57,14 +54,6 @@ export abstract class AbstractPuppet<
     );
   }
 
-  getConfig(): TConfig {
-    return this._config;
-  }
-
-  getKey(): PuppetKey {
-    return this._config.id;
-  }
-
   protected abstract _doInit(): Promise<void>;
 
   protected abstract _doSetTarget(target: PuppetTarget): Promise<void>;
@@ -75,6 +64,40 @@ export abstract class AbstractPuppet<
   // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
   protected async _doScreenshot(path: string): Promise<void> {
     throw new Error("Screenshot not implemented for this puppet"); // TODO: Fail Silently or add another way to differentiate between fails and not implemented? Error type?
+  }
+
+  getConfig(): TConfig {
+    return this._config;
+  }
+
+  getRuntime(): PuppetRuntime {
+    return this._runtime;
+  }
+
+  getKey(): PuppetKey {
+    return this._config.id;
+  }
+
+    getLastInfo(): PuppetInfo {
+    return {
+      ...this._info,
+      target_info: this._lastTargetInfo,
+    };
+  }
+
+  async getInfo(): Promise<PuppetInfo> {
+    // Evaluating against the page while it's navigating races the execution
+    // context being torn down. _isNavigating avoids starting that work in the
+    // common case, but a call already in flight when navigation starts can
+    // still lose the race, so fall back to the last known info on failure too.
+    if (!this._isNavigating) {
+      try {
+        this._lastTargetInfo = await this._getTargetInfo();
+      } catch (error) {
+        this._logger.debug("Failed to read target info, likely due to a concurrent navigation. Using last known info.", error);
+      }
+    }
+    return this.getLastInfo();
   }
 
   async init(): Promise<void> {
@@ -94,64 +117,31 @@ export abstract class AbstractPuppet<
       else
         this._logger.debug("No runtime found in store, showing a blank page until one is set.");
 
+      this.emit('config_update', this._config);
+
       await this._doInit();
       this._isInit = true;
-      await this._updateInfo({ state: ConnectionState.ONLINE }); // TODO: Make sure this is kept up to date.
-
-      this._logger.info("Initialized.");
 
       await this._setTarget(this._runtime.target);
+      await this._updateInfo({ state: ConnectionState.ONLINE });
+      this._logger.info("Initialized.");
 
       this._logger.info("Appied runtime.");
     } catch (error) {
-      this._info.state = ConnectionState.FAILED;
+      await this._updateInfo({ state: ConnectionState.FAILED });
       return this._logger.fatal("Failed to initialize", error);
     }
   }
 
-  async clearRuntime(): Promise<void> {
-    if (!this._isInit) throw new Error("Puppet not initialized");
-    await this._store.clearRuntime();
-
-    const old = this._runtime;
-    this._runtime = BLANK_PUPPET_TARGET;
-
-    if (old.target !== this._runtime.target)
-      await this._setTarget(this._runtime.target);
-  }
-
-  // TODO: Add target info? -> Needs a caller for some implementations?
-  // TODO: Load url from the puppet?
-  async getInfo(): Promise<PuppetInfoBundle> {
-    // Evaluating against the page while it's navigating races the execution
-    // context being torn down. _isNavigating avoids starting that work in the
-    // common case, but a call already in flight when navigation starts can
-    // still lose the race, so fall back to the last known info on failure too.
-    if (!this._isNavigating) {
-      try {
-        this._lastTargetInfo = await this._getTargetInfo();
-      } catch (error) {
-        this._logger.debug("Failed to read target info, likely due to a concurrent navigation. Using last known info.", error);
-      }
-    }
-
-    return {
-      info: {
-        ...this._info,
-        target_info: this._lastTargetInfo,
-      },
-      config: this._config,
-      runtime: this._runtime,
-    };
-  }
 
   protected async _updateInfo(info?: Partial<PuppetInfo>): Promise<void> {
     this._info = { ...this._info, ...info };
 
     // TODO: Add async callback to allow for target_info loading?
 
-    (this as EventEmitter<PuppetEvents>).emit("info_update", (await this.getInfo()).info);
+    this.emit("info_update", await this.getInfo());
   }
+
 
   async updateRuntime(runtime: Partial<PuppetRuntime>): Promise<void> {
     try { // TODO: Should this be in try catch?
@@ -167,11 +157,17 @@ export abstract class AbstractPuppet<
 
       await this._store.saveRuntime(this._runtime);
 
-      (this as EventEmitter<PuppetEvents>).emit("runtime_update", this._runtime);
     } catch (error) {
       this._logger.error("Failed to update runtime", error);
-      // TODO: Add some sort of feedback to caller.
+    } finally {
+      this.emit('runtime_update', this._runtime);
     }
+  }  
+  
+  async clearRuntime(): Promise<void> {
+    if (!this._isInit) throw new Error("Puppet not initialized");
+
+    this.updateRuntime({ ...BLANK_PUPPET_TARGET });
   }
 
   protected async _setTarget(target: PuppetTarget): Promise<void> {
@@ -186,13 +182,12 @@ export abstract class AbstractPuppet<
       const targetInfo = target === BLANK_PUPPET_TARGET.target ? {} : await this._getTargetInfo();
       this._lastTargetInfo = targetInfo;
 
-      (this as EventEmitter<PuppetEvents>).emit("load_success", targetInfo);
     } catch (error) {
       this._logger.error("Failed to set target", error);
       this._setFailedLoadingState();
-      (this as EventEmitter<PuppetEvents>).emit("load_fail", target);
     } finally {
       this._isNavigating = false;
+      this._updateInfo();
     }
   }
 
