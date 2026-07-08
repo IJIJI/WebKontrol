@@ -48,6 +48,7 @@
     "drizzle-zod": "^0.8.3",
     "express": "^5.2.1",
     "less": "^4.6.7",
+    "lit": "^3.3.3",
     "puppeteer": "^25.2.1",
     "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.18.0",
