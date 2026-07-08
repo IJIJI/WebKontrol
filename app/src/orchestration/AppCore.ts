@@ -1,6 +1,7 @@
 import { Logger } from "../logging/Logger";
 import type { SystemManager } from "../system/SystemManager";
 import type { UiManager } from "../ui/UiManager";
+import type { WebServerState } from "../webServer/model";
 import type { WebServer } from "../webServer/WebServer";
 import type { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
 
@@ -23,15 +24,21 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
   private _webServer: WebServer;
   private _uiManager: UiManager;
 
+  private _webState!: WebServerState;
+
   constructor(config: AppCoreConfig) {
     this._systemManager = config.systemManager;
     this._puppetOrchestrator = config.puppetOrchestrator;
     this._webServer = config.webServer;
     this._uiManager = config.uiManager;
 
-    this._systemManager.on('info_update', () => this._syncWebState());
-    this._puppetOrchestrator.on('info_update', () => this._syncWebState());
-    this._uiManager.on('info_update', () => this._syncWebState());
+    this._systemManager.on('info_update', (info) => this._updateState({info: { ...this._webState.runtime, system: info }}));
+    this._systemManager.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, system: runtime }}));
+    
+    this._puppetOrchestrator.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, puppetOrchestrator: runtime }}));
+    this._puppetOrchestrator.on('puppet_update', (puppets) => this._updateState({ puppets: puppets }));
+
+    this._uiManager.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, ui: runtime }}));
   }
 
   public getPuppetManager(): PuppetOrchestrator {
@@ -44,7 +51,6 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     }
     this._logger.important("Starting AppCore...");
 
-    //TODO: Wire WebServer, ...
     await this._systemManager.init();
 
     await this._puppetOrchestrator.init();
@@ -73,26 +79,31 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
       ui: this._uiManager.getHandlers(),
     });
     await this._webServer.start(); // TODO rename to init? Or split?
-    await this._syncWebState();
+
+
+    this._updateState({
+      puppets: this._puppetOrchestrator.getPuppetBundles(),
+      runtime: {
+        system: this._systemManager.getRuntime(),
+        puppetOrchestrator: this._puppetOrchestrator.getRuntime(),
+        ui: this._uiManager.getRuntime(),
+      },
+      info: {
+        system: this._systemManager.getInfo(),
+      }
+    });
   }
 
-  private async _syncWebState(): Promise<void> {
+  private _updateState(state: Partial<WebServerState>) {
+    this._webState = {...this._webState, ...state};
+    this._logger.debug(`Updating webstate and syncing to webserver...`);
     try {
-      this._logger.debug(`Syncing state to webserver...`);
-      this._webServer.setState({
-        puppets: await this._puppetOrchestrator.getPuppetInfoBundles(),
-        runtime: {
-          system: this._systemManager.getRuntime(),
-          ui: this._uiManager.getRuntime(),
-        },
-        info: {
-          system: this._systemManager.getInfo(),
-        }
-      });
+      this._webServer.setState(this._webState); 
     } catch (error) {
       this._logger.error("Failed to sync state to webserver:", error);
     }
   }
+
   
 
 
