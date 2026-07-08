@@ -45,7 +45,9 @@ export abstract class AbstractPuppet<
   constructor(config: TConfig) {
     super();
     this._config = config;
-
+    
+    this._logger = new Logger(this._getLogLabels());
+    
     this.IMG_FOLDER = path.join(
       process.cwd(),
       "db",
@@ -106,7 +108,6 @@ export abstract class AbstractPuppet<
         this._logger.warn("Attempted init, after it has already been done. Disregarding.");
         return;
       }
-      this._logger = new Logger(this._getLogLabels());
       this._logger.info("Initializing...");
 
       this._store = new PuppetStore(this._config.id);
