@@ -68,6 +68,8 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     await this._page.goto(target, { timeout: this._runtime.load_timout });
   }
 
+  // TODO: Add url and image fetching?
+  // TODO: Some callback from puppeteer that runs on page change?
   protected async _getTargetInfo(): Promise<TargetInfo> {
     const result: TargetInfo = {};
 

@@ -78,7 +78,7 @@ export abstract class AbstractPuppet<
     return this._config.id;
   }
 
-    getLastInfo(): PuppetInfo {
+  getLastInfo(): PuppetInfo {
     return {
       ...this._info,
       target_info: this._lastTargetInfo,
