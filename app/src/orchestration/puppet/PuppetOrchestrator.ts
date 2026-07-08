@@ -118,8 +118,8 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   public getHandlers(): PuppetWebhandlers {
     return {
-      updateOrchestratorRuntime: (runtime) => this.updateRuntime(runtime),
-      updateRuntime: (id, runtime) => this.updatePuppetRuntime(id, runtime),
+      updateOrchestratorRuntime: (runtime: Partial<PuppetOrchestratorRuntime>) => this.updateRuntime(runtime),
+      updateRuntime: (id: PuppetKey, runtime: Partial<PuppetRuntime>) => this.updatePuppetRuntime(id, runtime),
     }
   }
 }
