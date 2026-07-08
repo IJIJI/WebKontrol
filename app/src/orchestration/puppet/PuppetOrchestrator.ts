@@ -1,55 +1,110 @@
 import EventEmitter from "node:events";
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
-import type { PuppetInfoBundle } from "../../puppet/types/model";
-import type { PuppetKey, PuppetRuntime } from "../../puppet/types/schema";
+import type { BasePuppetConfig, PuppetKey, PuppetRuntime } from "../../puppet/types/schema";
 import type { PuppetWebhandlers } from "../../webServer/model";
+import type { PuppetInfo } from "../../puppet/types/model";
+import type { PuppetOrchestratorConfigOutput, PuppetOrchestratorInfoOutput, PuppetOrchestratorRuntimeOutput } from "./model";
 
 
 export type PuppetOrchestratorEvents = {
-  info_update: [], // TODO: Should info be included in the event?
+  info_update: [info: PuppetOrchestratorInfoOutput];
+  runtime_update: [runtime: PuppetOrchestratorRuntimeOutput];
+  config_update: [config: PuppetOrchestratorConfigOutput];
 }
+
+interface PuppetDataBundle {
+  puppet: AbstractPuppet;
+  runtime: PuppetRuntime;
+  info: PuppetInfo;
+  config: BasePuppetConfig;
+}
+
+
 
 export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  { // TODO: Add store and manage default runtime?
   private _logger = new Logger(["LifeCycle", "ORCHESTRATOR"]);
 
   private _hasStarted: boolean = false;
 
-  private _puppets: Map<PuppetKey, AbstractPuppet> = new Map();
+  private _puppets: Map<PuppetKey, PuppetDataBundle> = new Map();
 
   constructor() {
     super();
   }
-  
-  private _updateInfo(): void { 
-    this.emit("info_update");
+
+  getInfo(): PuppetOrchestratorInfoOutput {
+    return {
+      puppets: this._puppets.values().map((bundle) => bundle.info).toArray(),
+    }
+  }
+
+  getRuntime(): PuppetOrchestratorRuntimeOutput {
+    return {
+      puppets: this._puppets.values().map((bundle) => bundle.runtime).toArray(),
+    }
+  }
+
+  getConfig(): PuppetOrchestratorConfigOutput {
+    return {
+      puppets: this._puppets.values().map((bundle) => bundle.config).toArray(),
+    }
+  }
+
+  private _updatePuppetData(id: PuppetKey, data: Partial<Omit<PuppetDataBundle, "puppet">>): void {
+    const prev = this._puppets.get(id);
+    if (!prev){
+      this._logger.warn("Tried updating data cache for puppet that does not exist! Discarding.");
+      return;
+    }
+    
+    this._puppets.set(id, {...prev, ...data});
+    
+    if (data.info && prev.info !== data.info){
+      this.emit('info_update', this.getInfo())
+    }
+    if (data.runtime && prev.runtime !== data.runtime){
+      this.emit('runtime_update', this.getRuntime())
+    }
+    if (data.config && prev.config !== data.config){
+      this.emit('config_update', this.getConfig())
+    }
   }
 
   public addPuppet(puppet: AbstractPuppet): void {
     if (this._hasStarted)
       return this._logger.error("Cannot add puppets to PuppetManager after it has started!");
 
-    puppet.on('info_update', () => this._updateInfo());
-    puppet.on('load_fail', () => this._updateInfo());
-    puppet.on('load_success', () => this._updateInfo());
-    puppet.on('runtime_update', () => this._updateInfo());
+    const config = puppet.getConfig();
+    const id = config.id;
 
-    this._puppets.set(puppet.getKey(), puppet);
+    puppet.on('runtime_update', (runtime) => this._updatePuppetData(id, {runtime}));
+    puppet.on('info_update', (info) => this._updatePuppetData(id, {info}));
+    puppet.on('config_update', (config) => this._updatePuppetData(id, {config}));
+
+    const pupBundle: PuppetDataBundle = {
+      puppet: puppet,
+      runtime: puppet.getRuntime(),
+      info: puppet.getLastInfo(),
+      config: config,
+    }
+
+    this._puppets.set(puppet.getKey(), pupBundle);
   }
 
   public async updatePuppetRuntime(id: PuppetKey, runtime: Partial<PuppetRuntime>): Promise<void> {
     if (!this._puppets.has(id))
       return this._logger.error(`Attempted to update runtime for puppet ${id}. It does not exist. Provided runtime:`, runtime);
 
-    await this._puppets.get(id)?.updateRuntime(runtime);
+    await this._puppets.get(id)?.puppet.updateRuntime(runtime);
   }
 
   public async init(): Promise<void> {
     if (this._hasStarted)
       return this._logger.error("Attempted to initialised, but is already started!");
 
-    this._puppets.forEach(async (puppet, key) => {
-      await puppet.init();
+    this._puppets.forEach(async (puppetBundle, key) => {
+      await puppetBundle.puppet.init();
     });
   }
 
@@ -57,14 +112,5 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     return {
       updateRuntime: (id, runtime) => this.updatePuppetRuntime(id, runtime),
     }
-  }
-
-  public async getPuppetInfoBundles(): Promise<PuppetInfoBundle[]> {
-    return await Promise.all(
-        this._puppets
-            .values()
-            .map((puppet) => puppet.getInfo())
-            .toArray()
-    )
   }
 }
