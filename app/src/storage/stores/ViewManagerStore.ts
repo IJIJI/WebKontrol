@@ -20,7 +20,7 @@ export class ViewManagerStore {
     this._logger.debug(`Saving runtime...`);
     await this._db.updateSetting(
       "app",
-      "system",
+      "viewmanager",
       "runtime",
       JSON.stringify(config),
     );
@@ -30,7 +30,7 @@ export class ViewManagerStore {
   public async loadRuntime(): Promise<ViewManagerRuntime | null> {
     try {
       this._logger.debug(`Loading runtime...`);
-      const raw = await this._db.getSetting("app", "system", "runtime");
+      const raw = await this._db.getSetting("app", "viewmanager", "runtime");
       if (raw === null) {
         this._logger.info(`Failed loading runtime! Got null`);
         return null;
