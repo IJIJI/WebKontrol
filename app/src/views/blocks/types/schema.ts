@@ -166,3 +166,14 @@ export const FreeFormBlockTypeSchema: BlockTypeDefinition = {
   }),
   fixedDataDependencies: [],
 };
+
+//* More advanced types!
+// TextBlock: You can do text things!
+export const DateTimeBlockTypeSchema: BlockTypeDefinition = {
+  key: "webkontrol::block::text",
+  configSchema: z.object({
+    format: z.string().regex(/^(?:[dDjlNSwzWFmMntLoYyaABgGhHisuveIOPpTZcrU]|\\.|[\s\-\/\:\.,\|])+$/).optional().default("H:i:s"),
+    style: TextBlockStyleSchema,
+  }),
+  fixedDataDependencies: [],
+};
