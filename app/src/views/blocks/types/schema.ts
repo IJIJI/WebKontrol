@@ -29,16 +29,16 @@ export const BlockIdCodec = z.codec(BlockKeySchema, BlockIdSchema, {
 export const DataFieldSchema = slug;
 export type DataField = z.infer<typeof DataFieldSchema>;
 
-export const DataIdSchema = z.object({
+export const DataProviderSchema = z.object({
   namespace: NamespaceIdSchema,
   field: DataFieldSchema,
 });
-export type DataId = z.infer<typeof DataIdSchema>;
+export type DataProvider = z.infer<typeof DataProviderSchema>;
 
 export const DataKeySchema = z.templateLiteral([NamespaceIdSchema, "::data::", DataFieldSchema]);
 export type DataKey = z.infer<typeof DataKeySchema>;
 
-export const DataIdCodec = z.codec(DataKeySchema, DataIdSchema, {
+export const DataIdCodec = z.codec(DataKeySchema, DataProviderSchema, {
   decode: (key) => {
     const [namespace, , field] = key.split("::");
     return { namespace, field };
@@ -46,21 +46,7 @@ export const DataIdCodec = z.codec(DataKeySchema, DataIdSchema, {
   encode: (id) => `${id.namespace}::block::${id.field}` as DataKey,
 });
 
-//* Block Config:
-export const BaseBlockConfigSchema = z.object({
-  id: BlockIdSchema,
-}); // TODO: Content more fields in this schema, with styles being a content field? Or keep top level for known fields like content, style, etc?
 
-
-export function extendBlockConfig<
-  const B extends string, // TODO: Should the key extend the BlockKey somehow? Or the BlockId? In any case the format should be enforced.
-  T extends z.ZodRawShape,
->(key: B, shape: T) {
-  return BaseBlockConfigSchema.extend({
-    type: z.literal(key).optional().default(key),
-    ...shape,
-  });
-}
 
 //* Data Types:
 export const DimensionSchema = z.number().min(0).max(100);
