@@ -46,6 +46,12 @@ export const DataIdCodec = z.codec(DataKeySchema, DataProviderSchema, {
   encode: (id) => `${id.namespace}::block::${id.field}` as DataKey,
 });
 
+//* Block Definitions:
+export interface BlockTypeDefinition<TConfig = unknown> {
+  key: BlockKey;
+  configSchema: z.ZodType<TConfig>;
+  fixedDataDependencies?: DataKey[]; // Data sources that are not user configurable
+}
 
 
 //* Data Types:
@@ -80,13 +86,7 @@ export const TextBlockStyleSchema = ContainerBlockStyleSchema.extend({
   ...FontStyleShape,
 });
 
-//* Block Definitions:
-export interface BlockTypeDefinition<TConfig = unknown> {
-  key: BlockKey;
-  configSchema: z.ZodType<TConfig>;
-  component: string;
-  fixedDataDependencies?: DataKey[]; // Data sources that are not user configurable
-}
+
 
 
 
