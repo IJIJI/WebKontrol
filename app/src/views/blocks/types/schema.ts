@@ -55,6 +55,18 @@ export interface BlockTypeDefinition<TConfig = unknown> {
 
 export const AnyBlockConfigSchema = z.looseObject({ type: BlockKeySchema });
 
+//* Resolved Blocks:
+export interface ResolvedBlock<TConfig = unknown> { // TODO: Move to registry types?
+  type: BlockKey,
+  config: TConfig,
+}
+// export function resolveBlock(raw: unknown): ResolvedBlock {
+//   const envelope = AnyBlockConfigSchema.parse(raw);
+//   const def = registry.get(envelope.type);
+//   if (!def) throw new Error(`Unknown block type "${envelope.type}"`);
+//   return { type: envelope.type, content: def.configSchema.parse(envelope) };
+// }
+
 //* Data Types:
 export const DimensionSchema = z.number().min(0).max(100);
 export type Dimension = z.infer<typeof DimensionSchema>;
