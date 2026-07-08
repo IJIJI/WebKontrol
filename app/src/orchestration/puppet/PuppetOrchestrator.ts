@@ -3,23 +3,19 @@ import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
 import { BLANK_PUPPET_TARGET, type BasePuppetConfig, type PuppetKey, type PuppetRuntime } from "../../puppet/types/schema";
 import type { PuppetWebhandlers } from "../../webServer/model";
-import type { PuppetInfo } from "../../puppet/types/model";
-import type { PuppetOrchestratorConfigOutput, PuppetOrchestratorInfoOutput, PuppetOrchestratorRuntimeOutput } from "./model";
+import type { PuppetDataBundle, PuppetInfo } from "../../puppet/types/model";
 import { PuppetOrchestratorStore } from "../../storage/stores/PuppetOrchestratorStore";
 import { PuppetOrchestratorRuntimeSchema, type PuppetOrchestratorRuntime } from "./schema";
 
 
 export type PuppetOrchestratorEvents = {
-  info_update: [info: PuppetOrchestratorInfoOutput];
-  runtime_update: [runtime: PuppetOrchestratorRuntimeOutput];
-  config_update: [config: PuppetOrchestratorConfigOutput];
+  puppet_update: [bundles: PuppetDataBundle[]];
+  runtime_update: [runtime: PuppetOrchestratorRuntime];
 }
 
-interface PuppetDataBundle {
+
+interface PuppetFullBundle extends PuppetDataBundle {
   puppet: AbstractPuppet;
-  runtime: PuppetRuntime;
-  info: PuppetInfo;
-  config: BasePuppetConfig;
 }
 
 
@@ -32,29 +28,25 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   private _hasStarted: boolean = false;
 
-  private _puppets: Map<PuppetKey, PuppetDataBundle> = new Map();
+  private _puppets: Map<PuppetKey, PuppetFullBundle> = new Map();
 
   constructor() {
     super();
   }
 
-  getInfo(): PuppetOrchestratorInfoOutput {
-    return {
-      puppets: this._puppets.values().map((bundle) => bundle.info).toArray(),
-    }
+
+  getRuntime(): PuppetOrchestratorRuntime {
+    return this._runtime;
   }
 
-  getRuntime(): PuppetOrchestratorRuntimeOutput {
-    return {
-      runtime: this._runtime,
-      puppets: this._puppets.values().map((bundle) => bundle.runtime).toArray(),
-    }
-  }
-
-  getConfig(): PuppetOrchestratorConfigOutput {
-    return {
-      puppets: this._puppets.values().map((bundle) => bundle.config).toArray(),
-    }
+  getPuppetBundles(): PuppetDataBundle[] {
+    return this._puppets.values().map((bundle) => { 
+      return {
+        info: bundle.info,
+        runtime: bundle.runtime,
+        config: bundle.config, 
+      }
+    }).toArray()
   }
 
   async updateRuntime(runtime: Partial<PuppetOrchestratorRuntime>): Promise<void> { // TODO: Add a way to set puppets to the default runtime -> there needs to be a way to know if puppets are set.
@@ -63,7 +55,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     await this._store.saveRuntime(this._runtime);
   }
 
-  private _updatePuppetData(id: PuppetKey, data: Partial<Omit<PuppetDataBundle, "puppet">>): void {
+  private _updatePuppetData(id: PuppetKey, data: Partial<PuppetDataBundle>): void {
     const prev = this._puppets.get(id);
     if (!prev){
       this._logger.warn("Tried updating data cache for puppet that does not exist! Discarding.");
@@ -72,14 +64,8 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     
     this._puppets.set(id, {...prev, ...data});
     
-    if (data.info && prev.info !== data.info){
-      this.emit('info_update', this.getInfo())
-    }
-    if (data.runtime && prev.runtime !== data.runtime){
-      this.emit('runtime_update', this.getRuntime())
-    }
-    if (data.config && prev.config !== data.config){
-      this.emit('config_update', this.getConfig())
+    if (data.info && data !== prev){
+      this.emit('puppet_update', this.getPuppetBundles())
     }
   }
 
@@ -94,7 +80,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     puppet.on('info_update', (info) => this._updatePuppetData(id, {info}));
     puppet.on('config_update', (config) => this._updatePuppetData(id, {config}));
 
-    const pupBundle: PuppetDataBundle = {
+    const pupBundle: PuppetFullBundle = {
       puppet: puppet,
       runtime: puppet.getRuntime(),
       info: puppet.getLastInfo(),
@@ -132,6 +118,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   public getHandlers(): PuppetWebhandlers {
     return {
+      updateOrchestratorRuntime: (runtime) => this.updateRuntime(runtime),
       updateRuntime: (id, runtime) => this.updatePuppetRuntime(id, runtime),
     }
   }
