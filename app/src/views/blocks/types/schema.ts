@@ -96,27 +96,44 @@ export const TextBlockStyleSchema = ContainerBlockStyleSchema.extend({
 
 //* Some blocks:
 // Grid: Auto aranges the blocks in to the best grid for them.
-export const GridBlockConfigSchema = extendBlockConfig("webkontrol::grid",{
-  blocks: z.array(BaseBlockConfigSchema), // TODO: This should work for all extensions of it, BaseBlockConfig itself should not work as it is not a usable block
-});
+export const GridBlockConfigSchema: BlockTypeDefinition = {
+  key: "webkontrol::block::grid",
+  configSchema: z.object({
+    blocks: z.array(AnyBlockConfigSchema),
+  }),
+  fixedDataDependencies: [],
+};
 
 // ContainerBlock: Allows you to add styling to blocks that do not have it.
-export const ContainerBlockConfigSchema = extendBlockConfig("webkontrol::containter",{
-  block: BaseBlockConfigSchema, // TODO: This should work for all extensions of it, BaseBlockConfig itself should not work as it is not a usable block
-  style: ContainerBlockStyleSchema,
-});
+export const ContainerBlockConfigSchema: BlockTypeDefinition = {
+  key: "webkontrol::block::containter",
+  configSchema: z.object({
+    block: AnyBlockConfigSchema,
+    style: ContainerBlockStyleSchema,
+  }),
+  fixedDataDependencies: [],
+};
 
 // TextBlock: You can do text things!
-export const TextBlockConfigSchema = extendBlockConfig("webkontrol::text",{
-  text: z.string(),
-  style: TextBlockStyleSchema,
-});
+export const TextBlockConfigSchema: BlockTypeDefinition = {
+  key: "webkontrol::block::text",
+  configSchema: z.object({
+    text: z.string(),
+    style: TextBlockStyleSchema,
+  }),
+  fixedDataDependencies: [],
+};
 
 // FreeFormContainer: Position the blocks wherever you want!
-export const FreeFormBlockConfigSchema = extendBlockConfig("webkontrol::freeform",{
-  blocks: z.array(z.object({ // TODO: Should theze objects have their own schema?
-      block: BaseBlockConfigSchema,
+export const FreeFormBlockConfigSchema: BlockTypeDefinition = {
+  key: "webkontrol::block::freeform",
+  configSchema: z.object({
+  blocks: z.array(
+    z.object({ // TODO: Should theze objects have their own schema?
+      block: AnyBlockConfigSchema,
       position: CoordinateSchema,
       size: CoordinateSchema,
-    })), // TODO: This should work for all extensions of it, BaseBlockConfig itself should not work as it is not a usable block
-});
+    })), 
+  }),
+  fixedDataDependencies: [],
+};
