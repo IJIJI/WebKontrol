@@ -63,10 +63,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     }
     
     this._puppets.set(id, {...prev, ...data});
-    
-    if (data.info && data !== prev){
-      this.emit('puppet_update', this.getPuppetBundles())
-    }
+    this.emit('puppet_update', this.getPuppetBundles());
   }
 
   public addPuppet(puppet: AbstractPuppet): void {
