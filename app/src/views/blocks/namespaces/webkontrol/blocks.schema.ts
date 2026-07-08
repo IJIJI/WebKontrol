@@ -22,7 +22,7 @@ export const TextBlockTypeDefinition: BlockTypeDefinition = {
 
 // ContainerBlock: Allows you to add styling to blocks that do not have it.
 export const ContainerBlockTypeDefinition: BlockTypeDefinition = {
-  key: "webkontrol::block::containter",
+  key: "webkontrol::block::container",
   configSchema: z.object({
     block: AnyBlockConfigSchema,
     style: ContainerBlockStyleSchema,
