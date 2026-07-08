@@ -95,27 +95,17 @@ export const TextBlockStyleSchema = ContainerBlockStyleSchema.extend({
 
 
 //* Some blocks:
-// Grid: Auto aranges the blocks in to the best grid for them.
-export const GridBlockConfigSchema: BlockTypeDefinition = {
-  key: "webkontrol::block::grid",
+// WebsiteBlock: You can display websites!
+export const WebsiteBlockTypeSchema: BlockTypeDefinition = {
+  key: "webkontrol::block::website",
   configSchema: z.object({
-    blocks: z.array(AnyBlockConfigSchema),
-  }),
-  fixedDataDependencies: [],
-};
-
-// ContainerBlock: Allows you to add styling to blocks that do not have it.
-export const ContainerBlockConfigSchema: BlockTypeDefinition = {
-  key: "webkontrol::block::containter",
-  configSchema: z.object({
-    block: AnyBlockConfigSchema,
-    style: ContainerBlockStyleSchema,
+    url: z.url(),
   }),
   fixedDataDependencies: [],
 };
 
 // TextBlock: You can do text things!
-export const TextBlockConfigSchema: BlockTypeDefinition = {
+export const TextBlockTypeSchema: BlockTypeDefinition = {
   key: "webkontrol::block::text",
   configSchema: z.object({
     text: z.string(),
@@ -124,8 +114,27 @@ export const TextBlockConfigSchema: BlockTypeDefinition = {
   fixedDataDependencies: [],
 };
 
+// ContainerBlock: Allows you to add styling to blocks that do not have it.
+export const ContainerBlockTypeSchema: BlockTypeDefinition = {
+  key: "webkontrol::block::containter",
+  configSchema: z.object({
+    block: AnyBlockConfigSchema,
+    style: ContainerBlockStyleSchema,
+  }),
+  fixedDataDependencies: [],
+};
+
+// Grid: Auto aranges the blocks in to the best grid for them.
+export const GridBlockTypeSchema: BlockTypeDefinition = {
+  key: "webkontrol::block::grid",
+  configSchema: z.object({
+    blocks: z.array(AnyBlockConfigSchema),
+  }),
+  fixedDataDependencies: [],
+};
+
 // FreeFormContainer: Position the blocks wherever you want!
-export const FreeFormBlockConfigSchema: BlockTypeDefinition = {
+export const FreeFormBlockTypeSchema: BlockTypeDefinition = {
   key: "webkontrol::block::freeform",
   configSchema: z.object({
   blocks: z.array(
