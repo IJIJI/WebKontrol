@@ -32,6 +32,18 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     this._webServer = config.webServer;
     this._uiManager = config.uiManager;
 
+    this._updateState({
+      puppets: this._puppetOrchestrator.getPuppetBundles(),
+      runtime: {
+        system: this._systemManager.getRuntime(),
+        puppetOrchestrator: this._puppetOrchestrator.getRuntime(),
+        ui: this._uiManager.getRuntime(),
+      },
+      info: {
+        system: this._systemManager.getInfo(),
+      }
+    });
+
     this._systemManager.on('info_update', (info) => this._updateState({info: { ...this._webState.runtime, system: info }}));
     this._systemManager.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, system: runtime }}));
     
@@ -81,17 +93,6 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     await this._webServer.start(); // TODO rename to init? Or split?
 
 
-    this._updateState({
-      puppets: this._puppetOrchestrator.getPuppetBundles(),
-      runtime: {
-        system: this._systemManager.getRuntime(),
-        puppetOrchestrator: this._puppetOrchestrator.getRuntime(),
-        ui: this._uiManager.getRuntime(),
-      },
-      info: {
-        system: this._systemManager.getInfo(),
-      }
-    });
   }
 
   private _updateState(state: Partial<WebServerState>) {
