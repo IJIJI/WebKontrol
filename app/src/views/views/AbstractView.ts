@@ -1,4 +1,5 @@
 import { EventEmitter } from "node:stream";
+import type { ViewConfig } from "../types/schema";
 
 // TODO: Split and move into schema and model files
 export type ViewType = string;
@@ -9,9 +10,6 @@ export type ViewId = {
 };
 export type ViewKey = `${ViewType}::${ViewIndex}`;
 
-export type ViewConfig = {
-  name: string;
-};
 
 export type ViewEvents = {
   load_fail: [];
