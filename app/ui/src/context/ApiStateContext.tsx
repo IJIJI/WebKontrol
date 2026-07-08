@@ -9,15 +9,15 @@ import {
 } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import type { WebServerState } from "../../../src/webServer/model";
-import type { PuppetInfoBundle } from "../../../src/puppet/types/model";
 import { Api } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
 import { ConnectionStatus } from "./types";
 import { PuppetKey, PuppetRuntime, PuppetRuntimeInput } from "../../../src/puppet/types/schema";
 import { SystemRuntimeInput } from "../../../src/system/schema";
 import { UiRuntimeInput, UiTheme } from "../../../src/ui/schema";
+import { PuppetDataBundle } from "../../../src/puppet/types/model";
 
-export interface UiPuppetState extends PuppetInfoBundle {
+export interface UiPuppetState extends PuppetDataBundle {
   setRuntime: (config: PuppetRuntime) => Promise<void>;
 }
 
