@@ -1,10 +1,12 @@
 import EventEmitter from "node:events";
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
-import type { BasePuppetConfig, PuppetKey, PuppetRuntime } from "../../puppet/types/schema";
+import { BLANK_PUPPET_TARGET, type BasePuppetConfig, type PuppetKey, type PuppetRuntime } from "../../puppet/types/schema";
 import type { PuppetWebhandlers } from "../../webServer/model";
 import type { PuppetInfo } from "../../puppet/types/model";
 import type { PuppetOrchestratorConfigOutput, PuppetOrchestratorInfoOutput, PuppetOrchestratorRuntimeOutput } from "./model";
+import { PuppetOrchestratorStore } from "../../storage/stores/PuppetOrchestratorStore";
+import { PuppetOrchestratorRuntimeSchema, type PuppetOrchestratorRuntime } from "./schema";
 
 
 export type PuppetOrchestratorEvents = {
@@ -25,6 +27,9 @@ interface PuppetDataBundle {
 export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  { // TODO: Add store and manage default runtime?
   private _logger = new Logger(["LifeCycle", "ORCHESTRATOR"]);
 
+  protected _store!: PuppetOrchestratorStore;
+  protected _runtime: PuppetOrchestratorRuntime = PuppetOrchestratorRuntimeSchema.parse({});
+
   private _hasStarted: boolean = false;
 
   private _puppets: Map<PuppetKey, PuppetDataBundle> = new Map();
@@ -41,6 +46,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   getRuntime(): PuppetOrchestratorRuntimeOutput {
     return {
+      runtime: this._runtime,
       puppets: this._puppets.values().map((bundle) => bundle.runtime).toArray(),
     }
   }
@@ -49,6 +55,12 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     return {
       puppets: this._puppets.values().map((bundle) => bundle.config).toArray(),
     }
+  }
+
+  async updateRuntime(runtime: Partial<PuppetOrchestratorRuntime>): Promise<void> { // TODO: Add a way to set puppets to the default runtime -> there needs to be a way to know if puppets are set.
+    this._runtime = {...this._runtime, ...runtime};
+    this.emit('runtime_update', this.getRuntime());
+    await this._store.saveRuntime(this._runtime);
   }
 
   private _updatePuppetData(id: PuppetKey, data: Partial<Omit<PuppetDataBundle, "puppet">>): void {
@@ -102,6 +114,16 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
   public async init(): Promise<void> {
     if (this._hasStarted)
       return this._logger.error("Attempted to initialised, but is already started!");
+
+    this._store = new PuppetOrchestratorStore();
+    const runtime = await this._store.loadRuntime(); // TODO: All fields have defaults. Will this ever be null, store uses the schema to parse.
+    if (runtime) {
+      this._runtime = runtime;
+    }
+    else {
+      this._logger.debug("No runtime found, using defaults.");
+    }
+
 
     this._puppets.forEach(async (puppetBundle, key) => {
       await puppetBundle.puppet.init();

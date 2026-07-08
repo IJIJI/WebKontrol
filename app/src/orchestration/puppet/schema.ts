@@ -1,9 +1,12 @@
 import z from "zod";
-import { PuppetRuntimeSchema } from "../../puppet/types/schema";
+import { BLANK_PUPPET_TARGET, PuppetRuntimeSchema } from "../../puppet/types/schema";
 
 
-export const PuppetOrchestratorRuntimeSchema = z.object({
+export const PuppetOrchestratorRuntimeShape = z.object({
   default_runtime: PuppetRuntimeSchema,
+});
+export const PuppetOrchestratorRuntimeSchema = PuppetOrchestratorRuntimeShape.extend({
+  default_runtime: PuppetOrchestratorRuntimeShape.shape.default_runtime.default(BLANK_PUPPET_TARGET),
 });
 
 export type PuppetOrchestratorRuntime = z.infer<typeof PuppetOrchestratorRuntimeSchema>;
