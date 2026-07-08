@@ -5,7 +5,7 @@ import { Logger } from "../logging/Logger";
 import type { UiWebhandlers } from "../webServer/model";
 
 export type UiManagerEvents = {
-  info_update: [], // TODO: Should info be included in the event?
+  runtime_update: [runtime: UiRuntime],
 }
 
 export class UiManager extends EventEmitter<UiManagerEvents>  {
@@ -27,13 +27,13 @@ export class UiManager extends EventEmitter<UiManagerEvents>  {
       this._runtime = loaded;
     else
       this._logger.warn("Failed loading runtime from store, using defaults.");
+
+    await this.updateRuntime(this._runtime); // TODO: Should this save?
   }
 
-  async updateRuntime(config: Partial<UiRuntime>): Promise<void> {
-    
-    this._runtime = {...this._runtime, ...config};
-    
-    this.emit('info_update');
+  async updateRuntime(runtime: Partial<UiRuntime>): Promise<void> {
+    this._runtime = {...this._runtime, ...runtime};
+    this.emit('runtime_update', this._runtime);
     await this._store.saveRuntime(this._runtime);
   }
 

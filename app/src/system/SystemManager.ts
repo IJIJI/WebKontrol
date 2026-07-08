@@ -7,7 +7,8 @@ import type { SystemInfo } from "./model";
 import { SystemRuntimeSchema, type SystemRuntime } from "./schema";
 
 export type SystemManagerEvents = {
-  info_update: [], // TODO: Should info be included in the event?
+  info_update: [info: SystemInfo],
+  runtime_update: [runtime: SystemRuntime],
 }
 
 export class SystemManager extends EventEmitter<SystemManagerEvents>  {
@@ -31,17 +32,20 @@ export class SystemManager extends EventEmitter<SystemManagerEvents>  {
     const loaded = await this._store.loadRuntime();
     if (loaded)
       this._runtime = loaded;
-    else {
+    else
       this._logger.info("Failed loading runtime from store, using defaults.");
-      await this._store.saveRuntime(this._runtime); // TODO: Should this save?
-    }
+    
+    await this.updateRuntime(this._runtime); // TODO: Should this save?
   }
 
-  async updateRuntime(config: Partial<SystemRuntime>): Promise<void> {
-    
-    this._runtime = {...this._runtime, ...config};
-    this.emit('info_update');
+  async updateRuntime(runtime: Partial<SystemRuntime>): Promise<void> {
+    this._runtime = {...this._runtime, ...runtime};
+    this.emit('runtime_update', this._runtime);
     await this._store.saveRuntime(this._runtime);
+  }
+  async updateInfo(info: Partial<SystemInfo>): Promise<void> {
+    this._info = {...this._info, ...info};
+    this.emit('info_update', this._info);
   }
 
   getRuntime(): SystemRuntime {
