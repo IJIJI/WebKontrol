@@ -47,23 +47,27 @@ export const DataIdCodec = z.codec(DataSourceKeySchema, DataSourceSchema, {
 });
 
 //* Block Definitions:
+// Every block has a type, loose to ignore the rest of the values.
 export const AnyBlockConfigSchema = z.looseObject({ type: BlockKeySchema });
+export type AnyBlockConfig = z.infer<typeof AnyBlockConfigSchema>;
 
+// Child blocks are assigned the meta to differentiate and parse them.
+export const BLOCK_SLOT_META = "blockSlot" as const;
+export const blockSlot = () => AnyBlockConfigSchema.meta({ [BLOCK_SLOT_META]: true });
 
-// export function resolveBlock(raw: unknown): ResolvedBlock {
-//   const envelope = AnyBlockConfigSchema.parse(raw);
-//   const def = registry.get(envelope.type);
-//   if (!def) throw new Error(`Unknown block type "${envelope.type}"`);
-//   return { type: envelope.type, content: def.configSchema.parse(envelope) };
-// }
-// function findChildBlocks(value: unknown): unknown[] {
-//   if (Array.isArray(value)) return value.flatMap(findChildBlocks);
-//   if (value && typeof value === "object") {
-//     if (AnyBlockConfigSchema.safeParse(value).success) return [value];
-//     return Object.values(value).flatMap(findChildBlocks);
-//   }
-//   return [];
-// }
+export function isBlockSlot(schema: z.ZodType): boolean {
+  return schema.meta()?.[BLOCK_SLOT_META] === true;
+}
+
+//* Data binding:
+// Can be a literal or a DataSource, which is updated as it changes. 
+// Values that can be either use bindabl()
+// TODO: Check how typing can be enforced. E.g. a number field can only accept a number bindable.
+export const bindable = <T extends z.ZodType>(value: T) =>
+  z.discriminatedUnion("kind", [
+    z.object({ kind: z.literal("literal"), value }),
+    z.object({ kind: z.literal("binding"), source: DataSourceKeySchema }),
+  ]);
 
 //* Data Types:
 export const DimensionSchema = z.number().min(0).max(100);
