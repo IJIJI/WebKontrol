@@ -8,7 +8,7 @@ export interface ResolvedBlock<TConfig = unknown> { // TODO: Move to registry ty
 }
 
 //* Model Registration:
-export abstract class AbstractBlockType<TConfig = unknown> {
+export abstract class AbstractBlockType<TConfig> {
   abstract readonly key: BlockKey;
   abstract readonly configSchema: z.ZodType<TConfig>;
   readonly fixedDataDependencies: DataSourceKey[] = [];
