@@ -17,3 +17,5 @@ export class BlockTypeRegistry { // TODO: BlockRegistry?
     return [...this._types.values()];
   }
 }
+
+export const blockTypeRegistry = new BlockTypeRegistry(); // TODO: Singleton instead?
