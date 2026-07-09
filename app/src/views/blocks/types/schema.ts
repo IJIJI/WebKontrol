@@ -47,12 +47,6 @@ export const DataIdCodec = z.codec(DataSourceKeySchema, DataSourceSchema, {
 });
 
 //* Block Definitions:
-export interface BlockTypeDefinition<TConfig = unknown> {
-  key: BlockKey;
-  configSchema: z.ZodType<TConfig>;
-  fixedDataDependencies?: DataSourceKey[]; // Data sources that are not user configurable
-}
-
 export const AnyBlockConfigSchema = z.looseObject({ type: BlockKeySchema });
 
 

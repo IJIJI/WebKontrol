@@ -1,7 +1,7 @@
 import { blockTypeRegistry } from "../../registry";
-import { ContainerBlockTypeDefinition, DateTimeBlockTypeDefinition, FreeFormBlockTypeDefinition, GridBlockTypeDefinition, TextBlockTypeDefinition, WebsiteBlockTypeDefinition } from "./blocks.schema";
+import { ContainerBlockType, DateTimeBlockType, FreeFormBlockType, GridBlockType, TextBlockType, WebsiteBlockType } from "./blocks.schema";
 
 
-for ( const typeDef of [WebsiteBlockTypeDefinition, TextBlockTypeDefinition, ContainerBlockTypeDefinition, GridBlockTypeDefinition, FreeFormBlockTypeDefinition, DateTimeBlockTypeDefinition]) {
+for ( const typeDef of [new WebsiteBlockType(), new TextBlockType(), new ContainerBlockType(), new GridBlockType(), new FreeFormBlockType(), new DateTimeBlockType()]) {
   blockTypeRegistry.register(typeDef);
 }
