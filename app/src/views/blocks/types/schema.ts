@@ -62,7 +62,8 @@ export function isBlockSlot(schema: z.ZodType): boolean {
 //* Data binding:
 // Can be a literal or a DataSource, which is updated as it changes. 
 // Values that can be either use bindabl()
-// TODO: Check how typing can be enforced. E.g. a number field can only accept a number bindable.
+// TODO: Enforce binding types via a namespaced DataType key (identity match with
+// DataSources) + schema validation at runtime. Probably enable {namespace}::type::{type} = schema?
 export const bindable = <T extends z.ZodType>(value: T) =>
   z.discriminatedUnion("kind", [
     z.object({ kind: z.literal("literal"), value }),
