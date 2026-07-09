@@ -1,7 +1,7 @@
 import { type BlockKey, type BlockTypeDefinition } from "./types/schema";
 
 
-export class BlockTypeRegistry { // TODO: BlockRegistry?
+export class BlockTypeRegistry {
   private _types = new Map<BlockKey, BlockTypeDefinition>();
 
   register(definition: BlockTypeDefinition): void {
@@ -10,7 +10,7 @@ export class BlockTypeRegistry { // TODO: BlockRegistry?
     }
     this._types.set(definition.key, definition);
   }
-  get(key: BlockKey): BlockTypeDefinition | undefined { // TODO: Null instead of undefined?
+  get(key: BlockKey): BlockTypeDefinition | undefined {
     return this._types.get(key);
   }
   list(): BlockTypeDefinition[] {
