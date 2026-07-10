@@ -1,42 +1,83 @@
 import z from "zod";
-import { AbstractBlockType } from "./model";
-import type { BlockType, DataField, NamespaceId } from "./schema";
+import type { TemplateResult } from "lit";
+import { AbstractBlockType, type RenderContext, type Resolved } from "./model";
+import type { BlockKey, BlockKeyOf, BlockType, DataField, DataKeyOf, DataSourceKey, NamespaceId } from "./schema";
 import type { BlockTypeRegistry } from "../registry";
 
+/** The parsed config of a block: the exact `type` key plus its shape fields. */
+type BlockConfigOf<K extends BlockKey, S extends z.ZodRawShape> = { type: K } & z.infer<z.ZodObject<S>>;
+
 /**
- * A factory method for a namespace-kit that helps building a plugin's blocks within that namespace.
- * The namespace key is declared here and all declared blocks and (todo) data keys are assigned the correct namespace.
- * 
- * @param namespace The namespace key. e.g. webkontrol, or webkontrol.visuals
- * @returns // TODO
+ * The render function and metadata a block supplies to {@link NamespaceKit.defineBlock}.
  */
-export function createNamespace<const N extends NamespaceId>(namespace: N) {
-  const blockKey = <const T extends BlockType>(type: T) =>
-    `${namespace}::block::${type}` as `${N}::block::${T}`;
+export interface BlockImpl<K extends BlockKey, S extends z.ZodRawShape> {
+  render: (config: Resolved<BlockConfigOf<K, S>>, ctx: RenderContext) => TemplateResult;
+  /** DataSources this block always needs, regardless of config. */
+  fixedDataDependencies?: readonly DataSourceKey[];
+  /** Helper function to derive needed sources from config (a bound field, or one picked from another field). */
+  getConfigDataDependencies?: (config: BlockConfigOf<K, S>) => readonly DataSourceKey[];
+}
 
-  const dataKey = <const F extends DataField>(field: F) =>
-    `${namespace}::data::${field}` as `${N}::data::${F}`;
+/** A namespace-bound kit for building a plugin's blocks. See {@link createNamespace}. */
+export interface NamespaceKit<N extends NamespaceId> {
+  readonly namespace: N;
+  blockKey: <const T extends BlockType>(type: T) => BlockKeyOf<N, T>;
+  dataKey: <const F extends DataField>(field: F) => DataKeyOf<N, F>;
+  defineBlock: <const T extends BlockType, S extends z.ZodRawShape>(
+    type: T,
+    shape: S,
+    impl: BlockImpl<BlockKeyOf<N, T>, S>,
+  ) => AbstractBlockType<BlockConfigOf<BlockKeyOf<N, T>, S>>;
+  register: (registry: BlockTypeRegistry, blocks: readonly AbstractBlockType<any>[]) => void;
+}
 
-  /**
-   * Build a block base class with its key and config schema pre-wired. Extend it
-   * and implement render(); the config `type` literal is baked into the schema
-   * and TConfig is inferred from `shape`, so nothing else is restated.
-   */
-  function Block<const T extends BlockType, S extends z.ZodRawShape>(type: T, shape: S) {
+/**
+ * Build a namespace kit. The namespace is declared once here; every block/data
+ * key and every config `type` literal is derived from it, so plugin authors
+ * never hardcode (or typo) their namespace.
+ *
+ * Pure and compile-time only, creating a kit registers nothing. Hand the built
+ * blocks to `ns.register(registry, blocks)` to install them.
+ *
+ * @param namespace - The namespace this plugin owns (e.g. "webkontrol").
+ * @returns A kit that mints in-namespace keys and block definitions.
+ */
+export function createNamespace<const N extends NamespaceId>(namespace: N): NamespaceKit<N> {
+  const blockKey = <const T extends BlockType>(type: T): BlockKeyOf<N, T> =>
+    `${namespace}::block::${type}`;
+
+  const dataKey = <const F extends DataField>(field: F): DataKeyOf<N, F> =>
+    `${namespace}::data::${field}`;
+
+  function defineBlock<const T extends BlockType, S extends z.ZodRawShape>(
+    type: T,
+    shape: S,
+    impl: BlockImpl<BlockKeyOf<N, T>, S>,
+  ): AbstractBlockType<BlockConfigOf<BlockKeyOf<N, T>, S>> {
+    type Config = BlockConfigOf<BlockKeyOf<N, T>, S>;
     const key = blockKey(type);
-    const configSchema = z.object({ type: z.literal(key).default(key), ...shape });
+    // The `.default(key)` makes `type` optional on input but present on output,
+    // so the schema's input type is stricter than Config; hence the assertion.
+    const configSchema = z.object({ type: z.literal(key).default(key), ...shape }) as z.ZodType<Config>;
 
-    abstract class BlockBase extends AbstractBlockType<z.infer<typeof configSchema>> {
+    return new (class extends AbstractBlockType<Config> {
       readonly key = key;
       readonly configSchema = configSchema;
-    }
-    return BlockBase;
+      override readonly fixedDataDependencies = impl.fixedDataDependencies ?? [];
+
+      render(config: Resolved<Config>, ctx: RenderContext): TemplateResult {
+        return impl.render(config, ctx);
+      }
+
+      protected override _getConfigDataDependencies(config: Config): readonly DataSourceKey[] {
+        return impl.getConfigDataDependencies?.(config) ?? [];
+      }
+    })();
   }
 
-  /** Install this namespace's blocks into a registry (delegates to registry.register). */
   function register(registry: BlockTypeRegistry, blocks: readonly AbstractBlockType<any>[]): void {
     registry.register(namespace, blocks);
   }
 
-  return { namespace, blockKey, dataKey, Block, register };
+  return { namespace, blockKey, dataKey, defineBlock, register };
 }
