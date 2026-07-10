@@ -18,6 +18,9 @@ export type BlockId = z.infer<typeof BlockIdSchema>;
 export const BlockKeySchema = z.templateLiteral([NamespaceIdSchema, "::block::", BlockTypeSchema]);
 export type BlockKey = z.infer<typeof BlockKeySchema>;
 
+/** The block key for a specific namespace + type, e.g. `webkontrol::block::text`. */
+export type BlockKeyOf<N extends NamespaceId, T extends BlockType> = `${N}::block::${T}`;
+
 export const BlockIdCodec = z.codec(BlockKeySchema, BlockIdSchema, {
   decode: (key) => {
     const [namespace, , type] = key.split("::");
@@ -37,6 +40,9 @@ export type DataSource = z.infer<typeof DataSourceSchema>;
 
 export const DataSourceKeySchema = z.templateLiteral([NamespaceIdSchema, "::data::", DataFieldSchema]);
 export type DataSourceKey = z.infer<typeof DataSourceKeySchema>;
+
+/** The data source key for a specific namespace + field, e.g. `webkontrol::data::time`. */
+export type DataKeyOf<N extends NamespaceId, F extends DataField> = `${N}::data::${F}`;
 
 export const DataIdCodec = z.codec(DataSourceKeySchema, DataSourceSchema, {
   decode: (key) => {
