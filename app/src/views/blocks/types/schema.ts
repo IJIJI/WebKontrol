@@ -51,9 +51,11 @@ export const DataIdCodec = z.codec(DataSourceKeySchema, DataSourceSchema, {
 export const AnyBlockConfigSchema = z.looseObject({ type: BlockKeySchema });
 export type AnyBlockConfig = z.infer<typeof AnyBlockConfigSchema>;
 
-// Child blocks are assigned the meta to differentiate and parse them.
-export const BLOCK_SLOT_META = "blockSlot" as const;
-export const blockSlot = () => AnyBlockConfigSchema.meta({ [BLOCK_SLOT_META]: true });
+// A child-block slot. Marked by both meta and brand. Meta is used while walking the schema, brand is used at compile time to resolve blocks to Resolved<T>.
+export const BLOCK_SLOT_META = "blockSlot" as const; // TODO: Unify the slot meta and brand value
+export const blockSlot = () =>
+  AnyBlockConfigSchema.meta({ [BLOCK_SLOT_META]: true }).brand<"blockSlot">();
+export type BlockSlot = z.infer<ReturnType<typeof blockSlot>>;
 
 export function isBlockSlot(schema: z.ZodType): boolean {
   return schema.meta()?.[BLOCK_SLOT_META] === true;
