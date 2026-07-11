@@ -1,69 +1,58 @@
 import z from "zod";
-import { AnyBlockConfigSchema, ContainerBlockStyleSchema, CoordinateSchema, TextBlockStyleSchema } from "../../types/schema";
-import { AbstractBlockType } from "../../types/model";
+import { html } from "lit";
+import { blockSlot, ContainerBlockStyleSchema, CoordinateSchema, TextBlockStyleSchema } from "../../types/schema";
+import { createNamespace } from "../../types/config";
 
-// WebsiteBlock: You can display websites!
-export const WebsiteBlockConfigSchema = z.object({
+export const ns = createNamespace("webkontrol");
+
+// WebsiteBlock: display a website.
+export const WebsiteBlock = ns.defineBlock("website", {
   url: z.url(),
+}, {
+  render: (config) => html`<iframe src=${config.url} style="border:0;width:100%;height:100%"></iframe>`,
 });
-export type WebsiteBlockConfig = z.infer<typeof WebsiteBlockConfigSchema>;
-export class WebsiteBlockType extends AbstractBlockType<WebsiteBlockConfig> {
-  readonly key = "webkontrol::block::website" as const; // TODO: Const needed?
-  readonly configSchema = WebsiteBlockConfigSchema;
-};
 
-// TextBlock: You can do text things!
-export const TextBlockConfigSchema = z.object({
+// TextBlock: show some styled text.
+export const TextBlock = ns.defineBlock("text", {
   text: z.string(),
   style: TextBlockStyleSchema,
+}, {
+  render: (config) => html`<span>${config.text}</span>`, // TODO: apply config.style
 });
-export type TextBlockConfig = z.infer<typeof TextBlockConfigSchema>;
-export class TextBlockType extends AbstractBlockType<TextBlockConfig> {
-  readonly key = "webkontrol::block::text" as const; // TODO: Const needed?
-  readonly configSchema = TextBlockConfigSchema;
-};
 
-// ContainerBlock: Allows you to add styling to blocks that do not have it.
-export const ContainerBlockConfigSchema = z.object({
-  block: AnyBlockConfigSchema,
+// ContainerBlock: wrap another block to give it styling it does not have itself.
+export const ContainerBlock = ns.defineBlock("container", {
+  block: blockSlot(),
   style: ContainerBlockStyleSchema,
+}, {
+  render: (config, ctx) => html`<div>${ctx.renderChild(config.block)}</div>`, // TODO: apply config.style
 });
-export type ContainerBlockConfig = z.infer<typeof ContainerBlockConfigSchema>;
-export class ContainerBlockType extends AbstractBlockType<ContainerBlockConfig> {
-  readonly key = "webkontrol::block::container" as const; // TODO: Const needed?
-  readonly configSchema = ContainerBlockConfigSchema;
-}
 
-// Grid: Auto aranges the blocks in to the best grid for them.
-export const GridBlockConfigSchema = z.object({
-  blocks: z.array(AnyBlockConfigSchema),
+// GridBlock: auto-arrange child blocks into the best grid for them.
+export const GridBlock = ns.defineBlock("grid", {
+  blocks: z.array(blockSlot()),
+}, {
+  render: (config, ctx) => html`<div class="grid">${config.blocks.map((block) => ctx.renderChild(block))}</div>`,
 });
-export type GridBlockConfig = z.infer<typeof GridBlockConfigSchema>;
-export class GridBlockType extends AbstractBlockType<GridBlockConfig> {
-  readonly key = "webkontrol::block::grid" as const; // TODO: Const needed?
-  readonly configSchema = GridBlockConfigSchema;
-}
 
-// FreeFormContainer: Position the blocks wherever you want!
-export const FreeFormBlockConfigSchema = z.array(
-  z.object({ // TODO: Should theze objects have their own schema?
-    block: AnyBlockConfigSchema,
+// FreeFormBlock: position each child block wherever you want.
+export const FreeFormBlock = ns.defineBlock("freeform", {
+  items: z.array(z.object({ // TODO: Should these items have their own schema?
+    block: blockSlot(),
     position: CoordinateSchema,
     size: CoordinateSchema,
-}));
-export type FreeFormBlockConfig = z.infer<typeof FreeFormBlockConfigSchema>;
-export class FreeFormBlockType extends AbstractBlockType<FreeFormBlockConfig> {
-  readonly key = "webkontrol::block::freeform" as const; // TODO: Const needed?
-  readonly configSchema = FreeFormBlockConfigSchema;
-}
-
-// TextBlock: You can do text things!
-export const DateTimeBlockConfigSchema = z.object({
-  format: z.string().regex(/^(?:[dDjlNSwzWFmMntLoYyaABgGhHisuveIOPpTZcrU]|\\.|[\s\-\/\:\.,\|])+$/).optional().default("H:i:s"),
-  style: TextBlockStyleSchema,
+  })),
+}, {
+  render: (config, ctx) => html`<div class="freeform" style="position:relative">${config.items.map((item) => html`
+    <div style="position:absolute;left:${item.position.x}%;top:${item.position.y}%;width:${item.size.x}%;height:${item.size.y}%">
+      ${ctx.renderChild(item.block)}
+    </div>`)}</div>`,
 });
-export type DateTimeBlockConfig = z.infer<typeof DateTimeBlockConfigSchema>;
-export class DateTimeBlockType extends AbstractBlockType<DateTimeBlockConfig> {
-  readonly key = "webkontrol::block::datetime" as const; // TODO: Const needed?
-  readonly configSchema = DateTimeBlockConfigSchema;
-}
+
+// DateTimeBlock: show the current date/time in a configurable format.
+export const DateTimeBlock = ns.defineBlock("datetime", {
+  format: z.string().regex(/^(?:[dDjlNSwzWFmMntLoYyaABgGhHisuveIOPpTZcrU]|\\.|[\s\-/:.,|])+$/).optional().default("H:i:s"),
+  style: TextBlockStyleSchema,
+}, {
+  render: (config) => html`<span>${config.format}</span>`, // TODO: format the current time per config.format + apply config.style
+});
