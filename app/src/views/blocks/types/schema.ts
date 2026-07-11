@@ -59,6 +59,7 @@ export type AnyBlockConfig = z.infer<typeof AnyBlockConfigSchema>;
 
 // A child-block slot. Marked by both meta and brand. Meta is used while walking the schema, brand is used at compile time to resolve blocks to Resolved<T>.
 export const BLOCK_SLOT_META = "blockSlot" as const; // TODO: Unify the slot meta and brand value
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
 export const blockSlot = () =>
   AnyBlockConfigSchema.meta({ [BLOCK_SLOT_META]: true }).brand<"blockSlot">();
 export type BlockSlot = z.infer<ReturnType<typeof blockSlot>>;
@@ -72,6 +73,7 @@ export function isBlockSlot(schema: z.ZodType): boolean {
 // Values that can be either use bindabl()
 // TODO: Enforce binding types via a namespaced DataType key (identity match with
 // DataSources) + schema validation at runtime. Probably enable {namespace}::type::{type} = schema?
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
 export const bindable = <T extends z.ZodType>(value: T) =>
   z.discriminatedUnion("kind", [
     z.object({ kind: z.literal("literal"), value }),
