@@ -3,7 +3,7 @@ import { type JSX } from "react/jsx-runtime";
 import "../settings.less";
 import { BaseSetting, type BaseSettingNonValProps } from "../BaseSetting";
 import { useRef } from "react";
-import { Button, ButtonStyle, ButtonType } from "../../button/Button";
+import { Button, type ButtonStyle, type ButtonType } from "../../button/Button";
 
 type ButtonSettingProps = BaseSettingNonValProps & {
   onClick: () => void | Promise<void>;

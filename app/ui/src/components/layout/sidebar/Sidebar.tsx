@@ -6,7 +6,7 @@ import SidebarSection from "./SidebarSection";
 import "./sidebar.less";
 import { Icons } from "../../icons/Icons";
 import SidebarCollapseButton from "./SidebarCollapseButton";
-import { UiPuppetState, useApi } from "../../../context/ApiStateContext";
+import { type UiPuppetState, useApi } from "../../../context/ApiStateContext";
 import SidebarLoader from "./SidebarLoader";
 /* 
 Home

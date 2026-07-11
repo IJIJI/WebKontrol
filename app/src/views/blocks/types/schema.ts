@@ -26,6 +26,7 @@ export const BlockIdCodec = z.codec(BlockKeySchema, BlockIdSchema, {
     const [namespace, , type] = key.split("::");
     return { namespace, type };
   },
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- id parts are typed `string`, so the template literal widens to string; the cast is required.
   encode: (id) => `${id.namespace}::block::${id.type}` as BlockKey,
 });
 
@@ -49,6 +50,7 @@ export const DataIdCodec = z.codec(DataSourceKeySchema, DataSourceSchema, {
     const [namespace, , field] = key.split("::");
     return { namespace, field };
   },
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- id parts are typed `string`, so the template literal widens to string; the cast is required.
   encode: (id) => `${id.namespace}::data::${id.field}` as DataSourceKey,
 });
 
