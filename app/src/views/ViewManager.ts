@@ -49,7 +49,7 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
 
     const configs = await this._store.getViews();
     for (const [key, config] of configs) {
-      this._views.set(key, ViewFactory.createView(key, config));
+      this._views.set(key, ViewFactory.createView(key, config)); // TODO: Views are stored again. Smart?
     }
     this._logger.info(`Loaded ${this._views.size} view(s).`);
     this._syncInfo();
