@@ -1,6 +1,7 @@
 import z from "zod";
 import { LoadTimeoutSchema, LoadTimeoutSchemaDefault } from "../../puppet/types/schema";
 import { DisplayNameSchema } from "../../types/CommonTypes";
+import { AnyBlockConfigSchema } from "../blocks/types/schema";
 
 //* View identity:
 // A view instance key. A generated slug, stable across renames so puppet
@@ -51,10 +52,32 @@ export const BaseViewConfigSchema = z.object({
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
 export function extendViewConfig<const B extends ViewType, T extends z.ZodRawShape>(typeLiteral: B, shape: T) {
   return BaseViewConfigSchema.extend({
-    type: z.literal(typeLiteral).optional().default(typeLiteral),
+    type: z.literal(typeLiteral).default(typeLiteral),
     ...shape,
   });
 }
+
+//* Concrete view configs:
+// BlockView: renders a block tree (its single root block) as a page.
+export const BlockViewConfigSchema = extendViewConfig("blocks", {
+  root: AnyBlockConfigSchema,
+});
+export type BlockViewConfig = z.infer<typeof BlockViewConfigSchema>;
+
+// UrlView: the puppet navigates an external URL, without an iframe. This is to be able to load pages that prevent embedding.
+export const UrlViewConfigSchema = extendViewConfig("url", {
+  url: z.url(),
+  method: z.enum(["GET", "POST"]).default("GET"),
+  headers: z.record(z.string(), z.string()).optional(),
+  body: z.string().optional(),
+});
+export type UrlViewConfig = z.infer<typeof UrlViewConfigSchema>;
+
+export const AnyViewConfigSchema = z.discriminatedUnion("type", [
+  BlockViewConfigSchema,
+  UrlViewConfigSchema,
+]);
+export type AnyViewConfig = z.infer<typeof AnyViewConfigSchema>;
 
 // Temporary alias: the store parses this until it moves to AnyViewConfig (#20).
 export const ViewConfigSchema = BaseViewConfigSchema;
