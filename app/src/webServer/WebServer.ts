@@ -2,7 +2,7 @@ import express from "express";
 import ViteExpress from "vite-express";
 import type http from "http";
 import { Logger } from "../logging/Logger";
-import { WebServerStatus, type AppInfo, type WebServerMutationHandlers, type WebServerState } from "./model";
+import { WebServerStatus, type AppInfo, type RouteHandler, type RouteMethod, type RouteRegistrar, type WebServerMutationHandlers, type WebServerState } from "./model";
 import { jsonReplacer } from "../helpers/json";
 import {
   WebServerConfigSchema,
@@ -13,7 +13,7 @@ import { UiRuntimeShape } from "../ui/schema";
 import { SystemRuntimeShape } from "../system/schema";
 import { PuppetKeySchema, PuppetRuntimeShape } from "../puppet/types/schema";
 
-export class WebServer {
+export class WebServer implements RouteRegistrar {
   private _app = express();
   private _server!: http.Server;
   private _logger = new Logger(["WEB", "SERVER"]);
@@ -54,6 +54,40 @@ export class WebServer {
 
   public setHandlers(handlers: WebServerMutationHandlers): void {
     this._handlers = handlers;
+  }
+
+  /**
+   * Register a route. Components (views now, plugins later) use this instead of the
+   * WebServer hardcoding their paths. Must be called before start() so it lands
+   * ahead of the ViteExpress SPA catch-all. The handler returns a framework-agnostic
+   * RouteResponse, mapped to express here.
+   */
+  public registerRoute(method: RouteMethod, path: string, handler: RouteHandler): void {
+    this._app[method](path, (req, res) => {
+      void this._runRoute(handler, req, res);
+    });
+    this._logger.debug(`Registered ${method.toUpperCase()} ${path}`);
+  }
+
+  private async _runRoute(
+    handler: RouteHandler,
+    req: express.Request,
+    res: express.Response,
+  ): Promise<void> {
+    try {
+      const result = await handler({ params: req.params as Record<string, string>, query: req.query });
+      if (result.redirect !== undefined) {
+        res.redirect(result.status ?? 302, result.redirect);
+      } else if (result.body !== undefined) {
+        if (result.contentType) res.type(result.contentType);
+        res.status(result.status ?? 200).send(result.body);
+      } else {
+        res.status(result.status ?? 204).end();
+      }
+    } catch (error) {
+      this._logger.error(`Route handler failed for ${req.method} ${req.path}:`, error);
+      if (!res.headersSent) res.status(500).end();
+    }
   }
 
   public async start(): Promise<void> {

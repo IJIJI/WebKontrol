@@ -48,6 +48,29 @@ export interface WebServerMutationHandlers { // TODO: UiManager to manage ui set
   puppet: PuppetWebhandlers;
 }
 
+//* Route registration (the seed of plugin HTTP endpoints):
+export type RouteMethod = "get" | "post" | "put" | "patch" | "delete";
+
+export interface RouteRequest {
+  params: Record<string, string>;
+  query: Record<string, unknown>;
+}
+
+// A framework-agnostic response a route handler returns; WebServer maps it to express.
+export interface RouteResponse {
+  status?: number;
+  redirect?: string; // if set, redirect here (status defaults to 302)
+  body?: string;
+  contentType?: string; // for body, e.g. "text/html"
+}
+
+export type RouteHandler = (req: RouteRequest) => RouteResponse | Promise<RouteResponse>;
+
+// What WebServer exposes so components (views now, plugins later) register their own routes.
+export interface RouteRegistrar {
+  registerRoute(method: RouteMethod, path: string, handler: RouteHandler): void;
+}
+
 export enum WebServerStatus {
   SETTING_UP = "Setting up...",
   ONLINE = "Online",
