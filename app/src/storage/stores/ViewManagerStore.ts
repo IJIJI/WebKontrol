@@ -1,8 +1,8 @@
 import { Logger } from "../../logging/Logger";
 import {
-  ViewConfigSchema,
+  AnyViewConfigSchema,
   ViewManagerRuntimeSchema,
-  type ViewConfig,
+  type AnyViewConfig,
   type ViewKey,
   type ViewManagerRuntime,
 } from "../../views/types/schema";
@@ -49,7 +49,7 @@ export class ViewManagerStore {
   // TODO: deleteRuntime?
 
 
-  public async getView(key: ViewKey): Promise<ViewConfig | null> {
+  public async getView(key: ViewKey): Promise<AnyViewConfig | null> {
     try {
       this._logger.debug(`Loading view "${key}"...`);
       const raw = await this._db.getSetting(
@@ -61,7 +61,7 @@ export class ViewManagerStore {
         this._logger.info(`Failed loading view "${key}"! Got null`);
         return null;
       }
-      const config = ViewConfigSchema.parse(JSON.parse(raw));
+      const config = AnyViewConfigSchema.parse(JSON.parse(raw));
       this._logger.debug(`Successfully loaded view "${key}"!`, config);
       return config;
     } catch (error) {
@@ -70,16 +70,16 @@ export class ViewManagerStore {
     }
   }
 
-  public async getViews(): Promise<Map<ViewKey, ViewConfig>> {
+  public async getViews(): Promise<Map<ViewKey, AnyViewConfig>> {
     this._logger.debug(`Loading views...`);
     const rows = await this._db.getSettingsByType(
       "view",
       "entry",
     );
-    const views = new Map<ViewKey, ViewConfig>();
+    const views = new Map<ViewKey, AnyViewConfig>();
     for (const [key, value] of rows) {
       try {
-        views.set(key as ViewKey, ViewConfigSchema.parse(JSON.parse(value)));
+        views.set(key as ViewKey, AnyViewConfigSchema.parse(JSON.parse(value)));
       } catch (error) {
         this._logger.error(`Failed loading view "${key}" with error:`, error);
       }
@@ -88,7 +88,7 @@ export class ViewManagerStore {
     return views;
   }
 
-  public async updateView(key: ViewKey, config: ViewConfig): Promise<void> {
+  public async updateView(key: ViewKey, config: AnyViewConfig): Promise<void> {
     this._logger.debug(`Saving view "${key}"...`);
     await this._db.updateSetting(
       "view",
@@ -99,7 +99,7 @@ export class ViewManagerStore {
     this._logger.debug(`Successfully saved view "${key}"!`);
   }
 
-  public async updateViews(views: Map<ViewKey, ViewConfig>): Promise<void> {
+  public async updateViews(views: Map<ViewKey, AnyViewConfig>): Promise<void> {
     this._logger.debug(`Saving ${views.size} view(s)...`);
     for (const [key, config] of views) {
       await this.updateView(key, config);
