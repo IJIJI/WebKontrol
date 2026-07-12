@@ -40,14 +40,65 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
   }
 
   async init(): Promise<void> {
-
-    const loaded = await this._store.loadRuntime();
-    if (loaded)
-      this._runtime = loaded;
+    const loadedRuntime = await this._store.loadRuntime();
+    if (loadedRuntime)
+      this._runtime = loadedRuntime;
     else
       this._logger.info("Failed loading runtime from store, using defaults.");
-    
     await this.updateRuntime(this._runtime); // TODO: Should this save?
+
+    const configs = await this._store.getViews();
+    for (const [key, config] of configs) {
+      this._views.set(key, ViewFactory.createView(key, config));
+    }
+    this._logger.info(`Loaded ${this._views.size} view(s).`);
+    this._syncInfo();
+  }
+
+  getView(key: ViewKey): AbstractView | undefined {
+    return this._views.get(key);
+  }
+
+  listViews(): AbstractView[] {
+    return [...this._views.values()];
+  }
+
+  getRuntime(): ViewManagerRuntime {
+    return this._runtime;
+  }
+
+  getInfo(): ViewManagerInfo {
+    return this._info;
+  }
+
+  async createView(config: AnyViewConfig): Promise<ViewKey> {
+    const parsed = AnyViewConfigSchema.parse(config);
+    const key = generateViewKey(this._views.keys());
+    await this._store.updateView(key, parsed);
+    this._views.set(key, ViewFactory.createView(key, parsed));
+    this._syncInfo();
+    this.emit("view_added", key);
+    this._logger.info(`Created view "${key}".`);
+    return key;
+  }
+
+  async updateView(key: ViewKey, config: AnyViewConfig): Promise<void> {
+    if (!this._views.has(key)) throw new Error(`No view with key "${key}".`);
+    const parsed = AnyViewConfigSchema.parse(config);
+    await this._store.updateView(key, parsed);
+    // Re-instantiate rather than mutate: cleanly handles a view type change.
+    this._views.set(key, ViewFactory.createView(key, parsed));
+    this.emit("view_updated", key);
+    this._logger.info(`Updated view "${key}".`);
+  }
+
+  async deleteView(key: ViewKey): Promise<void> {
+    if (!this._views.has(key)) throw new Error(`No view with key "${key}".`);
+    await this._store.deleteView(key);
+    this._views.delete(key);
+    this._syncInfo();
+    this.emit("view_removed", key);
+    this._logger.info(`Deleted view "${key}".`);
   }
   
   async updateRuntime(runtime: Partial<ViewManagerRuntime>): Promise<void> {
