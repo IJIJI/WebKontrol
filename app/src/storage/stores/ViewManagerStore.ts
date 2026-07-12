@@ -3,9 +3,9 @@ import {
   ViewConfigSchema,
   ViewManagerRuntimeSchema,
   type ViewConfig,
+  type ViewKey,
   type ViewManagerRuntime,
 } from "../../views/types/schema";
-import type { ViewKey } from "../../views/views/AbstractView";
 import { CoreDatabase } from "../CoreDatabase";
 
 
@@ -45,6 +45,8 @@ export class ViewManagerStore {
       return null;
     }
   }
+
+  // TODO: deleteRuntime?
 
 
   public async getView(key: ViewKey): Promise<ViewConfig | null> {

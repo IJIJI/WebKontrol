@@ -1,5 +1,6 @@
 import EventEmitter from "node:events";
-import type { AbstractView, ViewKey } from "./views/AbstractView";
+import type { AbstractView } from "./views/AbstractView";
+import type { ViewKey } from "./types/schema";
 import { ViewManagerRuntimeSchema, type ViewManagerRuntime } from "./types/schema";
 import type { ViewManagerInfo } from "./types/model";
 import { ViewManagerStore } from "../storage/stores/ViewManagerStore";
