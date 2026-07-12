@@ -54,6 +54,7 @@ export type RouteMethod = "get" | "post" | "put" | "patch" | "delete";
 export interface RouteRequest {
   params: Record<string, string>;
   query: Record<string, unknown>;
+  body: unknown; // untrusted; a handler that reads it must validate (e.g. with zod) first
 }
 
 // A framework-agnostic response a route handler returns; WebServer maps it to express.

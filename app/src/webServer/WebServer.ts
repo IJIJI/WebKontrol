@@ -75,7 +75,11 @@ export class WebServer implements RouteRegistrar {
     res: express.Response,
   ): Promise<void> {
     try {
-      const result = await handler({ params: req.params as Record<string, string>, query: req.query });
+      const result = await handler({
+        params: req.params as Record<string, string>,
+        query: req.query,
+        body: req.body as unknown,
+      });
       if (result.redirect !== undefined) {
         res.redirect(result.status ?? 302, result.redirect);
       } else if (result.body !== undefined) {
