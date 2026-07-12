@@ -23,14 +23,11 @@ export function generateViewKey(existing: Iterable<ViewKey> = []): ViewKey {
 }
 
 //* Navigation target:
-// What a view resolves to for the puppet to load. Richer than a bare url so the
-// url view can POST / send headers. (Reconciled with PuppetTarget in the puppet
-// wiring slice.)
+// What the puppet loads: always the view's own /view/:key path (the server then
+// renders a block view or redirects a url view), plus the effective load timeout.
+// (Reconciled with PuppetTarget in the puppet wiring slice.)
 export const ViewTargetSchema = z.object({
   url: z.url(),
-  method: z.enum(["GET", "POST"]).optional(), // TODO: More methods? Probably not needed.
-  headers: z.record(z.string(), z.string()).optional(),
-  body: z.string().optional(),
   loadTimeout: LoadTimeoutSchema.optional(), // effective timeout, filled by AbstractView.resolve()
 });
 export type ViewTarget = z.infer<typeof ViewTargetSchema>;
@@ -64,12 +61,12 @@ export const BlockViewConfigSchema = extendViewConfig("blocks", {
 });
 export type BlockViewConfig = z.infer<typeof BlockViewConfigSchema>;
 
-// UrlView: the puppet navigates an external URL, without an iframe. This is to be able to load pages that prevent embedding.
+// UrlView: the puppet navigates an external URL, without an iframe, so pages that
+// forbid embedding still load. Served via a redirect from /view/:key (GET only;
+// parameters become the query string).
 export const UrlViewConfigSchema = extendViewConfig("url", {
   url: z.url(),
-  method: z.enum(["GET", "POST"]).default("GET"),
-  headers: z.record(z.string(), z.string()).optional(),
-  body: z.string().optional(),
+  parameters: z.record(z.string(), z.string()).optional(),
 });
 export type UrlViewConfig = z.infer<typeof UrlViewConfigSchema>;
 
