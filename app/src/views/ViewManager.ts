@@ -1,15 +1,24 @@
 import EventEmitter from "node:events";
 import type { AbstractView } from "./views/AbstractView";
-import type { ViewKey } from "./types/schema";
-import { ViewManagerRuntimeSchema, type ViewManagerRuntime } from "./types/schema";
+import {
+  AnyViewConfigSchema,
+  ViewManagerRuntimeSchema,
+  generateViewKey,
+  type AnyViewConfig,
+  type ViewKey,
+  type ViewManagerRuntime,
+} from "./types/schema";
 import type { ViewManagerInfo } from "./types/model";
 import { ViewManagerStore } from "../storage/stores/ViewManagerStore";
+import { ViewFactory } from "./ViewFactory";
 import { Logger } from "../logging/Logger";
 
 export type ViewManagerEvents = {
-  view_added: [view: AbstractView];
-    info_update: [info: ViewManagerInfo],
-    runtime_update: [runtime: ViewManagerRuntime],
+  view_added: [key: ViewKey];
+  view_updated: [key: ViewKey];
+  view_removed: [key: ViewKey];
+  info_update: [info: ViewManagerInfo];
+  runtime_update: [runtime: ViewManagerRuntime];
 };
 
 export class ViewManager extends EventEmitter<ViewManagerEvents> {
@@ -17,8 +26,8 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
   private _store: ViewManagerStore;
 
   private _runtime: ViewManagerRuntime = ViewManagerRuntimeSchema.parse({});
-  
-  private _info: ViewManagerInfo = { 
+
+  private _info: ViewManagerInfo = {
     viewCount: 0,
   };
 
