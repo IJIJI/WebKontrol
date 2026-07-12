@@ -79,7 +79,7 @@ export class ViewManagerStore {
     const views = new Map<ViewKey, AnyViewConfig>();
     for (const [key, value] of rows) {
       try {
-        views.set(key as ViewKey, AnyViewConfigSchema.parse(JSON.parse(value)));
+        views.set(key, AnyViewConfigSchema.parse(JSON.parse(value)));
       } catch (error) {
         this._logger.error(`Failed loading view "${key}" with error:`, error);
       }
