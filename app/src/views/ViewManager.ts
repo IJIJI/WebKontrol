@@ -100,14 +100,15 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
     this.emit("view_removed", key);
     this._logger.info(`Deleted view "${key}".`);
   }
-  
+
   async updateRuntime(runtime: Partial<ViewManagerRuntime>): Promise<void> {
-    this._runtime = {...this._runtime, ...runtime};
-    this.emit('runtime_update', this._runtime);
+    this._runtime = { ...this._runtime, ...runtime };
+    this.emit("runtime_update", this._runtime);
     await this._store.saveRuntime(this._runtime);
   }
-  async updateInfo(info: Partial<ViewManagerInfo>): Promise<void> {
-    this._info = {...this._info, ...info};
-    this.emit('info_update', this._info);
+
+  private _syncInfo(): void {
+    this._info = { ...this._info, viewCount: this._views.size };
+    this.emit("info_update", this._info);
   }
 }
