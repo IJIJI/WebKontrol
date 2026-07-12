@@ -76,9 +76,8 @@ export const AnyViewConfigSchema = z.discriminatedUnion("type", [
 ]);
 export type AnyViewConfig = z.infer<typeof AnyViewConfigSchema>;
 
-// Temporary alias: the store parses this until it moves to AnyViewConfig (#20).
-export const ViewConfigSchema = BaseViewConfigSchema;
-export type ViewConfig = z.infer<typeof ViewConfigSchema>;
+// The base config type (name + loadTimeout), used as the AbstractView generic constraint.
+export type ViewConfig = z.infer<typeof BaseViewConfigSchema>;
 
 //* View manager runtime:
 export const ViewManagerRuntimeShape = z.object({
