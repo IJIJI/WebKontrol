@@ -2,10 +2,13 @@ import EventEmitter from "node:events";
 import type { AbstractView } from "./views/AbstractView";
 import {
   AnyViewConfigSchema,
+  ViewManagerConfigSchema,
   ViewManagerRuntimeSchema,
   generateViewKey,
   type AnyViewConfig,
   type ViewKey,
+  type ViewManagerConfig,
+  type ViewManagerConfigInput,
   type ViewManagerRuntime,
 } from "./types/schema";
 import type { ViewManagerInfo } from "./types/model";
@@ -33,10 +36,18 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
 
   private _views: Map<ViewKey, AbstractView> = new Map();
 
-  constructor() {
+  private readonly _config: ViewManagerConfig;
+
+  constructor(config: ViewManagerConfigInput) {
     super();
+    this._config = ViewManagerConfigSchema.parse(config);
     this._logger = new Logger(["VIEW", "MANAGER"]);
     this._store = new ViewManagerStore();
+  }
+
+  /** The route path for a view: `${route_base}/${key}`. The express route and puppet target derive from this. */
+  viewPath(key: ViewKey): string {
+    return `${this._config.route_base}/${key}`;
   }
 
   async init(): Promise<void> {
