@@ -1,5 +1,5 @@
 import z from "zod";
-import { ConfigFilePuppetSpecificSchema, IncomingPuppetConfigSchema } from "../../puppet/types/validation";
+import { ConfigFilePuppetSpecificSchema } from "../../puppet/types/validation";
 import { WebServerConfigSchema } from "../../webServer/schema";
 
 

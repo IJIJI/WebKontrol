@@ -7,7 +7,6 @@ import ContentSection from "../content/ContentSection";
 export default function DesktopHeader({
   version,
   collapsed,
-  setCollapsed,
   className,
 }: {
   version: string;

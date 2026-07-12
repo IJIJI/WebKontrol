@@ -36,7 +36,7 @@ export function Button(props: {
       className={"buttonComp " + (props.disabled ? "disabled " : "") + type + " " + style}
       disabled={props.disabled}
       onClick={() => {
-        !props.disabled && props.onClick();
+        if (!props.disabled) props.onClick();
       }}
       ref={props.ref}
       style={{ fontSize: props.size }}

@@ -29,7 +29,7 @@ export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
     <div
       className={"setting field" + (props.changed ? " changed" : "")}
       onClick={() => {
-        props.inputRef && props.inputRef.current?.focus();
+        if (props.inputRef) props.inputRef.current?.focus();
       }}
     >
       <div className="titletext">

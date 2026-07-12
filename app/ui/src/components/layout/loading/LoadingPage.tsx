@@ -1,9 +1,10 @@
+import type { JSX } from "react";
 import { Icons } from "../../icons/Icons";
 
 import "./loadingPage.less";
 
 
-export function LoadingPage(props: {label?: string}) {
+export function LoadingPage(props: {label?: string}): JSX.Element {
   const label = props.label ? props.label : "Loading..." ;
 
   return (

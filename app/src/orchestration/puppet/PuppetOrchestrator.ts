@@ -1,9 +1,9 @@
 import EventEmitter from "node:events";
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
-import { BLANK_PUPPET_TARGET, type BasePuppetConfig, type PuppetKey, type PuppetRuntime } from "../../puppet/types/schema";
+import type { PuppetKey, PuppetRuntime } from "../../puppet/types/schema";
 import type { PuppetWebhandlers } from "../../webServer/model";
-import type { PuppetDataBundle, PuppetInfo } from "../../puppet/types/model";
+import type { PuppetDataBundle } from "../../puppet/types/model";
 import { PuppetOrchestratorStore } from "../../storage/stores/PuppetOrchestratorStore";
 import { PuppetOrchestratorRuntimeSchema, type PuppetOrchestratorRuntime } from "./schema";
 
@@ -108,7 +108,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     }
 
 
-    this._puppets.forEach(async (puppetBundle, key) => {
+    this._puppets.forEach(async (puppetBundle) => {
       await puppetBundle.puppet.init();
     });
   }

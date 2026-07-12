@@ -27,8 +27,8 @@ export class SystemManager extends EventEmitter<SystemManagerEvents>  {
     this._store = new SystemStore();
   }
 
-  async init() {
-    
+  async init(): Promise<void> {
+
     const loaded = await this._store.loadRuntime();
     if (loaded)
       this._runtime = loaded;

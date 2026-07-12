@@ -20,8 +20,8 @@ export class UiManager extends EventEmitter<UiManagerEvents>  {
     this._store = new UiStore();
   }
 
-  async init() {
-    
+  async init(): Promise<void> {
+
     const loaded = await this._store.loadRuntime();
     if (loaded)
       this._runtime = loaded;

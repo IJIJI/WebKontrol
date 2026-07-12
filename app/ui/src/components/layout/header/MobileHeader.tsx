@@ -5,7 +5,6 @@ import "./header.less";
 
 export default function MobileHeader({
   version,
-  setCollapsed,
   className,
 }: {
   version: string;

@@ -17,6 +17,7 @@ export type ViewEvents = {
 };
 
 export abstract class AbstractView<
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reserved for the per-view config type; wired up when views are implemented (#9).
   TConfig extends ViewConfig = ViewConfig,
   TEvents extends ViewEvents & Record<string, unknown[]> = ViewEvents,
 > extends EventEmitter<TEvents> {}

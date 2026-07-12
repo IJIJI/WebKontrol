@@ -24,7 +24,7 @@ export function ButtonSelectSetting<T>(
     <BaseSetting {...props} changed={changed} >
       {changed ? <RestoreButton onClick={restore} /> : <></>}
       <div className="buttonSelect">
-        {props.options.map((option, index) => (
+        {props.options.map((option) => (
           <button
             key={option.label}
             type="button"

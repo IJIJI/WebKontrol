@@ -8,14 +8,12 @@ import { ButtonSetting } from "../components/settings/implementations/ButtonSett
 import { BaseSetting } from "../components/settings/BaseSetting";
 import { aggregateDrafts, useDraft } from "../helpers/DraftSave";
 import { SaveBar } from "../components/bottomBar/SaveBar";
-import { Button, ButtonStyle, ButtonType } from "../components/button/Button";
+import { ButtonStyle, ButtonType } from "../components/button/Button";
 import { PillStyle, PillType, InfoPill } from "../components/pill/InfoPill";
-import { BottomBar } from "../components/bottomBar/BottomBar";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../src/types/CommonTypes";
 import { UiTheme } from "../../../src/ui/schema";
 import { useApi } from "../context/ApiStateContext";
-import { Icons } from "../components/icons/Icons";
 import { LoadingPage } from "../components/layout/loading/LoadingPage";
 
 
@@ -25,12 +23,10 @@ export default function SettingsPage(): JSX.Element {
   const runtime = useApi().state?.runtime;
   const handlers = useApi().callBacks;
 
-  if (!runtime) return <LoadingPage />;
-
-  // const {saved, values, setField, revertAll, anyChanged} = useDraft(config?.ui);
-  // const uiDraft = useDraft(config?.ui);
-  const uiDraft = useDraft(runtime.ui);
-  const systemDraft = useDraft(runtime.system);
+  // Hooks must run unconditionally, before any early return; useDraft tolerates
+  // undefined while runtime is still loading.
+  const uiDraft = useDraft(runtime?.ui);
+  const systemDraft = useDraft(runtime?.system);
 
   const { anyChanged, revertAll } = aggregateDrafts({"UI": uiDraft, "SYSTEM": systemDraft});
 
@@ -49,6 +45,7 @@ export default function SettingsPage(): JSX.Element {
     revertAll();
   }
 
+  if (!runtime) return <LoadingPage />;
 
   return (
     <>

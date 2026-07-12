@@ -7,7 +7,7 @@ import type {
   TargetInfo,
 } from "./types/model";
 import { PuppetStore } from "../storage/stores/PuppetStore";
-import { BLANK_PUPPET_TARGET, PuppetRuntimeSchema, type BasePuppetConfig, type PuppetKey, type PuppetRuntime, type PuppetTarget } from "./types/schema";
+import { BLANK_PUPPET_TARGET, type BasePuppetConfig, type PuppetKey, type PuppetRuntime, type PuppetTarget } from "./types/schema";
 
 
 export type PuppetEvents<TConfig extends BasePuppetConfig> = {
@@ -20,7 +20,7 @@ export abstract class AbstractPuppet<
   TConfig extends BasePuppetConfig = BasePuppetConfig,
 > extends EventEmitter<PuppetEvents<TConfig>> {
 
-  private readonly IMG_FOLDER: string;
+  private readonly _imgFolder: string;
 
   protected _logger!: Logger;
   protected _store!: PuppetStore;
@@ -48,7 +48,7 @@ export abstract class AbstractPuppet<
     
     this._logger = new Logger(this._getLogLabels());
     
-    this.IMG_FOLDER = path.join(
+    this._imgFolder = path.join(
       process.cwd(),
       "db",
       "images",
@@ -206,7 +206,7 @@ export abstract class AbstractPuppet<
     if (!this._isInit) throw new Error("Puppet not initialized");
 
     const imgPath: string = path.join( // TODO: Make generate folders in a better way.
-      this.IMG_FOLDER,
+      this._imgFolder,
       `${new Date().toISOString()}.png`,
     );
 

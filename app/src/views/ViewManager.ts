@@ -29,8 +29,8 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
     this._store = new ViewManagerStore();
   }
 
-  async init() {
-    
+  async init(): Promise<void> {
+
     const loaded = await this._store.loadRuntime();
     if (loaded)
       this._runtime = loaded;

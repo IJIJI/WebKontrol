@@ -13,15 +13,18 @@ export interface Draft<T extends Record<string, unknown>> {
   anyChanged: () => boolean;
 }
 
-export function useDraft<T extends Record<string, unknown>>(saved: T): Draft<T> {
+// `saved` may be undefined while data is still loading, so callers can invoke
+// this hook unconditionally (before an early return) without breaking hook order.
+export function useDraft<T extends Record<string, unknown>>(saved: T | undefined): Draft<T> {
+  const safeSaved = (saved ?? {}) as T;
   const [patch, setPatch] = useState<Partial<T>>({});
 
-  const values = useMemo(() => ({ ...saved, ...patch }), [saved, patch]);
+  const values = useMemo(() => ({ ...safeSaved, ...patch }), [safeSaved, patch]);
 
   const setField = <U extends keyof T>(key: U, value: T[U]): void => {
     setPatch((prev) => {
       const next: Partial<T> = { ...prev };
-      if (Object.is(saved[key], value)) {
+      if (Object.is(safeSaved[key], value)) {
         delete next[key];
       } else {
         next[key] = value;
@@ -44,8 +47,8 @@ export function useDraft<T extends Record<string, unknown>>(saved: T): Draft<T> 
   const anyChanged = () => Object.keys(patch).length > 0;
 
   return {
-    saved, values, patch,
-    setField, 
+    saved: safeSaved, values, patch,
+    setField,
     revertField, revertAll,
     isChanged, anyChanged
   }
