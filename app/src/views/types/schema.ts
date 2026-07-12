@@ -22,12 +22,6 @@ export function generateViewKey(existing: Iterable<ViewKey> = []): ViewKey {
   throw new Error("Could not generate a unique view key");
 }
 
-//* View serving path:
-// The one route convention both the /view/:key express route and the puppet
-// target derive from, so they can't drift.
-export const VIEW_ROUTE_BASE = "/view"; // TODO: Should this be here? In the ViewManager? Configurable via the yaml config?
-export const viewPath = (key: ViewKey): string => `${VIEW_ROUTE_BASE}/${key}`;
-
 //* Navigation target:
 // What the puppet loads: always the view's own /view/:key path (the server then
 // renders a block view or redirects a url view), plus the effective load timeout.
@@ -84,6 +78,14 @@ export type AnyViewConfig = z.infer<typeof AnyViewConfigSchema>;
 
 // The base config type (name + loadTimeout), used as the AbstractView generic constraint.
 export type ViewConfig = z.infer<typeof BaseViewConfigSchema>;
+
+//* View manager config (static, from the config file):
+export const ViewManagerConfigSchema = z.object({
+  // The /view/:key route prefix; the express route and the puppet target both derive from it.
+  route_base: z.string().startsWith("/").default("/view"),
+});
+export type ViewManagerConfig = z.infer<typeof ViewManagerConfigSchema>;
+export type ViewManagerConfigInput = z.input<typeof ViewManagerConfigSchema>;
 
 //* View manager runtime:
 export const ViewManagerRuntimeShape = z.object({
