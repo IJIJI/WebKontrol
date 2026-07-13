@@ -144,12 +144,37 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   /** Re-navigate any puppets currently showing this view (assigned to it, or unassigned + it's the default). */
   public async onViewUpdated(key: ViewKey): Promise<void> {
-    const defaultView = this._runtime.default_view;
     for (const id of this._puppets.keys()) {
-      const resolved = this.getAssignedView(id) ?? defaultView;
-      if (resolved === key) await this._navigatePuppet(id);
+      if (this._resolvedViewKey(id) === key) await this._navigatePuppet(id);
     }
-    const viewKey = this._resolvedViewKey(id);
+  }
+
+  /**
+   * A view was deleted. Drop it from assignments and the default, then re-navigate any
+   * puppet that was showing it (now falling back to the default view or about:blank).
+   */
+  public async onViewRemoved(key: ViewKey): Promise<void> {
+    const affected = [...this._puppets.keys()].filter((id) => this._resolvedViewKey(id) === key);
+
+    const assignments = { ...this._runtime.assignments };
+    let changed = false;
+    for (const [id, viewKey] of Object.entries(assignments)) {
+      if (viewKey === key) {
+        delete assignments[id];
+        changed = true;
+      }
+    }
+    const clearsDefault = this._runtime.default_view === key;
+    if (changed || clearsDefault) {
+      await this.updateRuntime({
+        assignments,
+        ...(clearsDefault ? { default_view: undefined } : {}),
+      });
+    }
+
+    for (const id of affected) await this._navigatePuppet(id);
+    this._logger.info(`Cleared references to removed view "${key}".`);
+  }
 
   /** Resolve a puppet's assigned (or default) view into the runtime target it should load. */
   private _resolveTargetRuntime(id: PuppetKey): PuppetRuntime {
