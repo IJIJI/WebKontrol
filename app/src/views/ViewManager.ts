@@ -78,7 +78,6 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
       this._runtime = loadedRuntime;
     else
       this._logger.info("Failed loading runtime from store, using defaults.");
-    await this.updateRuntime(this._runtime); // TODO: Should this save?
 
     const configs = await this._store.getViews();
     for (const [key, config] of configs) {
