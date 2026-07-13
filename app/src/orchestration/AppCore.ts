@@ -69,11 +69,19 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
 
     await this._systemManager.init();
 
+    // Views before puppets: the orchestrator resolves each puppet's assigned view into a
+    // target during its own init, so the ViewManager must already hold the views.
+    await this._viewManager.init();
+    this._puppetOrchestrator.setViewContext(this._viewManager, this._webServer.getServeBase());
+
+    // Keep puppets in sync with view edits: re-navigate on update, drop refs + fall back on removal.
+    this._viewManager.on('view_updated', (key) => void this._puppetOrchestrator.onViewUpdated(key));
+    this._viewManager.on('view_removed', (key) => void this._puppetOrchestrator.onViewRemoved(key));
+
     await this._puppetOrchestrator.init();
 
     await this._uiManager.init();
 
-    await this._viewManager.init();
     this._viewManager.registerRoutes(this._webServer); // before start() → lands ahead of the SPA catch-all
 
     this._webServer.setHandlers({
