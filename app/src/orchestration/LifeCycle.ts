@@ -7,6 +7,7 @@ import { AppCore, type AppCoreConfig } from "./AppCore";
 import { PuppetFactory } from "./puppet/PuppetFactory";
 import { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
 import { SystemManager } from "../system/SystemManager";
+import { ViewManager } from "../views/ViewManager";
 
 
 
@@ -39,6 +40,7 @@ export class LifeCycle {
       webServer: new WebServer(appConfig.web),
       uiManager: new UiManager(),
       systemManager: new SystemManager(),
+      viewManager: new ViewManager(appConfig.views),
     }
 
     return new AppCore(orchestratorConf);    

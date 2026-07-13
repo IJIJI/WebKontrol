@@ -4,12 +4,14 @@ import type { UiManager } from "../ui/UiManager";
 import type { WebServerState } from "../webServer/model";
 import type { WebServer } from "../webServer/WebServer";
 import type { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
+import type { ViewManager } from "../views/ViewManager";
 
 export interface AppCoreConfig {
   systemManager: SystemManager;
   puppetOrchestrator: PuppetOrchestrator;
   webServer: WebServer;
   uiManager: UiManager;
+  viewManager: ViewManager;
 }
 
 export class AppCore { // TODO: Move every non-puppet management from the appcore to this.
@@ -23,6 +25,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
 
   private _webServer: WebServer;
   private _uiManager: UiManager;
+  private _viewManager: ViewManager;
 
   private _webState!: WebServerState;
 
@@ -31,6 +34,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     this._puppetOrchestrator = config.puppetOrchestrator;
     this._webServer = config.webServer;
     this._uiManager = config.uiManager;
+    this._viewManager = config.viewManager;
 
     this._updateState({
       puppets: this._puppetOrchestrator.getPuppetBundles(),
@@ -68,7 +72,9 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     await this._puppetOrchestrator.init();
 
     await this._uiManager.init();
-    
+
+    await this._viewManager.init();
+
     this._webServer.setHandlers({
       system: this._systemManager.getHandlers(),
       update: { // TODO: UpdateManager
