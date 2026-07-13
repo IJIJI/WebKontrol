@@ -100,6 +100,15 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
     return this._runtime;
   }
 
+  /** The global fallback view for puppets with no assignment (if set). */
+  getDefaultViewKey(): ViewKey | undefined {
+    return this._runtime.default_view;
+  }
+
+  getDefaultLoadTimeout(): number {
+    return this._runtime.default_load_timeout;
+  }
+
   getInfo(): ViewManagerInfo {
     return this._info;
   }
