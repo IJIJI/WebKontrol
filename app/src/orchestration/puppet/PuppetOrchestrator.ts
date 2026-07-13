@@ -1,8 +1,9 @@
 import EventEmitter from "node:events";
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
-import type { PuppetKey, PuppetRuntime } from "../../puppet/types/schema";
+import { BLANK_PUPPET_TARGET, type PuppetKey, type PuppetRuntime } from "../../puppet/types/schema";
 import type { ViewKey } from "../../views/types/schema";
+import type { ViewManager } from "../../views/ViewManager";
 import type { PuppetWebhandlers } from "../../webServer/model";
 import type { PuppetDataBundle } from "../../puppet/types/model";
 import { PuppetOrchestratorStore } from "../../storage/stores/PuppetOrchestratorStore";
@@ -31,6 +32,9 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   private _puppets: Map<PuppetKey, PuppetFullBundle> = new Map();
 
+  private _viewManager?: ViewManager;
+  private _serveBase: string = "";
+
   constructor() {
     super();
   }
@@ -38,6 +42,12 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   getRuntime(): PuppetOrchestratorRuntime {
     return this._runtime;
+  }
+
+  /** Give the orchestrator what it needs to resolve view assignments into puppet targets. */
+  public setViewContext(viewManager: ViewManager, serveBase: string): void {
+    this._viewManager = viewManager;
+    this._serveBase = serveBase;
   }
 
   getPuppetBundles(): PuppetDataBundle[] {
@@ -112,6 +122,31 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     this._logger.info(`Unassigned puppet "${id}".`);
   }
 
+  /** Re-navigate any puppets currently showing this view (assigned to it, or unassigned + it's the default). */
+  public async onViewUpdated(key: ViewKey): Promise<void> {
+    const defaultView = this._viewManager?.getDefaultViewKey();
+    for (const id of this._puppets.keys()) {
+      const resolved = this.getAssignedView(id) ?? defaultView;
+      if (resolved === key) await this._navigatePuppet(id);
+    }
+  }
+
+  /** Resolve a puppet's assigned (or default) view into the runtime target it should load. */
+  private _resolveTargetRuntime(id: PuppetKey): PuppetRuntime {
+    const vm = this._viewManager;
+    const viewKey = this.getAssignedView(id) ?? vm?.getDefaultViewKey();
+    const view = vm && viewKey !== undefined ? vm.getView(viewKey) : undefined;
+    if (!vm || viewKey === undefined || !view) return BLANK_PUPPET_TARGET;
+    return {
+      target: `${this._serveBase}${vm.viewPath(viewKey)}`,
+      load_timout: view.getConfig().loadTimeout ?? vm.getDefaultLoadTimeout(),
+    };
+  }
+
+  private async _navigatePuppet(id: PuppetKey): Promise<void> {
+    await this.updatePuppetRuntime(id, this._resolveTargetRuntime(id));
+  }
+
   public async init(): Promise<void> {
     if (this._hasStarted)
       return this._logger.error("Attempted to initialised, but is already started!");
@@ -126,9 +161,14 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     }
 
 
-    this._puppets.forEach(async (puppetBundle) => {
-      await puppetBundle.puppet.init();
-    });
+    // Init each puppet, then navigate it to its assigned view (re-resolved from the
+    // assignment, so the orchestrator - not the puppet's cached target - is authoritative).
+    await Promise.all(
+      [...this._puppets].map(async ([id, bundle]) => {
+        await bundle.puppet.init();
+        await this._navigatePuppet(id);
+      }),
+    );
   }
 
   public getHandlers(): PuppetWebhandlers {
