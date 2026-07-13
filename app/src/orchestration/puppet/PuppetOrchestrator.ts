@@ -112,6 +112,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   public async assignView(id: PuppetKey, viewKey: ViewKey): Promise<void> {
     await this.updateRuntime({ assignments: { ...this._runtime.assignments, [id]: viewKey } });
+    await this._navigatePuppet(id);
     this._logger.info(`Assigned puppet "${id}" to view "${viewKey}".`);
   }
 
@@ -119,6 +120,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     const assignments = { ...this._runtime.assignments };
     delete assignments[id];
     await this.updateRuntime({ assignments });
+    await this._navigatePuppet(id); // → default view or about:blank
     this._logger.info(`Unassigned puppet "${id}".`);
   }
 
@@ -137,7 +139,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   /** Re-navigate any puppets currently showing this view (assigned to it, or unassigned + it's the default). */
   public async onViewUpdated(key: ViewKey): Promise<void> {
-    const defaultView = this._viewManager?.getDefaultViewKey();
+    const defaultView = this._runtime.default_view;
     for (const id of this._puppets.keys()) {
       const resolved = this.getAssignedView(id) ?? defaultView;
       if (resolved === key) await this._navigatePuppet(id);
@@ -147,7 +149,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
   /** Resolve a puppet's assigned (or default) view into the runtime target it should load. */
   private _resolveTargetRuntime(id: PuppetKey): PuppetRuntime {
     const vm = this._viewManager;
-    const viewKey = this.getAssignedView(id) ?? vm?.getDefaultViewKey();
+    const viewKey = this.getAssignedView(id) ?? this._runtime.default_view;
     const view = vm && viewKey !== undefined ? vm.getView(viewKey) : undefined;
     if (!vm || viewKey === undefined || !view) return BLANK_PUPPET_TARGET;
     return {
