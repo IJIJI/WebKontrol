@@ -21,23 +21,6 @@ export function generateViewKey(existing: Iterable<ViewKey> = []): ViewKey {
   }
   throw new Error("Could not generate a unique view key");
 }
-
-//* Navigation target:
-// What the puppet loads: always the view's own /view/:key path (the server then
-// renders a block view or redirects a url view), plus the effective load timeout.
-// (Reconciled with PuppetTarget in the puppet wiring slice.)
-export const ViewTargetSchema = z.object({
-  url: z.url(),
-  loadTimeout: LoadTimeoutSchema.optional(), // effective timeout, filled by AbstractView.resolve()
-});
-export type ViewTarget = z.infer<typeof ViewTargetSchema>;
-
-/** Context a view needs to resolve its target (e.g. the app's own serve base for block views). */
-export interface ViewResolveContext {
-  serveBase: string;
-  defaultLoadTimeout: number; // ViewManager default; a view's own loadTimeout overrides it
-}
-
 //* View config:
 // The base every view config shares; per-type configs extend it with a `type`
 // literal, mirroring extendPuppetConfig.
