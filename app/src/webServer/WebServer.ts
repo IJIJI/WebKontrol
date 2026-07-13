@@ -56,6 +56,11 @@ export class WebServer implements RouteRegistrar {
     this._handlers = handlers;
   }
 
+  /** The base URL the app serves on (used to build view targets the puppet navigates to). */
+  public getServeBase(): string {
+    return `http://localhost:${this._config.port}`;
+  }
+
   /**
    * Register a route. Components (views now, plugins later) use this instead of the
    * WebServer hardcoding their paths. Must be called before start() so it lands
