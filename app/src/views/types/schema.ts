@@ -90,6 +90,7 @@ export type ViewManagerConfigInput = z.input<typeof ViewManagerConfigSchema>;
 //* View manager runtime:
 export const ViewManagerRuntimeShape = z.object({
   default_load_timeout: LoadTimeoutSchema,  // TODO: Should the load timeout be viewmanager defined? Would be usefull.
+  default_view: ViewKeySchema.optional(), // global fallback view for puppets with no assignment
   // TODO: Add usefull fields
 });
 
