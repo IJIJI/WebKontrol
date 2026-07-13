@@ -74,6 +74,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     await this._uiManager.init();
 
     await this._viewManager.init();
+    this._viewManager.registerRoutes(this._webServer); // before start() → lands ahead of the SPA catch-all
 
     this._webServer.setHandlers({
       system: this._systemManager.getHandlers(),

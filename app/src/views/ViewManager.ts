@@ -12,6 +12,7 @@ import {
   type ViewManagerRuntime,
 } from "./types/schema";
 import type { ViewManagerInfo } from "./types/model";
+import type { RouteRegistrar, RouteRequest, RouteResponse } from "../webServer/model";
 import { ViewManagerStore } from "../storage/stores/ViewManagerStore";
 import { ViewFactory } from "./ViewFactory";
 import { Logger } from "../logging/Logger";
@@ -48,6 +49,27 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
   /** The route path for a view: `${route_base}/${key}`. The express route and puppet target derive from this. */
   viewPath(key: ViewKey): string {
     return `${this._config.route_base}/${key}`;
+  }
+
+  /** Register the /view/:key serving route on the web server. Call before the server starts. */
+  registerRoutes(registrar: RouteRegistrar): void {
+    registrar.registerRoute("get", `${this._config.route_base}/:key`, (req) => this._serve(req));
+    this._logger.info(`Registered view route "${this._config.route_base}/:key".`);
+  }
+
+  private _serve(req: RouteRequest): RouteResponse {
+    const view = this._views.get(req.params.key);
+    if (!view) return { status: 404 };
+
+    const result = view.serve();
+    if (result.kind === "redirect") return { redirect: result.url };
+
+    // kind === "blocks": placeholder until the client renderer (#24).
+    return {
+      status: 200,
+      contentType: "text/html",
+      body: "<!doctype html><title>Block view</title><p>Block view rendering is not yet implemented (#24).</p>",
+    };
   }
 
   async init(): Promise<void> {
