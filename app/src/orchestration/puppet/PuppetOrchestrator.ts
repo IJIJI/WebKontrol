@@ -22,7 +22,7 @@ interface PuppetFullBundle extends PuppetDataBundle {
 
 
 
-export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  { // TODO: Add store and manage default runtime?
+export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  {
   private _logger = new Logger(["LifeCycle", "ORCHESTRATOR"]);
 
   protected _store!: PuppetOrchestratorStore;
@@ -60,7 +60,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     }).toArray()
   }
 
-  async updateRuntime(runtime: Partial<PuppetOrchestratorRuntime>): Promise<void> { // TODO: Add a way to set puppets to the default runtime -> there needs to be a way to know if puppets are set.
+  async updateRuntime(runtime: Partial<PuppetOrchestratorRuntime>): Promise<void> {
     this._runtime = {...this._runtime, ...runtime};
     this.emit('runtime_update', this.getRuntime());
     await this._store.saveRuntime(this._runtime);
