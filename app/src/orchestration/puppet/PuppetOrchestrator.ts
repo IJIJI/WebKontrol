@@ -122,6 +122,19 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     this._logger.info(`Unassigned puppet "${id}".`);
   }
 
+  public getDefaultViewKey(): ViewKey | undefined {
+    return this._runtime.default_view;
+  }
+
+  public async setDefaultView(viewKey: ViewKey | undefined): Promise<void> {
+    await this.updateRuntime({ default_view: viewKey });
+    // Unassigned puppets follow the default, so re-navigate them.
+    for (const id of this._puppets.keys()) {
+      if (this.getAssignedView(id) === undefined) await this._navigatePuppet(id);
+    }
+    this._logger.info(`Set default view to "${viewKey ?? "(none)"}".`);
+  }
+
   /** Re-navigate any puppets currently showing this view (assigned to it, or unassigned + it's the default). */
   public async onViewUpdated(key: ViewKey): Promise<void> {
     const defaultView = this._viewManager?.getDefaultViewKey();
