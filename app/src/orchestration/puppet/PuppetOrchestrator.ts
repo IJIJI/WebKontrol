@@ -2,6 +2,7 @@ import EventEmitter from "node:events";
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
 import type { PuppetKey, PuppetRuntime } from "../../puppet/types/schema";
+import type { ViewKey } from "../../views/types/schema";
 import type { PuppetWebhandlers } from "../../webServer/model";
 import type { PuppetDataBundle } from "../../puppet/types/model";
 import { PuppetOrchestratorStore } from "../../storage/stores/PuppetOrchestratorStore";
@@ -92,6 +93,23 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
       return this._logger.error(`Attempted to update runtime for puppet ${id}. It does not exist. Provided runtime:`, runtime);
 
     await this._puppets.get(id)?.puppet.updateRuntime(runtime);
+  }
+
+  /** The view a puppet is assigned to, if any (absent = falls back to the default view). */
+  public getAssignedView(id: PuppetKey): ViewKey | undefined {
+    return this._runtime.assignments[id];
+  }
+
+  public async assignView(id: PuppetKey, viewKey: ViewKey): Promise<void> {
+    await this.updateRuntime({ assignments: { ...this._runtime.assignments, [id]: viewKey } });
+    this._logger.info(`Assigned puppet "${id}" to view "${viewKey}".`);
+  }
+
+  public async unassignView(id: PuppetKey): Promise<void> {
+    const assignments = { ...this._runtime.assignments };
+    delete assignments[id];
+    await this.updateRuntime({ assignments });
+    this._logger.info(`Unassigned puppet "${id}".`);
   }
 
   public async init(): Promise<void> {
