@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { defineConfig, type Logger as ViteLogger } from "vite";
 import react from "@vitejs/plugin-react";
 import { Logger } from "./src/logging/Logger.js";
@@ -35,6 +36,16 @@ export default defineConfig({
   build: {
     outDir: "../dist/ui",
     emptyOutDir: true,
+    // Two-page app: the React admin (index.html) and the lit powered block-view
+    // renderer (view/index.html), built together into dist/ui. Declaring inputs turns
+    // off Vite's default single-entry, so both must be listed. Dev needs neither entry
+    // here, as Vite serves modules on demand; this is purely for the prod build.
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "ui/index.html"),
+        view: resolve(__dirname, "ui/view/index.html"),
+      },
+    },
   },
   plugins: [react()],
   customLogger,
