@@ -68,8 +68,8 @@ export class WebServer implements RouteRegistrar {
    * RouteResponse, mapped to express here.
    */
   public registerRoute(method: RouteMethod, path: string, handler: RouteHandler): void {
-    this._app[method](path, (req, res) => {
-      void this._runRoute(handler, req, res);
+    this._app[method](path, (req, res, next) => {
+      void this._runRoute(handler, req, res, next);
     });
     this._logger.debug(`Registered ${method.toUpperCase()} ${path}`);
   }
@@ -78,6 +78,7 @@ export class WebServer implements RouteRegistrar {
     handler: RouteHandler,
     req: express.Request,
     res: express.Response,
+    next: express.NextFunction,
   ): Promise<void> {
     try {
       const result = await handler({
@@ -85,7 +86,10 @@ export class WebServer implements RouteRegistrar {
         query: req.query,
         body: req.body as unknown,
       });
-      if (result.redirect !== undefined) {
+      if (result.passthrough) {
+        // Handler declined; continue the middleware chain.
+        next();
+      } else if (result.redirect !== undefined) {
         res.redirect(result.status ?? 302, result.redirect);
       } else if (result.body !== undefined) {
         if (result.contentType) res.type(result.contentType);
