@@ -15,6 +15,7 @@ import type { ViewManagerInfo } from "./types/model";
 import type { RouteRegistrar, RouteRequest, RouteResponse } from "../webServer/model";
 import { ViewManagerStore } from "../storage/stores/ViewManagerStore";
 import { ViewFactory } from "./ViewFactory";
+import { getViewHostHtml } from "./viewHostPage";
 import { Logger } from "../logging/Logger";
 
 export type ViewManagerEvents = {
@@ -64,12 +65,10 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
     const result = view.serve();
     if (result.kind === "redirect") return { redirect: result.url };
 
-    // kind === "blocks": placeholder until the client renderer (#24).
-    return {
-      status: 200,
-      contentType: "text/html",
-      body: "<!doctype html><title>Block view</title><p>Block view rendering is not yet implemented (#24).</p>",
-    };
+    // kind === "blocks": the view renders client-side. Serve the host page that boots
+    // the dedicated Lit renderer; the client reads the view key from the path and
+    // streams the block config over SSE.
+    return { body: getViewHostHtml(), contentType: "text/html" };
   }
 
   async init(): Promise<void> {
