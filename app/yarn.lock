@@ -1068,6 +1068,7 @@ __metadata:
     drizzle-kit: "npm:^0.31.10"
     drizzle-orm: "npm:^0.45.2"
     drizzle-zod: "npm:^0.8.3"
+    esbuild: "npm:^0.27.7"
     eslint: "npm:^10.6.0"
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^7.1.1"
@@ -3002,7 +3003,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.27.0":
+"esbuild@npm:^0.27.0, esbuild@npm:^0.27.7":
   version: 0.27.7
   resolution: "esbuild@npm:0.27.7"
   dependencies:
