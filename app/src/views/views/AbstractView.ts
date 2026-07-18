@@ -15,4 +15,11 @@ export abstract class AbstractView<TConfig extends ViewConfig = ViewConfig> {
 
   /** How this view's /view/:key path responds (render vs redirect). The only per-type behaviour. */
   abstract serve(): ServeResult;
+
+  /**
+   * A value that changes iff a puppet showing this view must re-navigate. Compared across an
+   * update (old vs new): equal = no puppet reload (e.g. a block view whose content rides the
+   * SSE stream, or a url view whose target is unchanged); different = reload.
+   */
+  abstract reloadSignature(): string;
 }
