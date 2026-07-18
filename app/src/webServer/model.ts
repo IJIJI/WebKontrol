@@ -73,9 +73,23 @@ export interface RouteResponse {
 
 export type RouteHandler = (req: RouteRequest) => RouteResponse | Promise<RouteResponse>;
 
+// A live Server-Sent-Events connection, framework-agnostic; WebServer maps it to express.
+export interface SseConnection {
+  /** Send a named SSE event with a string (usually JSON) payload. */
+  send(event: string, data: string): void;
+  /** End the stream. */
+  close(): void;
+  /** Register a callback for when the client disconnects. */
+  onClose(callback: () => void): void;
+}
+
+export type SseHandler = (req: RouteRequest, connection: SseConnection) => void;
+
 // What WebServer exposes so components (views now, plugins later) register their own routes.
 export interface RouteRegistrar {
   registerRoute(method: RouteMethod, path: string, handler: RouteHandler): void;
+  /** Register a long-lived Server-Sent-Events stream (keep-alive is handled by the server). */
+  registerSse(path: string, handler: SseHandler): void;
 }
 
 export enum WebServerStatus {

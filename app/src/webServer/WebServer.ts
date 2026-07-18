@@ -2,7 +2,7 @@ import express from "express";
 import ViteExpress from "vite-express";
 import type http from "http";
 import { Logger } from "../logging/Logger";
-import { WebServerStatus, type AppInfo, type RouteHandler, type RouteMethod, type RouteRegistrar, type WebServerMutationHandlers, type WebServerState } from "./model";
+import { WebServerStatus, type AppInfo, type RouteHandler, type RouteMethod, type RouteRegistrar, type SseConnection, type SseHandler, type WebServerMutationHandlers, type WebServerState } from "./model";
 import { jsonReplacer } from "../helpers/json";
 import {
   WebServerConfigSchema,
@@ -72,6 +72,35 @@ export class WebServer implements RouteRegistrar {
       void this._runRoute(handler, req, res, next);
     });
     this._logger.debug(`Registered ${method.toUpperCase()} ${path}`);
+  }
+
+  /**
+   * Register a long-lived SSE stream. Sets the event-stream headers, keeps the
+   * connection alive with periodic pings, and hands the handler a framework-agnostic
+   * SseConnection. Must be called before start() so it lands ahead of the SPA catch-all.
+   */
+  public registerSse(path: string, handler: SseHandler): void {
+    this._app.get(path, (req, res) => {
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+      res.flushHeaders();
+
+      const ping = setInterval(() => res.write(`: ping\n\n`), this._config.sse.ping_interval);
+      req.on("close", () => clearInterval(ping));
+
+      const connection: SseConnection = {
+        send: (event, data) => res.write(`event: ${event}\ndata: ${data}\n\n`),
+        close: () => res.end(),
+        onClose: (cb) => req.on("close", cb),
+      };
+
+      handler(
+        { params: req.params as Record<string, string>, query: req.query, body: undefined },
+        connection,
+      );
+    });
+    this._logger.debug(`Registered SSE ${path}`);
   }
 
   private async _runRoute(
