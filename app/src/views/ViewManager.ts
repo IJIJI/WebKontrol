@@ -12,11 +12,15 @@ import {
   type ViewManagerRuntime,
 } from "./types/schema";
 import type { ViewManagerInfo } from "./types/model";
-import type { RouteRegistrar, RouteRequest, RouteResponse } from "../webServer/model";
+import type { RouteRegistrar, RouteRequest, RouteResponse, SseConnection } from "../webServer/model";
 import { ViewManagerStore } from "../storage/stores/ViewManagerStore";
 import { ViewFactory } from "./ViewFactory";
-import { getViewHostHtml } from "./viewHostPage";
+import { ViewClient } from "./client/ViewClient";
 import { Logger } from "../logging/Logger";
+
+// Fixed path the host page loads the browser bundle from. Kept out of the route base
+// (a single segment under it would collide with /:key), and referenced by client/index.html.
+const VIEW_CLIENT_BUNDLE_PATH = "/viewclient/main.js";
 
 export type ViewManagerEvents = {
   view_added: [key: ViewKey];
@@ -38,6 +42,12 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
 
   private _views: Map<ViewKey, AbstractView> = new Map();
 
+  // Open SSE connections per view, so a config change pushes to just that view's watchers.
+  private _streamSubs: Map<ViewKey, Set<SseConnection>> = new Map();
+
+  // The browser renderer app (host page + bundle), served at VIEW_CLIENT_BUNDLE_PATH.
+  private _client = new ViewClient();
+
   private readonly _config: ViewManagerConfig;
 
   constructor(config: ViewManagerConfigInput) {
@@ -52,10 +62,21 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
     return `${this._config.route_base}/${key}`;
   }
 
-  /** Register the /view/:key serving route on the web server. Call before the server starts. */
+  /** Register the /view/:key serving + config-stream routes. Call before the server starts. */
   registerRoutes(registrar: RouteRegistrar): void {
     registrar.registerRoute("get", `${this._config.route_base}/:key`, (req) => this._serve(req));
-    this._logger.info(`Registered view route "${this._config.route_base}/:key".`);
+    registrar.registerSse(`${this._config.route_base}/:key/stream`, (req, conn) => this._openStream(req, conn));
+    registrar.registerRoute("get", VIEW_CLIENT_BUNDLE_PATH, () => this._serveBundle());
+    this._logger.info(`Registered view routes "${this._config.route_base}/:key(/stream)" + client bundle.`);
+  }
+
+  private _serveBundle(): RouteResponse {
+    const bundle = this._client.getBundle();
+    if (bundle === null) {
+      return { status: 503, contentType: "text/plain", body: "View client bundle unavailable (build failed)." };
+    }
+    // Fixed, unhashed path: revalidate so a restart with new code isn't served stale from cache.
+    return { contentType: "text/javascript", body: bundle, headers: { "Cache-Control": "no-cache" } };
   }
 
   private _serve(req: RouteRequest): RouteResponse {
@@ -66,9 +87,65 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
     if (result.kind === "redirect") return { redirect: result.url };
 
     // kind === "blocks": the view renders client-side. Serve the host page that boots
-    // the dedicated Lit renderer; the client reads the view key from the path and
-    // streams the block config over SSE.
-    return { body: getViewHostHtml(), contentType: "text/html" };
+    // the renderer; the client reads the view key from the path and streams the block
+    // config over SSE.
+    return { body: this._client.getHostHtml(), contentType: "text/html" };
+  }
+
+  /** The config payload a stream sends for a view, or null if it isn't a (renderable) block view. */
+  private _blockConfigJson(key: ViewKey): string | null {
+    const result = this._views.get(key)?.serve();
+    return result?.kind === "blocks" ? JSON.stringify(result.root) : null;
+  }
+
+  /** A client opened a view's config stream: seed with the current config, then subscribe. */
+  private _openStream(req: RouteRequest, conn: SseConnection): void {
+    const key = req.params.key;
+    const payload = this._blockConfigJson(key);
+    if (payload === null) {
+      // Only block views stream a config (url views redirect; unknown keys have nothing).
+      conn.send("gone", "");
+      conn.close();
+      return;
+    }
+
+    conn.send("config", payload); // seed the initial render
+
+    let subs = this._streamSubs.get(key);
+    if (!subs) {
+      subs = new Set();
+      this._streamSubs.set(key, subs);
+    }
+    subs.add(conn);
+    conn.onClose(() => {
+      const set = this._streamSubs.get(key);
+      set?.delete(conn);
+      if (set && set.size === 0) this._streamSubs.delete(key);
+    });
+  }
+
+  /** Push a view's current config to its stream watchers, or close them if it's no longer a block view. */
+  private _refreshStreams(key: ViewKey): void {
+    const subs = this._streamSubs.get(key);
+    if (!subs?.size) return;
+
+    const payload = this._blockConfigJson(key);
+    if (payload === null) {
+      this._closeStreams(key); // type changed away from blocks, or view gone
+      return;
+    }
+    for (const conn of subs) conn.send("config", payload);
+  }
+
+  /** Tell a view's stream watchers it's gone and end their connections. */
+  private _closeStreams(key: ViewKey): void {
+    const subs = this._streamSubs.get(key);
+    if (!subs) return;
+    for (const conn of subs) {
+      conn.send("gone", "");
+      conn.close();
+    }
+    this._streamSubs.delete(key);
   }
 
   async init(): Promise<void> {
@@ -84,6 +161,9 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
     }
     this._logger.info(`Loaded ${this._views.size} view(s).`);
     this._syncInfo();
+
+    // Build the browser renderer bundle once (block views 503 until it succeeds).
+    await this._client.build();
   }
 
   getView(key: ViewKey): AbstractView | undefined {
@@ -124,6 +204,7 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
     // Re-instantiate rather than mutate: cleanly handles a view type change.
     this._views.set(key, ViewFactory.createView(key, parsed));
     this.emit("view_updated", key);
+    this._refreshStreams(key); // push the new config to open viewers, in place
     this._logger.info(`Updated view "${key}".`);
   }
 
@@ -131,6 +212,7 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
     if (!this._views.has(key)) throw new Error(`No view with key "${key}".`);
     await this._store.deleteView(key);
     this._views.delete(key);
+    this._closeStreams(key); // end open viewers before they lose their view
     this._syncInfo();
     this.emit("view_removed", key);
     this._logger.info(`Deleted view "${key}".`);
