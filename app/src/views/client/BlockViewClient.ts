@@ -7,11 +7,11 @@ import { Logger } from "../../logging/Logger";
 const HOST_HTML = path.join(process.cwd(), "src", "views", "client", "index.html");
 
 /**
- * Owns the browser renderer app: the static host page and the esbuild-built bundle.
- * ViewManager holds one and wires the routes to it, keeping every "serve the client app"
- * concern (build + hold + expose) together under client/.
+ * The browser renderer app for block views: the static host page and the esbuild-built
+ * bundle. ViewServer holds one and serves both. Block-specific by nature — url views
+ * redirect and have no client app — hence the name.
  */
-export class ViewClient {
+export class BlockViewClient {
   private _logger = new Logger(["VIEW", "CLIENT"]);
   private _hostHtml: string | undefined;
   private _bundle: string | null = null;
