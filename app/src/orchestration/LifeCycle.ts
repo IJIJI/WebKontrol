@@ -8,6 +8,7 @@ import { PuppetFactory } from "./puppet/PuppetFactory";
 import { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
 import { SystemManager } from "../system/SystemManager";
 import { ViewManager } from "../views/ViewManager";
+import { ViewServer } from "../views/ViewServer";
 
 
 
@@ -35,15 +36,18 @@ export class LifeCycle {
       puppetOrchestrator.addPuppet(puppet);
     }
 
+    const viewManager = new ViewManager(appConfig.views);
+
     const orchestratorConf: AppCoreConfig = {
       puppetOrchestrator: puppetOrchestrator,
       webServer: new WebServer(appConfig.web),
       uiManager: new UiManager(),
       systemManager: new SystemManager(),
-      viewManager: new ViewManager(appConfig.views),
+      viewManager: viewManager,
+      viewServer: new ViewServer(viewManager), // transport for the views; reacts to the manager's events
     }
 
-    return new AppCore(orchestratorConf);    
+    return new AppCore(orchestratorConf);
 
   }
   

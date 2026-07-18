@@ -5,6 +5,7 @@ import type { WebServerState } from "../webServer/model";
 import type { WebServer } from "../webServer/WebServer";
 import type { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
 import type { ViewManager } from "../views/ViewManager";
+import type { ViewServer } from "../views/ViewServer";
 
 export interface AppCoreConfig {
   systemManager: SystemManager;
@@ -12,6 +13,7 @@ export interface AppCoreConfig {
   webServer: WebServer;
   uiManager: UiManager;
   viewManager: ViewManager;
+  viewServer: ViewServer;
 }
 
 export class AppCore { // TODO: Move every non-puppet management from the appcore to this.
