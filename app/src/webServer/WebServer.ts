@@ -86,24 +86,41 @@ export class WebServer implements RouteRegistrar {
       res.setHeader("Connection", "keep-alive");
       res.flushHeaders();
 
-      const ping = setInterval(() => res.write(`: ping\n\n`), this._config.sse.ping_interval);
+      const ping = setInterval(() => this._sseWrite(res, `: ping\n\n`), this._config.sse.ping_interval);
       req.on("close", () => clearInterval(ping));
 
       const connection: SseConnection = {
-        send: (event, data) => res.write(`event: ${event}\ndata: ${data}\n\n`),
+        send: (event, data) => this._sseWrite(res, `event: ${event}\ndata: ${data}\n\n`),
         close: () => res.end(),
         onClose: (cb) => req.on("close", cb),
       };
 
-      handler(
-        { params: req.params as Record<string, string>, query: req.query, body: undefined },
-        connection,
-      );
+      try {
+        handler(
+          { params: req.params as Record<string, string>, query: req.query, body: undefined },
+          connection,
+        );
+      } catch (error) {
+        this._logger.error(`SSE handler threw for ${path}:`, error);
+        clearInterval(ping);
+        res.end();
+      }
     });
     this._logger.debug(`Registered SSE ${path}`);
   }
 
-  private async _runRoute(
+  /** Write to an SSE response, tolerating a connection that closed between checks and this write. */
+  private _sseWrite(res: express.Response, chunk: string): void {
+    if (res.writableEnded) return; // client already gone; the close handler cleaned up
+    try {
+      res.write(chunk);
+    } catch (error) {
+      // Routine (the client disconnected mid-write), so debug — but never silent.
+      this._logger.debug("Dropped SSE write to a closed connection:", error);
+    }
+  }
+
+  private async _runRoute( // TODO: ss has no seperate function. Should it or should this not.
     handler: RouteHandler,
     req: express.Request,
     res: express.Response,
