@@ -28,6 +28,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
   private _webServer: WebServer;
   private _uiManager: UiManager;
   private _viewManager: ViewManager;
+  private _viewServer: ViewServer;
 
   private _webState!: WebServerState;
 
@@ -37,6 +38,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     this._webServer = config.webServer;
     this._uiManager = config.uiManager;
     this._viewManager = config.viewManager;
+    this._viewServer = config.viewServer;
 
     this._updateState({
       puppets: this._puppetOrchestrator.getPuppetBundles(),
@@ -74,17 +76,21 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     // Views before puppets: the orchestrator resolves each puppet's assigned view into a
     // target during its own init, so the ViewManager must already hold the views.
     await this._viewManager.init();
+    await this._viewServer.init(); // build the block renderer bundle before serving
     this._puppetOrchestrator.setViewContext(this._viewManager, this._webServer.getServeBase());
 
-    // Keep puppets in sync with view edits: re-navigate on update, drop refs + fall back on removal.
-    this._viewManager.on('view_updated', (key) => void this._puppetOrchestrator.onViewUpdated(key));
+    // Keep puppets in sync with view edits: reload only when the served target actually
+    // changed (block content edits update in place over SSE), and always on removal.
+    this._viewManager.on('view_updated', (key, puppetReload) => {
+      if (puppetReload) void this._puppetOrchestrator.onViewUpdated(key);
+    });
     this._viewManager.on('view_removed', (key) => void this._puppetOrchestrator.onViewRemoved(key));
 
     await this._puppetOrchestrator.init();
 
     await this._uiManager.init();
 
-    this._viewManager.registerRoutes(this._webServer); // before start() → lands ahead of the SPA catch-all
+    this._viewServer.registerRoutes(this._webServer); // before start() → lands ahead of the SPA catch-all
 
     this._webServer.setHandlers({
       system: this._systemManager.getHandlers(),
