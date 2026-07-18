@@ -63,6 +63,7 @@ export interface RouteResponse {
   redirect?: string; // if set, redirect here (status defaults to 302)
   body?: string;
   contentType?: string; // for body, e.g. "text/html"
+  headers?: Record<string, string>; // extra response headers, e.g. Cache-Control
   // If set, the handler declines to respond and the request continues down the
   // middleware chain (e.g. a route that conditionally falls through to the SPA/Vite
   // HTML middleware). No current consumer, but kept as an extension point for plugin

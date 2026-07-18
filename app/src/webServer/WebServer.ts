@@ -117,8 +117,12 @@ export class WebServer implements RouteRegistrar {
       });
       if (result.passthrough) {
         // Handler declined; continue the middleware chain.
-        next();
-      } else if (result.redirect !== undefined) {
+        return next();
+      }
+      if (result.headers) {
+        for (const [name, value] of Object.entries(result.headers)) res.setHeader(name, value);
+      }
+      if (result.redirect !== undefined) {
         res.redirect(result.status ?? 302, result.redirect);
       } else if (result.body !== undefined) {
         if (result.contentType) res.type(result.contentType);
