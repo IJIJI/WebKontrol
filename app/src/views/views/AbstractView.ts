@@ -1,9 +1,11 @@
 import type { ServeResult } from "../types/model";
-import type { ViewConfig, ViewKey } from "../types/schema";
+import type { AnyViewConfig, ViewKey } from "../types/schema";
 
 // A single view instance: it knows its key + config and how its /view/:key path
 // responds. Lifecycle (create/update/delete + events) is owned by the ViewManager.
-export abstract class AbstractView<TConfig extends ViewConfig = ViewConfig> {
+// Bound to AnyViewConfig (not the base) so the erased Map<ViewKey, AbstractView> still
+// yields the discriminated config from getConfig().
+export abstract class AbstractView<TConfig extends AnyViewConfig = AnyViewConfig> {
   constructor(
     readonly key: ViewKey,
     protected _config: TConfig,
