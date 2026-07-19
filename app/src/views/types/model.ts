@@ -1,16 +1,7 @@
 import type { AnyBlockConfig } from "../blocks/types/schema";
-import type { AnyViewConfig, ViewKey } from "./schema";
 
 export interface ViewManagerInfo {
   viewCount: number; // TODO Actually usefull info
-}
-
-/**
- * Bundle for the frontend/api.
- */
-export interface ViewBundle {
-  key: ViewKey;
-  config: AnyViewConfig;
 }
 
 /**
