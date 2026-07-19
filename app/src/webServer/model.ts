@@ -42,12 +42,18 @@ export interface UpdateWebhandlers {
 export interface UiWebhandlers {
   updateRuntime: (runtime: Partial<UiRuntime>) => void | Promise<void>;
 }
+export interface ViewWebhandlers {
+  create: (config: AnyViewConfig) => Promise<ViewKey>;
+  update: (key: ViewKey, config: AnyViewConfig) => Promise<void>;
+  delete: (key: ViewKey) => Promise<void>;
+}
 
 export interface WebServerMutationHandlers { // TODO: UiManager to manage ui settings?
   system: SystemWebhandlers;
   update: UpdateWebhandlers;
   ui: UiWebhandlers;
   puppet: PuppetWebhandlers;
+  view: ViewWebhandlers;
 }
 
 //* Route registration (the seed of plugin HTTP endpoints):

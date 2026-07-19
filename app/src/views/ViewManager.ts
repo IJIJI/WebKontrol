@@ -12,6 +12,7 @@ import {
   type ViewManagerRuntime,
 } from "./types/schema";
 import type { ViewManagerInfo } from "./types/model";
+import type { ViewWebhandlers } from "../webServer/model";
 import { ViewManagerStore } from "../storage/stores/ViewManagerStore";
 import { ViewFactory } from "./ViewFactory";
 import { Logger } from "../logging/Logger";
@@ -88,6 +89,15 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
   /** A serializable snapshot of every view's config, keyed by view key (for WebServerState.views). */
   getViewConfigs(): Record<ViewKey, AnyViewConfig> {
     return Object.fromEntries([...this._views].map(([key, view]) => [key, view.getConfig()]));
+  }
+
+  /** CRUD handlers the web server exposes (mirrors PuppetOrchestrator.getHandlers). */
+  getHandlers(): ViewWebhandlers {
+    return {
+      create: (config) => this.createView(config),
+      update: (key, config) => this.updateView(key, config),
+      delete: (key) => this.deleteView(key),
+    };
   }
 
   getRuntime(): ViewManagerRuntime {
