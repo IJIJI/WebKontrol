@@ -4,6 +4,7 @@ import type { PuppetKey, PuppetRuntime } from "../puppet/types/schema";
 import type { SystemInfo } from "../system/model";
 import type { SystemRuntime } from "../system/schema";
 import type { UiRuntime } from "../ui/schema";
+import type { AnyViewConfig, ViewKey } from "../views/types/schema";
 
 export interface WebServerRuntimeState {// Only Runtime Configs. Standard configs are done from the config file.
   system: SystemRuntime;
@@ -16,6 +17,7 @@ export interface WebServerInfoState {
 
 export interface WebServerState {
   puppets: PuppetDataBundle[];
+  views: Record<ViewKey, AnyViewConfig>;
   runtime: WebServerRuntimeState; // TODO: Rename to runtime?
   info: WebServerInfoState;
 }
