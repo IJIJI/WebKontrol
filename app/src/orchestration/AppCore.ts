@@ -42,6 +42,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
 
     this._updateState({
       puppets: this._puppetOrchestrator.getPuppetBundles(),
+      views: this._viewManager.getViewConfigs(),
       runtime: {
         system: this._systemManager.getRuntime(),
         puppetOrchestrator: this._puppetOrchestrator.getRuntime(),
@@ -54,11 +55,17 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
 
     this._systemManager.on('info_update', (info) => this._updateState({info: { ...this._webState.runtime, system: info }}));
     this._systemManager.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, system: runtime }}));
-    
+
     this._puppetOrchestrator.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, puppetOrchestrator: runtime }}));
     this._puppetOrchestrator.on('puppet_update', (puppets) => this._updateState({ puppets: puppets }));
 
     this._uiManager.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, ui: runtime }}));
+
+    // Re-sync the view list into the state on any view change (create/edit/delete).
+    const syncViews = (): void => this._updateState({ views: this._viewManager.getViewConfigs() });
+    this._viewManager.on('view_added', syncViews);
+    this._viewManager.on('view_updated', syncViews);
+    this._viewManager.on('view_removed', syncViews);
   }
 
   public getPuppetManager(): PuppetOrchestrator {
@@ -76,6 +83,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     // Views before puppets: the orchestrator resolves each puppet's assigned view into a
     // target during its own init, so the ViewManager must already hold the views.
     await this._viewManager.init();
+    this._updateState({ views: this._viewManager.getViewConfigs() }); // seed loaded views (init emits no events)
     await this._viewServer.init(); // build the block renderer bundle before serving
     this._puppetOrchestrator.setViewContext(this._viewManager, this._webServer.getServeBase());
 
