@@ -16,13 +16,16 @@ import { type PuppetKey, type PuppetRuntime, type PuppetRuntimeInput } from "../
 import { type SystemRuntimeInput } from "../../../src/system/schema";
 import { type UiRuntimeInput, type UiTheme } from "../../../src/ui/schema";
 import { type PuppetDataBundle } from "../../../src/puppet/types/model";
+import { type AnyViewConfig, type ViewKey } from "../../../src/views/types/schema";
 
 export interface UiPuppetState extends PuppetDataBundle {
   setRuntime: (config: PuppetRuntime) => Promise<void>;
 }
 
-export interface UiWebServerState extends Omit<WebServerState, "puppets"> {
+export interface UiWebServerState extends Omit<WebServerState, "puppets" | "views"> {
   puppets: Map<PuppetKey, UiPuppetState>;
+  views: Map<ViewKey, AnyViewConfig>; // Todo: add mutatation handlers?
+  // TODO: The only difference from webserverstate is map vs record. Should there be a difference?
 }
 
 interface ApiState {
@@ -147,9 +150,12 @@ export function ApiStateProvider({
           puppets.set(key, full);
         }
 
+        const views = new Map<ViewKey, AnyViewConfig>(Object.entries(data.views));
+
         const state: UiWebServerState = {
           ...data,
           puppets: puppets,
+          views: views,
         };
 
         setStatus(ConnectionStatus.CONNECTED);
