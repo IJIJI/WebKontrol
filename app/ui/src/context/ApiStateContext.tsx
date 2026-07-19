@@ -22,10 +22,18 @@ export interface UiPuppetState extends PuppetDataBundle {
   setRuntime: (config: PuppetRuntime) => Promise<void>;
 }
 
+// A view enriched with mutations bound to its key (like UiPuppetState). The wire ships a
+// Record; the UI holds a Map so each value can carry update/delete.
+export interface UiViewState {
+  key: ViewKey;
+  config: AnyViewConfig;
+  update: (config: AnyViewConfig) => Promise<void>;
+  delete: () => Promise<void>;
+}
+
 export interface UiWebServerState extends Omit<WebServerState, "puppets" | "views"> {
   puppets: Map<PuppetKey, UiPuppetState>;
-  views: Map<ViewKey, AnyViewConfig>; // Todo: add mutatation handlers?
-  // TODO: The only difference from webserverstate is map vs record. Should there be a difference?
+  views: Map<ViewKey, UiViewState>;
 }
 
 interface ApiState {
@@ -56,6 +64,11 @@ interface ApiState {
         runtime: Partial<PuppetRuntimeInput>,
         notify?: boolean,
       ) => Promise<void>;
+    };
+    view: {
+      create: (config: AnyViewConfig, notify?: boolean) => Promise<ViewKey>;
+      update: (key: ViewKey, config: AnyViewConfig, notify?: boolean) => Promise<void>;
+      delete: (key: ViewKey, notify?: boolean) => Promise<void>;
     };
   };
 }
@@ -150,7 +163,15 @@ export function ApiStateProvider({
           puppets.set(key, full);
         }
 
-        const views = new Map<ViewKey, AnyViewConfig>(Object.entries(data.views));
+        const views = new Map<ViewKey, UiViewState>();
+        for (const [key, config] of Object.entries(data.views)) {
+          views.set(key, {
+            key,
+            config,
+            update: (next: AnyViewConfig): Promise<void> => viewUpdate(key, next),
+            delete: (): Promise<void> => viewDelete(key),
+          });
+        }
 
         const state: UiWebServerState = {
           ...data,
@@ -223,6 +244,38 @@ export function ApiStateProvider({
     );
   };
 
+  const viewCreate = async (
+    config: AnyViewConfig,
+    notify = true,
+  ): Promise<ViewKey> => {
+    const { key } = await withToast(
+      Api.post<{ key: ViewKey }>("/views", config),
+      { loading: "Creating view…", success: "View created" },
+      notify,
+    );
+    return key;
+  };
+
+  const viewUpdate = async (
+    key: ViewKey,
+    config: AnyViewConfig,
+    notify = true,
+  ): Promise<void> => {
+    return withToast(
+      Api.patch(`/views/${key}`, config),
+      { loading: "Saving view…", success: "View saved" },
+      notify,
+    );
+  };
+
+  const viewDelete = async (key: ViewKey, notify = true): Promise<void> => {
+    return withToast(
+      Api.delete(`/views/${key}`),
+      { loading: "Deleting view…", success: "View deleted" },
+      notify,
+    );
+  };
+
   useConnectionToast({ state: status });
 
   return (
@@ -240,6 +293,11 @@ export function ApiStateProvider({
           },
           puppet: {
             updateRuntime: puppetUpdateRuntime,
+          },
+          view: {
+            create: viewCreate,
+            update: viewUpdate,
+            delete: viewDelete,
           },
         },
       }}

@@ -12,6 +12,7 @@ import {
 import { UiRuntimeShape } from "../ui/schema";
 import { SystemRuntimeShape } from "../system/schema";
 import { PuppetKeySchema, PuppetRuntimeShape } from "../puppet/types/schema";
+import { AnyViewConfigSchema, ViewKeySchema } from "../views/types/schema";
 
 export class WebServer implements RouteRegistrar {
   private _app = express();
@@ -324,6 +325,55 @@ export class WebServer implements RouteRegistrar {
         res.status(500).json({
           error: e instanceof Error ? e.message : "Failed to update producer",
         });
+      }
+    });
+
+    this._app.post("/api/views", async (req, res) => {
+      const result = AnyViewConfigSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+      }
+      try {
+        const key = await this._handlers.view.create(result.data);
+        res.status(201).json({ key });
+        this._logger.info(`Created view ${key}.`);
+      } catch (e) {
+        this._logger.error("Failed to create view:", e);
+        res.status(500).json({ error: e instanceof Error ? e.message : "Failed to create view" });
+      }
+    });
+
+    this._app.patch("/api/views/:key", async (req, res) => {
+      const resultKey = ViewKeySchema.safeParse(req.params.key);
+      if (!resultKey.success) {
+        return res.status(400).json({ errors: resultKey.error.format() });
+      }
+      const resultBody = AnyViewConfigSchema.safeParse(req.body);
+      if (!resultBody.success) {
+        return res.status(400).json({ errors: resultBody.error.format() });
+      }
+      try {
+        await this._handlers.view.update(resultKey.data, resultBody.data);
+        res.status(204).send();
+        this._logger.info(`Updated view ${resultKey.data}.`);
+      } catch (e) {
+        this._logger.error("Failed to update view:", resultKey.data, e);
+        res.status(500).json({ error: e instanceof Error ? e.message : "Failed to update view" });
+      }
+    });
+
+    this._app.delete("/api/views/:key", async (req, res) => {
+      const resultKey = ViewKeySchema.safeParse(req.params.key);
+      if (!resultKey.success) {
+        return res.status(400).json({ errors: resultKey.error.format() });
+      }
+      try {
+        await this._handlers.view.delete(resultKey.data);
+        res.status(204).send();
+        this._logger.info(`Deleted view ${resultKey.data}.`);
+      } catch (e) {
+        this._logger.error("Failed to delete view:", resultKey.data, e);
+        res.status(500).json({ error: e instanceof Error ? e.message : "Failed to delete view" });
       }
     });
 

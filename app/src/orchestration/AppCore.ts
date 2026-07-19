@@ -120,6 +120,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
       },
       puppet: this._puppetOrchestrator.getHandlers(),
       ui: this._uiManager.getHandlers(),
+      view: this._viewManager.getHandlers(),
     });
     await this._webServer.start(); // TODO rename to init? Or split?
 
