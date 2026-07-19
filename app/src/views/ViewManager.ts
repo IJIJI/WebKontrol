@@ -85,6 +85,11 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
     return [...this._views.values()];
   }
 
+  /** A serializable snapshot of every view's config, keyed by view key (for WebServerState.views). */
+  getViewConfigs(): Record<ViewKey, AnyViewConfig> {
+    return Object.fromEntries([...this._views].map(([key, view]) => [key, view.getConfig()]));
+  }
+
   getRuntime(): ViewManagerRuntime {
     return this._runtime;
   }
