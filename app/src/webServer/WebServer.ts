@@ -29,6 +29,9 @@ export class WebServer implements RouteRegistrar {
 
   constructor(config: WebServerConfigInput) {
     this._config = WebServerConfigSchema.parse(config);
+    // Register body parsing up front. It is needed for the registrar routes, which are added before start.
+    // Without this registered routes can not parse the request body.
+    this._app.use(express.json());
   }
 
   private get _getSseDataPayload() {
@@ -161,7 +164,6 @@ export class WebServer implements RouteRegistrar {
 
     this._logger.info("Starting WebServer...");
 
-    this._app.use(express.json());
     this._app.set("json replacer", jsonReplacer);
 
     // Middleware that returns the still setting up message before the state is set:
