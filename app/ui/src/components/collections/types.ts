@@ -1,4 +1,5 @@
-export enum ListItemType {
-  VIEW = "view",
-  PUPPET = "puppet",
+export enum CollectionLayout {
+  LIST = "list",
+  GRID = "grid",
+  TABLE = "table",
 } 
