@@ -26,6 +26,7 @@ export function Button(props: {
   disabled?: boolean;
   ref?: RefObject<HTMLButtonElement | null>;
   size?: number;
+  ariaLabel?: string;
 }): JSX.Element {
   const type = props.type ?? ButtonType.DEFAULT;
   const style = props.style ?? ButtonStyle.FILLED;
@@ -40,6 +41,7 @@ export function Button(props: {
       }}
       ref={props.ref}
       style={{ fontSize: props.size }}
+      aria-label={props.ariaLabel}
     >
       {props.children}
     </button>
