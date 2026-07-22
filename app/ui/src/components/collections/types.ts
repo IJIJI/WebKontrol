@@ -25,6 +25,8 @@ export interface CollectionItemProps {
   to?: To;
   label?: string; // accessible name for the link (defaults to `name` when it's a string)
   name: ReactNode;
+  icon: ReactNode; 
+  color: string; // TODO: Better color type?
   chips?: ReactNode; // tag chips / status pills row
   actions?: ItemAction[];
   // content?: ReactNode; // TODO: optional custom body, replaces the entire item content
