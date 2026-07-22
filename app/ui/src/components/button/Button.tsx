@@ -1,7 +1,7 @@
 import { type JSX } from "react/jsx-runtime";
 
 import "./button.less";
-import { type RefObject } from "react";
+import { ReactNode, type RefObject } from "react";
 
 
 export enum ButtonType {
@@ -22,7 +22,7 @@ export function Button(props: {
   onClick: () => void | Promise<void>;
   type?: ButtonType;
   style?: ButtonStyle;
-  children: string | JSX.Element | JSX.Element[];
+  children: ReactNode;
   disabled?: boolean;
   ref?: RefObject<HTMLButtonElement | null>;
   size?: number;
