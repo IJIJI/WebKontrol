@@ -5,7 +5,6 @@ import { JSX } from "react/jsx-runtime";
 export interface FrameBoxProps {
   children: ReactNode;
   color: string; // TODO: Better color type?
-  size: number;
   className?: string;
 }
 
