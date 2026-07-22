@@ -1,13 +1,10 @@
 import { JSX, ReactNode } from "react";
 import { Link, To } from "react-router-dom";
+import { CollectionItemProps } from "../types";
+import { IconBox } from "../../icons/IconBox";
 
 
-export interface ListRowProps {
-  // onClick?: () => void; // TODO: Promise support?
-  to?: To;
-  label?: string;
-  actions?: ReactNode;
-  children: ReactNode;
+export interface ListRowProps extends CollectionItemProps {
 }
 
 export function ListItem(props: ListRowProps): JSX.Element {
@@ -22,7 +19,22 @@ export function ListItem(props: ListRowProps): JSX.Element {
     <div
       className={[...baseClass].filter(Boolean).join(" ")}
     >
-      {mainWrap(props.children)}
+      {mainWrap(
+        // TODO: Reactive size?
+        <>
+          <IconBox color={props.color} size={45} className={[...baseClass, "icon"].filter(Boolean).join(" ")} >
+            {props.icon}
+          </IconBox>
+          <div className={[...baseClass, "info"].filter(Boolean).join(" ")} >
+            <h1 className={[...baseClass, "title"].filter(Boolean).join(" ")} >
+              {props.label}
+            </h1>
+            <div className={[...baseClass, "subtitle"].filter(Boolean).join(" ")} >
+              // TODO: Chips loading
+            </div>
+          </div>
+        </>
+      )}
       <div className={[...baseClass, "actions"].filter(Boolean).join(" ")}>
         {props.actions}
       </div>
