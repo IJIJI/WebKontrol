@@ -27,6 +27,7 @@ export function Button(props: {
   ref?: RefObject<HTMLButtonElement | null>;
   size?: number;
   ariaLabel?: string;
+  className?: string;
 }): JSX.Element {
   const type = props.type ?? ButtonType.DEFAULT;
   const style = props.style ?? ButtonStyle.FILLED;
@@ -34,7 +35,7 @@ export function Button(props: {
   return (
     <button
       type="button"
-      className={"buttonComp " + (props.disabled ? "disabled " : "") + type + " " + style}
+      className={"buttonComp " + (props.className ? `${props.className} ` : "") + (props.disabled ? "disabled " : "") + type + " " + style}
       disabled={props.disabled}
       onClick={() => {
         if (!props.disabled) props.onClick();
