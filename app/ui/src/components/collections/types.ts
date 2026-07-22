@@ -27,7 +27,7 @@ export interface CollectionItemProps {
   name: ReactNode;
   icon: ReactNode; 
   color: string; // TODO: Better color type?
-  chips?: ReactNode; // tag chips / status pills row
+  chips?: ReactNode; // tag chips / status pills row // TODO: Array?
   actions?: ItemAction[];
   // content?: ReactNode; // TODO: optional custom body, replaces the entire item content
 }
