@@ -14,7 +14,7 @@ export interface ItemAction {
   icon?: ReactNode; 
   onClick: () => void;
   type?: ButtonType;
-  style: ButtonStyle;
+  style?: ButtonStyle;
   disabled?: boolean;
 }
 
