@@ -1,11 +1,34 @@
 import { ReactNode } from "react";
+import { To } from "react-router-dom";
+import { ButtonStyle, ButtonType } from "../button/Button";
 
 export enum CollectionLayout {
   LIST = "list",
   GRID = "grid",
   TABLE = "table",
-} 
+}
 
+export interface ItemAction {
+  id: string;
+  label: string; // tooltip + aria-label
+  icon?: ReactNode; 
+  onClick: () => void;
+  type?: ButtonType;
+  style: ButtonStyle;
+  disabled?: boolean;
+}
+
+// The shared shape an item resolves to. A layout renders `name` (as a link when `to` is set),
+// `chips` (tags / status pills), and `actions` (as buttons). `content` is an escape
+// hatch for anything custom that doesn't fit the standard shape.
+export interface CollectionItemProps {
+  to?: To;
+  label?: string; // accessible name for the link (defaults to `name` when it's a string)
+  name: ReactNode;
+  chips?: ReactNode; // tag chips / status pills row
+  actions?: ItemAction[];
+  // content?: ReactNode; // TODO: optional custom body, replaces the entire item content
+}
 
 export interface CollectionLayoutProps<T> {
   items: T[];
@@ -14,8 +37,8 @@ export interface CollectionLayoutProps<T> {
 }
 
 export interface CollectionProps<T> extends CollectionLayoutProps<T> {
-  layout?: CollectionLayout; // Defaults to list // TODO Add the option for different defaults? -> Not optional?
+  layout?: CollectionLayout; // Defaults to list
   title?: ReactNode;
-  actions?: ReactNode;
+  actions?: ReactNode; // toolbar actions (e.g. a New button)
   empty?: ReactNode; // Content for when the list is empty.
 }
