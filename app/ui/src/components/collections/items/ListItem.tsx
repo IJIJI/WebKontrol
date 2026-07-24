@@ -1,13 +1,12 @@
 import { JSX, ReactNode } from "react";
-import { Link, To } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { CollectionItemProps } from "../types";
-import { IconBox } from "../../icons/IconBox";
+import { FrameBox } from "../../frameBox/FrameBox";
+import { Icons } from "../../icons/Icons";
+import { Button } from "../../button/Button";
 
 
-export interface ListRowProps extends CollectionItemProps {
-}
-
-export function ListItem(props: ListRowProps): JSX.Element {
+export function ListItem(props: CollectionItemProps): JSX.Element {
   const baseClass = ["collection", "item", "list"];
   
   const mainWrap = (content: ReactNode): JSX.Element => props.to ? // TODO: This is here for more dynamic wrapping of main link items, check how the wrapping could be improved.
@@ -20,24 +19,40 @@ export function ListItem(props: ListRowProps): JSX.Element {
       className={[...baseClass].filter(Boolean).join(" ")}
     >
       {mainWrap(
-        // TODO: Reactive size?
         <>
-          <IconBox color={props.color} size={45} className={[...baseClass, "icon"].filter(Boolean).join(" ")} >
-            {props.icon}
-          </IconBox>
+          <FrameBox color={props.color} className={[...baseClass, "icon"].filter(Boolean).join(" ")} >
+            {props.icon ? props.icon : <Icons.burger /> } // TODO: How are icons sized?
+          </FrameBox>
           <div className={[...baseClass, "info"].filter(Boolean).join(" ")} >
-            <h1 className={[...baseClass, "title"].filter(Boolean).join(" ")} >
+            <span className={[...baseClass, "title"].filter(Boolean).join(" ")} >
               {props.label}
-            </h1>
-            <div className={[...baseClass, "subtitle"].filter(Boolean).join(" ")} >
-              // TODO: Chips loading
+            </span>
+            <div className={[...baseClass, "chips"].filter(Boolean).join(" ")} >
+              { props.chips }
             </div>
           </div>
         </>
       )}
+      {props.actions?.length ?
       <div className={[...baseClass, "actions"].filter(Boolean).join(" ")}>
-        {props.actions}
+        {props.actions.map((a) => (
+          <Button
+            key={a.id}
+            onClick={a.onClick}
+            type={a.type}
+            style={a.style}
+            disabled={a.disabled}
+            ariaLabel={a.label}
+            className={[...baseClass, "action"].filter(Boolean).join(" ")}
+          >
+            {a.icon}
+            <span className={[...baseClass, "action", "label"].filter(Boolean).join(" ")}>
+              {a.label}
+            </span>
+          </Button>
+        ))}
       </div>
+      : null }
     </div>
   );
 }
