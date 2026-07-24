@@ -19,7 +19,7 @@ export function Collection<T>( props: CollectionProps<T> ): JSX.Element {
         </header>
       )}
       {props.items.length === 0 ?
-        <div className={[...baseClass, "empty"].filter(Boolean).join(" ")} >
+        <div className={[...baseClass, "layout", "empty"].filter(Boolean).join(" ")} >
           {props.empty ?? "Nothing here yet."}
         </div> 
         :
