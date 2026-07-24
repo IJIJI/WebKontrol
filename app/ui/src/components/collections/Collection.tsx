@@ -2,9 +2,9 @@
 
 
 
-import { JSX } from "react/jsx-runtime";
+import { type JSX } from "react/jsx-runtime";
 import "./collection.less";
-import { CollectionLayout, CollectionProps } from "./types";
+import { CollectionLayout, type CollectionProps } from "./types";
 import { ListLayout } from "./layouts/ListLayout";
 
 export function Collection<T>( props: CollectionProps<T> ): JSX.Element {

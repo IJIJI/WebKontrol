@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
-import { To } from "react-router-dom";
-import { ButtonStyle, ButtonType } from "../button/Button";
+import { type ReactNode } from "react";
+import { type To } from "react-router-dom";
+import { type ButtonStyle, type ButtonType } from "../button/Button";
 
 export enum CollectionLayout {
   LIST = "list",

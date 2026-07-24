@@ -1,7 +1,7 @@
 import { type JSX } from "react/jsx-runtime";
 
 import "./button.less";
-import { ReactNode, type RefObject } from "react";
+import { type ReactNode, type RefObject } from "react";
 
 
 export enum ButtonType {

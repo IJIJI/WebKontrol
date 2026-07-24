@@ -1,5 +1,5 @@
-import { JSX } from "react/jsx-runtime";
-import { CollectionLayoutProps } from "../types";
+import { type JSX } from "react/jsx-runtime";
+import { type CollectionLayoutProps } from "../types";
 
 
 

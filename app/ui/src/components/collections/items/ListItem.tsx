@@ -1,6 +1,6 @@
-import { JSX, ReactNode } from "react";
+import { type JSX, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { CollectionItemProps } from "../types";
+import { type CollectionItemProps } from "../types";
 import { FrameBox } from "../../frameBox/FrameBox";
 import { Icons } from "../../icons/Icons";
 import { Button } from "../../button/Button";
