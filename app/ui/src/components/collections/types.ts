@@ -24,7 +24,7 @@ export interface ItemAction {
 export interface CollectionItemProps {
   to?: To;
   label?: string; // accessible name for the link (defaults to `name` when it's a string)
-  name: ReactNode;
+  title: ReactNode;
   icon: ReactNode; 
   color: string; // TODO: Better color type?
   chips?: ReactNode; // tag chips / status pills row // TODO: Array?

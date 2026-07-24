@@ -12,7 +12,7 @@ export function ListItem(props: CollectionItemProps): JSX.Element {
   const mainWrap = (content: ReactNode): JSX.Element => props.to ? // TODO: This is here for more dynamic wrapping of main link items, check how the wrapping could be improved.
     <Link to={props.to} className={[...baseClass, "main", "clickable"].filter(Boolean).join(" ")} aria-label={props.label}>{content}</Link>
     :
-    <div className={[...baseClass, "main"].filter(Boolean).join(" ")} aria-label={props.label}>{content}</div>
+    <div className={[...baseClass, "main"].filter(Boolean).join(" ")} >{content}</div>
   
     return (
     <div
@@ -21,15 +21,17 @@ export function ListItem(props: CollectionItemProps): JSX.Element {
       {mainWrap(
         <>
           <FrameBox color={props.color} className={[...baseClass, "icon"].filter(Boolean).join(" ")} >
-            {props.icon ? props.icon : <Icons.burger /> } // TODO: How are icons sized?
+            {props.icon ? props.icon : <Icons.burger /> }
           </FrameBox>
           <div className={[...baseClass, "info"].filter(Boolean).join(" ")} >
             <span className={[...baseClass, "title"].filter(Boolean).join(" ")} >
-              {props.label}
+              { props.title }
             </span>
-            <div className={[...baseClass, "chips"].filter(Boolean).join(" ")} >
-              { props.chips }
-            </div>
+            { props.chips &&
+              <div className={[...baseClass, "chips"].filter(Boolean).join(" ")} >
+                { props.chips }
+              </div>
+            }
           </div>
         </>
       )}
