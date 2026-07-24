@@ -5,6 +5,7 @@ import { FrameBox } from "../../frameBox/FrameBox";
 import { Icons } from "../../icons/Icons";
 import { Button } from "../../button/Button";
 
+import "./listItem.less";
 
 export function ListItem(props: CollectionItemProps): JSX.Element {
   const baseClass = ["collection", "item", "list"];
