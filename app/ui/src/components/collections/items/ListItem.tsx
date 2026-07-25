@@ -1,6 +1,6 @@
-import { type JSX, type ReactNode } from "react";
+import { JSX, ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { type CollectionItemProps } from "../types";
+import { CollectionItemProps } from "../types";
 import { FrameBox } from "../../frameBox/FrameBox";
 import { Icons } from "../../icons/Icons";
 import { Button } from "../../button/Button";
@@ -8,7 +8,7 @@ import { Button } from "../../button/Button";
 import "./listItem.less";
 
 export function ListItem(props: CollectionItemProps): JSX.Element {
-  const baseClass = ["collection", "item", "list"];
+  const baseClass = ["list"];
   
   const mainWrap = (content: ReactNode): JSX.Element => props.to ? // TODO: This is here for more dynamic wrapping of main link items, check how the wrapping could be improved.
     <Link to={props.to} className={[...baseClass, "main", "clickable"].filter(Boolean).join(" ")} aria-label={props.label}>{content}</Link>
@@ -28,11 +28,9 @@ export function ListItem(props: CollectionItemProps): JSX.Element {
             <span className={[...baseClass, "title"].filter(Boolean).join(" ")} >
               { props.title }
             </span>
-            { props.chips &&
-              <div className={[...baseClass, "chips"].filter(Boolean).join(" ")} >
-                { props.chips }
-              </div>
-            }
+            <div className={[...baseClass, "chips"].filter(Boolean).join(" ")} >
+              { props.chips }
+            </div>
           </div>
         </>
       )}
