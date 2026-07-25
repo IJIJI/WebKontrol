@@ -4,6 +4,8 @@ import { ListItem } from "../components/collections/items/ListItem";
 import { CollectionLayout, type CollectionItemProps } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
 import { Button, ButtonType } from "../components/button/Button";
+import { StatusPill } from "../components/pill/statusPill/StatusPill";
+import { ConnectionState } from "../../../src/types/CommonTypes";
 
 // Placeholder data until this is wired to state.views.
 type ExampleView = CollectionItemProps & { key: string };
@@ -35,6 +37,7 @@ const EXAMPLE_VIEWS: ExampleView[] = [
     icon: <Icons.warning />,
     color: "#f59e0b",
     actions: [],
+    chips: <StatusPill status={ConnectionState.ONLINE} label="test"/>
   },
 ];
 
@@ -49,7 +52,7 @@ export default function ViewsPage(): JSX.Element {
         <Button onClick={() => alert("test")} >Test</Button>
       ]}
       renderItem={(v) => (
-        <ListItem to={v.to} title={v.title} icon={v.icon} color={v.color} actions={v.actions} />
+        <ListItem to={v.to} title={v.title} icon={v.icon} color={v.color} actions={v.actions} chips={v.chips} />
       )}
     />
   );
