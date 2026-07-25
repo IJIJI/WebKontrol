@@ -6,6 +6,8 @@ import { Icons } from "../components/icons/Icons";
 import { Button, ButtonType } from "../components/button/Button";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../src/types/CommonTypes";
+import { useApi } from "../context/ApiStateContext";
+import { useNavigate } from "react-router-dom";
 
 // Placeholder data until this is wired to state.views.
 type ExampleView = CollectionItemProps & { key: string };
@@ -42,18 +44,24 @@ const EXAMPLE_VIEWS: ExampleView[] = [
 ];
 
 export default function ViewsPage(): JSX.Element {
+  const navigate = useNavigate();
+  const { state } = useApi();
+  
   return (
-    <Collection
-      items={EXAMPLE_VIEWS}
-      getKey={(v) => v.key}
-      layout={CollectionLayout.LIST}
-      title="Views"
-      actions={[
-        <Button onClick={() => alert("test")} >Test</Button>
-      ]}
-      renderItem={(v) => (
-        <ListItem to={v.to} title={v.title} icon={v.icon} color={v.color} actions={v.actions} chips={v.chips} />
-      )}
-    />
+    <>
+      <Collection
+        items={EXAMPLE_VIEWS}
+        getKey={(v) => v.key}
+        layout={CollectionLayout.LIST}
+        title="Views"
+        actions={[
+          <Button onClick={() => navigate("/views/new")} >New<Icons.addWindow/></Button>
+        ]}
+        renderItem={(v) => (
+          <ListItem to={v.to} title={v.title} icon={v.icon} color={v.color} actions={v.actions} chips={v.chips} />
+        )}
+      />
+      <pre>{JSON.stringify(state?.views, null, 2)}</pre>
+    </>
   );
 }
