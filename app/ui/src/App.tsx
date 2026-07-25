@@ -11,6 +11,8 @@ import PluginsPage from "./pages/PluginsPage";
 import { PageStateProvider } from "./context/PageContext";
 import { PageRoute } from "./components/layout/router/PageRoute";
 import PuppetPage from "./pages/PuppetPage";
+import NewViewPage from "./pages/NewViewPage";
+import ViewPage from "./pages/ViewPage";
 
 export default function App(): JSX.Element {
   return (
@@ -43,6 +45,22 @@ export default function App(): JSX.Element {
                   element={
                     <PageRoute title={["overview", "views"]}>
                       <ViewsPage />
+                    </PageRoute>
+                  }
+                />
+                <Route
+                  path="views/new"
+                  element={
+                    <PageRoute title={["overview", { label: "views", path: "/views" }, "new"]}>
+                      <NewViewPage />
+                    </PageRoute>
+                  }
+                />
+                <Route
+                  path="views/:viewKey"
+                  element={
+                    <PageRoute title={["overview", { label: "views", path: "/views" }, "view"]}>
+                      <ViewPage />
                     </PageRoute>
                   }
                 />
