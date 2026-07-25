@@ -1,19 +1,13 @@
-import { type JSX } from "react/jsx-runtime";
+import { Fragment, type JSX } from "react";
 import { type CollectionLayoutProps } from "../types";
 
-
-
-
-
-
+// The list container. Items are rendered directly via a keyed Fragment, each item is a
+// single element: the ListItem's own root, with no extra wrapper div around it.
 export function ListLayout<T>(props: CollectionLayoutProps<T>): JSX.Element {
-  const baseClass = ["collection", "layout", "list"];
   return (
-    <div className={[...baseClass].filter(Boolean).join(" ")}>
+    <div className="list">
       {props.items.map((item) => (
-        <div key={props.getKey(item)} className={[...baseClass, "item"].filter(Boolean).join(" ")}>
-          {props.renderItem(item)}
-        </div>
+        <Fragment key={props.getKey(item)}>{props.renderItem(item)}</Fragment>
       ))}
     </div>
   );
