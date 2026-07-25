@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { type JSX } from "react/jsx-runtime";
 
+import "./frameBox.less";
 
 export interface FrameBoxProps {
   children: ReactNode;
