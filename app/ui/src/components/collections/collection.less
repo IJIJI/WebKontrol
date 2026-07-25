@@ -48,7 +48,6 @@ section.collection {
       
       border-radius: @border-radius-xl;
       box-shadow: 2px 4px 10px 0px rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(80, 80, 80, 1);
       height: min-content;
       
       background: rgba(
@@ -59,10 +58,6 @@ section.collection {
       border: 1px solid var(--color-border-secondary);
       padding: 10px;
 
-      * {
-        color: var(--color-text-primary);
-      }
-
       .main {
         height: 100%;
         display: flex;
@@ -71,6 +66,7 @@ section.collection {
         
         .info {
           height: 100%;
+          color: var(--color-text-primary);
           display: flex;
           flex-direction: column !important;
           justify-content: flex-start !important;
@@ -118,8 +114,16 @@ section.collection {
         .icon {
           aspect-ratio: 1/1;
           display: flex;
+          align-items: center;
+          justify-content: center;
 
           height: 4rem;
+          font-size: 1.75rem; // icon glyph size (svg is 1em)
+
+          svg {
+            width: 1em;
+            height: 1em;
+          }
         }
       }
     }
