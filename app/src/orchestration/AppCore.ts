@@ -47,6 +47,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
         system: this._systemManager.getRuntime(),
         puppetOrchestrator: this._puppetOrchestrator.getRuntime(),
         ui: this._uiManager.getRuntime(),
+        view: this._viewManager.getRuntime(),
       },
       info: {
         system: this._systemManager.getInfo(),

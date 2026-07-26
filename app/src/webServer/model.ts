@@ -4,12 +4,13 @@ import type { PuppetKey, PuppetRuntime } from "../puppet/types/schema";
 import type { SystemInfo } from "../system/model";
 import type { SystemRuntime } from "../system/schema";
 import type { UiRuntime } from "../ui/schema";
-import type { AnyViewConfig, ViewKey } from "../views/types/schema";
+import type { AnyViewConfig, ViewKey, ViewManagerRuntime } from "../views/types/schema";
 
 export interface WebServerRuntimeState {// Only Runtime Configs. Standard configs are done from the config file.
   system: SystemRuntime;
   puppetOrchestrator: PuppetOrchestratorRuntime;
   ui:  UiRuntime;
+  view: ViewManagerRuntime;
 }
 export interface WebServerInfoState {
   system: SystemInfo;
@@ -46,6 +47,7 @@ export interface ViewWebhandlers {
   create: (config: AnyViewConfig) => Promise<ViewKey>;
   update: (key: ViewKey, config: AnyViewConfig) => Promise<void>;
   delete: (key: ViewKey) => Promise<void>;
+  updateRuntime: (runtime: Partial<ViewManagerRuntime>) => Promise<void>;
 }
 
 export interface WebServerMutationHandlers { // TODO: UiManager to manage ui settings?

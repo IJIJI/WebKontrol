@@ -97,6 +97,7 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
       create: (config) => this.createView(config),
       update: (key, config) => this.updateView(key, config),
       delete: (key) => this.deleteView(key),
+      updateRuntime: (config: Partial<ViewManagerRuntime>) => this.updateRuntime(config),
     };
   }
 
