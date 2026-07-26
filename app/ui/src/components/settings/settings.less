@@ -201,6 +201,12 @@
         color: var(--color-text-tertiary);
       }
 
+      // Native <select> needs room for its arrow + a min width so option text isn't clipped.
+      select.textfield {
+        min-width: 120px;
+        padding: 0 28px 0 5px;
+      }
+
     }
   }
 }
