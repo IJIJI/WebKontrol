@@ -16,7 +16,7 @@ import { type PuppetKey, type PuppetRuntime, type PuppetRuntimeInput } from "../
 import { type SystemRuntimeInput } from "../../../src/system/schema";
 import { type UiRuntimeInput, type UiTheme } from "../../../src/ui/schema";
 import { type PuppetDataBundle } from "../../../src/puppet/types/model";
-import { type AnyViewConfig, type ViewKey } from "../../../src/views/types/schema";
+import { ViewManagerRuntimeInput, type AnyViewConfig, type ViewKey } from "../../../src/views/types/schema";
 
 export interface UiPuppetState extends PuppetDataBundle {
   setRuntime: (config: PuppetRuntime) => Promise<void>;
@@ -69,6 +69,10 @@ interface ApiState {
       create: (config: AnyViewConfig, notify?: boolean) => Promise<ViewKey>;
       update: (key: ViewKey, config: AnyViewConfig, notify?: boolean) => Promise<void>;
       delete: (key: ViewKey, notify?: boolean) => Promise<void>;
+      updateRuntime: (
+        config: Partial<ViewManagerRuntimeInput>,
+        notify?: boolean,
+      ) => Promise<void>;
     };
   };
 }
@@ -244,6 +248,17 @@ export function ApiStateProvider({
     );
   };
 
+  const viewManagerUpdateRuntime = async (
+    config: Partial<ViewManagerRuntimeInput>,
+    notify = false,
+  ): Promise<void> => {
+    return withToast(
+      Api.patch(`/config/view`, config),
+      { loading: "Saving view settings…", success: "Saved" },
+      notify,
+    );
+  };
+
   const viewCreate = async (
     config: AnyViewConfig,
     notify = true,
@@ -298,6 +313,7 @@ export function ApiStateProvider({
             create: viewCreate,
             update: viewUpdate,
             delete: viewDelete,
+            updateRuntime: viewManagerUpdateRuntime,
           },
         },
       }}
