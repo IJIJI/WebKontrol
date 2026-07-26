@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { type JSX } from "react/jsx-runtime";
 
 import "../settings.less";
@@ -16,24 +15,25 @@ export function DisplayNameSetting(props: DisplayNameProps): JSX.Element {
     if (props.savedVal === undefined) return;
     props.setValue(props.savedVal);
   };
-// TODO: Add labels for long and short
   return (
     <BaseSetting {...props} changed={changed}>
       {changed ? <RestoreButton onClick={restore} /> : <></>}
+      <span className="inputLabel">Long</span>
       <input
         className={"textfield" + (changed ? " changed" : "")}
         type="text"
-        // ref={inputRef}
+        aria-label="Long name"
         value={props.value.long}
         onChange={(event) => {
           props.setValue({long: event.target.value, short: props.value.short });
         }}
         disabled={props.disabled}
       />
+      <span className="inputLabel">Short</span>
       <input
         className={"textfield" + (changed ? " changed" : "")}
         type="text"
-        // ref={inputRef}
+        aria-label="Short name"
         value={props.value.short}
         onChange={(event) => {
           props.setValue({long: props.value.long, short: event.target.value });
