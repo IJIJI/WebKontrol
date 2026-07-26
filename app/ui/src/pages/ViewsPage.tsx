@@ -6,17 +6,20 @@ import { Icons } from "../components/icons/Icons";
 import { ButtonType } from "../components/button/Button";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../src/types/CommonTypes";
+import { ViewTypeChip } from "../components/views/ViewTypeChip";
+import { type ViewType } from "../../../src/views/types/schema";
 import { useApi } from "../context/ApiStateContext";
 import { useNavigate } from "react-router-dom";
 
 // Placeholder data until this is wired to state.views.
-type ExampleView = CollectionItemProps & { key: string };
+type ExampleView = CollectionItemProps & { key: string; type: ViewType };
 
 const EXAMPLE_VIEWS: ExampleView[] = [
   {
     key: "lobby",
     to: "/views/lobby",
     title: "Lobby screen",
+    type: "url",
     icon: <Icons.burger />,
     color: "#4f8cff",
     actions: [
@@ -28,6 +31,7 @@ const EXAMPLE_VIEWS: ExampleView[] = [
     key: "menu",
     to: "/views/menu",
     title: "Menu board",
+    type: "blocks",
     icon: <Icons.connections />,
     color: "#22c55e",
     actions: [{ id: "open", label: "Open", onClick: () => console.log("open menu") }],
@@ -36,6 +40,7 @@ const EXAMPLE_VIEWS: ExampleView[] = [
     key: "alerts",
     to: "/views/alerts",
     title: "Alerts display",
+    type: "blocks",
     icon: <Icons.warning />,
     color: "#f59e0b",
     actions: [],
@@ -55,10 +60,17 @@ export default function ViewsPage(): JSX.Element {
         layout={CollectionLayout.LIST}
         title="Views"
         actions={[
-          { id: "new", label: "New", icon: <Icons.addWindow />, onClick: () => navigate("/views/new") },
+          { id: "new", label: "New", icon: <Icons.addWindow />, onClick: () => void navigate("/views/new") },
         ]}
         renderItem={(v) => (
-          <ListItem to={v.to} title={v.title} icon={v.icon} color={v.color} actions={v.actions} chips={v.chips} />
+          <ListItem
+            to={v.to}
+            title={v.title}
+            icon={v.icon}
+            color={v.color}
+            actions={v.actions}
+            chips={<><ViewTypeChip type={v.type} />{v.chips}</>}
+          />
         )}
       />
       <pre>{JSON.stringify(state?.views, null, 2)}</pre>
