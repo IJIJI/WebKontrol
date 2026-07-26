@@ -3,7 +3,7 @@ import { Collection } from "../components/collections/Collection";
 import { ListItem } from "../components/collections/items/ListItem";
 import { CollectionLayout, type CollectionItemProps } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
-import { Button, ButtonType } from "../components/button/Button";
+import { ButtonType } from "../components/button/Button";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../src/types/CommonTypes";
 import { useApi } from "../context/ApiStateContext";
@@ -55,7 +55,7 @@ export default function ViewsPage(): JSX.Element {
         layout={CollectionLayout.LIST}
         title="Views"
         actions={[
-          <Button onClick={() => navigate("/views/new")} >New<Icons.addWindow/></Button>
+          { id: "new", label: "New", icon: <Icons.addWindow />, onClick: () => navigate("/views/new") },
         ]}
         renderItem={(v) => (
           <ListItem to={v.to} title={v.title} icon={v.icon} color={v.color} actions={v.actions} chips={v.chips} />

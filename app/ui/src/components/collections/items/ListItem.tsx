@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { type CollectionItemProps } from "../types";
 import { FrameBox } from "../../frameBox/FrameBox";
 import { Icons } from "../../icons/Icons";
-import { Button } from "../../button/Button";
+import { ItemActions } from "../ItemActions";
 
 export function ListItem(props: CollectionItemProps): JSX.Element {
   const inner = (
@@ -28,23 +28,7 @@ export function ListItem(props: CollectionItemProps): JSX.Element {
         <div className="main">{inner}</div>
       )}
 
-      {props.actions?.length ? (
-        <div className="actions">
-          {props.actions.map((a) => (
-            <Button
-              key={a.id}
-              onClick={a.onClick}
-              type={a.type}
-              style={a.style}
-              disabled={a.disabled}
-              ariaLabel={a.label}
-            >
-              {a.icon}
-              <span className="label">{a.label}</span>
-            </Button>
-          ))}
-        </div>
-      ) : null}
+      <ItemActions actions={props.actions} />
     </div>
   );
 }

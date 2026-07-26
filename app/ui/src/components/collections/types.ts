@@ -41,6 +41,6 @@ export interface CollectionLayoutProps<T> {
 export interface CollectionProps<T> extends CollectionLayoutProps<T> {
   layout?: CollectionLayout; // Defaults to list
   title?: ReactNode;
-  actions?: ReactNode; // toolbar actions (e.g. a New button)
+  actions?: ItemAction[]; // toolbar actions (declarative, like item actions)
   empty?: ReactNode; // Content for when the list is empty.
 }
