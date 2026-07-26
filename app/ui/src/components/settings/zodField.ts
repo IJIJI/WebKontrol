@@ -15,9 +15,15 @@ export interface FieldInfo { // TODO: Union for options? Enum is a type and othe
 // def.type is "string"|"number"|"boolean"|"enum"|"optional"|"default"|"record"; z.url() is a
 // string with def.format === "url"; optional/default wrap via def.innerType.
 interface ZodLike {
-  def: { type: string; innerType?: ZodLike; format?: string };
+  def: {
+    type: string;
+    innerType?: ZodLike; // optional/default wrap
+    format?: string; // string sub-format, e.g. "url"
+    options?: readonly ZodLike[]; // union members
+    values?: readonly unknown[]; // literal values
+  };
   meta: () => FieldMeta | undefined;
-  options?: readonly string[];
+  options?: readonly string[]; // enum values
 }
 
 const asZod = (schema: unknown): ZodLike => schema as ZodLike;
@@ -53,9 +59,35 @@ function classify(core: ZodLike): FieldKind {
       return "enum";
     case "record":
       return "record";
+    case "literal":
+      return literalKind(core.def.values); // e.g. z.literal(0)
+    case "union":
+      // A simple value union like `z.number().or(z.literal(0))` (LoadTimeout): render as the
+      // shared kind when every member agrees; give up on genuinely mixed unions.
+      return unionKind(core.def.options);
     default:
       return "unknown";
   }
+}
+
+function literalKind(values: readonly unknown[] | undefined): FieldKind {
+  switch (typeof values?.[0]) {
+    case "number":
+      return "number";
+    case "boolean":
+      return "boolean";
+    case "string":
+      return "text";
+    default:
+      return "unknown";
+  }
+}
+
+function unionKind(options: readonly ZodLike[] | undefined): FieldKind {
+  if (!options?.length) return "unknown";
+  const kinds = options.map(classify);
+  const [first] = kinds;
+  return first !== "unknown" && kinds.every((k) => k === first) ? first : "unknown";
 }
 
 // Ordered [key, fieldSchema] pairs of an object schema's shape (insertion order preserved).
