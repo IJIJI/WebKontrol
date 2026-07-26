@@ -60,10 +60,11 @@ export default function NewViewPage(): JSX.Element {
     );
     revertAll();
   }
-
+// TODO: Better styling? A more general way?
+// TODO: Change over to an edit page? Have a create page with only the base settings?
   return (
     <>
-      <h1>New View</h1>
+      <h1 style={{marginBottom: "20px" }}>New View</h1>
       {/* <form onSubmit={handleForm} ref={formRef}> */}
         {/* <div className="formRow">
           <input type="text" name="name" id="viewName" />
