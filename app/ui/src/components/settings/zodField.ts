@@ -21,9 +21,9 @@ interface ZodLike {
     format?: string; // string sub-format, e.g. "url"
     options?: readonly ZodLike[]; // union members
     values?: readonly unknown[]; // literal values
+    entries?: Record<string, string>; // enum value map
   };
   meta: () => FieldMeta | undefined;
-  options?: readonly string[]; // enum values
 }
 
 const asZod = (schema: unknown): ZodLike => schema as ZodLike;
@@ -43,7 +43,7 @@ export function describeField(schema: unknown): FieldInfo {
   }
 
   const kind = classify(core);
-  const options = kind === "enum" ? [...(core.options ?? [])] : [];
+  const options = kind === "enum" ? Object.values(core.def.entries ?? {}) : [];
   return { kind, optional, meta, options };
 }
 
