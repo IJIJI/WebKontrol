@@ -28,6 +28,7 @@ export function generateViewKey(existing: Iterable<ViewKey> = []): ViewKey {
 // `advanced` fields are grouped into the editor's Advanced section (views only, for now).
 export interface FieldMeta {
   label: string;
+  description?: string; // maps to the Setting subtitle
   advanced?: boolean;
   placeholder?: string;
 }
