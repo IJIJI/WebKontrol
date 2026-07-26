@@ -29,6 +29,26 @@
       margin: 0 0 3px 2px;
     }
 
+    &.collapsible { 
+      .toggle {
+        background: none;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+
+        svg {
+          transition: transform @button-animation-time ease;
+        }
+      }
+      &.open .toggle svg {
+        transform: rotate(90deg);
+      }
+    }
+
     .content {
       display: flex;
       flex-direction: column;
