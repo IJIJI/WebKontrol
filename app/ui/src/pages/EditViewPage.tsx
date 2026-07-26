@@ -44,7 +44,11 @@ export default function EditViewPage(): JSX.Element {
     // Validate against the current type's real schema (strips stale fields from a type switch).
     const parsed = entry.schema.safeParse(draft.values);
     if (!parsed.success) {
-      toast.error("Some fields are invalid or missing"); // inline field errors: task #12
+      // List each failing field until inline per-field errors land (task #12).
+      const details = parsed.error.issues
+        .map((issue) => `${issue.path.join(".") || "value"}: ${issue.message}`)
+        .join("\n");
+      toast.error(details || "Invalid view configuration");
       return;
     }
     const config = parsed.data as AnyViewConfig;
