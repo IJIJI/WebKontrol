@@ -67,7 +67,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     this._viewManager.on('view_added', syncViews);
     this._viewManager.on('view_updated', syncViews);
     this._viewManager.on('view_removed', syncViews);
-    this._viewManager.on('runtime_update', syncViews);
+    this._viewManager.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, view: runtime }}));
   }
 
   public getPuppetManager(): PuppetOrchestrator {

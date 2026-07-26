@@ -66,7 +66,7 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
   async init(): Promise<void> {
     const loadedRuntime = await this._store.loadRuntime();
     if (loadedRuntime)
-      this._runtime = loadedRuntime;
+      this.updateRuntime(loadedRuntime);
     else
       this._logger.info("Failed loading runtime from store, using defaults.");
 
