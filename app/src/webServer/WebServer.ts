@@ -12,7 +12,7 @@ import {
 import { UiRuntimeShape } from "../ui/schema";
 import { SystemRuntimeShape } from "../system/schema";
 import { PuppetKeySchema, PuppetRuntimeShape } from "../puppet/types/schema";
-import { AnyViewConfigSchema, ViewKeySchema } from "../views/types/schema";
+import { AnyViewConfigSchema, ViewKeySchema, ViewManagerRuntimeShape } from "../views/types/schema";
 
 export class WebServer implements RouteRegistrar {
   private _app = express();
@@ -376,6 +376,24 @@ export class WebServer implements RouteRegistrar {
       } catch (e) {
         this._logger.error("Failed to delete view:", resultKey.data, e);
         res.status(500).json({ error: e instanceof Error ? e.message : "Failed to delete view" });
+      }
+    });
+
+    this._app.patch("/api/config/view", async (req, res) => {
+      const result = ViewManagerRuntimeShape.partial().safeParse(req.body);
+
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+      }
+
+      try {
+        await this._handlers.view.updateRuntime(result.data);
+        res.status(204).send();
+      } catch (e) {
+        this._logger.error("Failed to update view config:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to update view config",
+        });
       }
     });
 
