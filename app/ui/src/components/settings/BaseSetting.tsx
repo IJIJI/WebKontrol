@@ -4,7 +4,7 @@ import "./settings.less";
 
 export type BaseSettingsCompProps = {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   inputRef?: React.RefObject<any>;
   children: JSX.Element | JSX.Element[];
   changed?: boolean;
@@ -34,7 +34,7 @@ export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
     >
       <div className="titletext">
         <span className="title">{props.title}</span>
-        <span className="subtitle">{props.subtitle}</span>
+        {props.subtitle && <span className="subtitle">{props.subtitle}</span>}
       </div>
       <div className="input">{props.children}</div>
     </div>
