@@ -11,8 +11,8 @@ export enum CollectionLayout {
 export interface ItemAction {
   id: string;
   label: string; // tooltip + aria-label
-  icon?: ReactNode; 
-  onClick: () => void;
+  icon?: ReactNode;
+  onClick: () => void | Promise<void>; // async actions show a spinner in the Button while pending
   type?: ButtonType;
   style?: ButtonStyle;
   disabled?: boolean;
