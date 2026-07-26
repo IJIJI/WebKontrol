@@ -15,6 +15,7 @@ import { ConnectionState } from "../../../src/types/CommonTypes";
 import { UiTheme } from "../../../src/ui/schema";
 import { useApi } from "../context/ApiStateContext";
 import { LoadingPage } from "../components/layout/loading/LoadingPage";
+import { NumberSetting } from "../components/settings/implementations/NumberSetting";
 
 
 
@@ -27,14 +28,16 @@ export default function SettingsPage(): JSX.Element {
   // undefined while runtime is still loading.
   const uiDraft = useDraft(runtime?.ui);
   const systemDraft = useDraft(runtime?.system);
+  const viewManagerDraft = useDraft(runtime?.view);
 
-  const { anyChanged, revertAll } = aggregateDrafts({"UI": uiDraft, "SYSTEM": systemDraft});
+  const { anyChanged, revertAll } = aggregateDrafts({"UI": uiDraft, "SYSTEM": systemDraft, "VIEW": viewManagerDraft});
 
   const onSave = async (): Promise<void> => {
     await toast.promise(
       Promise.all([
         handlers.ui.updateRuntime(uiDraft.patch, false),
         handlers.system.updateRuntime(systemDraft.patch, false),
+        handlers.view.updateRuntime(viewManagerDraft.patch, false),
       ]),
       {
         loading: "Saving…",
@@ -117,6 +120,19 @@ export default function SettingsPage(): JSX.Element {
             value={systemDraft.values.system_name}
             savedVal={systemDraft.saved.system_name}
             setValue={(value) => systemDraft.setField("system_name", value)}
+        />
+      </SettingGroup>
+      <SettingGroup title="Views">
+        <NumberSetting
+            title="Default View Load Timeout"
+            subtitle="The load timeout a view uses when it does not have a timeout set"
+            value={viewManagerDraft.values.default_load_timeout / 1000 }
+            savedVal={viewManagerDraft.saved.default_load_timeout / 1000 }
+            min={0.5} // TODO: Derive from zod?
+            // TODO: Add a default placeholder / background value? 
+            // TODO: Add a way to set default? Remove the value?
+            // TODO: Add a postfix for seconds? Add a formatting in general?
+            setValue={(value) => viewManagerDraft.setField("default_load_timeout", value * 1000)}
         />
       </SettingGroup>
       <SettingGroup title="Configuration">
