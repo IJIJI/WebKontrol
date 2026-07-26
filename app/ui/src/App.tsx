@@ -11,8 +11,7 @@ import PluginsPage from "./pages/PluginsPage";
 import { PageStateProvider } from "./context/PageContext";
 import { PageRoute } from "./components/layout/router/PageRoute";
 import PuppetPage from "./pages/PuppetPage";
-import NewViewPage from "./pages/NewViewPage";
-import ViewPage from "./pages/ViewPage";
+import EditViewPage from "./pages/EditViewPage";
 
 export default function App(): JSX.Element {
   return (
@@ -52,7 +51,7 @@ export default function App(): JSX.Element {
                   path="views/new"
                   element={
                     <PageRoute title={["overview", { label: "views", path: "/views" }, "new"]}>
-                      <NewViewPage />
+                      <EditViewPage />
                     </PageRoute>
                   }
                 />
@@ -60,7 +59,7 @@ export default function App(): JSX.Element {
                   path="views/:viewKey"
                   element={
                     <PageRoute title={["overview", { label: "views", path: "/views" }, "view"]}>
-                      <ViewPage />
+                      <EditViewPage />
                     </PageRoute>
                   }
                 />
