@@ -19,12 +19,16 @@ export type titleSegment = string | { label: string; path: string };
 export type MetaTitle = titleSegment[];
 export type MetaTitleInput = string | MetaTitle;
 
+function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}
+
 const normalizeMetaTitle = (t: MetaTitleInput): MetaTitle =>
   typeof t === "string" ? [t] : t;
 
 const serializeMetaTitle = (title: MetaTitle): string => {
   return title
-    .map((value) => (typeof value == "string" ? value : value.label))
+    .map((value) => (typeof value == "string" ? capitalizeFirstLetter(value) : capitalizeFirstLetter(value.label)))
     .join(" > ");
 };
 
