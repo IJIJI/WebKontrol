@@ -21,12 +21,24 @@ export function generateViewKey(existing: Iterable<ViewKey> = []): ViewKey {
   }
   throw new Error("Could not generate a unique view key");
 }
+//* Field UI metadata:
+// Presentation metadata attached to config fields via `.meta()`, read by the schema-driven
+// view editor. Minimal and presentation-neutral. Convention: fields WITHOUT meta are not
+// auto-rendered (e.g. the `type` discriminator, which the editor renders as its own select).
+// `advanced` fields are grouped into the editor's Advanced section (views only, for now).
+export interface FieldMeta {
+  label: string;
+  advanced?: boolean;
+  placeholder?: string;
+}
+
 //* View config:
 // The base every view config shares; per-type configs extend it with a `type`
 // literal, mirroring extendPuppetConfig.
 export const BaseViewConfigSchema = z.object({
-  name: DisplayNameSchema,
-  loadTimeout: LoadTimeoutSchema.optional(), // per-view override of ViewManager.default_load_timeout
+  name: DisplayNameSchema.meta({ label: "Name" } satisfies FieldMeta),
+  // per-view override of ViewManager.default_load_timeout
+  loadTimeout: LoadTimeoutSchema.optional().meta({ label: "Load timeout", advanced: true } satisfies FieldMeta),
 });
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
@@ -40,7 +52,7 @@ export function extendViewConfig<const B extends ViewType, T extends z.ZodRawSha
 //* Concrete view configs:
 // BlockView: renders a block tree (its single root block) as a page.
 export const BlockViewConfigSchema = extendViewConfig("blocks", {
-  root: AnyBlockConfigSchema,
+  root: AnyBlockConfigSchema.meta({ label: "Root block" } satisfies FieldMeta),
 });
 export type BlockViewConfig = z.infer<typeof BlockViewConfigSchema>;
 
@@ -48,8 +60,11 @@ export type BlockViewConfig = z.infer<typeof BlockViewConfigSchema>;
 // forbid embedding still load. Served via a redirect from /view/:key (GET only;
 // parameters become the query string).
 export const UrlViewConfigSchema = extendViewConfig("url", {
-  url: z.url(),
-  parameters: z.record(z.string(), z.string()).optional(),
+  url: z.url().meta({ label: "URL", placeholder: "https://example.com" } satisfies FieldMeta),
+  parameters: z
+    .record(z.string(), z.string())
+    .optional()
+    .meta({ label: "Parameters", advanced: true } satisfies FieldMeta),
 });
 export type UrlViewConfig = z.infer<typeof UrlViewConfigSchema>;
 
