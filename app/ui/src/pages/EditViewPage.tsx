@@ -1,5 +1,5 @@
 import { type JSX } from "react/jsx-runtime";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -17,6 +17,7 @@ import { useDraft } from "../helpers/DraftSave";
 import { useApi } from "../context/ApiStateContext";
 import { type ViewType, type AnyViewConfig } from "../../../src/views/types/schema";
 import { type DisplayName } from "../../../src/types/CommonTypes";
+import { usePageContext } from "../context/PageContext";
 
 const DEFAULT_TYPE: ViewType = "url";
 
@@ -26,6 +27,7 @@ export default function EditViewPage(): JSX.Element {
   const { viewKey } = useParams();
   const { state, callBacks } = useApi();
   const navigate = useNavigate();
+  const { setMeta } = usePageContext();
 
   // Edit => the saved config; new => the default type's empty draft.
   const savedConfig = viewKey ? state?.views.get(viewKey)?.config : undefined;
@@ -33,6 +35,10 @@ export default function EditViewPage(): JSX.Element {
     () => ({ ...(savedConfig ?? VIEW_EDITORS[DEFAULT_TYPE].emptyDraft) }),
     [savedConfig],
   );
+
+  useEffect(() => { // TODO: Can this be simplified?
+    setMeta({ title: ["overview", { label: "views", path: "/views" }, {label: savedConfig?.name.long ?? viewKey ?? "Unkown View", path: `/views/${viewKey}` }, "edit"] }, true);
+  }, [viewKey, setMeta, savedConfig]);
 
   const draft = useDraft<ViewEditorValues>(initial);
 
