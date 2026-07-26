@@ -12,6 +12,7 @@ import { PageStateProvider } from "./context/PageContext";
 import { PageRoute } from "./components/layout/router/PageRoute";
 import PuppetPage from "./pages/PuppetPage";
 import EditViewPage from "./pages/EditViewPage";
+import ViewPage from "./pages/ViewPage";
 
 export default function App(): JSX.Element {
   return (
@@ -59,6 +60,14 @@ export default function App(): JSX.Element {
                   path="views/:viewKey"
                   element={
                     <PageRoute title={["overview", { label: "views", path: "/views" }, "view"]}>
+                      <ViewPage />
+                    </PageRoute>
+                  }
+                />
+                <Route
+                  path="views/:viewKey/edit"
+                  element={
+                    <PageRoute title={["overview", { label: "views", path: "/views" }, "edit"]}>
                       <EditViewPage />
                     </PageRoute>
                   }
