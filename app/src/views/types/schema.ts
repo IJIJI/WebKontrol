@@ -39,7 +39,7 @@ export interface FieldMeta {
 export const BaseViewConfigSchema = z.object({
   name: DisplayNameSchema.meta({ label: "Name" } satisfies FieldMeta),
   // per-view override of ViewManager.default_load_timeout
-  loadTimeout: LoadTimeoutSchema.optional().meta({ label: "Load timeout", advanced: true } satisfies FieldMeta),
+  loadTimeout: LoadTimeoutSchema.optional().meta({ label: "Load timeout", advanced: true, description: "Load timeout override. Leave empty to use the global default defined in config" } satisfies FieldMeta),
 });
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
