@@ -4,6 +4,7 @@ import { usePageContext } from "../context/PageContext";
 import { type JSX, useEffect, useState } from "react";
 import { ViewHeader } from "../components/views/ViewHeader";
 import { ViewDetails } from "../components/views/ViewDetails";
+import "./viewPage.less";
 
 export default function ViewPage(): JSX.Element {
   const { viewKey } = useParams();
@@ -26,7 +27,9 @@ export default function ViewPage(): JSX.Element {
       {view ? (
         <>
           <ViewHeader view={view} />
-          <ViewDetails view={view} />
+          <div className="pageSections">
+            <ViewDetails view={view} />
+          </div>
         </>
       ) : (
         <h1>{title}</h1>
