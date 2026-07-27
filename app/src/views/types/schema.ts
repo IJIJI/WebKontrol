@@ -65,7 +65,7 @@ export const UrlViewConfigSchema = extendViewConfig("url", {
   parameters: z
     .record(z.string(), z.string())
     .optional()
-    .meta({ label: "Parameters", advanced: true } satisfies FieldMeta),
+    .meta({ label: "Parameters", advanced: true, description: "Get parameters added to the url" } satisfies FieldMeta),
 });
 export type UrlViewConfig = z.infer<typeof UrlViewConfigSchema>;
 
