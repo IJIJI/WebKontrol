@@ -23,6 +23,10 @@ export type BaseSettingProps<T = any> = BaseSettingNonValProps & {
   savedVal?: T;
 };
 
+// For free-text-style inputs (text/url/number) that support a placeholder. Kept off
+// BaseSettingProps since toggles/selects/buttons have no placeholder.
+export type InputSettingProps<T> = BaseSettingProps<T> & { placeholder?: string };
+
 // TODO: Add an easy way to add an InfoPill
 export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
   return (

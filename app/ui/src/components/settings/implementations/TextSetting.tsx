@@ -2,10 +2,10 @@ import { useRef } from "react";
 import { type JSX } from "react/jsx-runtime";
 
 import "../settings.less";
-import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
+import { BaseSetting, type InputSettingProps } from "../BaseSetting";
 import { RestoreButton } from "../RestoreButton";
 
-type TextProps = BaseSettingProps<string> & { placeholder?: string };
+type TextProps = InputSettingProps<string>;
 
 export function TextSetting(props: TextProps): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);

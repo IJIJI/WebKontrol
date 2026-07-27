@@ -2,14 +2,13 @@ import { useRef } from "react";
 import { type JSX } from "react/jsx-runtime";
 
 import "../settings.less";
-import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
+import { BaseSetting, type InputSettingProps } from "../BaseSetting";
 import { RestoreButton } from "../RestoreButton";
 
-type NumberProps = BaseSettingProps<number> & {
+type NumberProps = InputSettingProps<number> & {
   min?: number;
   max?: number;
   step?: number;
-  placeholder?: string;
 };
 
 export function NumberSetting(props: NumberProps): JSX.Element {
