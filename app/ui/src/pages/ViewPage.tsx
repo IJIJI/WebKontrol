@@ -3,6 +3,7 @@ import { useApi } from "../context/ApiStateContext";
 import { usePageContext } from "../context/PageContext";
 import { type JSX, useEffect, useState } from "react";
 import { ViewHeader } from "../components/views/ViewHeader";
+import { ViewDetails } from "../components/views/ViewDetails";
 
 export default function ViewPage(): JSX.Element {
   const { viewKey } = useParams();
@@ -22,8 +23,15 @@ export default function ViewPage(): JSX.Element {
 
   return (
     <>
-      {view ? <ViewHeader view={view} /> : <h1>{title}</h1>}
-      {/* TODO: sections below the header (assignments, config, health, usage, details). */}
+      {view ? (
+        <>
+          <ViewHeader view={view} />
+          <ViewDetails view={view} />
+        </>
+      ) : (
+        <h1>{title}</h1>
+      )}
+      {/* TODO: more sections (assignments, config summary, health, usage). */}
       <pre>{JSON.stringify(view?.config, null, 2)}</pre>
     </>
   );
