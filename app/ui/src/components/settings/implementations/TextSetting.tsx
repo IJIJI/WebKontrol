@@ -5,7 +5,7 @@ import "../settings.less";
 import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
 import { RestoreButton } from "../RestoreButton";
 
-type TextProps = BaseSettingProps<string>;
+type TextProps = BaseSettingProps<string> & { placeholder?: string };
 
 export function TextSetting(props: TextProps): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -22,6 +22,7 @@ export function TextSetting(props: TextProps): JSX.Element {
       <input
         className={"textfield" + (changed ? " changed" : "")}
         type="text"
+        placeholder={props.placeholder}
         ref={inputRef}
         value={props.value}
         onChange={(event) => {
