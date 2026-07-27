@@ -107,6 +107,7 @@ export default function EditViewPage(): JSX.Element {
           setValue={(v) => draft.setField("type", v)}
           options={viewTypeOptions}
         />
+      </SettingGroup>
         {Body ? (
           <Body draft={draft} />
         ) : (
@@ -117,7 +118,6 @@ export default function EditViewPage(): JSX.Element {
             placeholders={defaultLoadTimeout != null ? { loadTimeout: String(defaultLoadTimeout) } : {}}
           />
         )}
-      </SettingGroup>
     </>
   );
 }
