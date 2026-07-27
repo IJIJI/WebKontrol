@@ -1,79 +1,51 @@
 import { type JSX } from "react/jsx-runtime";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
 import { Collection } from "../components/collections/Collection";
 import { ListItem } from "../components/collections/items/ListItem";
-import { CollectionLayout, type CollectionItemProps } from "../components/collections/types";
+import { CollectionLayout } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
-import { ButtonType } from "../components/button/Button";
-import { StatusPill } from "../components/pill/statusPill/StatusPill";
-import { ConnectionState } from "../../../src/types/CommonTypes";
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
-import { type ViewType } from "../../../src/views/types/schema";
+import { VIEW_TYPE_META } from "../components/views/viewMeta";
 import { useApi } from "../context/ApiStateContext";
-import { useNavigate } from "react-router-dom";
 
-// Placeholder data until this is wired to state.views.
-type ExampleView = CollectionItemProps & { key: string; type: ViewType };
-
-const EXAMPLE_VIEWS: ExampleView[] = [
-  {
-    key: "lobby",
-    to: "/views/lobby",
-    title: "Lobby screen",
-    type: "url",
-    icon: <Icons.burger />,
-    color: "#4f8cff",
-    actions: [
-      { id: "open", label: "Open", icon: <Icons.connections />, onClick: () => console.log("open lobby") },
-      { id: "delete", label: "Delete", type: ButtonType.DANGER, onClick: () => console.log("delete lobby") },
-    ],
-  },
-  {
-    key: "menu",
-    to: "/views/menu",
-    title: "Menu board",
-    type: "blocks",
-    icon: <Icons.connections />,
-    color: "#22c55e",
-    actions: [{ id: "open", label: "Open", onClick: () => console.log("open menu") }],
-  },
-  {
-    key: "alerts",
-    to: "/views/alerts",
-    title: "Alerts display",
-    type: "blocks",
-    icon: <Icons.warning />,
-    color: "#f59e0b",
-    actions: [],
-    chips: <StatusPill status={ConnectionState.ONLINE} label="test"/>
-  },
-];
+// Neutral badge colour until views carry their own colour (EntityMeta, #6).
+const NEUTRAL_COLOR = "#a3a0a8";
 
 export default function ViewsPage(): JSX.Element {
   const navigate = useNavigate();
   const { state } = useApi();
-  
+
+  const views = state ? [...state.views.values()] : [];
+
   return (
-    <>
-      <Collection
-        items={EXAMPLE_VIEWS}
-        getKey={(v) => v.key}
-        layout={CollectionLayout.LIST}
-        title="Views"
-        actions={[
-          { id: "new", label: "New", icon: <Icons.addWindow />, onClick: () => void navigate("/views/new") },
-        ]}
-        renderItem={(v) => (
+    <Collection
+      items={views}
+      getKey={(v) => v.key}
+      layout={CollectionLayout.LIST}
+      title="Views"
+      empty="Nothing here yet..." // TODO: Add an arrow to the new or a button to make a view.
+      actions={[
+        { id: "new", label: "New", icon: <Icons.addWindow />, onClick: () => void navigate("/views/new") },
+      ]}
+      renderItem={(v) => {
+        const TypeIcon = VIEW_TYPE_META[v.config.type].icon;
+        return (
           <ListItem
-            to={v.to}
-            title={v.title}
-            icon={v.icon}
-            color={v.color}
-            actions={v.actions}
-            chips={<><ViewTypeChip type={v.type} />{v.chips}</>}
+            to={`/views/${v.key}`}
+            title={v.config.name.long}
+            icon={<TypeIcon />}
+            color={NEUTRAL_COLOR}
+            chips={<ViewTypeChip type={v.config.type} />}
+            actions={[
+              // Both placeholders for now: Share -> share modal (#15), Assign -> puppet-assign modal (#17).
+              { id: "share", label: "Share", icon: <Icons.openInNew />, onClick: () => void toast("Sharing coming soon") },
+              { id: "assign", label: "Assign", icon: <Icons.installDesktop />, onClick: () => void toast("Assigning coming soon") },
+            ]}
           />
-        )}
-      />
-      <pre>{JSON.stringify(state?.views, null, 2)}</pre>
-    </>
+        );
+      }}
+    />
   );
 }
