@@ -4,6 +4,7 @@ import { usePageContext } from "../context/PageContext";
 import { type JSX, useEffect, useState } from "react";
 import { ViewHeader } from "../components/views/ViewHeader";
 import { ViewDetails } from "../components/views/ViewDetails";
+import { ViewConfigSummary } from "../components/views/ViewConfigSummary";
 import "./viewPage.less";
 
 export default function ViewPage(): JSX.Element {
@@ -29,6 +30,7 @@ export default function ViewPage(): JSX.Element {
           <ViewHeader view={view} />
           <div className="pageSections">
             <ViewDetails view={view} />
+            <ViewConfigSummary view={view} />
           </div>
         </>
       ) : (
