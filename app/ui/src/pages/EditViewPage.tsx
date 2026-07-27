@@ -1,5 +1,5 @@
 import { type JSX } from "react/jsx-runtime";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -85,7 +85,7 @@ export default function EditViewPage(): JSX.Element {
 
   return (
     <>
-      <h1 style={{ marginBottom: "20px" }}>{viewKey ? "Edit view" : "New view"}</h1>
+      <h1 style={{ marginBottom: "20px" }}>{`${viewKey ? "Edit " : ""}${title}`}</h1>
 
       <SaveBar visible={draft.anyChanged()} onSave={onSave} onDiscard={draft.revertAll} />
 
