@@ -28,6 +28,7 @@ export default function EditViewPage(): JSX.Element {
   const { state, callBacks } = useApi();
   const navigate = useNavigate();
   const { setMeta } = usePageContext();
+  const [title, setTitle] = useState<string>(viewKey ?? "New View");
 
   // Edit => the saved config; new => the default type's empty draft.
   const savedConfig = viewKey ? state?.views.get(viewKey)?.config : undefined;
@@ -36,9 +37,14 @@ export default function EditViewPage(): JSX.Element {
     [savedConfig],
   );
 
-  useEffect(() => { // TODO: Can this be simplified?
-    setMeta({ title: ["overview", { label: "views", path: "/views" }, {label: savedConfig?.name.long ?? viewKey ?? "Unkown View", path: `/views/${viewKey}` }, "edit"] }, true);
-  }, [viewKey, setMeta, savedConfig]);
+  useEffect(() => {
+    setTitle(savedConfig?.name.long ?? viewKey ?? "New View");
+  }, [savedConfig])
+
+  useEffect(() => {
+    // if (puppet) setMeta({ title: ["Puppet", puppet.displayName] }, true);
+    setMeta({ title: ["overview", { label: "views", path: "/views" }, {label: title, path: `/views/${viewKey}` }, "edit"] }, true);
+  }, [viewKey, setMeta, title]);
 
   const draft = useDraft<ViewEditorValues>(initial);
 
