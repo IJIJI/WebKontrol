@@ -61,7 +61,7 @@ export type BlockViewConfig = z.infer<typeof BlockViewConfigSchema>;
 // forbid embedding still load. Served via a redirect from /view/:key (GET only;
 // parameters become the query string).
 export const UrlViewConfigSchema = extendViewConfig("url", {
-  url: z.url().meta({ label: "URL", placeholder: "https://example.com" } satisfies FieldMeta),
+  url: z.url().meta({ label: "URL", placeholder: "https://example.com", description: "Website url to load. Opened directly without any embedding" } satisfies FieldMeta),
   parameters: z
     .record(z.string(), z.string())
     .optional()
