@@ -1,0 +1,69 @@
+.viewHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 24px;
+
+  .icon {
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 4rem;
+    font-size: 1.75rem; // glyph size (svg is 1em)
+    flex-shrink: 0;
+
+    svg {
+      width: 1em;
+      height: 1em;
+    }
+  }
+
+  .titleBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+
+    .title {
+      font-size: 1.75rem;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .subtitle {
+      display: flex;
+      flex-direction: row;
+      gap: 4px;
+      font-size: 0.85rem;
+      color: var(--color-text-tertiary);
+
+      span {
+        margin: 0;
+        font-family: monospace;
+      }
+    }
+
+    .chips {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+}
