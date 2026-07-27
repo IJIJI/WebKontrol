@@ -23,11 +23,13 @@ export function SchemaSettings({
   draft,
   exclude = [],
   advancedTitle = "Advanced",
+  placeholders = {},
 }: {
   schema: ZodObject<ZodRawShape>; // the current view type's member schema (any zod object)
   draft: Draft<Values>;
   exclude?: string[];
   advancedTitle?: string;
+  placeholders?: Record<string, string>; // per-key placeholder overrides (e.g. a runtime default)
 }): JSX.Element {
   const normal: JSX.Element[] = [];
   const advanced: JSX.Element[] = [];
@@ -38,7 +40,14 @@ export function SchemaSettings({
     const meta = info.meta;
     if (!meta) continue; // no meta => not auto-rendered
 
-    const element = renderField(key, info.kind, info.options, meta, draft);
+    // Placeholder precedence: page-injected (e.g. a runtime default) > static meta placeholder
+    // > the field's own schema .default() (only shown for primitive defaults).
+    const defaultStr =
+      typeof info.defaultValue === "string" || typeof info.defaultValue === "number"
+        ? String(info.defaultValue)
+        : undefined;
+    const placeholder = placeholders[key] ?? meta.placeholder ?? defaultStr;
+    const element = renderField(key, info.kind, info.options, meta, draft, placeholder);
     (meta.advanced ? advanced : normal).push(element);
   }
 
@@ -56,6 +65,7 @@ function renderField(
   options: string[],
   meta: FieldMeta,
   draft: Draft<Values>,
+  placeholder: string | undefined,
 ): JSX.Element {
   const title = meta.label;
   const subtitle = meta.description;
@@ -66,17 +76,17 @@ function renderField(
   switch (kind) {
     case "url":
       return (
-        <UrlSetting key={key} title={title} subtitle={subtitle} placeholder={meta.placeholder}
+        <UrlSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder}
           value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
       );
     case "text":
       return (
-        <TextSetting key={key} title={title} subtitle={subtitle}
+        <TextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder}
           value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
       );
     case "number":
       return (
-        <NumberSetting key={key} title={title} subtitle={subtitle} placeholder={meta.placeholder}
+        <NumberSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder}
           value={value as number} savedVal={saved as number | undefined} setValue={set} />
       );
     case "boolean":
