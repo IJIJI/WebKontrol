@@ -51,6 +51,8 @@ export default function EditViewPage(): JSX.Element {
   const type = (draft.values.type as ViewType | undefined) ?? DEFAULT_TYPE;
   const entry = VIEW_EDITORS[type] ?? VIEW_EDITORS[DEFAULT_TYPE];
   const Body = entry.body;
+  // The ViewManager's configured default, shown as the loadTimeout placeholder when unset.
+  const defaultLoadTimeout = state?.runtime.view.default_load_timeout;
 
   const onSave = async (): Promise<void> => {
     // Validate against the current type's real schema (strips stale fields from a type switch).
@@ -108,7 +110,12 @@ export default function EditViewPage(): JSX.Element {
         {Body ? (
           <Body draft={draft} />
         ) : (
-          <SchemaSettings schema={entry.schema} draft={draft} exclude={["name"]} />
+          <SchemaSettings
+            schema={entry.schema}
+            draft={draft}
+            exclude={["name"]}
+            placeholders={defaultLoadTimeout != null ? { loadTimeout: String(defaultLoadTimeout) } : {}}
+          />
         )}
       </SettingGroup>
     </>
