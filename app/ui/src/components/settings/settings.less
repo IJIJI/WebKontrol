@@ -187,10 +187,13 @@
 
       // Inline caption for a sub-input (e.g. the long/short DisplayName fields).
       .inputLabel {
+        // align-self: flex-start; // TODO: Better styling
         display: flex;
         align-items: center;
         font-size: 11px;
         color: var(--color-text-tertiary);
+        // writing-mode: vertical-rl;
+        // text-orientation: sideways-right;
       }
 
       // Read-only value shown for fields that have no editable widget yet.

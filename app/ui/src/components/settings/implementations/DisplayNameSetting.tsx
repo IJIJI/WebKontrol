@@ -15,6 +15,7 @@ export function DisplayNameSetting(props: DisplayNameProps): JSX.Element {
     if (props.savedVal === undefined) return;
     props.setValue(props.savedVal);
   };
+  // TODO: A form field element should have an id or name attribute
   return (
     <BaseSetting {...props} changed={changed}>
       {changed ? <RestoreButton onClick={restore} /> : <></>}
