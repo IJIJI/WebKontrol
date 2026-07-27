@@ -3,6 +3,8 @@ import { type JSX } from "react/jsx-runtime";
 
 import "./dropdown.less";
 
+// TODO Add a type that contains both the dropdownitem and divider
+// TODO Add a DropdownDivider type, where a label can be added.
 export type DropdownItem = {
   id: string;
   label: string;
