@@ -33,7 +33,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
     void navigate(`/views/${newKey}/edit`);
   };
 
-  const menu: (DropdownItem | "divider")[] = [
+  const menu: (DropdownItem | "divider")[] = [ // TODO: Icons are large, tweak.
     { id: "open", label: "Open in new tab", icon: <Icons.openInNew />, onClick: () => void window.open(serveUrl, "_blank", "noopener") },
     { id: "edit", label: "Edit", icon: <Icons.edit />, onClick: () => void navigate(`/views/${key}/edit`) },
     { id: "duplicate", label: "Duplicate", icon: <Icons.tabDuplicate />, onClick: duplicate },
