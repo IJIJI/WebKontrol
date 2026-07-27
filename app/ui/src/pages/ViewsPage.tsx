@@ -13,6 +13,7 @@ import { useApi } from "../context/ApiStateContext";
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
 
+// TODO: Rename to ViewCollectionpage
 export default function ViewsPage(): JSX.Element {
   const navigate = useNavigate();
   const { state } = useApi();
@@ -40,7 +41,7 @@ export default function ViewsPage(): JSX.Element {
             chips={<ViewTypeChip type={v.config.type} />}
             actions={[
               // Both placeholders for now: Share -> share modal (#15), Assign -> puppet-assign modal (#17).
-              { id: "share", label: "Share", icon: <Icons.openInNew />, onClick: () => void toast("Sharing coming soon") },
+              { id: "share", label: "Share", icon: <Icons.share />, onClick: () => void toast("Sharing coming soon") },
               { id: "assign", label: "Assign", icon: <Icons.installDesktop />, onClick: () => void toast("Assigning coming soon") },
             ]}
           />
