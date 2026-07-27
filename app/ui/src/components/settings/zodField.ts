@@ -8,6 +8,7 @@ export interface FieldInfo { // TODO: Union for options? Enum is a type and othe
   optional: boolean;
   meta: FieldMeta | undefined;
   options: string[]; // enum values; empty otherwise
+  defaultValue?: unknown; // schema default, if the field has a .default()
 }
 
 // Minimal structural view into the zod internals we introspect. Localizes the unavoidable
@@ -22,6 +23,7 @@ interface ZodLike {
     options?: readonly ZodLike[]; // union members
     values?: readonly unknown[]; // literal values
     entries?: Record<string, string>; // enum value map
+    defaultValue?: unknown; // .default() value
   };
   meta: () => FieldMeta | undefined;
 }
@@ -36,15 +38,17 @@ export function describeField(schema: unknown): FieldInfo {
 
   let core = outer;
   let optional = false;
+  let defaultValue: unknown;
   while (core.def.type === "optional" || core.def.type === "default") {
     if (core.def.type === "optional") optional = true;
+    if (core.def.type === "default") defaultValue = core.def.defaultValue;
     if (!core.def.innerType) break; // loop, not a single step: a field can be wrapped twice (e.g. .default().optional())
     core = core.def.innerType;
   }
 
   const kind = classify(core);
   const options = kind === "enum" ? Object.values(core.def.entries ?? {}) : [];
-  return { kind, optional, meta, options };
+  return { kind, optional, meta, options, defaultValue };
 }
 
 function classify(core: ZodLike): FieldKind {
