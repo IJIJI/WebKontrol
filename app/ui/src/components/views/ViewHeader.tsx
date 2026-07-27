@@ -23,21 +23,12 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   const TypeIcon = VIEW_TYPE_META[config.type].icon;
   const serveUrl = `/view/${key}`; // TODO: route_base is configurable; hardcoded /view for now
 
-  // Clone the config under a new name; the backend mints a fresh key.
-  const duplicate = async (): Promise<void> => {
-    const copy = {
-      ...config,
-      name: { long: `Copy of ${config.name.long}`, short: config.name.short },
-    };
-    const newKey = await callBacks.view.create(copy);
-    void navigate(`/views/${newKey}/edit`);
-  };
-
-  const menu: (DropdownItem | "divider")[] = [ // TODO: Icons are large, tweak.
+  const menu: DropdownItem[] = [ // TODO: Icons are large, tweak.
     { id: "open", label: "Open in new tab", icon: <Icons.openInNew />, onClick: () => void window.open(serveUrl, "_blank", "noopener") },
     { id: "edit", label: "Edit", icon: <Icons.edit />, onClick: () => void navigate(`/views/${key}/edit`) },
-    { id: "duplicate", label: "Duplicate", icon: <Icons.tabDuplicate />, onClick: duplicate },
-    "divider",
+    // Duplicate is a placeholder until its name-picker modal (#16).
+    { id: "duplicate", label: "Duplicate", icon: <Icons.tabDuplicate />, onClick: () => void toast("Duplicate coming soon") },
+    { divider: true },
     // Delete is a placeholder until its confirm + puppet-replacement guards (#16).
     { id: "delete", label: "Delete", icon: <Icons.delete />, danger: true, onClick: () => void toast("Delete coming soon") },
   ];

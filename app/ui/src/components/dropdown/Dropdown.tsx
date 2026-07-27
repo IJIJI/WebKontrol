@@ -3,9 +3,8 @@ import { type JSX } from "react/jsx-runtime";
 
 import "./dropdown.less";
 
-// TODO Add a type that contains both the dropdownitem and divider
-// TODO Add a DropdownDivider type, where a label can be added.
-export type DropdownItem = {
+// A clickable menu entry.
+export type DropdownButton = {
   id: string;
   label: string;
   icon?: ReactNode;
@@ -14,15 +13,24 @@ export type DropdownItem = {
   disabled?: boolean;
 };
 
-// A trigger button that opens a small popover menu. Items run their onClick then close the
-// menu; a "divider" entry renders a separator. Closes on outside click (transparent backdrop).
+// A separator line, optionally with a label shown in a break of the line (a mini section heading).
+export type DropdownDivider = {
+  divider: true;
+  label?: string;
+};
+
+// Anything that can appear in a Dropdown's item list.
+export type DropdownItem = DropdownButton | DropdownDivider;
+
+// A trigger button that opens a small popover menu. Buttons run their onClick then close the
+// menu; dividers separate groups. Closes on outside click (transparent backdrop).
 export function Dropdown({
   trigger,
   items,
   ariaLabel,
 }: {
   trigger: ReactNode;
-  items: (DropdownItem | "divider")[];
+  items: DropdownItem[];
   ariaLabel?: string;
 }): JSX.Element {
   const [open, setOpen] = useState(false);
@@ -44,10 +52,17 @@ export function Dropdown({
         <>
           <div className="dropdownBackdrop" onClick={() => setOpen(false)} />
           <div className="dropdownMenu" role="menu">
-            {items.map((item, i) =>
-              item === "divider" ? (
-                <hr key={`divider-${i}`} className="dropdownDivider" />
-              ) : (
+            {items.map((item, i) => {
+              if ("divider" in item) {
+                return item.label ? (
+                  <div key={`divider-${i}`} className="dropdownDivider labeled">
+                    <span>{item.label}</span>
+                  </div>
+                ) : (
+                  <hr key={`divider-${i}`} className="dropdownDivider" />
+                );
+              }
+              return (
                 <button
                   key={item.id}
                   type="button"
@@ -62,8 +77,8 @@ export function Dropdown({
                   {item.icon}
                   <span className="label">{item.label}</span>
                 </button>
-              ),
-            )}
+              );
+            })}
           </div>
         </>
       )}
