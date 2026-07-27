@@ -86,7 +86,7 @@ export default function Sidebar({
           collapsed={collapsed}
           to="/settings/plugins"
           label="Plugins"
-          icon={<Icons.connections />}
+          icon={<Icons.connection />}
         />
         <SidebarItem
           collapsed={collapsed}
