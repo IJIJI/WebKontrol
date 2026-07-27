@@ -1,0 +1,89 @@
+.dropdown {
+  position: relative;
+  display: inline-flex;
+
+  .dropdownTrigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: var(--color-text-primary);
+    padding: 4px;
+    border-radius: @border-radius-md;
+    transition: background-color @button-animation-time ease;
+
+    &:hover,
+    &:focus {
+      background-color: var(--color-background-secondary);
+    }
+  }
+
+  // Transparent full-screen catcher so an outside click closes the menu.
+  .dropdownBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+  }
+
+  .dropdownMenu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 101;
+    min-width: 170px;
+
+    display: flex;
+    flex-direction: column;
+    padding: 4px;
+    gap: 2px;
+
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border-tertiary);
+    border-radius: @border-radius-lg;
+    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.4);
+
+    .dropdownItem {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+
+      background: none;
+      border: 0;
+      cursor: pointer;
+      text-align: left;
+      padding: 7px 10px;
+      border-radius: @border-radius-md;
+      color: var(--color-text-primary);
+      font-size: 14px;
+      transition: background-color @button-animation-time ease;
+
+      &:hover,
+      &:focus {
+        background-color: var(--color-border-tertiary);
+      }
+      &.danger {
+        color: var(--color-text-danger);
+      }
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    .dropdownDivider {
+      border: 0;
+      border-top: 1px solid var(--color-border-tertiary);
+      margin: 4px 2px;
+      width: 100%;
+    }
+  }
+}
