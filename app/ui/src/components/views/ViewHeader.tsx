@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import "./viewHeader.less";
-import { useApi, type UiViewState } from "../../context/ApiStateContext";
+import { type UiViewState } from "../../context/ApiStateContext";
 import { ConnectionState } from "../../../../src/types/CommonTypes";
 import { FrameBox } from "../frameBox/FrameBox";
 import { Icons } from "../icons/Icons";
@@ -18,7 +18,6 @@ const NEUTRAL_COLOR = "#a3a0a8";
 
 export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   const navigate = useNavigate();
-  const { callBacks } = useApi();
   const { key, config } = view;
   const TypeIcon = VIEW_TYPE_META[config.type].icon;
   const serveUrl = `/view/${key}`; // TODO: route_base is configurable; hardcoded /view for now
