@@ -11,6 +11,7 @@ import { ToggleSetting } from "./implementations/ToggleSetting";
 import { SelectSetting } from "./implementations/SelectSetting";
 import { BaseSetting } from "./BaseSetting";
 import type { ZodObject, ZodRawShape } from "zod";
+import { SettingGroup } from "./SettingGroup";
 
 type Values = Record<string, unknown>;
 
@@ -53,7 +54,9 @@ export function SchemaSettings({
 
   return (
     <>
-      {normal}
+      <SettingGroup title="Type Specific">
+        {normal}
+      </SettingGroup>
       {advanced.length > 0 && <CollapsibleGroup title={advancedTitle}>{advanced}</CollapsibleGroup>}
     </>
   );
