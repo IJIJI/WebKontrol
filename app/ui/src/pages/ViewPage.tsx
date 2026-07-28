@@ -5,7 +5,24 @@ import { type JSX, useEffect, useState } from "react";
 import { ViewHeader } from "../components/views/ViewHeader";
 import { ViewDetails } from "../components/views/ViewDetails";
 import { ViewConfigSummary } from "../components/views/ViewConfigSummary";
+import { BlockTree, type BlockLike } from "../components/blockTree/BlockTree";
+import { SettingGroup } from "../components/settings/SettingGroup";
 import "./viewPage.less";
+
+// TODO: remove — example data to preview the BlockTree styling.
+const EXAMPLE_BLOCK: BlockLike = {
+  type: "container",
+  header: { type: "clock" },
+  body: {
+    type: "grid",
+    left: { type: "image" },
+    right: {
+      type: "stack",
+      items: [{ type: "text" }, { type: "text" }, { type: "button" }],
+    },
+  },
+  footer: { type: "marquee" },
+};
 
 export default function ViewPage(): JSX.Element {
   const { viewKey } = useParams();
@@ -31,6 +48,10 @@ export default function ViewPage(): JSX.Element {
           <div className="pageSections">
             <ViewDetails view={view} />
             <ViewConfigSummary view={view} />
+            {/* TODO: remove — example BlockTree to preview its styling. */}
+            <SettingGroup title="Block tree (example)">
+              <BlockTree root={EXAMPLE_BLOCK} />
+            </SettingGroup>
           </div>
         </>
       ) : (
