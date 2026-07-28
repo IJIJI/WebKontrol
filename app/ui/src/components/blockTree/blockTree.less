@@ -1,4 +1,4 @@
-// A compact tree drawn with box-drawing connectors, in the detail-card style.
+// A compact block tree with rounded CSS guide lines (file-explorer style), in the detail card.
 .blockTree {
   display: flex;
   flex-direction: column;
@@ -10,25 +10,55 @@
   padding: 10px 14px;
   overflow-x: auto;
 
-  font-family: monospace;
   font-size: 13px;
-  line-height: 1.25; // tight so the vertical connectors join up
 
-  .treeRow {
+  .treeNode {
+    position: relative;
+  }
+
+  .nodeRow {
     display: flex;
-    flex-direction: row;
     align-items: center;
-
-    .lines {
-      white-space: pre; // keep the connector spacing intact
-      color: var(--color-text-tertiary);
-      line-height: 13px;
-      font-size: 14px;
-    }
+    padding: 3px 0 3px 4px;
 
     .blockType {
       color: var(--color-text-primary);
       font-weight: 600;
+    }
+  }
+
+  // Each nested level is indented; the guides are drawn into that indent.
+  .children {
+    padding-left: 16px;
+  }
+
+  // Rounded elbow (::before) + continuation line (::after) for each child. The root row lives
+  // directly under .blockTree, so it gets no connector.
+  .children > .treeNode {
+    &::before {
+      content: "";
+      position: absolute;
+      left: -12px;
+      top: 0;
+      width: 12px;
+      height: 13px; // down to ~the row's middle — tweak with nodeRow padding
+      border-left: 2.5px solid var(--color-text-tertiary);
+      border-bottom: 2.5px solid var(--color-text-tertiary);
+      border-bottom-left-radius: 2.5px; // slightly rounded, chunky corner
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: -12px;
+      top: 0;
+      height: 100%;
+      border-left: 2.5px solid var(--color-text-tertiary);
+    }
+
+    // Last child: the vertical line stops at the elbow (no continuation below it).
+    &:last-child::after {
+      display: none;
     }
   }
 }

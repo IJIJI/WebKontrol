@@ -34,45 +34,32 @@ function childBlocks(block: BlockLike): { key: string; block: BlockLike }[] {
   return out;
 }
 
-function TreeNode({
-  block,
-  prefix,
-  isLast,
-  isRoot,
-}: {
-  block: BlockLike;
-  prefix: string;
-  isLast: boolean;
-  isRoot: boolean;
-}): JSX.Element {
+// Nested rows; the connector guides are drawn in CSS (border-based), so last-child detection
+// is handled by :last-child rather than prefix strings.
+function TreeNode({ block }: { block: BlockLike }): JSX.Element {
   const children = childBlocks(block);
-  const connector = isRoot ? "" : isLast ? "└─ " : "├─ ";
-  const childPrefix = isRoot ? "" : prefix + (isLast ? "   " : "│  ");
 
   return (
-    <>
-      <div className="treeRow">
-        <span className="lines">{prefix + connector}</span>
+    <div className="treeNode">
+      <div className="nodeRow">
         <span className="blockType">{block.type}</span>
       </div>
-      {children.map((child, i) => (
-        <TreeNode
-          key={child.key}
-          block={child.block}
-          prefix={childPrefix}
-          isLast={i === children.length - 1}
-          isRoot={false}
-        />
-      ))}
-    </>
+      {children.length > 0 && (
+        <div className="children">
+          {children.map((child) => (
+            <TreeNode key={child.key} block={child.block} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
-// A compact, Linux-`tree`-style view of a block and its slot children (blocks only).
+// A compact block tree (blocks only) with rounded CSS guide lines.
 export function BlockTree({ root }: { root: BlockLike }): JSX.Element {
   return (
     <div className="blockTree">
-      <TreeNode block={root} prefix="" isLast isRoot />
+      <TreeNode block={root} />
     </div>
   );
 }
