@@ -11,17 +11,46 @@ import "./viewPage.less";
 
 // TODO: remove — example data to preview the BlockTree styling.
 const EXAMPLE_BLOCK: BlockLike = {
-  type: "container",
-  header: { type: "clock" },
-  body: {
-    type: "grid",
-    left: { type: "image" },
-    right: {
-      type: "stack",
-      items: [{ type: "text" }, { type: "text" }, { type: "button" }],
-    },
+  type: bk("container"),
+  style: { background: "#0b0b12", padding: "24px" },
+  block: {
+    type: bk("grid"),
+    blocks: [
+      {
+        type: bk("container"),
+        style: { background: "#161622", padding: "16px", border: "1px solid #2a2a3a" },
+        block: {
+          type: bk("text"),
+          text: "Welcome to the lobby",
+          style: { fontSize: 42, align: "center", fontFamily: "Inter" },
+        },
+      },
+      {
+        type: bk("datetime"),
+        format: "H:i:s",
+        style: { fontSize: 64, align: "center" },
+      },
+      {
+        type: bk("website"),
+        url: "https://status.example.com",
+      },
+      {
+        type: bk("freeform"),
+        items: [
+          {
+            block: { type: bk("text"), text: "Top left", style: { fontSize: 20, align: "left" } },
+            position: { x: 5, y: 5 },
+            size: { x: 40, y: 20 },
+          },
+          {
+            block: { type: bk("datetime"), format: "D, d M", style: { fontSize: 24, align: "right" } },
+            position: { x: 60, y: 5 },
+            size: { x: 35, y: 15 },
+          },
+        ],
+      },
+    ],
   },
-  footer: { type: "marquee" },
 };
 
 export default function ViewPage(): JSX.Element {
