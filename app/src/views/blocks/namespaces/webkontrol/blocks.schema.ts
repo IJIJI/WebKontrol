@@ -1,6 +1,6 @@
 import z from "zod";
 import { html } from "lit";
-import { blockSlot, ContainerBlockStyleSchema, CoordinateSchema, TextBlockStyleSchema } from "../../types/schema";
+import { blockSlot, ContainerBlockStyleSchema, CoordinateSchema, GridConfigSchema, TextBlockStyleSchema } from "../../types/schema";
 import { createNamespace } from "../../types/config";
 
 export const ns = createNamespace("webkontrol");
@@ -28,8 +28,11 @@ export const ContainerBlock = ns.defineBlock("container", {
   render: (config, ctx) => html`<div>${ctx.renderChild(config.block)}</div>`, // TODO: apply config.style
 });
 
-// GridBlock: auto-arrange child blocks into the best grid for them.
+// GridBlock: Arranges child blocks into the best grid for them.
+// TODO: Check if it is possible and or smart to do a auto arrange, and make layout optional
+// TODO: Check if these defaults are the right.
 export const GridBlock = ns.defineBlock("grid", {
+  layout: GridConfigSchema.default({ rows: 2, columns: 2 }),
   blocks: z.array(blockSlot()),
 }, {
   render: (config, ctx) => html`<div class="grid">${config.blocks.map((block) => ctx.renderChild(block))}</div>`,

@@ -92,6 +92,12 @@ export const CoordinateSchema = z.object({
 });
 export type Coordinate = z.infer<typeof CoordinateSchema>;
 
+export const GridConfigSchema = z.object({
+  rows: z.number().int().min(1), 
+  columns: z.number().int().min(1),
+});
+export type GridConfig = z.infer<typeof GridConfigSchema>;
+
 //* Block Styling, added as fields in blocks that need them.
 export const BackgroundStyleShape = { background: z.string().optional() };
 export const PaddingStyleShape = { padding: z.string().optional() }; // TODO: Add top right bottom left?
