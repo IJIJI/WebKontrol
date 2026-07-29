@@ -13,6 +13,7 @@ import { PageRoute } from "./components/layout/router/PageRoute";
 import PuppetPage from "./pages/PuppetPage";
 import EditViewPage from "./pages/EditViewPage";
 import ViewPage from "./pages/ViewPage";
+import TestPage from "./pages/TestPage";
 
 export default function App(): JSX.Element {
   return (
@@ -104,6 +105,9 @@ export default function App(): JSX.Element {
                   }
                 />
 
+                {import.meta.env.DEV && (
+                  <Route path="test" element={<PageRoute title="Test"><TestPage /></PageRoute>} />
+                )}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Routes>
