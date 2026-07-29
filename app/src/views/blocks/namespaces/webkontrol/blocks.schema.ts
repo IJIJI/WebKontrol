@@ -31,6 +31,7 @@ export const ContainerBlock = ns.defineBlock("container", {
 // GridBlock: Arranges child blocks into the best grid for them.
 // TODO: Check if it is possible and or smart to do a auto arrange, and make layout optional
 // TODO: Check if these defaults are the right.
+// TODO: add the option to define grid templates, instead of the layout?
 export const GridBlock = ns.defineBlock("grid", {
   layout: GridConfigSchema.default({ rows: 2, columns: 2 }),
   blocks: z.array(blockSlot()),
