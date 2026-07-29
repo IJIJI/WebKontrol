@@ -87,7 +87,6 @@ export default function ViewPage(): JSX.Element {
         <h1>{title}</h1>
       )}
       {/* TODO: more sections (assignments, config summary, health, usage). */}
-      <pre>{JSON.stringify(view?.config, null, 2)}</pre>
     </>
   );
 }
