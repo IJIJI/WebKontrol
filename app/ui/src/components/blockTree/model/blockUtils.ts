@@ -67,3 +67,14 @@ export function childBlocks(block: BlockLike): { key: string; block: BlockLike }
   }
   return out;
 }
+
+// The block whose children include `target`, searched from `root`. Null when `target` is the root
+// itself or isn't found. Matches by reference, so `target` must come from `root`'s own tree.
+export function findParent(root: BlockLike, target: BlockLike): BlockLike | null {
+  for (const { block } of childBlocks(root)) {
+    if (block === target) return root;
+    const found = findParent(block, target);
+    if (found !== null) return found;
+  }
+  return null;
+}
