@@ -1,21 +1,23 @@
-// Detail-page body: sections in one column on mobile, two on desktop. A section opts into
-// spanning both columns with `.fullWidth` (e.g. a live preview or a wide list).
+// Detail-page body: a masonry-style two-column layout on desktop — each column packs independently,
+// so a tall card in one column doesn't stretch its neighbour — collapsing to a single column on
+// mobile. A section opts into spanning both columns with `.fullWidth` (e.g. a live preview).
 .pageSections {
-  display: grid;
-  gap: 24px;
-  grid-template-columns: 1fr;
   width: 100%;
+  column-count: 1;
+  column-gap: 24px;
 
   @media (min-width: 900px) {
-    grid-template-columns: 1fr 1fr;
+    column-count: 2;
   }
 
-  // The grid gap owns the spacing; drop the sections' own bottom margin so it isn't doubled.
+  // Keep each card whole within its column, with vertical rhythm between stacked cards.
   > * {
-    margin-bottom: 0;
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    margin-bottom: 24px;
   }
 
   > .fullWidth {
-    grid-column: 1 / -1;
+    column-span: all;
   }
 }
