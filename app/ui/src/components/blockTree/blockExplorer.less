@@ -1,0 +1,98 @@
+.blockExplorer {
+  position: relative;
+  width: 100%;
+
+  // The detail pane floats over the right ~2/5 of the tree; the tree scrolls under it. It spans
+  // the tree's height and scrolls its own body when the config is taller than the tree.
+  .detailPane {
+
+    @pad-around: 5px;
+
+    position: absolute;
+    // top: @pad-around;
+    // right: @pad-around;
+    // bottom: @pad-around;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: @pad-around;
+    width: 40%;
+    max-width: calc(100% - 2*@pad-around);
+    min-width: 260px;
+    box-sizing: border-box;
+
+    // On a narrow screen the pane covers the tree (full-width overlay) instead of a cramped column.
+    @media (max-width: 640px) {
+      width: calc(100% - 2*@pad-around);
+      min-width: 0;
+    }
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    background-color: var(--color-background-primary);
+    border: 1px solid var(--color-border-secondary);
+    border-radius: calc(@border-radius-lg - @pad-around);
+    box-shadow: -4px 4px 16px -4px rgba(0, 0, 0, 0.4);
+
+    .paneHead {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--color-border-tertiary);
+      background-color: var(--color-background-secondary);
+
+      // The inspected block's type as a colored `namespace › name` breadcrumb.
+      .blockTypeTitle {
+        display: flex;
+        align-items: baseline;
+        gap: 2px;
+        font-family: monospace;
+        font-weight: 500;
+        word-break: break-word;
+        font-size: 14px;
+        text-transform: capitalize;
+
+        .ns {
+          color: var(--color-text-acc);
+        }
+        .sep {
+          color: var(--color-text-tertiary);
+        }
+        .name {
+          color: var(--color-text-primary);
+        }
+      }
+
+      .close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: 0;
+        padding: 2px;
+        cursor: pointer;
+        color: var(--color-text-tertiary);
+        border-radius: @border-radius-md;
+
+        &:hover,
+        &:focus {
+          color: var(--color-text-primary);
+          background-color: var(--color-background-secondary);
+        }
+      }
+    }
+
+    .paneBody {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      background-color: var(--color-background-tertiary); // TODO: Check if this its the best color
+    }
+  }
+}
