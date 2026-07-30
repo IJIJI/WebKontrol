@@ -1,0 +1,13 @@
+// A block's icon + badge as one unit. Geometry (the icon is what the tree's guide lines meet) is
+// owned by the tree; this only handles the icon↔badge spacing and the icon colour.
+.blockChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+
+  .blockIcon {
+    flex: none;
+    color: var(--color-text-secondary);
+  }
+}
