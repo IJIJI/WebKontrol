@@ -7,7 +7,7 @@ export default defineConfig({
   platform: "node",
   splitting: false,
   clean: false,
-  // esbuild is used at runtime (view client build) and ships a native binary — keep it
+  // esbuild is used at runtime (view client build) and ships a native binary. Keep it
   // external so tsup doesn't try to bundle it into the backend.
   external: ["pigpio", "esbuild"],
 });
