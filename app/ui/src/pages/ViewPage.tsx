@@ -1,15 +1,17 @@
 import { useParams } from "react-router-dom";
 import { useApi } from "../context/ApiStateContext";
 import { usePageContext } from "../context/PageContext";
-import { type JSX, useEffect, useState } from "react";
+import { type JSX, useEffect } from "react";
 import { ViewHeader } from "../components/views/ViewHeader";
 import { ViewDetails } from "../components/views/ViewDetails";
 import { ViewConfigSummary } from "../components/views/ViewConfigSummary";
-import { BlockTree, type BlockLike } from "../components/blockTree/BlockTree";
+import { BlockExplorer } from "../components/blockTree/BlockExplorer";
+import { type BlockLike } from "../components/blockTree/model/blockUtils";
 import { SettingGroup } from "../components/settings/SettingGroup";
 import "./viewPage.less";
 
-// TODO: remove — example data to preview the BlockTree styling.
+// TODO: remove — example data (real webkontrol blocks) to preview the block explorer.
+const bk = (t: string): string => `webkontrol::block::${t}`;
 const EXAMPLE_BLOCK: BlockLike = {
   type: bk("container"),
   style: { background: "#0b0b12", padding: "24px" },
@@ -58,16 +60,12 @@ export default function ViewPage(): JSX.Element {
   const { state } = useApi();
   const { setMeta } = usePageContext();
 
-  const [title, setTitle] = useState<string>(viewKey ?? "Unkown View");
   const view = viewKey ? state?.views.get(viewKey) : undefined;
-  
-  useEffect(() => {
-    setTitle(view?.config.name.long ?? viewKey ?? "Unkown View");
-  }, [view])
+  const title = view?.config.name.long ?? viewKey ?? "Unknown View";
 
   useEffect(() => {
     setMeta({ title: ["overview", { label: "views", path: "/views" }, title] }, true);
-  }, [viewKey, setMeta, title]);
+  }, [setMeta, title]);
 
   return (
     <>
@@ -79,7 +77,7 @@ export default function ViewPage(): JSX.Element {
             <ViewConfigSummary view={view} />
             {/* TODO: remove — example BlockTree to preview its styling. */}
             <SettingGroup title="Block tree (example)">
-              <BlockTree root={EXAMPLE_BLOCK} />
+              <BlockExplorer root={EXAMPLE_BLOCK} />
             </SettingGroup>
           </div>
         </>
