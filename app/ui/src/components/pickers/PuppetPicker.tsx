@@ -1,9 +1,11 @@
 import { type JSX } from "react/jsx-runtime";
 
 import { EntityPicker } from "./EntityPicker";
-import { ModalSize } from "../modal/Modal";
-import { type UiPuppetState } from "../../context/ApiStateContext";
+import { Modal, ModalSize } from "../modal/Modal";
+import { UiViewState, type UiPuppetState } from "../../context/ApiStateContext";
 import { Icons } from "../icons/Icons";
+import { Button } from "../button/Button";
+import { FillStyle, Variant } from "../../helpers/variants";
 
 // Neutral until puppets carry their own colour (EntityMeta, #6).
 const PUPPET_COLOR = "#a3a0a8";
@@ -13,13 +15,44 @@ export function PuppetPicker({
   open,
   onClose,
   puppets,
+  view,
   onAssign,
 }: {
   open: boolean;
   onClose: () => void;
   puppets: UiPuppetState[];
+  view?: UiViewState;
   onAssign: (puppetKey: string) => void | Promise<void>;
 }): JSX.Element {
+  // TODO: Better style the view name.
+  if (puppets.length == 1) // TODO: This should not be part of the puppet picker, it is view-specific. Check how to make the split.
+    return (
+      <Modal 
+        open={open}
+        onClose={onClose}
+        title={<span>Assign {view ? <b><code>{view?.config.name.long}</code></b> : "view"}</span>}
+        size={ ModalSize.SM }
+        footer={
+          <>
+            <Button fillStyle={FillStyle.SKELETON} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              variant={Variant.ACCENT}
+              onClick={() => {
+                void onAssign(puppets[0].config.id);
+                onClose();
+              }}
+            >
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <span>Are you sure you want to assign the <b><code>{view?.config.name.long}</code></b> view?</span>
+      </Modal>
+  );
+
   return (
     <EntityPicker<UiPuppetState>
       open={open}

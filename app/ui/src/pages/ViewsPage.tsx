@@ -25,7 +25,7 @@ export default function ViewsPage(): JSX.Element {
 
   const puppets = state ? [...state.puppets.values()] : [];
 
-  const [selectedView, setSelectedView] = useState<UiViewState | null>(null);
+  const [selectedView, setSelectedView] = useState<UiViewState | undefined>(undefined);
 
   return (
     <>
@@ -67,9 +67,10 @@ export default function ViewsPage(): JSX.Element {
       }}
     />
     <PuppetPicker
-      open={selectedView !== null}
-      onClose={() => setSelectedView(null)}
+      open={selectedView != undefined}
+      onClose={() => setSelectedView(undefined)}
       puppets={puppets}
+      view={selectedView}
       onAssign={(puppetKey) => selectedView?.assign(puppetKey)}
     />
     </>
