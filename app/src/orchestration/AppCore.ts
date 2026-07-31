@@ -96,7 +96,6 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     });
     this._viewManager.on('view_removed', (key) => void this._puppetOrchestrator.onViewRemoved(key));
 
-    await this._puppetOrchestrator.init();
 
     await this._uiManager.init();
 
@@ -125,6 +124,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
       view: this._viewManager.getHandlers(),
     });
     await this._webServer.start(); // TODO rename to init? Or split?
+    await this._puppetOrchestrator.init();
 
 
   }

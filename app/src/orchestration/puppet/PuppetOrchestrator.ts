@@ -199,7 +199,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     this._store = new PuppetOrchestratorStore();
     const runtime = await this._store.loadRuntime(); // TODO: All fields have defaults. Will this ever be null, store uses the schema to parse.
     if (runtime) {
-      this._runtime = runtime;
+      this.updateRuntime(runtime);
     }
     else {
       this._logger.debug("No runtime found, using defaults.");
@@ -207,7 +207,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
 
     // Init each puppet, then navigate it to its assigned view (re-resolved from the
-    // assignment, so the orchestrator - not the puppet's cached target - is authoritative).
+    // assignment, so the orchestrator, not the puppet's cached target, is authoritative).
     await Promise.all(
       [...this._puppets].map(async ([id, bundle]) => {
         await bundle.puppet.init();
