@@ -2,7 +2,7 @@ import { type JSX } from "react/jsx-runtime";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import { type UiViewState } from "../../context/ApiStateContext";
+import { type UiPuppetState, useApi, type UiViewState } from "../../context/ApiStateContext";
 import { ConnectionState } from "../../../../src/types/CommonTypes";
 import { Icons } from "../icons/Icons";
 import { Button } from "../button/Button";
