@@ -2,6 +2,7 @@ import { type JSX } from "react/jsx-runtime";
 import "./collection.less";
 import { CollectionLayout, type CollectionProps } from "./types";
 import { ListLayout } from "./layouts/ListLayout";
+import { GridLayout } from "./layouts/GridLayout";
 import { ItemActions } from "./ItemActions";
 
 export function Collection<T>(props: CollectionProps<T>): JSX.Element {
@@ -24,9 +25,11 @@ export function Collection<T>(props: CollectionProps<T>): JSX.Element {
 
 function renderLayout<T>(props: CollectionProps<T>): JSX.Element {
   switch (props.layout) {
+    case CollectionLayout.GRID:
+      return <GridLayout {...props} />;
     case CollectionLayout.LIST:
     default:
       return <ListLayout {...props} />;
-    // TODO: More layouts
+    // TODO: TableLayout
   }
 }
