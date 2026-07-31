@@ -7,7 +7,11 @@ import { CollectionLayout } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
 import { VIEW_TYPE_META } from "../components/views/viewMeta";
-import { useApi } from "../context/ApiStateContext";
+import { UiViewState, useApi } from "../context/ApiStateContext";
+import { PuppetPicker } from "../components/pickers/PuppetPicker";
+import { useState } from "react";
+import { PuppetKey } from "../../../src/puppet/types/schema";
+import { ViewKey } from "../../../src/views/types/schema";
 
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
@@ -19,8 +23,12 @@ export default function ViewsPage(): JSX.Element {
 
   const views = state ? [...state.views.values()] : [];
 
+  const puppets = state ? [...state.puppets.values()] : [];
+
+  const [selectedView, setSelectedView] = useState<UiViewState | null>(null);
 
   return (
+    <>
     <Collection
       items={views}
       getKey={(v) => v.key}
@@ -51,13 +59,19 @@ export default function ViewsPage(): JSX.Element {
               label: "Assign",
               icon: <Icons.installDesktop />,
               onClick: () => {
-                if (v.config.type !== "url") void toast("Assigning non url views coming soon");
-                void v.assign("sdi-1");
+                void setSelectedView(v);
               },
             },
           ],
         };
       }}
     />
+    <PuppetPicker
+      open={selectedView !== null}
+      onClose={() => setSelectedView(null)}
+      puppets={puppets}
+      onAssign={(puppetKey) => selectedView?.assign(puppetKey)}
+    />
+    </>
   );
 }
