@@ -53,40 +53,40 @@ export default function SettingsPage(): JSX.Element {
   return (
     <>
       {/* <BottomBar visible={true}>
-        <Button type={Variant.DEFAULT} style={FillStyle.FILLED} onClick={() => {}}> 
+        <Button variant={Variant.DEFAULT} fillStyle={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.ACCENT} style={FillStyle.FILLED} onClick={() => {}}> 
+        <Button variant={Variant.ACCENT} fillStyle={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.DANGER} style={FillStyle.FILLED} onClick={() => {}}> 
+        <Button variant={Variant.DANGER} fillStyle={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.INFO} style={FillStyle.FILLED} onClick={() => {}}> 
+        <Button variant={Variant.INFO} fillStyle={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.SUCCESS} style={FillStyle.FILLED} onClick={() => {}}> 
+        <Button variant={Variant.SUCCESS} fillStyle={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.WARNING} style={FillStyle.FILLED} onClick={() => {}}> 
+        <Button variant={Variant.WARNING} fillStyle={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.DEFAULT} style={FillStyle.SKELETON} onClick={() => {}}> 
+        <Button variant={Variant.DEFAULT} fillStyle={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.ACCENT} style={FillStyle.SKELETON} onClick={() => {}}> 
+        <Button variant={Variant.ACCENT} fillStyle={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.DANGER} style={FillStyle.SKELETON} onClick={() => {}}> 
+        <Button variant={Variant.DANGER} fillStyle={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.INFO} style={FillStyle.SKELETON} onClick={() => {}}> 
+        <Button variant={Variant.INFO} fillStyle={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.SUCCESS} style={FillStyle.SKELETON} onClick={() => {}}> 
+        <Button variant={Variant.SUCCESS} fillStyle={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
-        <Button type={Variant.WARNING} style={FillStyle.SKELETON} onClick={() => {}}> 
+        <Button variant={Variant.WARNING} fillStyle={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
       </BottomBar> */}
@@ -155,8 +155,8 @@ export default function SettingsPage(): JSX.Element {
           subtitle="Restore all configuration to factory defaults"
           label="Reset"
           onClick={() => { alert("I DON'T WANT TO DIE")}}
-          type={Variant.DANGER}
-          style={FillStyle.SKELETON}
+          variant={Variant.DANGER}
+          fillStyle={FillStyle.SKELETON}
         />
       </SettingGroup>
       <SettingGroup title="About">
@@ -176,7 +176,7 @@ export default function SettingsPage(): JSX.Element {
           title="Hardware"
           subtitle="Hardware Type"
         >
-          <InfoPill type={Variant.DEFAULT} style={FillStyle.FILLED}>
+          <InfoPill variant={Variant.DEFAULT} fillStyle={FillStyle.FILLED}>
             <span>WebKontrol v3</span>
           </InfoPill>
         </BaseSetting>

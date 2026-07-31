@@ -6,20 +6,20 @@ import { ChipPill } from "./ChipPill";
 import { Variant, FillStyle } from "../../helpers/variants";
 
 export function InfoPill({
-  type = Variant.DEFAULT,
-  style = FillStyle.FILLED,
+  variant = Variant.DEFAULT,
+  fillStyle = FillStyle.FILLED,
   children,
   size,
   className,
 }: {
-  type?: Variant;
-  style?: FillStyle;
+  variant?: Variant;
+  fillStyle?: FillStyle;
   children: ReactNode;
   size?: number;
   className?: string;
 }): JSX.Element {
   return (
-    <ChipPill className={["infoPill", type, style, className].filter(Boolean).join(" ")} size={size}>
+    <ChipPill className={["infoPill", variant, fillStyle, className].filter(Boolean).join(" ")} size={size}>
       {children}
     </ChipPill>
   );

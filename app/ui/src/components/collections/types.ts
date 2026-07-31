@@ -13,8 +13,8 @@ export interface ItemAction {
   label: string; // tooltip + aria-label
   icon?: ReactNode;
   onClick: () => void | Promise<void>; // async actions show a spinner in the Button while pending
-  type?: Variant;
-  style?: FillStyle;
+  variant?: Variant;
+  fillStyle?: FillStyle;
   disabled?: boolean;
 }
 

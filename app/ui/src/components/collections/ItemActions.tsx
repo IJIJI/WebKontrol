@@ -12,8 +12,8 @@ export function ItemActions({ actions }: { actions?: ItemAction[] }): JSX.Elemen
         <Button
           key={a.id}
           onClick={a.onClick}
-          type={a.type}
-          style={a.style}
+          variant={a.variant}
+          fillStyle={a.fillStyle}
           disabled={a.disabled}
           ariaLabel={a.label}
         >

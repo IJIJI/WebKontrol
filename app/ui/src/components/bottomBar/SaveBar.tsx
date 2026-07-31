@@ -32,11 +32,11 @@ export function SaveBar({
     <BottomBar visible={visible} className="saveBar">
       <span className="saveTitle">Unsaved changes</span>
       <div className="saveButtons">
-        <Button type={Variant.DANGER} onClick={onDiscard} disabled={isSaving}>
+        <Button variant={Variant.DANGER} onClick={onDiscard} disabled={isSaving}>
           <Icons.undo size={20} />
           <p>Discard</p>
         </Button>
-        <Button type={Variant.SUCCESS} onClick={doSave} >
+        <Button variant={Variant.SUCCESS} onClick={doSave} >
           { isSaving ? <Icons.loading size={19}/> : <Icons.check size={19} /> }
           <p>Save</p>
         </Button>

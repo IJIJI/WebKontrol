@@ -8,8 +8,8 @@ import { Variant, FillStyle } from "../../helpers/variants";
 // TODO: Add the possiblility for th euser to define loading children
 export function Button({
   onClick,
-  type = Variant.DEFAULT,
-  style = FillStyle.FILLED,
+  variant = Variant.DEFAULT,
+  fillStyle = FillStyle.FILLED,
   children,
   disabled,
   ref,
@@ -18,8 +18,8 @@ export function Button({
   className,
 }: {
   onClick: () => void | Promise<void>;
-  type?: Variant;
-  style?: FillStyle;
+  variant?: Variant;
+  fillStyle?: FillStyle;
   children: ReactNode;
   disabled?: boolean;
   ref?: RefObject<HTMLButtonElement | null>;
@@ -50,7 +50,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={"buttonComp " + (className ? `${className} ` : "") + (isDisabled ? "disabled " : "") + type + " " + style}
+      className={"buttonComp " + (className ? `${className} ` : "") + (isDisabled ? "disabled " : "") + variant + " " + fillStyle}
       disabled={isDisabled}
       onClick={() => void handleClick()}
       ref={ref}
