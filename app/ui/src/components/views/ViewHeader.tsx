@@ -12,6 +12,8 @@ import { StatusPill } from "../pill/statusPill/StatusPill";
 import { EntityHeader } from "../entityHeader/EntityHeader";
 import { ViewTypeChip } from "./ViewTypeChip";
 import { VIEW_TYPE_META } from "./viewMeta";
+import { useMemo } from "react";
+import { UrlViewConfig } from "../../../../src/views/types/schema";
 
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
@@ -22,6 +24,14 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   const { key, config } = view;
   const TypeIcon = VIEW_TYPE_META[config.type].icon;
   const serveUrl = `/view/${key}`; // TODO: route_base is configurable; hardcoded /view for now
+
+  const state = useApi().state;
+  const testPuppet: UiPuppetState | undefined = useMemo(
+    () => {
+      return state?.puppets.entries().next().value?.[1];
+    },
+    [state],
+  );
 
   const menu: DropdownItem[] = [
     { id: "open", label: "Open in new tab", icon: <Icons.openInNew />, onClick: () => void window.open(serveUrl, "_blank", "noopener") },
@@ -47,7 +57,14 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
       }
       actions={
         <>
-          <Button onClick={() => void toast("Assigning coming soon")} style={FillStyle.FILLED}>
+          <Button onClick={() => {
+              if (view.config.type !== "url")
+                void toast("Assigning non url views coming soon")
+
+              testPuppet?.updateRuntime({target: (view.config as UrlViewConfig).url})}
+              }
+              style={FillStyle.FILLED}
+            >
             <Icons.installDesktop />
             <span>Assign</span>
           </Button>
