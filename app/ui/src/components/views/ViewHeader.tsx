@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { type JSX } from "react/jsx-runtime";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import { UiPuppetState, useApi, type UiViewState } from "../../context/ApiStateContext";
+import { useApi, type UiViewState } from "../../context/ApiStateContext";
 import { ConnectionState } from "../../../../src/types/CommonTypes";
 import { Icons } from "../icons/Icons";
 import { Button } from "../button/Button";
@@ -10,9 +11,9 @@ import { FillStyle } from "../../helpers/variants";
 import { Dropdown, type DropdownItem } from "../dropdown/Dropdown";
 import { StatusPill } from "../pill/statusPill/StatusPill";
 import { EntityHeader } from "../entityHeader/EntityHeader";
+import { PuppetPicker } from "../pickers/PuppetPicker";
 import { ViewTypeChip } from "./ViewTypeChip";
 import { VIEW_TYPE_META } from "./viewMeta";
-import { UrlViewConfig } from "../../../../src/views/types/schema";
 
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
@@ -20,9 +21,13 @@ const NEUTRAL_COLOR = "#a3a0a8";
 // A view's detail-page header: fills EntityHeader with view-specific content.
 export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   const navigate = useNavigate();
+  const { state } = useApi();
   const { key, config } = view;
   const TypeIcon = VIEW_TYPE_META[config.type].icon;
   const serveUrl = `/view/${key}`; // TODO: route_base is configurable; hardcoded /view for now
+
+  const [assignOpen, setAssignOpen] = useState(false);
+  const puppets = state ? [...state.puppets.values()] : [];
 
   const menu: DropdownItem[] = [
     { id: "open", label: "Open in new tab", icon: <Icons.openInNew />, onClick: () => void window.open(serveUrl, "_blank", "noopener") },
@@ -34,38 +39,39 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   ];
 
   return (
-    <EntityHeader
-      icon={<TypeIcon />}
-      color={NEUTRAL_COLOR}
-      title={config.name.long}
-      subtitle={config.name.short}
-      chips={
-        <>
-          <ViewTypeChip type={config.type} />
-          {/* Placeholder until assignment/open data is wired. */}
-          <StatusPill status={ConnectionState.DISABLED} label="Not displayed" />
-        </>
-      }
-      actions={
-        <>
-          <Button onClick={() => {
-                  if (view.config.type !== "url")
-                    return void toast("Assigning non url views coming soon")
-                  view.assign("sdi-1");
-                }
-              }
-              fillStyle={FillStyle.FILLED}
-            >
-            <Icons.installDesktop />
-            <span>Assign</span>
-          </Button>
-          <Button onClick={() => void toast("Sharing coming soon")} fillStyle={FillStyle.FILLED}>
-            <Icons.share />
-            <span>Share</span>
-          </Button>
-          <Dropdown ariaLabel="More actions" trigger={<Icons.more />} items={menu} />
-        </>
-      }
-    />
+    <>
+      <EntityHeader
+        icon={<TypeIcon />}
+        color={NEUTRAL_COLOR}
+        title={config.name.long}
+        subtitle={config.name.short}
+        chips={
+          <>
+            <ViewTypeChip type={config.type} />
+            {/* Placeholder until assignment/open data is wired. */}
+            <StatusPill status={ConnectionState.DISABLED} label="Not displayed" />
+          </>
+        }
+        actions={
+          <>
+            <Button onClick={() => setAssignOpen(true)} fillStyle={FillStyle.FILLED}>
+              <Icons.installDesktop />
+              <span>Assign</span>
+            </Button>
+            <Button onClick={() => void toast("Sharing coming soon")} fillStyle={FillStyle.FILLED}>
+              <Icons.share />
+              <span>Share</span>
+            </Button>
+            <Dropdown ariaLabel="More actions" trigger={<Icons.more />} items={menu} />
+          </>
+        }
+      />
+      <PuppetPicker
+        open={assignOpen}
+        onClose={() => setAssignOpen(false)}
+        puppets={puppets}
+        onAssign={(puppetKey) => view.assign(puppetKey)}
+      />
+    </>
   );
 }
