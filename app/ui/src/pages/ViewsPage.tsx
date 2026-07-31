@@ -8,7 +8,9 @@ import { CollectionLayout } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
 import { VIEW_TYPE_META } from "../components/views/viewMeta";
-import { useApi } from "../context/ApiStateContext";
+import { UiPuppetState, useApi } from "../context/ApiStateContext";
+import { useMemo } from "react";
+import { UrlViewConfig } from "../../../src/views/types/schema";
 
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
@@ -19,6 +21,13 @@ export default function ViewsPage(): JSX.Element {
   const { state } = useApi();
 
   const views = state ? [...state.views.values()] : [];
+
+  const testPuppet: UiPuppetState | undefined = useMemo(
+    () => {
+      return state?.puppets.entries().next().value?.[1];
+    },
+    [state],
+  );
 
   return (
     <Collection
@@ -41,8 +50,23 @@ export default function ViewsPage(): JSX.Element {
             chips={<ViewTypeChip type={v.config.type} />}
             actions={[
               // Both placeholders for now: Share -> share modal (#15), Assign -> puppet-assign modal (#17).
-              { id: "share", label: "Share", icon: <Icons.share />, onClick: () => void toast("Sharing coming soon") },
-              { id: "assign", label: "Assign", icon: <Icons.installDesktop />, onClick: () => void toast("Assigning coming soon") },
+              { 
+                id: "share", 
+                label: "Share", 
+                icon: <Icons.share />, 
+                onClick: () => void toast("Sharing coming soon") 
+              },
+              { 
+                id: "assign", 
+                label: "Assign", 
+                icon: <Icons.installDesktop />, 
+                onClick: () => {
+                  if (v.config.type !== "url")
+                    void toast("Assigning non url views coming soon")
+
+                  testPuppet?.updateRuntime({target: (v.config as UrlViewConfig).url})
+                } 
+              },
             ]}
           />
         );
