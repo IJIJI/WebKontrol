@@ -17,9 +17,12 @@ import { type SystemRuntimeInput } from "../../../src/system/schema";
 import { type UiRuntimeInput, type UiTheme } from "../../../src/ui/schema";
 import { type PuppetDataBundle } from "../../../src/puppet/types/model";
 import { ViewManagerRuntimeInput, type AnyViewConfig, type ViewKey } from "../../../src/views/types/schema";
+import { PuppetOrchestratorRuntime, PuppetOrchestratorRuntimeInput } from "../../../src/orchestration/puppet/schema";
 
 export interface UiPuppetState extends PuppetDataBundle {
-  updateRuntime: (runtime: Partial<PuppetRuntime>) => Promise<void>;
+  updateRuntime: (runtime: Partial<PuppetRuntime>) => Promise<void>; // TODO: Remove?
+  assignView: (view: ViewKey) => Promise<void>;
+  unassignView: () => Promise<void>;
 }
 
 // A view enriched with mutations bound to its key (like UiPuppetState). The wire ships a
@@ -29,6 +32,7 @@ export interface UiViewState {
   config: AnyViewConfig;
   update: (config: AnyViewConfig) => Promise<void>;
   delete: () => Promise<void>;
+  assign: (puppet: PuppetKey) => Promise<void>;
 }
 
 export interface UiWebServerState extends Omit<WebServerState, "puppets" | "views"> {
@@ -59,9 +63,22 @@ interface ApiState {
       ) => Promise<void>;
     };
     puppet: {
+      updateOrchestratorRuntime: (
+        runtime: Partial<PuppetOrchestratorRuntime>,
+        notify?: boolean,
+      ) => Promise<void>;
       updateRuntime: (
         id: PuppetKey,
         runtime: Partial<PuppetRuntimeInput>,
+        notify?: boolean,
+      ) => Promise<void>;
+      assignView: (
+        puppet: PuppetKey,
+        view: ViewKey,
+        notify?: boolean,
+      ) => Promise<void>;
+      unassignView: (
+        puppet: PuppetKey,
         notify?: boolean,
       ) => Promise<void>;
     };
@@ -161,18 +178,22 @@ export function ApiStateProvider({
           const full: UiPuppetState = {
             ...pup,
             updateRuntime: async (runtime: Partial<PuppetRuntime>): Promise<void> => puppetUpdateRuntime(key, runtime),
+            assignView: async (view: ViewKey): Promise<void> => puppetAssignView(key, view),
+            unassignView: async (): Promise<void> => puppetUnassignView(key),
           };
           puppets.set(key, full);
         }
 
         const views = new Map<ViewKey, UiViewState>();
         for (const [key, config] of Object.entries(data.views)) {
-          views.set(key, {
+          const full: UiViewState = {
             key,
             config,
             update: (next: AnyViewConfig): Promise<void> => viewUpdate(key, next),
             delete: (): Promise<void> => viewDelete(key),
-          });
+            assign: (puppet: PuppetKey) =>puppetAssignView(puppet, key),
+          }
+          views.set(key, full);
         }
 
         const state: UiWebServerState = {
@@ -224,6 +245,29 @@ export function ApiStateProvider({
     );
   };
 
+  const puppetAssignView = async (
+    puppet: PuppetKey,
+    view: ViewKey,
+    notify = true,
+  ): Promise<void> => {
+    return withToast(
+      Api.post(`/puppets/${puppet}/assign`, { view }),
+      { loading: "Assigning view...", success: "View assigned" },
+      notify,
+    );
+  };
+
+  const puppetUnassignView = async (
+    puppet: PuppetKey,
+    notify = true,
+  ): Promise<void> => {
+    return withToast(
+      Api.delete(`/puppets/${puppet}/unassign`),
+      { loading: "Unassigning view...", success: "View cleared" },
+      notify,
+    );
+  };
+
   const systemUpdateRuntime = async (
     config: Partial<SystemRuntimeInput>,
     notify = false,
@@ -231,6 +275,17 @@ export function ApiStateProvider({
     return withToast(
       Api.patch(`/config/system`, config),
       { loading: "Saving system settings…", success: "Saved" },
+      notify,
+    );
+  };
+
+  const puppetOrchestratorUpdateRuntime = async (
+    config: Partial<PuppetOrchestratorRuntimeInput>,
+    notify = false,
+  ): Promise<void> => {
+    return withToast(
+      Api.patch(`/config/puppet`, config),
+      { loading: "Saving puppet settings…", success: "Saved" },
       notify,
     );
   };
@@ -305,7 +360,10 @@ export function ApiStateProvider({
             updateRuntime: uiUpdateRuntime,
           },
           puppet: {
+            updateOrchestratorRuntime: puppetOrchestratorUpdateRuntime,
             updateRuntime: puppetUpdateRuntime,
+            assignView: puppetAssignView,
+            unassignView: puppetUnassignView,
           },
           view: {
             create: viewCreate,
