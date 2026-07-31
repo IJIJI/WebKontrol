@@ -3,27 +3,13 @@ import { type JSX } from "react/jsx-runtime";
 import "./button.less";
 import { useState, type ReactNode, type RefObject } from "react";
 import { Icons } from "../icons/Icons";
-
-
-export enum ButtonType {
-  DEFAULT = "default",
-  ACCENT = "accent",
-  SUCCESS = "success",
-  DANGER = "danger",
-  WARNING = "warning",
-  INFO = "info",
-}
-
-export enum ButtonStyle {
-  FILLED = "filled",
-  SKELETON = "skeleton",
-}
+import { Variant, FillStyle } from "../../helpers/variants";
 
 // TODO: Add the possiblility for th euser to define loading children
 export function Button({
   onClick,
-  type = ButtonType.DEFAULT,
-  style = ButtonStyle.FILLED,
+  type = Variant.DEFAULT,
+  style = FillStyle.FILLED,
   children,
   disabled,
   ref,
@@ -32,8 +18,8 @@ export function Button({
   className,
 }: {
   onClick: () => void | Promise<void>;
-  type?: ButtonType;
-  style?: ButtonStyle;
+  type?: Variant;
+  style?: FillStyle;
   children: ReactNode;
   disabled?: boolean;
   ref?: RefObject<HTMLButtonElement | null>;

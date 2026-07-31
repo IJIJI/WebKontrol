@@ -3,31 +3,17 @@ import { type JSX } from "react/jsx-runtime";
 
 import "./infoPill.less";
 import { ChipPill } from "./ChipPill";
-
-// TODO: unify with Button's ButtonType/ButtonStyle into one shared variants module.
-export enum PillType {
-  DEFAULT = "default",
-  ACCENT = "accent",
-  SUCCESS = "success",
-  DANGER = "danger",
-  WARNING = "warning",
-  INFO = "info",
-}
-
-export enum PillStyle {
-  FILLED = "filled",
-  SKELETON = "skeleton",
-}
+import { Variant, FillStyle } from "../../helpers/variants";
 
 export function InfoPill({
-  type = PillType.DEFAULT,
-  style = PillStyle.FILLED,
+  type = Variant.DEFAULT,
+  style = FillStyle.FILLED,
   children,
   size,
   className,
 }: {
-  type?: PillType;
-  style?: PillStyle;
+  type?: Variant;
+  style?: FillStyle;
   children: ReactNode;
   size?: number;
   className?: string;

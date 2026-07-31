@@ -2,22 +2,23 @@ import { type JSX } from "react/jsx-runtime";
 
 import "./statusPill.less";
 import { ConnectionState } from "../../../../../src/types/CommonTypes";
-import { InfoPill, PillStyle, PillType } from "../InfoPill";
+import { InfoPill } from "../InfoPill";
+import { Variant, FillStyle } from "../../../helpers/variants";
 
-const STATE_MAP: Record<ConnectionState, {type: PillType, style: PillStyle, label: string}> = {
-  [ConnectionState.DISABLED]: { type: PillType.DEFAULT, style: PillStyle.SKELETON, label: "Disabled" },
-  [ConnectionState.ERROR]: { type: PillType.WARNING, style: PillStyle.FILLED, label: "Error" },
-  [ConnectionState.FAILED]: { type: PillType.DANGER, style: PillStyle.FILLED, label: "Failed" },
-  [ConnectionState.OFFLINE]: { type: PillType.WARNING, style: PillStyle.FILLED, label: "Offline" },
-  [ConnectionState.ONLINE]: { type: PillType.SUCCESS, style: PillStyle.SKELETON, label: "Online" },
-  [ConnectionState.UNKNOWN]: { type: PillType.WARNING, style: PillStyle.FILLED, label: "Unknown" },
+const STATE_MAP: Record<ConnectionState, {type: Variant, style: FillStyle, label: string}> = {
+  [ConnectionState.DISABLED]: { type: Variant.DEFAULT, style: FillStyle.SKELETON, label: "Disabled" },
+  [ConnectionState.ERROR]: { type: Variant.WARNING, style: FillStyle.FILLED, label: "Error" },
+  [ConnectionState.FAILED]: { type: Variant.DANGER, style: FillStyle.FILLED, label: "Failed" },
+  [ConnectionState.OFFLINE]: { type: Variant.WARNING, style: FillStyle.FILLED, label: "Offline" },
+  [ConnectionState.ONLINE]: { type: Variant.SUCCESS, style: FillStyle.SKELETON, label: "Online" },
+  [ConnectionState.UNKNOWN]: { type: Variant.WARNING, style: FillStyle.FILLED, label: "Unknown" },
 }
 
 export function StatusPill(props: {
   size?: number;
   label?: string;
   status: ConnectionState;
-  style?: PillStyle;
+  style?: FillStyle;
   collapsed?: boolean
 }): JSX.Element {
   const state = STATE_MAP[props.status];

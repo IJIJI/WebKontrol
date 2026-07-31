@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import { type To } from "react-router-dom";
-import { type ButtonStyle, type ButtonType } from "../button/Button";
+import { type Variant, type FillStyle } from "../../helpers/variants";
 
 export enum CollectionLayout {
   LIST = "list",
@@ -13,8 +13,8 @@ export interface ItemAction {
   label: string; // tooltip + aria-label
   icon?: ReactNode;
   onClick: () => void | Promise<void>; // async actions show a spinner in the Button while pending
-  type?: ButtonType;
-  style?: ButtonStyle;
+  type?: Variant;
+  style?: FillStyle;
   disabled?: boolean;
 }
 

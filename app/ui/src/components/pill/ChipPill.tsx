@@ -1,4 +1,4 @@
-import { type ReactNode, type CSSProperties } from "react";
+import { type ReactNode } from "react";
 import { type JSX } from "react/jsx-runtime";
 
 import "./chipPill.less";

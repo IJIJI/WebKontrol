@@ -2,7 +2,8 @@ import { type JSX } from "react/jsx-runtime";
 
 import "./bar.less";
 import { BottomBar } from "./BottomBar";
-import { Button, ButtonType } from "../button/Button";
+import { Button } from "../button/Button";
+import { Variant } from "../../helpers/variants";
 import { Icons } from "../icons/Icons";
 import { useState } from "react";
 
@@ -31,11 +32,11 @@ export function SaveBar({
     <BottomBar visible={visible} className="saveBar">
       <span className="saveTitle">Unsaved changes</span>
       <div className="saveButtons">
-        <Button type={ButtonType.DANGER} onClick={onDiscard} disabled={isSaving}> 
+        <Button type={Variant.DANGER} onClick={onDiscard} disabled={isSaving}>
           <Icons.undo size={20} />
           <p>Discard</p>
         </Button>
-        <Button type={ButtonType.SUCCESS} onClick={doSave} > 
+        <Button type={Variant.SUCCESS} onClick={doSave} >
           { isSaving ? <Icons.loading size={19}/> : <Icons.check size={19} /> }
           <p>Save</p>
         </Button>

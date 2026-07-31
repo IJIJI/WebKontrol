@@ -5,7 +5,8 @@ import toast from "react-hot-toast";
 import { type UiViewState } from "../../context/ApiStateContext";
 import { ConnectionState } from "../../../../src/types/CommonTypes";
 import { Icons } from "../icons/Icons";
-import { Button, ButtonStyle } from "../button/Button";
+import { Button } from "../button/Button";
+import { FillStyle } from "../../helpers/variants";
 import { Dropdown, type DropdownItem } from "../dropdown/Dropdown";
 import { StatusPill } from "../pill/statusPill/StatusPill";
 import { EntityHeader } from "../entityHeader/EntityHeader";
@@ -46,11 +47,11 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
       }
       actions={
         <>
-          <Button onClick={() => void toast("Assigning coming soon")} style={ButtonStyle.FILLED}>
+          <Button onClick={() => void toast("Assigning coming soon")} style={FillStyle.FILLED}>
             <Icons.installDesktop />
             <span>Assign</span>
           </Button>
-          <Button onClick={() => void toast("Sharing coming soon")} style={ButtonStyle.FILLED}>
+          <Button onClick={() => void toast("Sharing coming soon")} style={FillStyle.FILLED}>
             <Icons.share />
             <span>Share</span>
           </Button>

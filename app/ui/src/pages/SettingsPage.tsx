@@ -8,8 +8,8 @@ import { ButtonSetting } from "../components/settings/implementations/ButtonSett
 import { BaseSetting } from "../components/settings/BaseSetting";
 import { aggregateDrafts, useDraft } from "../helpers/DraftSave";
 import { SaveBar } from "../components/bottomBar/SaveBar";
-import { ButtonStyle, ButtonType } from "../components/button/Button";
-import { PillStyle, PillType, InfoPill } from "../components/pill/InfoPill";
+import { InfoPill } from "../components/pill/InfoPill";
+import { Variant, FillStyle } from "../helpers/variants";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../src/types/CommonTypes";
 import { UiTheme } from "../../../src/ui/schema";
@@ -53,40 +53,40 @@ export default function SettingsPage(): JSX.Element {
   return (
     <>
       {/* <BottomBar visible={true}>
-        <Button type={ButtonType.DEFAULT} style={ButtonStyle.FILLED} onClick={() => {}}> 
+        <Button type={Variant.DEFAULT} style={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.ACCENT} style={ButtonStyle.FILLED} onClick={() => {}}> 
+        <Button type={Variant.ACCENT} style={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.DANGER} style={ButtonStyle.FILLED} onClick={() => {}}> 
+        <Button type={Variant.DANGER} style={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.INFO} style={ButtonStyle.FILLED} onClick={() => {}}> 
+        <Button type={Variant.INFO} style={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.SUCCESS} style={ButtonStyle.FILLED} onClick={() => {}}> 
+        <Button type={Variant.SUCCESS} style={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.WARNING} style={ButtonStyle.FILLED} onClick={() => {}}> 
+        <Button type={Variant.WARNING} style={FillStyle.FILLED} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.DEFAULT} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+        <Button type={Variant.DEFAULT} style={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.ACCENT} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+        <Button type={Variant.ACCENT} style={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.DANGER} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+        <Button type={Variant.DANGER} style={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.INFO} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+        <Button type={Variant.INFO} style={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.SUCCESS} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+        <Button type={Variant.SUCCESS} style={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
-        <Button type={ButtonType.WARNING} style={ButtonStyle.SKELETON} onClick={() => {}}> 
+        <Button type={Variant.WARNING} style={FillStyle.SKELETON} onClick={() => {}}> 
           save
         </Button>
       </BottomBar> */}
@@ -155,8 +155,8 @@ export default function SettingsPage(): JSX.Element {
           subtitle="Restore all configuration to factory defaults"
           label="Reset"
           onClick={() => { alert("I DON'T WANT TO DIE")}}
-          type={ButtonType.DANGER}
-          style={ButtonStyle.SKELETON}
+          type={Variant.DANGER}
+          style={FillStyle.SKELETON}
         />
       </SettingGroup>
       <SettingGroup title="About">
@@ -176,7 +176,7 @@ export default function SettingsPage(): JSX.Element {
           title="Hardware"
           subtitle="Hardware Type"
         >
-          <InfoPill type={PillType.DEFAULT} style={PillStyle.FILLED}>
+          <InfoPill type={Variant.DEFAULT} style={FillStyle.FILLED}>
             <span>WebKontrol v3</span>
           </InfoPill>
         </BaseSetting>
