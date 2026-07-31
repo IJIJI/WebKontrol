@@ -285,7 +285,7 @@ export class WebServer implements RouteRegistrar {
         await this._handlers.system.updateRuntime(result.data);
         res.status(204).send();
       } catch (e) {
-        this._logger.error("Failed to update core config:", e);
+        this._logger.error("Failed to update core runtime:", e);
         res.status(500).json({
           error: e instanceof Error ? e.message : "Failed to update core config",
         });

@@ -222,7 +222,6 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
       updateRuntime: (id: PuppetKey, runtime: Partial<PuppetRuntime>) => this.updatePuppetRuntime(id, runtime),
       assignView: (puppet: PuppetKey, view: ViewKey) => this.assignView(puppet, view),
       unassignView: (puppet: PuppetKey) => this.unassignView(puppet),
-      setDefaultView: (view: ViewKey | undefined) => this.setDefaultView(view),
     }
   }
 }

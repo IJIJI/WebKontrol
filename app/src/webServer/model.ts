@@ -38,9 +38,6 @@ export interface PuppetWebhandlers {
   unassignView: (
     puppet: PuppetKey,
   ) => Promise<void>;
-  setDefaultView: (
-    view: ViewKey | undefined, // TODO: Allow undefined?
-  ) => Promise<void>;
 }
 export interface SystemWebhandlers {
   updateRuntime: (config: Partial<SystemRuntime>) => void | Promise<void>;
