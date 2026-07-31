@@ -1,13 +1,11 @@
+import { type ReactNode } from "react";
 import { type JSX } from "react/jsx-runtime";
 
-import "./pill.less";
+import "./infoPill.less";
+import { ChipPill } from "./ChipPill";
 
-// TODO: Extract a base, typeless chip (e.g. ChipPill) — just the pill shape/layout with no
-// semantic PillType/coloring, and rebuild InfoPill on top of it. The grey view-type chip
-// (ViewTypeChip) should then use that base directly instead of PillType.DEFAULT.
-
-
-export enum PillType { // TODO: Move to a more general type? It is used in more places.
+// TODO: unify with Button's ButtonType/ButtonStyle into one shared variants module.
+export enum PillType {
   DEFAULT = "default",
   ACCENT = "accent",
   SUCCESS = "success",
@@ -16,26 +14,27 @@ export enum PillType { // TODO: Move to a more general type? It is used in more 
   INFO = "info",
 }
 
-export enum PillStyle { // TODO: Move to a more general type? It is used in more places.
+export enum PillStyle {
   FILLED = "filled",
   SKELETON = "skeleton",
 }
 
-export function InfoPill({type, style, children, size, className}: {
+export function InfoPill({
+  type = PillType.DEFAULT,
+  style = PillStyle.FILLED,
+  children,
+  size,
+  className,
+}: {
   type?: PillType;
   style?: PillStyle;
-  children: string | JSX.Element | JSX.Element[];
+  children: ReactNode;
   size?: number;
   className?: string;
 }): JSX.Element {
-  const compStyle = style ?? PillStyle.FILLED;
-
   return (
-    <div 
-      className={"infoPill " + (className ? className+" " : "") + type + " " + compStyle}
-      style={{ fontSize: size }}
-    >
+    <ChipPill className={["infoPill", type, style, className].filter(Boolean).join(" ")} size={size}>
       {children}
-    </div>
+    </ChipPill>
   );
 }
