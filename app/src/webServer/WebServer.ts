@@ -13,6 +13,7 @@ import { UiRuntimeShape } from "../ui/schema";
 import { SystemRuntimeShape } from "../system/schema";
 import { PuppetKeySchema, PuppetRuntimeShape } from "../puppet/types/schema";
 import { AnyViewConfigSchema, ViewKeySchema, ViewManagerRuntimeShape } from "../views/types/schema";
+import { PuppetOrchestratorRuntimeShape } from "../orchestration/puppet/schema";
 
 export class WebServer implements RouteRegistrar {
   private _app = express();
@@ -292,6 +293,24 @@ export class WebServer implements RouteRegistrar {
       }
     });
 
+    this._app.patch("/api/config/puppet", async (req, res) => { // TODO: Correct path? It is for the puppet orchestrator
+      const result = PuppetOrchestratorRuntimeShape.partial().safeParse(req.body);
+
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+      }
+
+      try {
+        await this._handlers.puppet.updateOrchestratorRuntime(result.data);
+        res.status(204).send();
+      } catch (e) {
+        this._logger.error("Failed to update puppet orchestator runtime:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to update puppet orchestator config",
+        });
+      }
+    });
+
     this._app.get("/api/puppets", (_req, res) => {
       res.json(this._state?.puppets);
     });
@@ -323,9 +342,65 @@ export class WebServer implements RouteRegistrar {
           resultBody.data,
         );
       } catch (e) {
-        this._logger.error("Failed to update producer:", resultId.data, e);
+        this._logger.error("Failed to update puppet runtime:", resultId.data, e);
         res.status(500).json({
-          error: e instanceof Error ? e.message : "Failed to update producer",
+          error: e instanceof Error ? e.message : "Failed to update puppet config",
+        });
+      }
+    });
+
+    this._app.post("/api/puppets/:id/assign", async (req, res) => { // TODO: Correct path?
+      const resultId = PuppetKeySchema.safeParse(req.params.id);
+
+      if (!resultId.success) {
+        return res.status(400).json({ errors: resultId.error.format() });
+      }
+
+      const resultBody = ViewKeySchema.safeParse(
+        req.body,
+      );
+
+      if (!resultBody.success) {
+        return res.status(400).json({ errors: resultBody.error.format() });
+      }
+
+      try {
+        await this._handlers.puppet.assignView(
+          resultId.data,
+          resultBody.data,
+        );
+        res.status(204).send();
+        this._logger.info(
+          `Assigned view ${resultId.data} to puppet ${resultId.data}`
+        );
+      } catch (e) {
+        this._logger.error("Failed to assign view to puppet:", resultId.data, e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to assign view to puppet",
+        });
+      }
+    });
+
+    this._app.post("/api/puppets/:id/unassign", async (req, res) => { // TODO: Correct path?
+      const resultId = PuppetKeySchema.safeParse(req.params.id);
+
+      if (!resultId.success) {
+        return res.status(400).json({ errors: resultId.error.format() });
+      }
+
+
+      try {
+        await this._handlers.puppet.unassignView(
+          resultId.data,
+        );
+        res.status(204).send();
+        this._logger.info(
+          `Assigned view ${resultId.data} to puppet ${resultId.data}`
+        );
+      } catch (e) {
+        this._logger.error("Failed to assign view to puppet:", resultId.data, e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to assign view to puppet",
         });
       }
     });
@@ -390,7 +465,7 @@ export class WebServer implements RouteRegistrar {
         await this._handlers.view.updateRuntime(result.data);
         res.status(204).send();
       } catch (e) {
-        this._logger.error("Failed to update view config:", e);
+        this._logger.error("Failed to update view runtime:", e);
         res.status(500).json({
           error: e instanceof Error ? e.message : "Failed to update view config",
         });
@@ -408,7 +483,7 @@ export class WebServer implements RouteRegistrar {
         await this._handlers.ui.updateRuntime(result.data);
         res.status(204).send();
       } catch (e) {
-        this._logger.error("Failed to update ui config:", e);
+        this._logger.error("Failed to update ui runtime:", e);
         res.status(500).json({
           error: e instanceof Error ? e.message : "Failed to update ui config",
         });
