@@ -15,8 +15,9 @@ export function GridItem(props: CollectionItemProps): JSX.Element {
       <FrameBox color={props.color} className="icon">
         {props.icon ?? <Icons.burger />}
       </FrameBox>
-      <span className="title">{props.title}</span>
-      {props.chips && <div className="chips">{props.chips}</div>}
+      <span className="title" title={typeof props.title === "string" ? props.title : undefined}>
+        {props.title}
+      </span>
     </>
   );
 
@@ -34,7 +35,7 @@ export function GridItem(props: CollectionItemProps): JSX.Element {
   }
 
   return (
-    <div className="gridItem">
+    <div className="item gridItem">
       {props.to ? (
         <Link to={props.to} className="cardMain clickable" aria-label={props.label}>
           {inner}
