@@ -381,7 +381,7 @@ export class WebServer implements RouteRegistrar {
       }
     });
 
-    this._app.post("/api/puppets/:id/unassign", async (req, res) => { // TODO: Correct path?
+    this._app.delete("/api/puppets/:id/unassign", async (req, res) => { // TODO: Correct path?
       const resultId = PuppetKeySchema.safeParse(req.params.id);
 
       if (!resultId.success) {
