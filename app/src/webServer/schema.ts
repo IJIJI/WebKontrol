@@ -1,4 +1,5 @@
 import z from "zod";
+import { ViewKeySchema } from "../views/types/schema";
 
 const SseConfigSchema = z.object({
   ping_interval: z.number().min(500).max(25_000).default(1000),
@@ -11,3 +12,8 @@ export const WebServerConfigSchema = z.object({
 
 export type WebServerConfig = z.infer<typeof WebServerConfigSchema>;
 export type WebServerConfigInput = z.input<typeof WebServerConfigSchema>;
+
+
+export const ViewKeyPackageShape = z.object({
+  view: ViewKeySchema,
+})

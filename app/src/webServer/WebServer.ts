@@ -5,6 +5,7 @@ import { Logger } from "../logging/Logger";
 import { WebServerStatus, type AppInfo, type RouteHandler, type RouteMethod, type RouteRegistrar, type SseConnection, type SseHandler, type WebServerMutationHandlers, type WebServerState } from "./model";
 import { jsonReplacer } from "../helpers/json";
 import {
+  ViewKeyPackageShape,
   WebServerConfigSchema,
   type WebServerConfig,
   type WebServerConfigInput,
@@ -356,7 +357,7 @@ export class WebServer implements RouteRegistrar {
         return res.status(400).json({ errors: resultId.error.format() });
       }
 
-      const resultBody = ViewKeySchema.safeParse(
+      const resultBody = ViewKeyPackageShape.safeParse(
         req.body,
       );
 
@@ -367,7 +368,7 @@ export class WebServer implements RouteRegistrar {
       try {
         await this._handlers.puppet.assignView(
           resultId.data,
-          resultBody.data,
+          resultBody.data.view,
         );
         res.status(204).send();
         this._logger.info(
