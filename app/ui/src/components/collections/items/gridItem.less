@@ -1,0 +1,64 @@
+// The grid container (owned by GridLayout, styled here alongside the card).
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.gridItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 10px;
+
+  background-color: var(--color-background-tertiary);
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: @border-radius-lg;
+
+  .cardMain {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .icon {
+    height: 2.75rem;
+    font-size: 1.4rem; // glyph size (svg is 1em)
+    flex-shrink: 0;
+  }
+
+  .title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    text-align: center;
+    word-break: break-word;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  // Selectable (picker) card: reset the button, light up on hover/selection.
+  &.selectable {
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    transition: border-color @button-animation-time ease, background-color @button-animation-time ease;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--color-text-tertiary);
+    }
+    &.selected {
+      border-color: var(--color-text-acc);
+      background-color: var(--color-background-acc);
+    }
+  }
+}
