@@ -19,7 +19,7 @@ import { type PuppetDataBundle } from "../../../src/puppet/types/model";
 import { ViewManagerRuntimeInput, type AnyViewConfig, type ViewKey } from "../../../src/views/types/schema";
 
 export interface UiPuppetState extends PuppetDataBundle {
-  setRuntime: (config: PuppetRuntime) => Promise<void>;
+  updateRuntime: (runtime: Partial<PuppetRuntime>) => Promise<void>;
 }
 
 // A view enriched with mutations bound to its key (like UiPuppetState). The wire ships a
@@ -160,9 +160,7 @@ export function ApiStateProvider({
           const key: PuppetKey = pup.config.id;
           const full: UiPuppetState = {
             ...pup,
-            setRuntime: async (
-              config: PuppetRuntimeInput,
-            ): Promise<void> => puppetUpdateRuntime(key, config),
+            updateRuntime: async (runtime: Partial<PuppetRuntime>): Promise<void> => puppetUpdateRuntime(key, runtime),
           };
           puppets.set(key, full);
         }
