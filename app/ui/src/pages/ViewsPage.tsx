@@ -8,9 +8,7 @@ import { CollectionLayout } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
 import { VIEW_TYPE_META } from "../components/views/viewMeta";
-import { UiPuppetState, useApi } from "../context/ApiStateContext";
-import { useMemo } from "react";
-import { UrlViewConfig } from "../../../src/views/types/schema";
+import { useApi } from "../context/ApiStateContext";
 
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
@@ -22,12 +20,6 @@ export default function ViewsPage(): JSX.Element {
 
   const views = state ? [...state.views.values()] : [];
 
-  const testPuppet: UiPuppetState | undefined = useMemo(
-    () => {
-      return state?.puppets.entries().next().value?.[1];
-    },
-    [state],
-  );
 
   return (
     <Collection
@@ -62,9 +54,8 @@ export default function ViewsPage(): JSX.Element {
                 icon: <Icons.installDesktop />, 
                 onClick: () => {
                   if (v.config.type !== "url")
-                    void toast("Assigning non url views coming soon")
-
-                  testPuppet?.updateRuntime({target: (v.config as UrlViewConfig).url})
+                    void toast("Assigning non url views coming soon")                  
+                  v.assign("sdi-1");
                 } 
               },
             ]}

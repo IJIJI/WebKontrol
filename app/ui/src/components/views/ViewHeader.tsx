@@ -2,7 +2,7 @@ import { type JSX } from "react/jsx-runtime";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import { type UiPuppetState, useApi, type UiViewState } from "../../context/ApiStateContext";
+import { type UiViewState } from "../../context/ApiStateContext";
 import { ConnectionState } from "../../../../src/types/CommonTypes";
 import { Icons } from "../icons/Icons";
 import { Button } from "../button/Button";
@@ -12,8 +12,6 @@ import { StatusPill } from "../pill/statusPill/StatusPill";
 import { EntityHeader } from "../entityHeader/EntityHeader";
 import { ViewTypeChip } from "./ViewTypeChip";
 import { VIEW_TYPE_META } from "./viewMeta";
-import { useMemo } from "react";
-import { UrlViewConfig } from "../../../../src/views/types/schema";
 
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
@@ -25,13 +23,13 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   const TypeIcon = VIEW_TYPE_META[config.type].icon;
   const serveUrl = `/view/${key}`; // TODO: route_base is configurable; hardcoded /view for now
 
-  const state = useApi().state;
-  const testPuppet: UiPuppetState | undefined = useMemo(
-    () => {
-      return state?.puppets.entries().next().value?.[1];
-    },
-    [state],
-  );
+  // const state = useApi().state;
+  // const testPuppet: UiPuppetState | undefined = useMemo(
+  //   () => {
+  //     return state?.puppets.entries().next().value?.[1];
+  //   },
+  //   [state],
+  // );
 
   const menu: DropdownItem[] = [
     { id: "open", label: "Open in new tab", icon: <Icons.openInNew />, onClick: () => void window.open(serveUrl, "_blank", "noopener") },
@@ -58,10 +56,10 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
       actions={
         <>
           <Button onClick={() => {
-              if (view.config.type !== "url")
-                void toast("Assigning non url views coming soon")
-
-              testPuppet?.updateRuntime({target: (view.config as UrlViewConfig).url})}
+                  if (view.config.type !== "url")
+                    return void toast("Assigning non url views coming soon")
+                  view.assign("sdi-1");
+                }
               }
               style={FillStyle.FILLED}
             >
