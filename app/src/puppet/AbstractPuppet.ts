@@ -151,10 +151,10 @@ export abstract class AbstractPuppet<
       const old = this._runtime;
       this._runtime = { ...this._runtime, ...runtime };
 
-      if (
-        old.target !== this._runtime.target
-      )
-        await this._setTarget(this._runtime.target);
+      // if (
+      //   old.target !== this._runtime.target
+      // ) // TODO: Commented to allow renavigation for url websites, as they can change with buttons. BlockViews might reload because of this. Once puppets have their own endpoint, this wil probably be fixed.
+      await this._setTarget(this._runtime.target);
 
       await this._store.saveRuntime(this._runtime);
 
