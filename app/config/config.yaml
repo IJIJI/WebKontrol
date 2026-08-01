@@ -3,3 +3,7 @@ puppets:
     name: 
       long: SDI Output 1
       short: SDI-1
+  - id: SDI-2 # Note: ID's will be made lowercase
+    name: 
+      long: SDI Output 2
+      short: SDI-2
