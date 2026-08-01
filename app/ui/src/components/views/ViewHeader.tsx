@@ -69,6 +69,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
       <PuppetPicker
         open={assignOpen}
         onClose={() => setAssignOpen(false)}
+        view={view}
         puppets={puppets}
         onAssign={(puppetKey) => view.assign(puppetKey)}
       />
