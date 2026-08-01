@@ -25,11 +25,11 @@ export function GridItem(props: CollectionItemProps): JSX.Element {
     return (
       <button
         type="button"
-        className={"gridItem selectable" + (props.selected ? " selected" : "")}
+        className={"item gridItem selectable" + (props.selected ? " selected" : "")}
         aria-pressed={props.selected ?? false}
         onClick={props.onSelect}
       >
-        {inner}
+        <div className="cardMain">{inner}</div>
       </button>
     );
   }
