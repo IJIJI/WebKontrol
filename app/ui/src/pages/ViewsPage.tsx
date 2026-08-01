@@ -30,7 +30,7 @@ export default function ViewsPage(): JSX.Element {
     <Collection
       items={views}
       getKey={(v) => v.key}
-      layout={CollectionLayout.GRID}
+      layout={CollectionLayout.LIST}
       title="Views"
       empty="Nothing here yet..." // TODO: Add an arrow to the new or a button to make a view.
       actions={[
