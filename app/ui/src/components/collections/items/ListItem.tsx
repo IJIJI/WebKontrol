@@ -1,5 +1,7 @@
 import { type JSX } from "react";
 import { Link } from "react-router-dom";
+
+import "./listItem.less";
 import { type CollectionItemProps } from "../types";
 import { FrameBox } from "../../frameBox/FrameBox";
 import { Icons } from "../../icons/Icons";

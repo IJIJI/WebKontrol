@@ -37,8 +37,8 @@ section.collection {
     color: var(--color-text-tertiary);
   }
 
-  // A collection item card. Shared across layouts; each layout arranges it below.
-  // TODO: Move listItem styling to listItem.less
+  // The shared item card frame. Both layouts build on this; each arranges its own contents
+  // (list rows → listItem.less, grid cards → gridItem.less).
   .item {
     border-radius: @border-radius-xl;
     box-shadow: 2px 4px 10px 0px rgba(0, 0, 0, 0.3);
@@ -48,84 +48,5 @@ section.collection {
     -webkit-backdrop-filter: blur(@glass-blur);
     padding: 10px;
     height: min-content;
-
-    .main {
-      display: flex;
-      flex: 1;
-      .icon {
-        aspect-ratio: 1/1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: @border-radius-md;
-
-        height: 4rem;
-        font-size: 1.75rem; // icon glyph size (svg is 1em)
-
-        svg {
-          width: 1em;
-          height: 1em;
-        }
-      }
-
-      .info {
-        color: var(--color-text-primary);
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: calc(@gap-items/6);
-      }
-
-      .title {
-        font-size: 1.5rem;
-        margin: 0;
-        font-weight: bold;
-      }
-      .chips {
-        margin: 0;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: calc(@gap-items / 2);
-      }
-    }
-
-    .actions {
-      height: 100%;
-      display: flex;
-      flex-direction: row;
-      justify-content: flex-end;
-      align-items: stretch;
-      gap: calc(@gap-items/2);
-
-      button {
-        height: 100%;
-        padding: 0.25em 1.5em !important;
-      }
-    }
-  }
-
-  // List layout: a stack of full-width rows; each item lays its content out in a row.
-  .list {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
-    gap: @gap-items;
-
-    .item {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      gap: @gap-items;
-
-      .main {
-        flex-direction: row;
-        align-items: center;
-        gap: @gap-items;
-      }
-    }
   }
 }
