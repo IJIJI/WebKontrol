@@ -6,11 +6,11 @@ import { InfoPill } from "../InfoPill";
 import { Variant, FillStyle } from "../../../helpers/variants";
 
 const STATE_MAP: Record<ConnectionState, { variant: Variant; fillStyle: FillStyle; label: string }> = {
-  [ConnectionState.DISABLED]: { variant: Variant.DEFAULT, fillStyle: FillStyle.SKELETON, label: "Disabled" },
+  [ConnectionState.DISABLED]: { variant: Variant.DEFAULT, fillStyle: FillStyle.FILLED, label: "Disabled" },
   [ConnectionState.ERROR]: { variant: Variant.WARNING, fillStyle: FillStyle.FILLED, label: "Error" },
   [ConnectionState.FAILED]: { variant: Variant.DANGER, fillStyle: FillStyle.FILLED, label: "Failed" },
   [ConnectionState.OFFLINE]: { variant: Variant.WARNING, fillStyle: FillStyle.FILLED, label: "Offline" },
-  [ConnectionState.ONLINE]: { variant: Variant.SUCCESS, fillStyle: FillStyle.SKELETON, label: "Online" },
+  [ConnectionState.ONLINE]: { variant: Variant.SUCCESS, fillStyle: FillStyle.FILLED, label: "Online" },
   [ConnectionState.UNKNOWN]: { variant: Variant.WARNING, fillStyle: FillStyle.FILLED, label: "Unknown" },
 };
 
