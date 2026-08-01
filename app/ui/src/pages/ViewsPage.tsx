@@ -43,7 +43,11 @@ export default function ViewsPage(): JSX.Element {
           title: v.config.name.long,
           icon: <TypeIcon />,
           color: NEUTRAL_COLOR,
-          chips: <ViewTypeChip type={v.config.type} />,
+          chips: <> 
+                <ViewTypeChip type={v.config.type} />
+                <
+              </>
+              ,
           // Both placeholders for now: Share -> share modal (#15), Assign -> puppet-assign modal (#17).
           actions: [
             {
