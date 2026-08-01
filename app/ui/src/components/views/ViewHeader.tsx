@@ -16,7 +16,7 @@ import { DeleteViewModal } from "./DeleteViewModal";
 import { DuplicateViewModal } from "./DuplicateViewModal";
 import { ViewTypeChip } from "./ViewTypeChip";
 import { VIEW_TYPE_META } from "./viewMeta";
-import { ViewStatusPill } from "../pill/statusPill/ViewStatusPill";
+import { ViewStatusPill } from "./ViewStatusPill";
 
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
