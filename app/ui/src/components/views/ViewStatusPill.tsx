@@ -20,5 +20,5 @@ export function ViewStatusPill({ view, ...props }: { view: UiViewState; size?: n
   
   return (
     <StatusPill {...props} status={status} label={label} />
-  );
+  ); // TODO: Implement GroupStatusPill and use it to show what views are active on hover, with more then one active puppet or when collapsed.
 }
