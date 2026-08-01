@@ -112,7 +112,10 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   public async assignView(id: PuppetKey, viewKey: ViewKey): Promise<void> {
     await this.updateRuntime({ assignments: { ...this._runtime.assignments, [id]: viewKey } });
-    await this._navigatePuppet(id);
+    // Kick off navigation but don't block the caller on the browser load (up to load_timeout).
+    // Load success/failure reaches the UI via the state broadcast (puppet Online/Error).
+    // TODO: Add feedback toast to ui? Or make it actually wait?
+    void this._navigatePuppet(id).catch((e) => this._logger.error(`Navigation failed for puppet "${id}":`, e));
     this._logger.info(`Assigned puppet "${id}" to view "${viewKey}".`);
   }
 
@@ -120,7 +123,9 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     const assignments = { ...this._runtime.assignments };
     delete assignments[id];
     await this.updateRuntime({ assignments });
-    await this._navigatePuppet(id); // → default view or about:blank
+    // Fire-and-forget the navigation (→ default view or about:blank); see assignView.
+    // TODO: Add feedback toast to ui? Or make it actually wait?
+    void this._navigatePuppet(id).catch((e) => this._logger.error(`Navigation failed for puppet "${id}":`, e));
     this._logger.info(`Unassigned puppet "${id}".`);
   }
 
