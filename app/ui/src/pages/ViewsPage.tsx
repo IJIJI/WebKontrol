@@ -10,6 +10,7 @@ import { VIEW_TYPE_META } from "../components/views/viewMeta";
 import { UiViewState, useApi } from "../context/ApiStateContext";
 import { AssignViewModal } from "../components/views/AssignViewModal";
 import { useState } from "react";
+import { ViewStatusPill } from "../components/views/ViewStatusPill";
 
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
@@ -45,9 +46,9 @@ export default function ViewsPage(): JSX.Element {
           color: NEUTRAL_COLOR,
           chips: <> 
                 <ViewTypeChip type={v.config.type} />
-                <
-              </>
-              ,
+                <ViewStatusPill view={v} collapsed={false} /> 
+              </>, // TODO: Status pill always collapsed?
+                   // TODO: Auto collapse all pills on mobile?
           // Both placeholders for now: Share -> share modal (#15), Assign -> puppet-assign modal (#17).
           actions: [
             {
