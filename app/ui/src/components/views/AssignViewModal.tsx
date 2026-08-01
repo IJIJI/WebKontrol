@@ -24,7 +24,7 @@ export function AssignViewModal({
       <code>{view.config.name.long}</code>
     </b>
   );
-  const assign = (keys: string[]): void => keys.forEach((key) => void view.assign(key));
+  const assign = (keys: string[]): Promise<void> => view.assign(keys);
 
   // Common case (most instances have a single puppet): confirm rather than pick.
   if (puppets.length === 1) {

@@ -32,7 +32,7 @@ export interface UiViewState {
   config: AnyViewConfig;
   update: (config: AnyViewConfig) => Promise<void>;
   delete: () => Promise<void>;
-  assign: (puppet: PuppetKey) => Promise<void>;
+  assign: (puppets: PuppetKey[]) => Promise<void>;
 }
 
 export interface UiWebServerState extends Omit<WebServerState, "puppets" | "views"> {
@@ -191,7 +191,12 @@ export function ApiStateProvider({
             config,
             update: (next: AnyViewConfig): Promise<void> => viewUpdate(key, next),
             delete: (): Promise<void> => viewDelete(key),
-            assign: (puppet: PuppetKey) =>puppetAssignView(puppet, key),
+            assign: (puppets: PuppetKey[]): Promise<void> =>
+              withToast(
+                // Fire in parallel so the displays switch together, but await + toast as one op.
+                Promise.all(puppets.map((puppet) => puppetAssignView(puppet, key, false))).then(() => undefined),
+                { loading: "Assigning view…", success: "View assigned" },
+              ),
           }
           views.set(key, full);
         }
