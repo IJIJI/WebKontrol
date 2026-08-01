@@ -11,7 +11,7 @@ import { FillStyle } from "../../helpers/variants";
 import { Dropdown, type DropdownItem } from "../dropdown/Dropdown";
 import { StatusPill } from "../pill/statusPill/StatusPill";
 import { EntityHeader } from "../entityHeader/EntityHeader";
-import { PuppetPicker } from "../pickers/PuppetPicker";
+import { AssignViewModal } from "./AssignViewModal";
 import { ViewTypeChip } from "./ViewTypeChip";
 import { VIEW_TYPE_META } from "./viewMeta";
 
@@ -66,12 +66,11 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
           </>
         }
       />
-      <PuppetPicker
+      <AssignViewModal
         open={assignOpen}
         onClose={() => setAssignOpen(false)}
         view={view}
         puppets={puppets}
-        onAssign={(keys) => keys.forEach( (puppetKey) => view.assign(puppetKey) )} // TODO: Better multi call handeling?
       />
     </>
   );

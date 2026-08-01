@@ -8,10 +8,8 @@ import { Icons } from "../components/icons/Icons";
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
 import { VIEW_TYPE_META } from "../components/views/viewMeta";
 import { UiViewState, useApi } from "../context/ApiStateContext";
-import { PuppetPicker } from "../components/pickers/PuppetPicker";
+import { AssignViewModal } from "../components/views/AssignViewModal";
 import { useState } from "react";
-import { PuppetKey } from "../../../src/puppet/types/schema";
-import { ViewKey } from "../../../src/views/types/schema";
 
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
@@ -66,12 +64,11 @@ export default function ViewsPage(): JSX.Element {
         };
       }}
     />
-    <PuppetPicker
+    <AssignViewModal
       open={selectedView != undefined}
       onClose={() => setSelectedView(undefined)}
-      puppets={puppets}
       view={selectedView}
-      onAssign={(keys) => keys.forEach( (puppetKey) => selectedView?.assign(puppetKey) )}
+      puppets={puppets}
     />
     </>
   );
