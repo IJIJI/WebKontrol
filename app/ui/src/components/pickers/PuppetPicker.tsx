@@ -22,7 +22,7 @@ export function PuppetPicker({
   onClose: () => void;
   puppets: UiPuppetState[];
   view?: UiViewState;
-  onAssign: (puppetKey: string) => void | Promise<void>;
+  onAssign: (puppetKeys: string[]) => void | Promise<void>;
 }): JSX.Element {
   // TODO: Better style the view name.
   if (puppets.length == 1) // TODO: This should not be part of the puppet picker, it is view-specific. Check how to make the split.
@@ -40,7 +40,7 @@ export function PuppetPicker({
             <Button
               variant={Variant.ACCENT}
               onClick={() => {
-                void onAssign(puppets[0].config.id);
+                void onAssign(puppets.map((pup) => pup.config.id)); // TODO Better split between multi and single puppets
                 onClose();
               }}
             >
@@ -63,12 +63,13 @@ export function PuppetPicker({
       items={puppets}
       getKey={(p) => p.config.id}
       empty="No puppets connected."
-      onConfirm={(p) => onAssign(p.config.id)}
+      onConfirm={(p) => onAssign(p.map((pup) => pup.config.id))}
       renderCard={(p) => ({
         title: p.config.name.long,
         icon: <Icons.screen />,
         color: PUPPET_COLOR,
       })}
+      multiple={true}
     />
   );
 }

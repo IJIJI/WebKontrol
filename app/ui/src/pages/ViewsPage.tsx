@@ -71,7 +71,7 @@ export default function ViewsPage(): JSX.Element {
       onClose={() => setSelectedView(undefined)}
       puppets={puppets}
       view={selectedView}
-      onAssign={(puppetKey) => selectedView?.assign(puppetKey)}
+      onAssign={(keys) => keys.forEach( (puppetKey) => selectedView?.assign(puppetKey) )}
     />
     </>
   );

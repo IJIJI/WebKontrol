@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { type JSX } from "react/jsx-runtime";
 
 import { Modal, ModalSize } from "../modal/Modal";
@@ -21,6 +21,7 @@ export function EntityPicker<T>({
   onConfirm,
   confirmLabel = "Select",
   empty,
+  multiple = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -29,18 +30,37 @@ export function EntityPicker<T>({
   items: T[];
   getKey: (item: T) => string;
   renderCard: (item: T) => CollectionItemProps;
-  onConfirm: (item: T) => void | Promise<void>;
+  onConfirm: (item: T[]) => void | Promise<void>;
   confirmLabel?: string;
   empty?: ReactNode;
+  multiple?: boolean;
 }): JSX.Element {
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
-  // Start each opening with a clean selection.
+  const selectToggle = useCallback((key: string): void => {
+    setSelectedKeys((prevKeys) => {
+      if (!multiple)
+        return new Set([key]);
+
+      const nextKeys = new Set(prevKeys);
+      if (nextKeys.has(key)) {
+        nextKeys.delete(key);
+      } else {
+        nextKeys.add(key);
+      }
+      return nextKeys;
+    });
+  }, []);
+
+  const isSelected = (key: string) => selectedKeys.has(key);
+
   useEffect(() => {
-    if (open) setSelectedKey(null);
+    if (open) {
+      setSelectedKeys(new Set());
+    }
   }, [open]);
 
-  const selected = items.find((item) => getKey(item) === selectedKey) ?? null;
+  const selected = items.filter( (item) => selectedKeys.has(getKey(item)) );
 
   return (
     <Modal
@@ -74,7 +94,7 @@ export function EntityPicker<T>({
         empty={empty}
         renderItem={(item) => {
           const key = getKey(item);
-          return { ...renderCard(item), selected: key === selectedKey, onSelect: () => setSelectedKey(key) };
+          return { ...renderCard(item), selected: isSelected(key), onSelect: () => selectToggle(key) };
         }}
       />
     </Modal>

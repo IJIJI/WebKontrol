@@ -71,7 +71,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
         onClose={() => setAssignOpen(false)}
         view={view}
         puppets={puppets}
-        onAssign={(puppetKey) => view.assign(puppetKey)}
+        onAssign={(keys) => keys.forEach( (puppetKey) => view.assign(puppetKey) )} // TODO: Better multi call handeling?
       />
     </>
   );
