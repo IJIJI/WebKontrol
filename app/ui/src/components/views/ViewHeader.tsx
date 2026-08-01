@@ -12,6 +12,8 @@ import { Dropdown, type DropdownItem } from "../dropdown/Dropdown";
 import { StatusPill } from "../pill/statusPill/StatusPill";
 import { EntityHeader } from "../entityHeader/EntityHeader";
 import { AssignViewModal } from "./AssignViewModal";
+import { DeleteViewModal } from "./DeleteViewModal";
+import { DuplicateViewModal } from "./DuplicateViewModal";
 import { ViewTypeChip } from "./ViewTypeChip";
 import { VIEW_TYPE_META } from "./viewMeta";
 
@@ -27,15 +29,16 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   const serveUrl = `/view/${key}`; // TODO: route_base is configurable; hardcoded /view for now
 
   const [assignOpen, setAssignOpen] = useState(false);
+  const [duplicateOpen, setDuplicateOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const puppets = state ? [...state.puppets.values()] : [];
 
   const menu: DropdownItem[] = [
     { id: "open", label: "Open in new tab", icon: <Icons.openInNew />, onClick: () => void window.open(serveUrl, "_blank", "noopener") },
     { id: "edit", label: "Edit", icon: <Icons.edit />, onClick: () => void navigate(`/views/${key}/edit`) },
-    // Duplicate + Delete are placeholders until their action modals (#16).
-    { id: "duplicate", label: "Duplicate", icon: <Icons.tabDuplicate />, onClick: () => void toast("Duplicate coming soon") },
+    { id: "duplicate", label: "Duplicate", icon: <Icons.tabDuplicate />, onClick: () => setDuplicateOpen(true) },
     { divider: true },
-    { id: "delete", label: "Delete", icon: <Icons.delete />, danger: true, onClick: () => void toast("Delete coming soon") },
+    { id: "delete", label: "Delete", icon: <Icons.delete />, danger: true, onClick: () => setDeleteOpen(true) },
   ];
 
   return (
@@ -72,6 +75,8 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
         view={view}
         puppets={puppets}
       />
+      <DuplicateViewModal open={duplicateOpen} onClose={() => setDuplicateOpen(false)} view={view} />
+      <DeleteViewModal open={deleteOpen} onClose={() => setDeleteOpen(false)} view={view} />
     </>
   );
 }
