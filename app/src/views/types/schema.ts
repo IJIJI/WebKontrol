@@ -2,7 +2,7 @@ import z from "zod";
 import { LoadTimeoutSchema, LoadTimeoutSchemaDefault } from "../../puppet/types/schema";
 import { DisplayNameSchema } from "../../types/CommonTypes";
 import { AnyBlockConfigSchema } from "../blocks/types/schema";
-import { EntityMetaSchema } from "../../common/entityMeta/schema";
+import { EntityAppearanceSchema } from "../../common/entityAppearance/schema";
 
 //* View identity:
 // A view instance key. A generated slug, stable across renames so puppet
@@ -41,9 +41,9 @@ export const BaseViewConfigSchema = z.object({
   name: DisplayNameSchema.meta({ label: "Name" } satisfies FieldMeta),
   // per-view override of ViewManager.default_load_timeout
   loadTimeout: LoadTimeoutSchema.optional().meta({ label: "Load timeout", advanced: true, description: "Load timeout override. Leave empty to use the global default defined in config" } satisfies FieldMeta),
-  // Presentation meta (colour/icon). No FieldMeta => the schema-driven editor skips it; it's
-  // rendered in a dedicated Appearance section instead.
-  meta: EntityMetaSchema.optional(),
+  // Presentation (colour/icon). No FieldMeta => the schema-driven editor skips it; it's rendered
+  // in a dedicated Appearance section instead.
+  appearance: EntityAppearanceSchema.optional(),
 });
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
