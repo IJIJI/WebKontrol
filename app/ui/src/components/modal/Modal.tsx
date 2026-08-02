@@ -5,7 +5,7 @@ import { type JSX } from "react/jsx-runtime";
 import "./modal.less";
 import { Icons } from "../icons/Icons";
 
-export enum ModalSize {
+export enum ModalSize { // TODO: Generalise to a WindowSize, SectionSize or ObjectSize?
   SM = "sm",
   MD = "md",
   LG = "lg",
