@@ -2,7 +2,7 @@ import { JSX } from "react/jsx-runtime";
 import { UiViewState, useApi } from "../../context/ApiStateContext";
 import { StatusPill } from "../pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../../src/types/CommonTypes";
-import { FillStyle } from "../../helpers/variants";
+import { FillStyle } from "../../common/variants";
 
     
 export function ViewStatusPill({ view, ...props }: { view: UiViewState; size?: number; fillStyle?: FillStyle; collapsed?: boolean; }): JSX.Element {

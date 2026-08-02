@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useApi, type UiViewState } from "../../context/ApiStateContext";
 import { ConfirmModal } from "../modal/ConfirmModal";
 import { SelectSetting } from "../settings/implementations/SelectSetting";
-import { Variant } from "../../helpers/variants";
+import { Variant } from "../../common/variants";
 
 export function DeleteViewModal({
   open,

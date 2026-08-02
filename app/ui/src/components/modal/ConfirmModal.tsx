@@ -3,7 +3,7 @@ import { type JSX } from "react/jsx-runtime";
 
 import { Modal, ModalSize } from "./Modal";
 import { Button } from "../button/Button";
-import { FillStyle, Variant } from "../../helpers/variants";
+import { FillStyle, Variant } from "../../common/variants";
 
 // A small yes/no dialog: a message body plus Cancel/Confirm. Generic: the assign-view flow, delete, 
 // duplicate, … all compose it. `onConfirm` fires, then the modal closes.

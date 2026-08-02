@@ -5,7 +5,7 @@ import { Modal, ModalSize } from "../modal/Modal";
 import { Collection } from "../collections/Collection";
 import { CollectionLayout, type CollectionItemProps } from "../collections/types";
 import { Button } from "../button/Button";
-import { Variant, FillStyle } from "../../helpers/variants";
+import { Variant, FillStyle } from "../../common/variants";
 
 // A modal that presents a grid of entities to pick one from, then confirm. Generic over the entity
 // type; `renderCard` maps an entity to its card (icon/title/chips). Shared by every "pick an X"

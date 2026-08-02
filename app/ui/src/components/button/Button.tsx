@@ -3,7 +3,7 @@ import { type JSX } from "react/jsx-runtime";
 import "./button.less";
 import { useState, type ReactNode, type RefObject } from "react";
 import { Icons } from "../icons/Icons";
-import { Variant, FillStyle } from "../../helpers/variants";
+import { Variant, FillStyle } from "../../common/variants";
 
 // TODO: Add the possiblility for th euser to define loading children
 export function Button({

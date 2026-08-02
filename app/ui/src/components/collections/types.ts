@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import { type To } from "react-router-dom";
-import { type Variant, type FillStyle } from "../../helpers/variants";
+import { type Variant, type FillStyle } from "../../common/variants";
 
 export enum CollectionLayout {
   LIST = "list",

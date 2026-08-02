@@ -3,7 +3,7 @@ import { type JSX } from "react/jsx-runtime";
 
 import "./infoPill.less";
 import { ChipPill } from "./ChipPill";
-import { Variant, FillStyle } from "../../helpers/variants";
+import { Variant, FillStyle } from "../../common/variants";
 
 export function InfoPill({
   variant = Variant.DEFAULT,
