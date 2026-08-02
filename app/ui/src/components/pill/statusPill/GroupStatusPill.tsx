@@ -21,25 +21,24 @@ export function GroupStatusPill({
   items: StatusItem[];
   children: ReactNode;
 }): JSX.Element {
+  // Nothing to reveal → just the plain pill, no hover attached.
+  if (items.length === 0) return <>{children}</>;
+
   return (
     <GroupChipPill
       content={
-        items.length === 0 ? (
-          <span className="statusEmpty">None</span>
-        ) : (
-          <ul className="statusList">
-            {items.map((item) => {
-              const meta = STATUS_META[item.status];
-              return (
-                <li key={item.id} className="statusRow">
-                  <StatusDot variant={meta.variant} />
-                  <span className="statusRowName">{item.name}</span>
-                  <span className="statusRowText">{item.text ?? meta.label}</span>
-                </li>
-              );
-            })}
-          </ul>
-        )
+        <ul className="statusList">
+          {items.map((item) => {
+            const meta = STATUS_META[item.status];
+            return (
+              <li key={item.id} className="statusRow">
+                <StatusDot variant={meta.variant} />
+                <span className="statusRowName">{item.name}</span>
+                <span className="statusRowText">{item.text ?? meta.label}</span>
+              </li>
+            );
+          })}
+        </ul>
       }
     >
       {children}
