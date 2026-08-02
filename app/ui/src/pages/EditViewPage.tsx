@@ -13,7 +13,7 @@ import {
   viewTypeOptions,
   type ViewEditorValues,
 } from "../components/views/viewEditors";
-import { useDraft } from "../common/DraftSave";
+import { useDraft } from "../common/hooks/DraftSave";
 import { useApi } from "../context/ApiStateContext";
 import { type ViewType, type AnyViewConfig } from "../../../src/views/types/schema";
 import { type DisplayName } from "../../../src/types/CommonTypes";

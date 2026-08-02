@@ -6,7 +6,7 @@ import {
   UrlViewConfigSchema,
   BlockViewConfigSchema,
 } from "../../../../src/views/types/schema";
-import { type Draft } from "../../common/DraftSave";
+import { type Draft } from "../../common/hooks/DraftSave";
 import { VIEW_TYPE_META } from "./viewMeta";
 
 // The draft shape the editor works with: a flat, loosely-typed view config. The mapper reads

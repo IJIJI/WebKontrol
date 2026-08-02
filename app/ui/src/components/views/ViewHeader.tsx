@@ -7,7 +7,7 @@ import { useApi, type UiViewState } from "../../context/ApiStateContext";
 import { ConnectionState } from "../../../../src/types/CommonTypes";
 import { Icons } from "../icons/Icons";
 import { Button } from "../button/Button";
-import { FillStyle } from "../../common/variants";
+import { FillStyle } from "../../common/types/variants";
 import { Dropdown, type DropdownItem } from "../dropdown/Dropdown";
 import { StatusPill } from "../pill/statusPill/StatusPill";
 import { EntityHeader } from "../entityHeader/EntityHeader";

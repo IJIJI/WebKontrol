@@ -3,7 +3,7 @@ import { type JSX } from "react/jsx-runtime";
 import "./statusPill.less";
 import { ConnectionState } from "../../../../../src/types/CommonTypes";
 import { InfoPill } from "../InfoPill";
-import { Variant, FillStyle } from "../../../common/variants";
+import { Variant, FillStyle } from "../../../common/types/variants";
 
 const STATE_MAP: Record<ConnectionState, { variant: Variant; fillStyle: FillStyle; label: string }> = {
   [ConnectionState.DISABLED]: { variant: Variant.DEFAULT, fillStyle: FillStyle.FILLED, label: "Disabled" },

@@ -1,6 +1,6 @@
 import { type JSX } from "react/jsx-runtime";
 
-import { type Draft } from "../../common/DraftSave";
+import { type Draft } from "../../common/hooks/DraftSave";
 import { type FieldMeta } from "../../../../src/views/types/schema";
 import { describeField, objectFields, type FieldKind } from "./zodField";
 import { CollapsibleGroup } from "./CollapsibleGroup";

@@ -3,7 +3,7 @@ import { type JSX } from "react/jsx-runtime";
 import "./bar.less";
 import { BottomBar } from "./BottomBar";
 import { Button } from "../button/Button";
-import { Variant } from "../../common/variants";
+import { Variant } from "../../common/types/variants";
 import { Icons } from "../icons/Icons";
 import { useState } from "react";
 

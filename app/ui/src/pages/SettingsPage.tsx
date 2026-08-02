@@ -6,10 +6,10 @@ import { ToggleSetting } from "../components/settings/implementations/ToggleSett
 import { TextSetting } from "../components/settings/implementations/TextSetting";
 import { ButtonSetting } from "../components/settings/implementations/ButtonSetting";
 import { BaseSetting } from "../components/settings/BaseSetting";
-import { aggregateDrafts, useDraft } from "../common/DraftSave";
+import { aggregateDrafts, useDraft } from "../common/hooks/DraftSave";
 import { SaveBar } from "../components/bottomBar/SaveBar";
 import { InfoPill } from "../components/pill/InfoPill";
-import { Variant, FillStyle } from "../common/variants";
+import { Variant, FillStyle } from "../common/types/variants";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../src/types/CommonTypes";
 import { UiTheme } from "../../../src/ui/schema";
