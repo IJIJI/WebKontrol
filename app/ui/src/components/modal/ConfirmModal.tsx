@@ -4,7 +4,6 @@ import { type JSX } from "react/jsx-runtime";
 import { Modal, ModalSize } from "./Modal";
 import { Button } from "../button/Button";
 import { FillStyle, Variant } from "../../helpers/variants";
-import { SettingWidth, SettingWidthContext } from "../settings/settingWidth";
 
 // A small yes/no dialog: a message body plus Cancel/Confirm. Generic: the assign-view flow, delete, 
 // duplicate, … all compose it. `onConfirm` fires, then the modal closes.
@@ -50,12 +49,7 @@ export function ConfirmModal({
         </>
       }
     >
-      {/* A small/medium modal is too narrow for the wide (label-left) setting layout — stack them. */}
-      <SettingWidthContext.Provider
-        value={size === ModalSize.LG ? SettingWidth.WIDE : SettingWidth.COMPACT}
-      >
-        {children}
-      </SettingWidthContext.Provider>
+      {children}
     </Modal>
   );
 }

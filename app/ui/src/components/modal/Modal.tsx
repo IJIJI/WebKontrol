@@ -4,6 +4,7 @@ import { type JSX } from "react/jsx-runtime";
 
 import "./modal.less";
 import { Icons } from "../icons/Icons";
+import { SettingWidth, SettingWidthContext } from "../settings/settingWidth";
 
 export enum ModalSize { // TODO: Generalise to a WindowSize, SectionSize or ObjectSize?
   SM = "sm",
@@ -53,7 +54,14 @@ export function Modal({
             <Icons.close size={18} />
           </button>
         </div>
-        <div className="modalBody">{children}</div>
+        <div className="modalBody">
+          {/* A small/medium modal is too narrow for the wide (label-left) setting layout — stack. */}
+          <SettingWidthContext.Provider
+            value={size === ModalSize.LG ? SettingWidth.WIDE : SettingWidth.COMPACT}
+          >
+            {children}
+          </SettingWidthContext.Provider>
+        </div>
         {footer && <div className="modalFoot">{footer}</div>}
       </div>
     </div>,
