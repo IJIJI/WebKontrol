@@ -23,7 +23,7 @@ export function ConfirmModal({
   children: ReactNode;
   confirmLabel?: string;
   confirmVariant?: Variant;
-  size: ModalSize;
+  size?: ModalSize;
   onConfirm: () => void | Promise<void>;
 }): JSX.Element {
   return (
