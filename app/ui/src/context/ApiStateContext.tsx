@@ -30,7 +30,7 @@ export interface UiPuppetState extends PuppetDataBundle {
 export interface UiViewState {
   key: ViewKey;
   config: AnyViewConfig;
-  activePuppets: PuppetKey[];
+  assignedPuppets: PuppetKey[];
   update: (config: AnyViewConfig) => Promise<void>;
   delete: () => Promise<void>;
   assign: (puppets: PuppetKey[]) => Promise<void>;
@@ -191,7 +191,7 @@ export function ApiStateProvider({
           const full: UiViewState = {
             key,
             config,
-            activePuppets: Object.entries(data.runtime.puppetOrchestrator.assignments).filter(([k, v]) => v == key).map(([k,v]) => k), // TODO: Simplify?
+            assignedPuppets: Object.entries(data.runtime.puppetOrchestrator.assignments).filter(([, v]) => v == key).map(([k]) => k), // TODO: Simplify?
             update: (next: AnyViewConfig): Promise<void> => viewUpdate(key, next),
             delete: (): Promise<void> => viewDelete(key),
             assign: (puppets: PuppetKey[]): Promise<void> =>
