@@ -81,31 +81,8 @@
       margin: 0;
     }
 
-    // Setting fields are built for the wide settings page (title left, inputs in a row on the
-    // right). In a narrow modal, stack everything into one column — title/subtitle, then each
-    // sub-input under its label, so wide multi-field settings don't overflow.
     .setting.field {
       margin: 0;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 6px;
-
-      .input {
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: flex-start;
-        height: auto;
-        gap: 4px;
-
-        & > * {
-          height: auto;
-        }
-
-        .textfield {
-          width: 100%;
-          box-sizing: border-box;
-        }
-      }
     }
   }
 
