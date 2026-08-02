@@ -4,11 +4,6 @@ import { StatusPill } from "../pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../../src/types/CommonTypes";
 import { FillStyle } from "../../helpers/variants";
 
-
-  
-    
-
-
     
 export function ViewStatusPill({ view, ...props }: { view: UiViewState; size?: number; fillStyle?: FillStyle; collapsed?: boolean; }): JSX.Element {
   const { state } = useApi()
