@@ -56,11 +56,9 @@ export function Modal({
         </div>
         <div className="modalBody">
           {/* A small/medium modal is too narrow for the wide (label-left) setting layout — stack. */}
-          <SettingWidthContext.Provider
-            value={size === ModalSize.LG ? SettingWidth.WIDE : SettingWidth.COMPACT}
-          >
+          <SettingWidthContext value={size === ModalSize.LG ? SettingWidth.WIDE : SettingWidth.COMPACT}>
             {children}
-          </SettingWidthContext.Provider>
+          </SettingWidthContext>
         </div>
         {footer && <div className="modalFoot">{footer}</div>}
       </div>
