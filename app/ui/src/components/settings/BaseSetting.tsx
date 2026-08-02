@@ -1,6 +1,8 @@
+import { useContext } from "react";
 import { type JSX } from "react/jsx-runtime";
 
 import "./settings.less";
+import { SettingWidth, SettingWidthContext } from "./settingWidth";
 
 export type BaseSettingsCompProps = {
   title: string;
@@ -8,6 +10,8 @@ export type BaseSettingsCompProps = {
   inputRef?: React.RefObject<any>;
   children: JSX.Element | JSX.Element[];
   changed?: boolean;
+  // Layout of label vs. input. Falls back to the nearest SettingWidthContext, then WIDE.
+  width?: SettingWidth;
 };
 
 export type BaseSettingNonValProps = Omit<
@@ -29,9 +33,11 @@ export type InputSettingProps<T> = BaseSettingProps<T> & { placeholder?: string 
 
 // TODO: Add an easy way to add an InfoPill
 export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
+  const contextWidth = useContext(SettingWidthContext);
+  const width = props.width ?? contextWidth ?? SettingWidth.WIDE;
   return (
     <div
-      className={"setting field" + (props.changed ? " changed" : "")}
+      className={["setting", "field", width, props.changed && "changed"].filter(Boolean).join(" ")}
       onClick={() => {
         if (props.inputRef) props.inputRef.current?.focus();
       }}

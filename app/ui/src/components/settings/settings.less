@@ -10,6 +10,34 @@
   @setting-group-gap: 20px;
 
   @field-height: 30px;
+  // Below this field width, AUTO switches to the stacked (COMPACT) layout.
+  @field-stack-width: 400px;
+
+  // The inner column layout shared by COMPACT and AUTO-when-narrow: each input full-width under
+  // its label, with real height so selects aren't cramped.
+  .stacked-input() {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    height: auto;
+    gap: 6px;
+
+    & > * {
+      height: auto;
+    }
+
+    .textfield {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: @field-height;
+    }
+
+    // The native select carries no vertical padding by default; give it some when stacked.
+    select.textfield {
+      min-width: 0;
+      padding: 6px 28px 6px 8px;
+    }
+  }
 
   &.group {
     display: flex;
@@ -210,6 +238,40 @@
         padding: 0 28px 0 5px;
       }
 
+    }
+
+    // COMPACT: always stacked (title/subtitle, then each labelled input full-width).
+    &.compact {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+
+      .titletext {
+        height: auto;
+      }
+
+      .input {
+        .stacked-input();
+      }
+    }
+
+    // AUTO: WIDE by default, stacking once the field is narrower than @field-stack-width. The
+    // field is its own container; the query restyles its children (a container can't query itself),
+    // so flex-wrap + full-basis children do the row→column switch.
+    &.auto {
+      container-type: inline-size;
+      flex-wrap: wrap;
+
+      @container (max-width: @field-stack-width) {
+        & > .titletext {
+          flex-basis: 100%;
+          height: auto;
+        }
+        & > .input {
+          flex-basis: 100%;
+          .stacked-input();
+        }
+      }
     }
   }
 }
