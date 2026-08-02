@@ -4,6 +4,7 @@ import "../settings.less";
 import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
 import { RestoreButton } from "../RestoreButton";
 import { DisplayName } from "../../../../../src/types/CommonTypes";
+import { classNames } from "../../../common/helpers/classNames";
 
 type DisplayNameProps = BaseSettingProps<Partial<DisplayName>>; // TODO: Not partial? Validation is needed in any case.
 
@@ -21,7 +22,7 @@ export function DisplayNameSetting(props: DisplayNameProps): JSX.Element {
       {changed ? <RestoreButton onClick={restore} /> : <></>}
       <span className="inputLabel">Long</span>
       <input
-        className={"textfield" + (changed ? " changed" : "")}
+        className={classNames("textfield", changed && "changed")}
         type="text"
         aria-label="Long name"
         value={props.value.long}
@@ -32,7 +33,7 @@ export function DisplayNameSetting(props: DisplayNameProps): JSX.Element {
       />
       <span className="inputLabel">Short</span>
       <input
-        className={"textfield" + (changed ? " changed" : "")}
+        className={classNames("textfield", changed && "changed")}
         type="text"
         aria-label="Short name"
         value={props.value.short}

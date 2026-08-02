@@ -3,6 +3,7 @@ import { type JSX } from "react/jsx-runtime";
 
 import "./settings.less";
 import { SettingWidth, SettingWidthContext } from "./settingWidth";
+import { classNames } from "../../common/helpers/classNames";
 
 export type BaseSettingsCompProps = {
   title: string;
@@ -37,7 +38,7 @@ export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
   const width = props.width ?? contextWidth ?? SettingWidth.WIDE;
   return (
     <div
-      className={["setting", "field", width, props.changed && "changed"].filter(Boolean).join(" ")}
+      className={classNames("setting", "field", width, props.changed && "changed")}
       onClick={() => {
         if (props.inputRef) props.inputRef.current?.focus();
       }}

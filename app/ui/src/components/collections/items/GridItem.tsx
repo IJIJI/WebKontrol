@@ -6,6 +6,7 @@ import { type CollectionItemProps } from "../types";
 import { FrameBox } from "../../frameBox/FrameBox";
 import { Icons } from "../../icons/Icons";
 import { ItemActions } from "../ItemActions";
+import { classNames } from "../../../common/helpers/classNames";
 
 // A card-shaped collection item. Selectable (a button, used by pickers) when `onSelect` is set; a
 // link when `to` is set; otherwise a static card.
@@ -25,7 +26,7 @@ export function GridItem(props: CollectionItemProps): JSX.Element {
     return (
       <button
         type="button"
-        className={"item gridItem selectable" + (props.selected ? " selected" : "")}
+        className={classNames("item", "gridItem", "selectable", props.selected && "selected")}
         aria-pressed={props.selected ?? false}
         onClick={props.onSelect}
       >

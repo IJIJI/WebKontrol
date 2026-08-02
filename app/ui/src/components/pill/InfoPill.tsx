@@ -4,6 +4,7 @@ import { type JSX } from "react/jsx-runtime";
 import "./infoPill.less";
 import { ChipPill } from "./ChipPill";
 import { Variant, FillStyle } from "../../common/types/variants";
+import { classNames } from "../../common/helpers/classNames";
 
 export function InfoPill({
   variant = Variant.DEFAULT,
@@ -19,7 +20,7 @@ export function InfoPill({
   className?: string;
 }): JSX.Element {
   return (
-    <ChipPill className={["infoPill", variant, fillStyle, className].filter(Boolean).join(" ")} size={size}>
+    <ChipPill className={classNames("infoPill", variant, fillStyle, className)} size={size}>
       {children}
     </ChipPill>
   );

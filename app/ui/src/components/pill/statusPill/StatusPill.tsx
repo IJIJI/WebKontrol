@@ -4,6 +4,7 @@ import "./statusPill.less";
 import { ConnectionState } from "../../../../../src/types/CommonTypes";
 import { InfoPill } from "../InfoPill";
 import { Variant, FillStyle } from "../../../common/types/variants";
+import { classNames } from "../../../common/helpers/classNames";
 
 const STATE_MAP: Record<ConnectionState, { variant: Variant; fillStyle: FillStyle; label: string }> = {
   [ConnectionState.DISABLED]: { variant: Variant.DEFAULT, fillStyle: FillStyle.FILLED, label: "Disabled" },
@@ -27,7 +28,7 @@ export function StatusPill(props: {
 
   return (
     <InfoPill
-      className={"statusPill" + (props.collapsed ? " collapsed" : "")}
+      className={classNames("statusPill", props.collapsed && "collapsed")}
       variant={state.variant}
       fillStyle={fillStyle}
       size={props.size}

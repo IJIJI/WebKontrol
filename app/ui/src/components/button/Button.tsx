@@ -4,6 +4,7 @@ import "./button.less";
 import { useState, type ReactNode, type RefObject } from "react";
 import { Icons } from "../icons/Icons";
 import { Variant, FillStyle } from "../../common/types/variants";
+import { classNames } from "../../common/helpers/classNames";
 
 // TODO: Add the possiblility for th euser to define loading children
 export function Button({
@@ -50,7 +51,7 @@ export function Button({
   return (
     <button
       type="button"
-      className={"buttonComp " + (className ? `${className} ` : "") + (isDisabled ? "disabled " : "") + variant + " " + fillStyle}
+      className={classNames("buttonComp", className, isDisabled && "disabled", variant, fillStyle)}
       disabled={isDisabled}
       onClick={() => void handleClick()}
       ref={ref}

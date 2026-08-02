@@ -3,6 +3,7 @@ import { type JSX } from "react/jsx-runtime";
 import "../settings.less";
 import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
 import { RestoreButton } from "../RestoreButton";
+import { classNames } from "../../../common/helpers/classNames";
 
 type SelectProps<T extends string> = BaseSettingProps<T> & {
   options: { label: string; value: T }[];
@@ -21,7 +22,7 @@ export function SelectSetting<T extends string>(props: SelectProps<T>): JSX.Elem
     <BaseSetting {...props} changed={changed}>
       {changed ? <RestoreButton onClick={restore} /> : <></>}
       <select
-        className={"textfield" + (changed ? " changed" : "")}
+        className={classNames("textfield", changed && "changed")}
         value={props.value}
         onChange={(event) => {
           props.setValue(event.target.value as T);
