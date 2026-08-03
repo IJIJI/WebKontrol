@@ -1,5 +1,6 @@
 import type { ConnectionState } from "../../types/CommonTypes";
 import type { BasePuppetConfig, PuppetRuntime } from "./schema";
+import type { EntityAppearance } from "../../common/entityAppearance/schema";
 
 /**
  * This file contains all model definitions for the puppets. That means types that don't need validation.
@@ -32,4 +33,5 @@ export interface PuppetDataBundle {
   runtime: PuppetRuntime;
   info: PuppetInfo;
   config: BasePuppetConfig;
+  appearance: EntityAppearance;
 }
