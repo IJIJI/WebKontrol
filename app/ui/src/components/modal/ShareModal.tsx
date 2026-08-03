@@ -6,9 +6,7 @@ import "./shareModal.less";
 import { Modal, ModalSize } from "./Modal";
 import { CopyButton } from "../copyButton/CopyButton";
 
-// A generic "share this URL" dialog: a scannable QR and the link as a copyable field, plus a slot
-// for two caller-defined actions (rendered stacked beside the QR). It owns no entity specifics —
-// callers pass the `title`, the `url`, and the two action buttons.
+
 export function ShareModal({
   open,
   onClose,

@@ -25,8 +25,7 @@ export function ShareViewModal({
 
   if (!view) return null;
 
-  // Absolute so it's reachable from another device; the UI and views share an origin.
-  const url = `${window.location.origin}/view/${view.key}`;
+  const url = `${window.location.origin}/view/${view.key}`; // TODO: Load this in from the backend
   const puppets = state ? [...state.puppets.values()] : [];
 
   return (
