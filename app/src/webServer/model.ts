@@ -3,6 +3,7 @@ import type { PuppetDataBundle } from "../puppet/types/model";
 import type { PuppetKey, PuppetRuntime } from "../puppet/types/schema";
 import type { SystemInfo } from "../system/model";
 import type { SystemRuntime } from "../system/schema";
+import type { ViewManagerInfo } from "../views/types/model";
 import type { UiRuntime } from "../ui/schema";
 import type { AnyViewConfig, ViewKey, ViewManagerRuntime } from "../views/types/schema";
 
@@ -14,6 +15,7 @@ export interface WebServerRuntimeState {// Only Runtime Configs. Standard config
 }
 export interface WebServerInfoState {
   system: SystemInfo;
+  view: ViewManagerInfo;
 }
 
 export interface WebServerState {

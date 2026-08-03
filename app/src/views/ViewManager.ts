@@ -38,17 +38,14 @@ export class ViewManager extends EventEmitter<ViewManagerEvents> {
 
   private _runtime: ViewManagerRuntime = ViewManagerRuntimeSchema.parse({});
 
-  private _info: ViewManagerInfo = {
-    viewCount: 0,
-  };
-
+  private _info!: ViewManagerInfo;
   private _views: Map<ViewKey, AbstractView> = new Map();
-
   private readonly _config: ViewManagerConfig;
 
   constructor(config: ViewManagerConfigInput) {
     super();
     this._config = ViewManagerConfigSchema.parse(config);
+    this._info = { viewCount: 0, route_base: this._config.route_base };
     this._logger = new Logger(["VIEW", "MANAGER"]);
     this._store = new ViewManagerStore();
   }

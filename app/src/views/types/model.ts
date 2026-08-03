@@ -1,7 +1,8 @@
 import type { AnyBlockConfig } from "../blocks/types/schema";
 
 export interface ViewManagerInfo {
-  viewCount: number; // TODO Actually usefull info
+  viewCount: number;
+  route_base: string;
 }
 
 /**
