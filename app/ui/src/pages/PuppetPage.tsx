@@ -36,7 +36,7 @@ export default function PuppetPage(): JSX.Element {
     {
       label: "View",
       value: assignedView ? (
-        <Link className="assignedViewRow" to={`/views/${assignedView.key}`}>
+        <Link className="assignedViewRow" to={`/views/${assignedView.key}`} state={{ back: { path: `/puppets/${puppet.config.id}`, label: puppet.config.name.long } }}>
           <span className="assignedViewIcon" style={{ background: assignedView.appearance.color }}>
             <Icon id={assignedView.appearance.icon} size={12} />
           </span>
