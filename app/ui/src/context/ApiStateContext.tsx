@@ -18,6 +18,9 @@ import { type UiRuntimeInput, type UiTheme } from "../../../src/ui/schema";
 import { type PuppetDataBundle } from "../../../src/puppet/types/model";
 import { ViewManagerRuntimeInput, type AnyViewConfig, type ViewKey } from "../../../src/views/types/schema";
 import { PuppetOrchestratorRuntime, PuppetOrchestratorRuntimeInput } from "../../../src/orchestration/puppet/schema";
+import { type EntityAppearance } from "../../../src/common/entityAppearance/schema";
+import { DEFAULT_ENTITY_COLOR } from "../common/appearance";
+import { VIEW_TYPE_META } from "../components/views/viewMeta";
 
 export interface UiPuppetState extends PuppetDataBundle {
   updateRuntime: (runtime: Partial<PuppetRuntime>) => Promise<void>; // TODO: Remove?
@@ -31,6 +34,7 @@ export interface UiViewState {
   key: ViewKey;
   config: AnyViewConfig;
   assignedPuppets: PuppetKey[];
+  appearance: Required<EntityAppearance>;
   update: (config: AnyViewConfig) => Promise<void>;
   delete: () => Promise<void>;
   assign: (puppets: PuppetKey[]) => Promise<void>;
@@ -192,6 +196,10 @@ export function ApiStateProvider({
             key,
             config,
             assignedPuppets: Object.entries(data.runtime.puppetOrchestrator.assignments).filter(([, v]) => v == key).map(([k]) => k), // TODO: Simplify?
+            appearance: {
+              color: config.appearance?.color ?? DEFAULT_ENTITY_COLOR,
+              icon: config.appearance?.icon ?? VIEW_TYPE_META[config.type].icon,
+            },
             update: (next: AnyViewConfig): Promise<void> => viewUpdate(key, next),
             delete: (): Promise<void> => viewDelete(key),
             assign: (puppets: PuppetKey[]): Promise<void> =>
