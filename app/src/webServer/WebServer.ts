@@ -5,6 +5,7 @@ import { Logger } from "../logging/Logger";
 import { WebServerStatus, type AppInfo, type RouteHandler, type RouteMethod, type RouteRegistrar, type SseConnection, type SseHandler, type WebServerMutationHandlers, type WebServerState } from "./model";
 import { jsonReplacer } from "../helpers/json";
 import {
+  PuppetPatchSchema,
   ViewKeyPackageShape,
   WebServerConfigSchema,
   type WebServerConfig,
@@ -12,8 +13,7 @@ import {
 } from "./schema";
 import { UiRuntimeShape } from "../ui/schema";
 import { SystemRuntimeShape } from "../system/schema";
-import { PuppetKeySchema, PuppetRuntimeShape } from "../puppet/types/schema";
-import { EntityAppearanceSchema } from "../common/entityAppearance/schema";
+import { PuppetKeySchema } from "../puppet/types/schema";
 import { AnyViewConfigSchema, ViewKeySchema, ViewManagerRuntimeShape } from "../views/types/schema";
 import { PuppetOrchestratorRuntimeShape } from "../orchestration/puppet/schema";
 
@@ -324,9 +324,6 @@ export class WebServer implements RouteRegistrar {
         return res.status(400).json({ errors: resultId.error.format() });
       }
 
-      const PuppetPatchSchema = PuppetRuntimeShape.partial().extend({
-        appearance: EntityAppearanceSchema.optional(),
-      });
       const resultBody = PuppetPatchSchema.safeParse(req.body);
 
       if (!resultBody.success) {
