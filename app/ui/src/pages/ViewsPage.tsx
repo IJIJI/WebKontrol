@@ -6,15 +6,11 @@ import { Collection } from "../components/collections/Collection";
 import { CollectionLayout } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
-import { VIEW_TYPE_META } from "../components/views/viewMeta";
 import { type UiViewState, useApi } from "../context/ApiStateContext";
 import { AssignViewModal } from "../components/views/AssignViewModal";
 import { useState } from "react";
 import { ViewStatusPill } from "../components/views/ViewStatusPill";
 import { Icon } from "../components/icons/Icon";
-
-// Neutral badge colour until views carry their own colour (EntityMeta, #6).
-const NEUTRAL_COLOR = "#a3a0a8";
 
 // TODO: Rename to ViewCollectionpage
 export default function ViewsPage(): JSX.Element {
@@ -42,14 +38,13 @@ export default function ViewsPage(): JSX.Element {
         return {
           to: `/views/${v.key}`,
           title: v.config.name.long,
-          icon: <Icon id={VIEW_TYPE_META[v.config.type].icon} />,
-          color: NEUTRAL_COLOR,
-          chips: <> 
+          icon: <Icon id={v.appearance.icon} />,
+          color: v.appearance.color,
+          chips: <>
                 <ViewTypeChip type={v.config.type} />
-                <ViewStatusPill view={v} collapsed={false} /> 
+                <ViewStatusPill view={v} collapsed={false} />
               </>, // TODO: Status pill always collapsed?
                    // TODO: Auto collapse all pills on mobile?
-          // Both placeholders for now: Share -> share modal (#15), Assign -> puppet-assign modal (#17).
           actions: [
             {
               id: "share",

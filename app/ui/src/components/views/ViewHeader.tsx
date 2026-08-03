@@ -14,11 +14,7 @@ import { AssignViewModal } from "./AssignViewModal";
 import { DeleteViewModal } from "./DeleteViewModal";
 import { DuplicateViewModal } from "./DuplicateViewModal";
 import { ViewTypeChip } from "./ViewTypeChip";
-import { VIEW_TYPE_META } from "./viewMeta";
 import { ViewStatusPill } from "./ViewStatusPill";
-
-// Neutral badge colour until views carry their own colour (EntityMeta, #6).
-const NEUTRAL_COLOR = "#a3a0a8";
 
 // A view's detail-page header: fills EntityHeader with view-specific content.
 export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
@@ -43,14 +39,13 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   return (
     <>
       <EntityHeader
-        icon={<Icon id={VIEW_TYPE_META[config.type].icon} />}
-        color={NEUTRAL_COLOR}
+        icon={<Icon id={view.appearance.icon} />}
+        color={view.appearance.color}
         title={config.name.long}
         subtitle={config.name.short}
         chips={
           <>
             <ViewTypeChip type={config.type} />
-            {/* Placeholder until assignment/open data is wired. */}
             <ViewStatusPill view={view} />
           </>
         }
