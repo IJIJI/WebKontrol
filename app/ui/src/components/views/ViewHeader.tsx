@@ -15,6 +15,7 @@ import { DuplicateViewModal } from "./DuplicateViewModal";
 import { ShareViewModal } from "./ShareViewModal";
 import { ViewTypeChip } from "./ViewTypeChip";
 import { ViewStatusPill } from "./ViewStatusPill";
+import { ViewStatusGroupPill } from "./ViewStatusGroupPill";
 
 // A view's detail-page header: fills EntityHeader with view-specific content.
 export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
@@ -47,7 +48,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
         chips={
           <>
             <ViewTypeChip type={config.type} />
-            <ViewStatusPill view={view} />
+            <ViewStatusGroupPill view={view} />
           </>
         }
         actions={
