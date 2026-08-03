@@ -12,6 +12,7 @@ import { PageStateProvider } from "./context/PageContext";
 import { PageRoute } from "./components/layout/router/PageRoute";
 import PuppetPage from "./pages/PuppetPage";
 import PuppetsPage from "./pages/PuppetsPage";
+import EditPuppetPage from "./pages/EditPuppetPage";
 import EditViewPage from "./pages/EditViewPage";
 import ViewPage from "./pages/ViewPage";
 import TestPage from "./pages/TestPage";
@@ -88,6 +89,14 @@ export default function App(): JSX.Element {
                   element={
                     <PageRoute title="Puppet">
                       <PuppetPage />
+                    </PageRoute>
+                  }
+                />
+                <Route
+                  path="puppets/:puppetKey/edit"
+                  element={
+                    <PageRoute title="Edit Puppet">
+                      <EditPuppetPage />
                     </PageRoute>
                   }
                 />
