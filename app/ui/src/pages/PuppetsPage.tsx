@@ -3,9 +3,10 @@ import { type JSX } from "react/jsx-runtime";
 import { Collection } from "../components/collections/Collection";
 import { CollectionLayout } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
+import { Icon } from "../components/icons/Icon";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
-import { UiPuppetState, useApi } from "../context/ApiStateContext";
-import { DEFAULT_ENTITY_COLOR } from "../common/appearance";
+import { type UiPuppetState, useApi } from "../context/ApiStateContext";
+import { resolvePuppetAppearance } from "../common/appearance";
 import { ViewPicker } from "../components/pickers/ViewPicker";
 import { useState } from "react";
 
@@ -24,11 +25,13 @@ export default function PuppetsPage(): JSX.Element {
         layout={CollectionLayout.LIST}
         title="Puppets"
         empty="No puppets connected."
-        renderItem={(p) => ({
+        renderItem={(p) => {
+          const appearance = resolvePuppetAppearance(p.appearance);
+          return {
           to: `/puppets/${p.config.id}`,
           title: p.config.name.long,
-          icon: <Icons.screen />,
-          color: DEFAULT_ENTITY_COLOR,
+          icon: <Icon id={appearance.icon} />,
+          color: appearance.color,
           chips: <StatusPill status={p.info.state} />,
           actions: [
             {
@@ -40,7 +43,8 @@ export default function PuppetsPage(): JSX.Element {
               },
             },
           ]
-        })}
+        };
+        }}
       />
       <ViewPicker
         open={selectedPuppet != undefined}
