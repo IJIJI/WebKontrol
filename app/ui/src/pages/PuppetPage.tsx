@@ -39,15 +39,15 @@ export default function PuppetPage(): JSX.Element {
           <ViewTypeChip type={assignedView.config.type} />
         </>
       ) : (
-        "—"
+        "-"
       ),
     },
   ];
 
   const { target_info } = puppet.info;
   const pageRows: DetailRow[] = [
-    { label: "Title", value: target_info?.title ?? "—" },
-    { label: "URL", value: target_info?.url ?? "—", copy: target_info?.url },
+    { label: "Title", value: target_info?.title ?? "-" },
+    { label: "URL", value: target_info?.url ?? "-", copy: target_info?.url },
   ];
   if (target_info?.description) pageRows.push({ label: "Description", value: target_info.description });
   if (target_info?.screenshot)
