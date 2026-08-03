@@ -5,9 +5,7 @@ import { EntityPicker } from "./EntityPicker";
 import { ModalSize } from "../modal/Modal";
 import { type UiPuppetState } from "../../context/ApiStateContext";
 import { Icons } from "../icons/Icons";
-
-// Neutral until puppets carry their own colour (EntityMeta, #6).
-const PUPPET_COLOR = "#a3a0a8";
+import { DEFAULT_ENTITY_COLOR } from "../../common/appearance";
 
 // Pick one or more puppets, then confirm. Generic over what you do with them; Callers own the
 // title/label and the action (assign a view, …). Built on the shared EntityPicker.
@@ -42,7 +40,7 @@ export function PuppetPicker({
       renderCard={(p) => ({
         title: p.config.name.long,
         icon: <Icons.screen />,
-        color: PUPPET_COLOR,
+        color: DEFAULT_ENTITY_COLOR, // placeholder until puppets carry their own appearance
       })}
       multiple={multiple}
     />
