@@ -5,6 +5,8 @@ import { type JSX, useEffect } from "react";
 import { PuppetHeader } from "../components/puppets/PuppetHeader";
 import { DetailList, type DetailRow } from "../components/detailList/DetailList";
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
+import { Icon } from "../components/icons/Icon";
+import { Icons } from "../components/icons/Icons";
 import "./puppetPage.less";
 
 export default function PuppetPage(): JSX.Element {
@@ -34,15 +36,17 @@ export default function PuppetPage(): JSX.Element {
     {
       label: "View",
       value: assignedView ? (
-        <>
-          <Link to={`/views/${assignedView.key}`}>{assignedView.config.name.long}</Link>{" "}
-          <ViewTypeChip type={assignedView.config.type} />
-        </>
-      ) : (
-        "-"
-      ),
+        <Link className="assignedViewRow" to={`/views/${assignedView.key}`}>
+          <span className="assignedViewIcon" style={{ background: assignedView.appearance.color }}>
+            <Icon id={assignedView.appearance.icon} size={12} />
+          </span>
+          {assignedView.config.name.long}
+          <Icons.chevronRight size={14} className="assignedViewChevron" />
+        </Link>
+      ) : "-",
     },
   ];
+  if (assignedView) assignedRows.push({ label: "Type", value: <ViewTypeChip type={assignedView.config.type} /> });
 
   const { target_info } = puppet.info;
   const pageRows: DetailRow[] = [

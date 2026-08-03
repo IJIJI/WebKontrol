@@ -23,3 +23,31 @@
   display: block;
   border-radius: 4px;
 }
+
+.assignedViewRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+
+  .assignedViewChevron {
+    color: var(--color-text-secondary);
+    margin-left: auto;
+  }
+
+  &:hover .assignedViewChevron {
+    color: var(--color-text-primary);
+  }
+}
+
+.assignedViewIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  color: white;
+  flex-shrink: 0;
+}
