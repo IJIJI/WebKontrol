@@ -11,6 +11,7 @@ import PluginsPage from "./pages/PluginsPage";
 import { PageStateProvider } from "./context/PageContext";
 import { PageRoute } from "./components/layout/router/PageRoute";
 import PuppetPage from "./pages/PuppetPage";
+import PuppetsPage from "./pages/PuppetsPage";
 import EditViewPage from "./pages/EditViewPage";
 import ViewPage from "./pages/ViewPage";
 import TestPage from "./pages/TestPage";
@@ -74,6 +75,14 @@ export default function App(): JSX.Element {
                   }
                 />
 
+                <Route
+                  path="puppets"
+                  element={
+                    <PageRoute title={["overview", "Puppets"]}>
+                      <PuppetsPage />
+                    </PageRoute>
+                  }
+                />
                 <Route
                   path="puppets/:puppetKey"
                   element={
