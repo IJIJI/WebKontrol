@@ -8,12 +8,14 @@ import type {
 } from "./types/model";
 import { PuppetStore } from "../storage/stores/PuppetStore";
 import { BLANK_PUPPET_TARGET, type BasePuppetConfig, type PuppetKey, type PuppetRuntime, type PuppetTarget } from "./types/schema";
+import type { EntityAppearance } from "../common/entityAppearance/schema";
 
 
 export type PuppetEvents<TConfig extends BasePuppetConfig> = {
   info_update: [info: PuppetInfo];
   runtime_update: [runtime: PuppetRuntime];
   config_update: [config: TConfig];
+  appearance_update: [appearance: EntityAppearance];
 };
 
 export abstract class AbstractPuppet<
@@ -34,6 +36,7 @@ export abstract class AbstractPuppet<
 
   protected _config: TConfig;
   protected _runtime: PuppetRuntime = BLANK_PUPPET_TARGET;
+  protected _appearance: EntityAppearance = {};
 
   protected _info: PuppetInfo = {
     state: ConnectionState.OFFLINE,
@@ -80,6 +83,16 @@ export abstract class AbstractPuppet<
     return this._config.id;
   }
 
+  getAppearance(): EntityAppearance {
+    return this._appearance;
+  }
+
+  async updateAppearance(appearance: EntityAppearance): Promise<void> {
+    this._appearance = appearance;
+    await this._store.saveAppearance(appearance);
+    this.emit('appearance_update', this._appearance);
+  }
+
   getLastInfo(): PuppetInfo {
     return {
       ...this._info,
@@ -118,7 +131,12 @@ export abstract class AbstractPuppet<
       else
         this._logger.debug("No runtime found in store, showing a blank page until one is set.");
 
+      const loadedAppearance = await this._store.loadAppearance();
+      if (loadedAppearance) this._appearance = loadedAppearance;
+
       this.emit('config_update', this._config);
+      this.emit('runtime_update', this._runtime)
+      this.emit('appearance_update', this._appearance);
 
       await this._doInit();
       this._isInit = true;
