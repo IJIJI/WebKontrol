@@ -4,27 +4,59 @@ import { Collection } from "../components/collections/Collection";
 import { CollectionLayout } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
-import { useApi } from "../context/ApiStateContext";
+import { UiPuppetState, useApi } from "../context/ApiStateContext";
 import { DEFAULT_ENTITY_COLOR } from "../common/appearance";
+import { ViewPicker } from "../components/pickers/ViewPicker";
+import { useState } from "react";
 
 export default function PuppetsPage(): JSX.Element {
   const { state } = useApi();
   const puppets = state ? [...state.puppets.values()] : [];
+  const views = state ? [...state.views.values()] : [];
+
+  const [selectedPuppet, setSelectedPuppet] = useState<UiPuppetState | undefined>(undefined);
 
   return (
-    <Collection
-      items={puppets}
-      getKey={(p) => p.config.id}
-      layout={CollectionLayout.LIST}
-      title="Puppets"
-      empty="No puppets connected."
-      renderItem={(p) => ({
-        to: `/puppets/${p.config.id}`,
-        title: p.config.name.long,
-        icon: <Icons.screen />,
-        color: DEFAULT_ENTITY_COLOR,
-        chips: <StatusPill status={p.info.state} />,
-      })}
-    />
+    <>
+      <Collection
+        items={puppets}
+        getKey={(p) => p.config.id}
+        layout={CollectionLayout.LIST}
+        title="Puppets"
+        empty="No puppets connected."
+        renderItem={(p) => ({
+          to: `/puppets/${p.config.id}`,
+          title: p.config.name.long,
+          icon: <Icons.screen />,
+          color: DEFAULT_ENTITY_COLOR,
+          chips: <StatusPill status={p.info.state} />,
+          actions: [
+            {
+              id: "assign",
+              label: "Assign",
+              icon: <Icons.installDesktop />,
+              onClick: () => {
+                void setSelectedPuppet(p);
+              },
+            },
+          ]
+        })}
+      />
+      <ViewPicker
+        open={selectedPuppet != undefined}
+        onClose={() => setSelectedPuppet(undefined)}
+        views={views}
+        title={
+          <span>
+            Assign view to{" "}
+            <b>
+              <code>{selectedPuppet?.config.name.long}</code>
+            </b>
+          </span>
+        }
+        confirmLabel="Assign"
+        onConfirm={(viewKey) => selectedPuppet?.assignView(viewKey)}
+      />
+    </>
   );
 }

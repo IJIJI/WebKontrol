@@ -22,7 +22,7 @@ export default function ViewsPage(): JSX.Element {
   const puppets = state ? [...state.puppets.values()] : [];
 
   const [selectedView, setSelectedView] = useState<UiViewState | undefined>(undefined);
-  const [shareView, setShareView] = useState<UiViewState | undefined>(undefined);
+  const [shareView, setShareView] = useState<UiViewState | undefined>(undefined); // TODO: Needed?
 
   return (
     <>
