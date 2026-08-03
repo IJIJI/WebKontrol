@@ -1,6 +1,7 @@
 import type { PuppetOrchestratorRuntime } from "../orchestration/puppet/schema";
 import type { PuppetDataBundle } from "../puppet/types/model";
 import type { PuppetKey, PuppetRuntime } from "../puppet/types/schema";
+import type { EntityAppearance } from "../common/entityAppearance/schema";
 import type { SystemInfo } from "../system/model";
 import type { SystemRuntime } from "../system/schema";
 import type { ViewManagerInfo } from "../views/types/model";
@@ -32,6 +33,10 @@ export interface PuppetWebhandlers {
   updateRuntime: (
     id: PuppetKey,
     runtime: Partial<PuppetRuntime>,
+  ) => Promise<void>;
+  updateAppearance: (
+    id: PuppetKey,
+    appearance: EntityAppearance,
   ) => Promise<void>;
   assignView: (
     puppet: PuppetKey,
