@@ -35,6 +35,8 @@ export interface UiViewState {
   config: AnyViewConfig;
   assignedPuppets: PuppetKey[];
   appearance: Required<EntityAppearance>;
+  // TODO: Have the backend send per-view URLs so the origin doesn't need to come from the client.
+  url: string;
   update: (config: AnyViewConfig) => Promise<void>;
   delete: () => Promise<void>;
   assign: (puppets: PuppetKey[]) => Promise<void>;
@@ -200,6 +202,7 @@ export function ApiStateProvider({
               color: config.appearance?.color ?? DEFAULT_ENTITY_COLOR,
               icon: config.appearance?.icon ?? VIEW_TYPE_META[config.type].icon,
             },
+            url: `${window.location.origin}${data.info.view.route_base}/${key}`,
             update: (next: AnyViewConfig): Promise<void> => viewUpdate(key, next),
             delete: (): Promise<void> => viewDelete(key),
             assign: (puppets: PuppetKey[]): Promise<void> =>

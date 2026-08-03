@@ -25,7 +25,7 @@ export function ShareViewModal({
 
   if (!view) return null;
 
-  const url = `${window.location.origin}/view/${view.key}`; // TODO: Load this in from the backend
+  const url = view.url;
   const puppets = state ? [...state.puppets.values()] : [];
 
   return (
