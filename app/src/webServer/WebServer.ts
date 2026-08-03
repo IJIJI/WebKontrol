@@ -13,6 +13,7 @@ import {
 import { UiRuntimeShape } from "../ui/schema";
 import { SystemRuntimeShape } from "../system/schema";
 import { PuppetKeySchema, PuppetRuntimeShape } from "../puppet/types/schema";
+import { EntityAppearanceSchema } from "../common/entityAppearance/schema";
 import { AnyViewConfigSchema, ViewKeySchema, ViewManagerRuntimeShape } from "../views/types/schema";
 import { PuppetOrchestratorRuntimeShape } from "../orchestration/puppet/schema";
 
@@ -317,35 +318,32 @@ export class WebServer implements RouteRegistrar {
     });
 
     this._app.patch("/api/puppets/:id", async (req, res) => {
-      // TODO: Update puppet runtime config
       const resultId = PuppetKeySchema.safeParse(req.params.id);
 
       if (!resultId.success) {
         return res.status(400).json({ errors: resultId.error.format() });
       }
 
-      const resultBody = PuppetRuntimeShape.partial().safeParse(
-        req.body,
-      );
+      const PuppetPatchSchema = PuppetRuntimeShape.partial().extend({
+        appearance: EntityAppearanceSchema.optional(),
+      });
+      const resultBody = PuppetPatchSchema.safeParse(req.body);
 
       if (!resultBody.success) {
         return res.status(400).json({ errors: resultBody.error.format() });
       }
 
       try {
-        await this._handlers.puppet.updateRuntime(
-          resultId.data,
-          resultBody.data,
-        );
+        const { appearance, ...runtimeUpdate } = resultBody.data;
+        if (Object.keys(runtimeUpdate).length > 0)
+          await this._handlers.puppet.updateRuntime(resultId.data, runtimeUpdate);
+        if (appearance !== undefined)
+          await this._handlers.puppet.updateAppearance(resultId.data, appearance);
         res.status(204).send();
-        this._logger.info(
-          `Updated puppet ${resultId.data} runtime. New:`,
-          resultBody.data,
-        );
       } catch (e) {
-        this._logger.error("Failed to update puppet runtime:", resultId.data, e);
+        this._logger.error("Failed to update puppet:", resultId.data, e);
         res.status(500).json({
-          error: e instanceof Error ? e.message : "Failed to update puppet config",
+          error: e instanceof Error ? e.message : "Failed to update puppet",
         });
       }
     });
