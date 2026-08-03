@@ -1,6 +1,5 @@
 import { type JSX } from "react/jsx-runtime";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 
 import { Collection } from "../components/collections/Collection";
 import { CollectionLayout } from "../components/collections/types";
@@ -8,6 +7,7 @@ import { Icons } from "../components/icons/Icons";
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
 import { type UiViewState, useApi } from "../context/ApiStateContext";
 import { AssignViewModal } from "../components/views/AssignViewModal";
+import { ShareViewModal } from "../components/views/ShareViewModal";
 import { useState } from "react";
 import { ViewStatusPill } from "../components/views/ViewStatusPill";
 import { Icon } from "../components/icons/Icon";
@@ -22,6 +22,7 @@ export default function ViewsPage(): JSX.Element {
   const puppets = state ? [...state.puppets.values()] : [];
 
   const [selectedView, setSelectedView] = useState<UiViewState | undefined>(undefined);
+  const [shareView, setShareView] = useState<UiViewState | undefined>(undefined);
 
   return (
     <>
@@ -50,7 +51,7 @@ export default function ViewsPage(): JSX.Element {
               id: "share",
               label: "Share",
               icon: <Icons.share />,
-              onClick: () => void toast("Sharing coming soon"),
+              onClick: () => setShareView(v),
             },
             {
               id: "assign",
@@ -69,6 +70,11 @@ export default function ViewsPage(): JSX.Element {
       onClose={() => setSelectedView(undefined)}
       view={selectedView}
       puppets={puppets}
+    />
+    <ShareViewModal
+      open={shareView != undefined}
+      onClose={() => setShareView(undefined)}
+      view={shareView}
     />
     </>
   );

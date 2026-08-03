@@ -52,6 +52,7 @@
     "less": "^4.6.7",
     "lit": "^3.3.3",
     "puppeteer": "^25.2.1",
+    "qrcode.react": "^4.2.0",
     "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.18.0",
     "tsx": "^4.22.4",

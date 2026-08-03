@@ -1,0 +1,53 @@
+@share-gap: 12px; // one value for every gap so the QR + two tiles read as a single grid
+
+.shareBody {
+  display: flex;
+  flex-direction: column;
+  gap: @share-gap;
+}
+
+// Two columns: the QR block and the stacked actions.
+.shareMain {
+  display: flex;
+  gap: @share-gap;
+}
+
+// White so the QR scans in any theme; padding gives it a quiet zone inside the card.
+.shareQr {
+  flex-shrink: 0;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: @border-radius-md;
+  line-height: 0; // drop the inline-svg descender gap
+}
+
+.shareActions {
+  flex: 1; // fill the width beside the QR
+  display: flex;
+  flex-direction: column;
+  gap: @share-gap;
+
+  // Two rows split the QR's height evenly, so the pair reads as one tiled block with the QR.
+  // Centre each tile's icon+label (Button defaults to space-between, which looks stranded when wide).
+  .buttonComp {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+// A bordered field so the URL belongs to the composition instead of floating as loose text.
+// Single line + ellipsis keeps it tidy; the full URL stays selectable and shows on hover (title).
+.shareUrl {
+  padding: 7px 10px;
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: @border-radius-md;
+
+  font-family: monospace;
+  font-size: 0.8em;
+  color: var(--color-text-tertiary);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: all; // one drag selects the whole URL
+}

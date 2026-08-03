@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { type JSX } from "react/jsx-runtime";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 
 import { useApi, type UiViewState } from "../../context/ApiStateContext";
 import { Icons } from "../icons/Icons";
@@ -13,6 +12,7 @@ import { EntityHeader } from "../entityHeader/EntityHeader";
 import { AssignViewModal } from "./AssignViewModal";
 import { DeleteViewModal } from "./DeleteViewModal";
 import { DuplicateViewModal } from "./DuplicateViewModal";
+import { ShareViewModal } from "./ShareViewModal";
 import { ViewTypeChip } from "./ViewTypeChip";
 import { ViewStatusPill } from "./ViewStatusPill";
 
@@ -24,6 +24,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   const serveUrl = `/view/${key}`; // TODO: route_base is configurable; hardcoded /view for now
 
   const [assignOpen, setAssignOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [duplicateOpen, setDuplicateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const puppets = state ? [...state.puppets.values()] : [];
@@ -55,7 +56,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
               <Icons.installDesktop />
               <span>Assign</span>
             </Button>
-            <Button onClick={() => void toast("Sharing coming soon")} fillStyle={FillStyle.FILLED}>
+            <Button onClick={() => setShareOpen(true)} fillStyle={FillStyle.FILLED}>
               <Icons.share />
               <span>Share</span>
             </Button>
@@ -69,6 +70,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
         view={view}
         puppets={puppets}
       />
+      <ShareViewModal open={shareOpen} onClose={() => setShareOpen(false)} view={view} />
       <DuplicateViewModal open={duplicateOpen} onClose={() => setDuplicateOpen(false)} view={view} />
       <DeleteViewModal open={deleteOpen} onClose={() => setDeleteOpen(false)} view={view} />
     </>
