@@ -1,4 +1,4 @@
-@share-gap: 12px; // one value for every gap so the QR + two tiles read as a single grid
+@share-gap: 12px; // one value for every grid gap so the QR + two tiles read as a single grid
 
 .shareBody {
   display: flex;
@@ -35,19 +35,29 @@
   }
 }
 
-// A bordered field so the URL belongs to the composition instead of floating as loose text.
-// Single line + ellipsis keeps it tidy; the full URL stays selectable and shows on hover (title).
-.shareUrl {
-  padding: 7px 10px;
+// The link as a field with the copy button tucked inside its right edge.
+.shareUrlRow {
+  position: relative;
+}
+
+.shareUrlField {
+  width: 100%;
+  padding: 7px 36px 7px 10px; // right padding clears the copy button
   border: 1px solid var(--color-border-tertiary);
   border-radius: @border-radius-md;
+  background-color: transparent;
+  color: var(--color-text-secondary);
 
   font-family: monospace;
   font-size: 0.8em;
-  color: var(--color-text-tertiary);
+  box-sizing: border-box;
+  text-overflow: ellipsis; // clip a long URL tidily when unfocused
+  user-select: all;
+}
 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  user-select: all; // one drag selects the whole URL
+.shareUrlRow .copyButton {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
 }
