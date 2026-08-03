@@ -7,6 +7,7 @@ import { Icon } from "../components/icons/Icon";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { type UiPuppetState, useApi } from "../context/ApiStateContext";
 import { resolvePuppetAppearance } from "../common/appearance";
+import { ViewChip } from "../components/views/ViewChip";
 import { ViewPicker } from "../components/pickers/ViewPicker";
 import { useState } from "react";
 
@@ -27,12 +28,18 @@ export default function PuppetsPage(): JSX.Element {
         empty="No puppets connected."
         renderItem={(p) => {
           const appearance = resolvePuppetAppearance(p.appearance);
+          const assignedView = p.assignedView ? state?.views.get(p.assignedView) : undefined;
           return {
           to: `/puppets/${p.config.id}`,
           title: p.config.name.long,
           icon: <Icon id={appearance.icon} />,
           color: appearance.color,
-          chips: <StatusPill status={p.info.state} />,
+          chips: (
+            <>
+              <StatusPill status={p.info.state} />
+              {assignedView && <ViewChip view={assignedView} />}
+            </>
+          ),
           actions: [
             {
               id: "assign",
