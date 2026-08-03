@@ -25,6 +25,7 @@ import { VIEW_TYPE_META } from "../components/views/viewMeta";
 export interface UiPuppetState extends PuppetDataBundle {
   assignedView?: ViewKey;
   updateRuntime: (runtime: Partial<PuppetRuntime>) => Promise<void>; // TODO: Remove?
+  updateAppearance: (appearance: EntityAppearance) => Promise<void>;
   assignView: (view: ViewKey) => Promise<void>;
   unassignView: () => Promise<void>;
 }
@@ -78,6 +79,11 @@ interface ApiState {
       updateRuntime: (
         id: PuppetKey,
         runtime: Partial<PuppetRuntimeInput>,
+        notify?: boolean,
+      ) => Promise<void>;
+      updateAppearance: (
+        id: PuppetKey,
+        appearance: EntityAppearance,
         notify?: boolean,
       ) => Promise<void>;
       assignView: (
@@ -187,6 +193,7 @@ export function ApiStateProvider({
             ...pup,
             assignedView: (data.runtime.puppetOrchestrator.assignments as Partial<Record<PuppetKey, ViewKey>>)[key],
             updateRuntime: async (runtime: Partial<PuppetRuntime>): Promise<void> => puppetUpdateRuntime(key, runtime),
+            updateAppearance: async (appearance: EntityAppearance): Promise<void> => puppetUpdateAppearance(key, appearance),
             assignView: async (view: ViewKey): Promise<void> => puppetAssignView(key, view),
             unassignView: async (): Promise<void> => puppetUnassignView(key),
           };
@@ -262,6 +269,18 @@ export function ApiStateProvider({
     return withToast(
       Api.patch(`/puppets/${id}`, runtime),
       { loading: "Updating puppet…", success: "Puppet updated" },
+      notify,
+    );
+  };
+
+  const puppetUpdateAppearance = async (
+    id: PuppetKey,
+    appearance: EntityAppearance,
+    notify = true,
+  ): Promise<void> => {
+    return withToast(
+      Api.patch(`/puppets/${id}`, { appearance }),
+      { loading: "Saving appearance…", success: "Appearance saved" },
       notify,
     );
   };
@@ -383,6 +402,7 @@ export function ApiStateProvider({
           puppet: {
             updateOrchestratorRuntime: puppetOrchestratorUpdateRuntime,
             updateRuntime: puppetUpdateRuntime,
+            updateAppearance: puppetUpdateAppearance,
             assignView: puppetAssignView,
             unassignView: puppetUnassignView,
           },
