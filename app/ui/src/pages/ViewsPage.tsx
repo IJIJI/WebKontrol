@@ -7,10 +7,11 @@ import { CollectionLayout } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
 import { VIEW_TYPE_META } from "../components/views/viewMeta";
-import { UiViewState, useApi } from "../context/ApiStateContext";
+import { type UiViewState, useApi } from "../context/ApiStateContext";
 import { AssignViewModal } from "../components/views/AssignViewModal";
 import { useState } from "react";
 import { ViewStatusPill } from "../components/views/ViewStatusPill";
+import { Icon } from "../components/icons/Icon";
 
 // Neutral badge colour until views carry their own colour (EntityMeta, #6).
 const NEUTRAL_COLOR = "#a3a0a8";
@@ -38,11 +39,10 @@ export default function ViewsPage(): JSX.Element {
         { id: "new", label: "New", icon: <Icons.addWindow />, onClick: () => void navigate("/views/new") },
       ]}
       renderItem={(v) => {
-        const TypeIcon = VIEW_TYPE_META[v.config.type].icon;
         return {
           to: `/views/${v.key}`,
           title: v.config.name.long,
-          icon: <TypeIcon />,
+          icon: <Icon id={VIEW_TYPE_META[v.config.type].icon} />,
           color: NEUTRAL_COLOR,
           chips: <> 
                 <ViewTypeChip type={v.config.type} />

@@ -4,12 +4,11 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import { useApi, type UiViewState } from "../../context/ApiStateContext";
-import { ConnectionState } from "../../../../src/types/CommonTypes";
 import { Icons } from "../icons/Icons";
+import { Icon } from "../icons/Icon";
 import { Button } from "../button/Button";
 import { FillStyle } from "../../common/types/variants";
 import { Dropdown, type DropdownItem } from "../dropdown/Dropdown";
-import { StatusPill } from "../pill/statusPill/StatusPill";
 import { EntityHeader } from "../entityHeader/EntityHeader";
 import { AssignViewModal } from "./AssignViewModal";
 import { DeleteViewModal } from "./DeleteViewModal";
@@ -26,7 +25,6 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   const navigate = useNavigate();
   const { state } = useApi();
   const { key, config } = view;
-  const TypeIcon = VIEW_TYPE_META[config.type].icon;
   const serveUrl = `/view/${key}`; // TODO: route_base is configurable; hardcoded /view for now
 
   const [assignOpen, setAssignOpen] = useState(false);
@@ -45,7 +43,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   return (
     <>
       <EntityHeader
-        icon={<TypeIcon />}
+        icon={<Icon id={VIEW_TYPE_META[config.type].icon} />}
         color={NEUTRAL_COLOR}
         title={config.name.long}
         subtitle={config.name.short}
