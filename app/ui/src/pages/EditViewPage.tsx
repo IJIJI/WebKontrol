@@ -7,6 +7,8 @@ import { SaveBar } from "../components/bottomBar/SaveBar";
 import { SettingGroup } from "../components/settings/SettingGroup";
 import { DisplayNameSetting } from "../components/settings/implementations/DisplayNameSetting";
 import { SelectSetting } from "../components/settings/implementations/SelectSetting";
+import { ColorSetting } from "../components/settings/implementations/ColorSetting";
+import { IconSetting } from "../components/settings/implementations/IconSetting";
 import { SchemaSettings } from "../components/settings/SchemaSettings";
 import {
   VIEW_EDITORS,
@@ -106,6 +108,23 @@ export default function EditViewPage(): JSX.Element {
           savedVal={draft.saved.type as ViewType | undefined}
           setValue={(v) => draft.setField("type", v)}
           options={viewTypeOptions}
+        />
+      </SettingGroup>
+
+      <SettingGroup title="Appearance">
+        <ColorSetting
+          title="Colour"
+          subtitle="Badge and header tint"
+          value={draft.values.appearance?.color}
+          savedVal={draft.saved.appearance?.color}
+          setValue={(color) => draft.setField("appearance", { ...draft.values.appearance, color })}
+        />
+        <IconSetting
+          title="Icon"
+          subtitle="Defaults to the view type icon"
+          value={draft.values.appearance?.icon}
+          savedVal={draft.saved.appearance?.icon}
+          setValue={(icon) => draft.setField("appearance", { ...draft.values.appearance, icon })}
         />
       </SettingGroup>
         {Body ? (
