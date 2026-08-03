@@ -2,6 +2,7 @@ import EventEmitter from "node:events";
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
 import { BLANK_PUPPET_TARGET, type PuppetKey, type PuppetRuntime } from "../../puppet/types/schema";
+import type { EntityAppearance } from "../../common/entityAppearance/schema";
 import type { ViewKey } from "../../views/types/schema";
 import type { ViewManager } from "../../views/ViewManager";
 import type { PuppetWebhandlers } from "../../webServer/model";
@@ -51,11 +52,12 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
   }
 
   getPuppetBundles(): PuppetDataBundle[] {
-    return this._puppets.values().map((bundle) => { 
+    return this._puppets.values().map((bundle) => {
       return {
         info: bundle.info,
         runtime: bundle.runtime,
-        config: bundle.config, 
+        config: bundle.config,
+        appearance: bundle.appearance,
       }
     }).toArray()
   }
@@ -87,12 +89,14 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     puppet.on('runtime_update', (runtime) => this._updatePuppetData(id, {runtime}));
     puppet.on('info_update', (info) => this._updatePuppetData(id, {info}));
     puppet.on('config_update', (config) => this._updatePuppetData(id, {config}));
+    puppet.on('appearance_update', (appearance) => this._updatePuppetData(id, {appearance}));
 
     const pupBundle: PuppetFullBundle = {
       puppet: puppet,
       runtime: puppet.getRuntime(),
       info: puppet.getLastInfo(),
       config: config,
+      appearance: puppet.getAppearance(),
     }
 
     this._puppets.set(puppet.getKey(), pupBundle);
@@ -103,6 +107,13 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
       return this._logger.error(`Attempted to update runtime for puppet ${id}. It does not exist. Provided runtime:`, runtime);
 
     await this._puppets.get(id)?.puppet.updateRuntime(runtime);
+  }
+
+  public async updatePuppetAppearance(id: PuppetKey, appearance: EntityAppearance): Promise<void> {
+    if (!this._puppets.has(id))
+      return this._logger.error(`Attempted to update appearance for puppet ${id}. It does not exist.`);
+
+    await this._puppets.get(id)?.puppet.updateAppearance(appearance);
   }
 
   /** The view a puppet is assigned to, if any (absent = falls back to the default view). */
@@ -225,6 +236,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     return {
       updateOrchestratorRuntime: (runtime: Partial<PuppetOrchestratorRuntime>) => this.updateRuntime(runtime),
       updateRuntime: (id: PuppetKey, runtime: Partial<PuppetRuntime>) => this.updatePuppetRuntime(id, runtime),
+      updateAppearance: (id: PuppetKey, appearance: EntityAppearance) => this.updatePuppetAppearance(id, appearance),
       assignView: (puppet: PuppetKey, view: ViewKey) => this.assignView(puppet, view),
       unassignView: (puppet: PuppetKey) => this.unassignView(puppet),
     }
