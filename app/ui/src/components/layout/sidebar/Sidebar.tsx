@@ -66,8 +66,14 @@ export default function Sidebar({
           label="Views"
           icon={<Icons.tab />}
         />
+        <SidebarItem
+          collapsed={collapsed}
+          to="/puppets"
+          label="Puppets"
+          icon={<Icons.screen />}
+        />
       </SidebarSection>
-      <SidebarSection collapsed={collapsed} label="Puppets">
+      {/* <SidebarSection collapsed={collapsed} label="Puppets">
         {puppets?.size ?
           [...puppets].map(([key, value]: [string, UiPuppetState]) => (
             <SidebarItem
@@ -80,7 +86,7 @@ export default function Sidebar({
           ))
           : <SidebarLoader collapsed={collapsed} />
         }
-      </SidebarSection>
+      </SidebarSection> */}
       <SidebarSection collapsed={collapsed} label="Settings">
         <SidebarItem
           collapsed={collapsed}
