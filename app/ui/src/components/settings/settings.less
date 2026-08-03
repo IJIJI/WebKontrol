@@ -242,16 +242,28 @@
 
     // COMPACT: always stacked (title/subtitle, then each labelled input full-width).
     &.compact {
+      position: relative;
       flex-direction: column;
       align-items: stretch;
       gap: 8px;
 
       .titletext {
         height: auto;
+        // Reserve the corner restore button's box so title/subtitle never slide under it,
+        // with or without a subtitle.
+        min-height: @field-height;
+        padding-right: @field-height + 8px;
       }
 
       .input {
         .stacked-input();
+      }
+
+      // Restore pinned to the field's top-right corner, out of the stacked input flow.
+      .restore {
+        position: absolute;
+        top: 10px;
+        right: 14px;
       }
     }
 
