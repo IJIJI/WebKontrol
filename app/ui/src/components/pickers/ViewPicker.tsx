@@ -29,7 +29,7 @@ export function ViewPicker({
       open={open}
       onClose={onClose}
       title={title}
-      size={views.length <= 4 ? ModalSize.MD : ModalSize.LG}
+      size={views.length <= 4 ? ModalSize.MD : ModalSize.LG} // TODO: Move to entitypicker?
       confirmLabel={confirmLabel}
       items={views}
       getKey={(v) => v.key}
