@@ -14,7 +14,6 @@ import { DeleteViewModal } from "./DeleteViewModal";
 import { DuplicateViewModal } from "./DuplicateViewModal";
 import { ShareViewModal } from "./ShareViewModal";
 import { ViewTypeChip } from "./ViewTypeChip";
-import { ViewStatusPill } from "./ViewStatusPill";
 import { ViewStatusGroupPill } from "./ViewStatusGroupPill";
 
 // A view's detail-page header: fills EntityHeader with view-specific content.
@@ -22,7 +21,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
   const navigate = useNavigate();
   const { state } = useApi();
   const { key, config } = view;
-  const serveUrl = `/view/${key}`; // TODO: route_base is configurable; hardcoded /view for now
+  const serveUrl = view.url;
 
   const [assignOpen, setAssignOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
