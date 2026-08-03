@@ -88,6 +88,7 @@ export abstract class AbstractPuppet<
   }
 
   async updateAppearance(appearance: EntityAppearance): Promise<void> {
+    if (!this._isInit) throw new Error("Puppet not initialized");
     this._appearance = appearance;
     await this._store.saveAppearance(appearance);
     this.emit('appearance_update', this._appearance);
@@ -166,11 +167,10 @@ export abstract class AbstractPuppet<
     try { // TODO: Should this be in try catch?
       if (!this._isInit) throw new Error("Puppet not initialized");
 
-      const old = this._runtime;
       this._runtime = { ...this._runtime, ...runtime };
 
       // if (
-      //   old.target !== this._runtime.target
+      //   old.target !== this._runtime.target // (`old` was the pre-spread this._runtime)
       // ) // TODO: Commented to allow renavigation for url websites, as they can change with buttons. BlockViews might reload because of this. Once puppets have their own endpoint, this wil probably be fixed.
       await this._setTarget(this._runtime.target);
 
@@ -186,7 +186,7 @@ export abstract class AbstractPuppet<
   async clearRuntime(): Promise<void> {
     if (!this._isInit) throw new Error("Puppet not initialized");
 
-    this.updateRuntime({ ...BLANK_PUPPET_TARGET });
+    await this.updateRuntime({ ...BLANK_PUPPET_TARGET });
   }
 
   protected async _setTarget(target: PuppetTarget): Promise<void> {
@@ -206,7 +206,7 @@ export abstract class AbstractPuppet<
       this._setFailedLoadingState();
     } finally {
       this._isNavigating = false;
-      this._updateInfo();
+      await this._updateInfo();
     }
   }
 
