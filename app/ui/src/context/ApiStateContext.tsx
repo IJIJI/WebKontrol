@@ -23,6 +23,7 @@ import { DEFAULT_ENTITY_COLOR } from "../common/appearance";
 import { VIEW_TYPE_META } from "../components/views/viewMeta";
 
 export interface UiPuppetState extends PuppetDataBundle {
+  assignedView?: ViewKey;
   updateRuntime: (runtime: Partial<PuppetRuntime>) => Promise<void>; // TODO: Remove?
   assignView: (view: ViewKey) => Promise<void>;
   unassignView: () => Promise<void>;
@@ -184,6 +185,7 @@ export function ApiStateProvider({
           const key: PuppetKey = pup.config.id;
           const full: UiPuppetState = {
             ...pup,
+            assignedView: (data.runtime.puppetOrchestrator.assignments as Partial<Record<PuppetKey, ViewKey>>)[key],
             updateRuntime: async (runtime: Partial<PuppetRuntime>): Promise<void> => puppetUpdateRuntime(key, runtime),
             assignView: async (view: ViewKey): Promise<void> => puppetAssignView(key, view),
             unassignView: async (): Promise<void> => puppetUnassignView(key),
