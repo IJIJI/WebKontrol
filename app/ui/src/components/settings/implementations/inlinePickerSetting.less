@@ -1,7 +1,5 @@
 .inlineStrip {
   @chip-size: 28px;
-  // Gap between a chip and its selected/saved ring.
-  @ring-offset: 1px;
 
   display: flex;
   flex-direction: row;
@@ -28,14 +26,12 @@
     &.selected {
       background-color: var(--color-background-acc);
       outline: 2px solid var(--color-text-acc);
-      outline-offset: @ring-offset;
     }
     // Saved value (when it isn't the current one): the ButtonSelect `.previous` grey fill for icon
     // chips, plus a grey ring so it also reads on a colour swatch.
     &.saved {
       background-color: var(--color-border-secondary);
       outline: 2px solid var(--color-text-tertiary);
-      outline-offset: @ring-offset;
     }
 
     // Keep the neutral grey boundary even when selected — the accent outline ring (from `.selected`)

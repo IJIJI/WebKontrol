@@ -3,7 +3,6 @@
 .colorModal {
   min-width: 240px;
   // Gap between a swatch and its selected ring.
-  @ring-offset: 1px;
 
   .colorSwatches {
     display: flex;
@@ -21,7 +20,6 @@
 
       &.selected {
         outline: 2px solid var(--color-text-acc);
-        outline-offset: @ring-offset;
       }
     }
 
