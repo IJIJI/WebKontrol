@@ -13,6 +13,19 @@ export interface Draft<T extends Record<string, unknown>> {
   anyChanged: () => boolean;
 }
 
+// Structural equality, treating an `undefined`-valued key as absent (JSON semantics). Object-valued
+// fields (e.g. DisplayName, appearance) are a fresh object on every edit, so reference equality
+// (`Object.is`) would always read them as changed; this detects a revert to the saved *content*.
+// Order-independent, so a spread that reorders keys isn't mistaken for a change.
+function deepEqual(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (typeof a !== "object" || a === null || typeof b !== "object" || b === null) return false;
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  return [...keys].every((k) =>
+    deepEqual((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]),
+  );
+}
+
 // `saved` may be undefined while data is still loading, so callers can invoke
 // this hook unconditionally (before an early return) without breaking hook order.
 export function useDraft<T extends Record<string, unknown>>(saved: T | undefined): Draft<T> {
@@ -24,7 +37,7 @@ export function useDraft<T extends Record<string, unknown>>(saved: T | undefined
   const setField = <U extends keyof T>(key: U, value: T[U]): void => {
     setPatch((prev) => {
       const next: Partial<T> = { ...prev };
-      if (Object.is(safeSaved[key], value)) {
+      if (deepEqual(safeSaved[key], value)) {
         delete next[key];
       } else {
         next[key] = value;
