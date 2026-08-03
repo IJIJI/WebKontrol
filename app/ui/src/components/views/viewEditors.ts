@@ -6,13 +6,21 @@ import {
   UrlViewConfigSchema,
   BlockViewConfigSchema,
 } from "../../../../src/views/types/schema";
+import { type EntityAppearance } from "../../../../src/common/entityAppearance/schema";
+import { type DisplayName } from "../../../../src/types/CommonTypes";
 import { type Draft } from "../../common/hooks/DraftSave";
 import { VIEW_TYPE_META } from "./viewMeta";
 
 // The draft shape the editor works with: a flat, loosely-typed view config. The mapper reads
 // fields by key, so per-type precision lives in each entry's `schema` (used for rendering + save
-// validation), not in this alias.
-export type ViewEditorValues = Record<string, unknown>;
+// validation), not in this alias. Shared base fields the editor binds directly (not through the
+// schema mapper) are typed here so their call sites stay cast-free, with their *edit* types
+// (`name` is edited as a partial). `loadTimeout` stays loose since the mapper renders it by key.
+export type ViewEditorValues = Record<string, unknown> & {
+  type?: ViewType;
+  name?: Partial<DisplayName>;
+  appearance?: EntityAppearance;
+};
 
 export interface ViewBodyProps {
   draft: Draft<ViewEditorValues>;

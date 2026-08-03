@@ -18,7 +18,6 @@ import {
 import { useDraft } from "../common/hooks/DraftSave";
 import { useApi } from "../context/ApiStateContext";
 import { type ViewType, type AnyViewConfig } from "../../../src/views/types/schema";
-import { type DisplayName } from "../../../src/types/CommonTypes";
 import { usePageContext } from "../context/PageContext";
 
 const DEFAULT_TYPE: ViewType = "url";
@@ -50,7 +49,7 @@ export default function EditViewPage(): JSX.Element {
 
   const draft = useDraft<ViewEditorValues>(initial);
 
-  const type = (draft.values.type as ViewType | undefined) ?? DEFAULT_TYPE;
+  const type = draft.values.type ?? DEFAULT_TYPE;
   const entry = VIEW_EDITORS[type] ?? VIEW_EDITORS[DEFAULT_TYPE];
   const Body = entry.body;
   // The ViewManager's configured default, shown as the loadTimeout placeholder when unset.
@@ -97,15 +96,15 @@ export default function EditViewPage(): JSX.Element {
         <DisplayNameSetting
           title="Name"
           subtitle="Display name, long and short"
-          value={(draft.values.name as Partial<DisplayName>) ?? {}}
-          savedVal={draft.saved.name as Partial<DisplayName> | undefined}
+          value={draft.values.name ?? {}}
+          savedVal={draft.saved.name}
           setValue={(v) => draft.setField("name", v)}
         />
         <SelectSetting
           title="Type"
           subtitle="How this view renders"
           value={type}
-          savedVal={draft.saved.type as ViewType | undefined}
+          savedVal={draft.saved.type}
           setValue={(v) => draft.setField("type", v)}
           options={viewTypeOptions}
         />
