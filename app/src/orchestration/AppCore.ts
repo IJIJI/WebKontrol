@@ -51,10 +51,12 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
       },
       info: {
         system: this._systemManager.getInfo(),
+        view: this._viewManager.getInfo(),
       }
     });
 
-    this._systemManager.on('info_update', (info) => this._updateState({info: { ...this._webState.runtime, system: info }}));
+    this._systemManager.on('info_update', (info) => this._updateState({ info: { ...this._webState.info, system: info } }));
+    this._viewManager.on('info_update', (info) => this._updateState({ info: { ...this._webState.info, view: info } }));
     this._systemManager.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, system: runtime }}));
 
     this._puppetOrchestrator.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, puppetOrchestrator: runtime }}));
