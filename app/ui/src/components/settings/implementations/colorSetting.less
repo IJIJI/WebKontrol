@@ -1,0 +1,63 @@
+// The full palette + custom swatch, shown inside the colour picker's modal (the inline strip is
+// styled by inlinePickerSetting.less).
+.colorModal {
+  min-width: 240px;
+  // Gap between a swatch and its selected ring.
+  @ring-offset: 1px;
+
+  .colorSwatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .swatch {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: @border-radius-md;
+
+      &.selected {
+        outline: 2px solid var(--color-text-acc);
+        outline-offset: @ring-offset;
+      }
+    }
+
+    // The native custom picker, styled like a swatch (colour fills edge-to-edge), with a pencil.
+    .swatch.custom {
+      overflow: hidden;
+      border-color: var(--color-border-secondary);
+
+      input[type="color"] {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        border: none;
+        background: none;
+        cursor: pointer;
+
+        &::-webkit-color-swatch-wrapper {
+          padding: 0;
+        }
+        &::-webkit-color-swatch {
+          border: none;
+          border-radius: 0;
+        }
+        &::-moz-color-swatch {
+          border: none;
+        }
+      }
+
+      .swatchPencil {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+      }
+    }
+  }
+}
