@@ -1,5 +1,6 @@
 import { Logger } from "../../logging/Logger";
 import { PuppetRuntimeSchema, type PuppetKey, type PuppetRuntime } from "../../puppet/types/schema";
+import { EntityAppearanceSchema, type EntityAppearance } from "../../common/entityAppearance/schema";
 import { CoreDatabase } from "../CoreDatabase";
 
 // TODO: Make a generic runtime store? Most functions are the same.
@@ -49,5 +50,19 @@ export class PuppetStore {
 
   public async clearRuntime(): Promise<void> {
     this._db.deleteSetting("puppet", this._id, "runtime");
+  }
+
+  public async saveAppearance(appearance: EntityAppearance): Promise<void> {
+    await this._db.updateSetting("puppet", this._id, "appearance", JSON.stringify(appearance));
+  }
+
+  public async loadAppearance(): Promise<EntityAppearance | null> {
+    try {
+      const raw = await this._db.getSetting("puppet", this._id, "appearance");
+      if (raw === null) return null;
+      return EntityAppearanceSchema.parse(JSON.parse(raw));
+    } catch {
+      return null;
+    }
   }
 }
