@@ -1,7 +1,19 @@
+import type { EntityAppearance } from "../../../src/common/entityAppearance/schema";
+
 // Entity appearance constants (colour side; icons live in the icon registry).
 
 // Fallback colour for entities without a chosen colour.
 export const DEFAULT_ENTITY_COLOR = "#a3a0a8";
+
+// Fill in the defaults for a puppet's stored appearance for display. Views resolve centrally in
+// ApiStateContext (their icon default is type-driven); puppets share this helper instead so the
+// editor can still read the raw stored value.
+export function resolvePuppetAppearance(appearance: EntityAppearance): Required<EntityAppearance> {
+  return {
+    color: appearance.color ?? DEFAULT_ENTITY_COLOR,
+    icon: appearance.icon ?? "screen",
+  };
+}
 
 // Preset swatches for the colour picker. Deliberately not the status/variant 
 // colours, so a chosen colour never implies state. "Default" (no colour) is a
