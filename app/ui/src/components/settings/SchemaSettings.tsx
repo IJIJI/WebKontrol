@@ -63,12 +63,8 @@ export function SchemaSettings({
 
     // Placeholder precedence: page-injected (e.g. a runtime default) > static meta placeholder
     // > the field's own schema .default() (only shown for primitive defaults).
-    const defaultStr =
-      typeof info.defaultValue === "string" || typeof info.defaultValue === "number"
-        ? String(info.defaultValue)
-        : undefined;
-    const placeholder = placeholders[key] ?? meta.placeholder ?? defaultStr;
-    const element = renderField(key, info.kind, info.options, meta, draft, placeholder);
+    const placeholder = placeholders[key] ?? meta.placeholder ?? defaultPlaceholder(info);
+    const element = fieldElement(key, info, meta, draft, placeholder);
     (meta.advanced ? advanced : normal).push(element);
   }
 
