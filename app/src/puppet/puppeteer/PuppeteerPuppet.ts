@@ -50,8 +50,9 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
 
     this._browser = await puppeteer.launch(settings);
 
-    // TODO: Docs use await broser.newPage(); Check which is better.
-    this._page = await this._browser.pages().then((pages) => pages[0]);
+    // Reuse the browser's initial tab; fall back to a new one if it opened without any.
+    const [firstPage] = await this._browser.pages();
+    this._page = firstPage ?? (await this._browser.newPage());
 
     const client = await this._page.createCDPSession();
     await client.send("Emulation.setDefaultBackgroundColorOverride", {
