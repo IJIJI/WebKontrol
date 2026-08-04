@@ -1,7 +1,7 @@
 import z from "zod";
 import { LoadTimeoutSchema, LoadTimeoutSchemaDefault } from "../../puppet/types/schema";
 import { DisplayNameSchema } from "../../types/CommonTypes";
-import { AnyBlockConfigSchema } from "../blocks/types/schema";
+import { blockSlot } from "../blocks/types/schema";
 import { EntityAppearanceField } from "../../common/entityAppearance/schema";
 
 //* View identity:
@@ -57,7 +57,7 @@ export function extendViewConfig<const B extends ViewType, T extends z.ZodRawSha
 //* Concrete view configs:
 // BlockView: renders a block tree (its single root block) as a page.
 export const BlockViewConfigSchema = extendViewConfig("blocks", {
-  root: AnyBlockConfigSchema.meta({ label: "Root block" } satisfies FieldMeta),
+  root: blockSlot({ label: "Root block" } satisfies FieldMeta),
 });
 export type BlockViewConfig = z.infer<typeof BlockViewConfigSchema>;
 
