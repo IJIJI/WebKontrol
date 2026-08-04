@@ -43,8 +43,8 @@ export function describeField(schema: unknown): FieldInfo {
   let core = outer;
   let optional = false;
   let defaultValue: unknown;
-  while (core.def.type === "optional" || core.def.type === "default") {
-    if (core.def.type === "optional") optional = true;
+  while (core.def.type === "optional" || core.def.type === "default" || core.def.type === "nullable") {
+    if (core.def.type !== "default") optional = true; // optional and nullable both mean "may be absent" to the UI
     if (core.def.type === "default") defaultValue = core.def.defaultValue;
     if (!core.def.innerType) break; // loop, not a single step: a field can be wrapped twice (e.g. .default().optional())
     core = core.def.innerType;
