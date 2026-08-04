@@ -24,6 +24,8 @@ export function ViewStatusGroupPill({
       id,
       name: puppet?.config.name.long ?? id,
       status: puppet?.info.state ?? ConnectionState.UNKNOWN,
+      to: `/puppets/${id}`,
+      state: { back: { path: `/views/${view.key}`, label: view.config.name.long } },
     };
   });
 
