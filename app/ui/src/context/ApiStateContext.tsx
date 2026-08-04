@@ -16,8 +16,8 @@ import { type PuppetKey, type PuppetRuntime, type PuppetRuntimeInput } from "../
 import { type SystemRuntimeInput } from "../../../src/system/schema";
 import { type UiRuntimeInput, type UiTheme } from "../../../src/ui/schema";
 import { type PuppetDataBundle } from "../../../src/puppet/types/model";
-import { ViewManagerRuntimeInput, type AnyViewConfig, type ViewKey } from "../../../src/views/types/schema";
-import { PuppetOrchestratorRuntime, PuppetOrchestratorRuntimeInput } from "../../../src/orchestration/puppet/schema";
+import type { ViewManagerRuntimeInput, AnyViewConfig, ViewKey } from "../../../src/views/types/schema";
+import type { PuppetOrchestratorRuntime, PuppetOrchestratorRuntimeInput } from "../../../src/orchestration/puppet/schema";
 import { type EntityAppearance } from "../../../src/common/entityAppearance/schema";
 import { DEFAULT_ENTITY_COLOR } from "../common/appearance";
 import { VIEW_TYPE_META } from "../components/views/viewMeta";
@@ -110,9 +110,9 @@ interface ApiState {
 
 const ApiStateContext = createContext<ApiState | null>(null);
 
-// Wraps a mutation in a toast unless the caller opts out (e.g. to batch several
-// calls under one toast of its own).
-function withToast<T>(
+// Wraps a mutation in a toast unless the caller opts out. Exported so a caller batching several
+// mutations can pass `notify: false` to each and wrap the whole batch in one toast of its own.
+export function withToast<T>(
   promise: Promise<T>,
   messages: { loading: string; success: string },
   notify = true,
