@@ -68,29 +68,21 @@ export default function EditViewPage(): JSX.Element {
     }
     const config = parsed.data as AnyViewConfig;
 
-    await toast.promise(
-      (async (): Promise<void> => {
-        if (viewKey) {
-          await callBacks.view.update(viewKey, config);
-        } else {
-          const key = await callBacks.view.create(config);
-          void navigate(`/views/${key}`);
-        }
-      })(),
-      {
-        loading: viewKey ? "Saving…" : "Creating…",
-        success: viewKey ? "View saved" : "View created",
-        error: (e: unknown) => (e instanceof Error ? e.message : "Failed to save view"),
-      },
-    );
-    draft.revertAll();
+    await draft.save(async () => {
+      if (viewKey) {
+        await callBacks.view.update(viewKey, config);
+      } else {
+        const key = await callBacks.view.create(config);
+        void navigate(`/views/${key}`);
+      }
+    });
   };
 
   return (
     <>
       <h1 style={{ marginBottom: "20px" }}>{`${viewKey ? "Edit " : ""}${title}`}</h1>
 
-      <SaveBar visible={draft.anyChanged()} onSave={onSave} onDiscard={draft.revertAll} />
+      <SaveBar visible={draft.anyChanged} onSave={onSave} onDiscard={draft.revertAll} />
 
       <SettingGroup title="View">
         <DisplayNameSetting

@@ -26,17 +26,14 @@ export default function EditPuppetPage(): JSX.Element {
 
   if (!puppet) return <h1>{title}</h1>;
 
-  const onSave = async (): Promise<void> => {
-    // The api layer already wraps the call in a toast; only revert on success.
-    await callBacks.puppet.updateAppearance(puppet.config.id, draft.values); // TODO: Wrap in single combined toast promise once there are more fields
-    draft.revertAll();
-  };
+  const onSave = (): Promise<void> =>
+    draft.save(() => callBacks.puppet.updateAppearance(puppet.config.id, draft.values));
 
   return (
     <>
       <h1 style={{ marginBottom: "20px" }}>Edit {title}</h1>
 
-      <SaveBar visible={draft.anyChanged()} onSave={onSave} onDiscard={draft.revertAll} />
+      <SaveBar visible={draft.anyChanged} onSave={onSave} onDiscard={draft.revertAll} />
 
       <SettingGroup title="Appearance">
         <ColorSetting

@@ -1,5 +1,4 @@
 import { type JSX } from "react";
-import toast from "react-hot-toast";
 import { SettingGroup } from "../components/settings/SettingGroup";
 import { ButtonSelectSetting } from "../components/settings/implementations/ButtonSelectSetting";
 import { ToggleSetting } from "../components/settings/implementations/ToggleSetting";
@@ -13,7 +12,7 @@ import { Variant, FillStyle } from "../common/types/variants";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { ConnectionState } from "../../../src/types/CommonTypes";
 import { UiTheme } from "../../../src/ui/schema";
-import { useApi } from "../context/ApiStateContext";
+import { useApi, withToast } from "../context/ApiStateContext";
 import { LoadingPage } from "../components/layout/loading/LoadingPage";
 import { NumberSetting } from "../components/settings/implementations/NumberSetting";
 
@@ -30,23 +29,21 @@ export default function SettingsPage(): JSX.Element {
   const systemDraft = useDraft(runtime?.system);
   const viewManagerDraft = useDraft(runtime?.view);
 
-  const { anyChanged, revertAll } = aggregateDrafts({"UI": uiDraft, "SYSTEM": systemDraft, "VIEW": viewManagerDraft});
+  const { anyChanged, revertAll, save } = aggregateDrafts([uiDraft, systemDraft, viewManagerDraft]);
 
-  const onSave = async (): Promise<void> => {
-    await toast.promise(
-      Promise.all([
-        handlers.ui.updateRuntime(uiDraft.patch, false),
-        handlers.system.updateRuntime(systemDraft.patch, false),
-        handlers.view.updateRuntime(viewManagerDraft.patch, false),
-      ]),
-      {
-        loading: "Saving…",
-        success: "Saved",
-        error: (e: unknown) => (e instanceof Error ? e.message : "Failed to save settings"),
-      },
+  // The three updates are separate requests, so they opt out of their own toasts (notify: false)
+  // and share one here instead.
+  const onSave = (): Promise<void> =>
+    save(() =>
+      withToast(
+        Promise.all([
+          handlers.ui.updateRuntime(uiDraft.patch, false),
+          handlers.system.updateRuntime(systemDraft.patch, false),
+          handlers.view.updateRuntime(viewManagerDraft.patch, false),
+        ]),
+        { loading: "Saving…", success: "Saved" },
+      ),
     );
-    revertAll();
-  }
 
   if (!runtime) return <LoadingPage />;
 

@@ -48,16 +48,16 @@ export default function PuppetPage(): JSX.Element {
   ];
   if (assignedView) assignedRows.push({ label: "Type", value: <ViewTypeChip type={assignedView.config.type} /> });
 
-  const { target_info } = puppet.info;
+  const targetInfo = puppet.info.target_info;
   const pageRows: DetailRow[] = [
-    { label: "Title", value: target_info?.title ?? "-" },
-    { label: "URL", value: target_info?.url ?? "-", copy: target_info?.url },
+    { label: "Title", value: targetInfo?.title ?? "-" },
+    { label: "URL", value: targetInfo?.url ?? "-", copy: targetInfo?.url },
   ];
-  if (target_info?.description) pageRows.push({ label: "Description", value: target_info.description });
-  if (target_info?.screenshot)
+  if (targetInfo?.description) pageRows.push({ label: "Description", value: targetInfo.description });
+  if (targetInfo?.screenshot)
     pageRows.push({
       label: "Screenshot",
-      value: <img src={target_info.screenshot} alt="Page screenshot" className="pageScreenshot" />,
+      value: <img src={targetInfo.screenshot} alt="Page screenshot" className="pageScreenshot" />,
     });
 
   return (
