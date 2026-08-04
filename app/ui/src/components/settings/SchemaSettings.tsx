@@ -35,6 +35,20 @@ function subLens(parent: DraftLens, key: string): DraftLens {
   };
 }
 
+/**
+ * Escape hatch for field kinds this generic mapper does not know about. Tried before the built-in
+ * widgets (so it can override them) and applied at every nesting depth; return null to fall
+ * through. Keeps domain-specific fields, block slots for one, out of the shared mapper.
+ * `path` is the field's enclosing object keys relative to the schema root ([] at the top level),
+ * so a custom renderer can address nested fields without walking the schema itself.
+ */
+export type CustomFieldRenderer = (
+  key: string,
+  info: FieldInfo,
+  lens: DraftLens,
+  path: readonly string[],
+) => JSX.Element | null;
+
 // Renders Setting components for a zod object schema, driven by each field's FieldMeta and
 // wired through a useDraft (or any DraftLens). Fields without meta are skipped (e.g. the `type`
 // discriminator); `exclude` skips fields the page renders itself (e.g. name, in the top row).
@@ -46,14 +60,21 @@ export function SchemaSettings({
   exclude = [],
   advancedTitle = "Advanced",
   placeholders = {},
+  renderCustom,
+  groupTitle = "Type Specific",
+  joined = false,
 }: {
   schema: ZodObject<ZodRawShape>; // the current view type's member schema (any zod object)
   draft: DraftLens;
   exclude?: string[];
   advancedTitle?: string;
   placeholders?: Record<string, string>; // per-key placeholder overrides (e.g. a runtime default)
+  renderCustom?: CustomFieldRenderer;
+  groupTitle?: string;
+  joined?: boolean; // one divided card per group instead of an island per field
 }): JSX.Element {
-  const normal: JSX.Element[] = [];
+  const fields: JSX.Element[] = [];
+  const sections: JSX.Element[] = [];
   const advanced: JSX.Element[] = [];
 
   for (const [key, fieldSchema] of objectFields(schema)) {
@@ -65,16 +86,25 @@ export function SchemaSettings({
     // Placeholder precedence: page-injected (e.g. a runtime default) > static meta placeholder
     // > the field's own schema .default() (only shown for primitive defaults).
     const placeholder = placeholders[key] ?? meta.placeholder ?? defaultPlaceholder(info);
-    const element = fieldElement(key, info, meta, draft, placeholder);
-    (meta.advanced ? advanced : normal).push(element);
+
+    // Same dispatch as fieldElement, unrolled because the bucket depends on which branch renders:
+    // flat fields (and custom widgets) share one group; each top-level object field is its own
+    // sibling section (deeper objects render inline inside it). Advanced folds away regardless.
+    const custom = renderCustom?.(key, info, draft, []);
+    const isSection = !custom && info.kind === "object";
+    const element =
+      custom ??
+      (isSection
+        ? objectGroup(key, info, meta, draft, renderCustom, [], joined)
+        : renderField(key, info.kind, info.options, meta, draft, placeholder));
+    (meta.advanced ? advanced : isSection ? sections : fields).push(element);
   }
 
   return (
     <>
-      <SettingGroup title="Type Specific">
-        {normal}
-      </SettingGroup>
-      {advanced.length > 0 && <CollapsibleGroup title={advancedTitle}>{advanced}</CollapsibleGroup>}
+      {fields.length > 0 && <SettingGroup title={groupTitle} joined={joined}>{fields}</SettingGroup>}
+      {sections}
+      {advanced.length > 0 && <CollapsibleGroup title={advancedTitle} joined={joined}>{advanced}</CollapsibleGroup>}
     </>
   );
 }
@@ -86,30 +116,45 @@ function defaultPlaceholder(info: FieldInfo): string | undefined {
     : undefined;
 }
 
-// One field: a nested group for plain objects, a Setting widget for everything else.
+// One field: a caller's custom renderer if it claims the field, else a nested group for plain
+// objects, else a Setting widget.
 function fieldElement(
   key: string,
   info: FieldInfo,
   meta: FieldMeta,
   lens: DraftLens,
   placeholder: string | undefined,
+  renderCustom: CustomFieldRenderer | undefined,
+  path: readonly string[],
+  joined: boolean,
 ): JSX.Element {
-  if (info.kind === "object") return objectGroup(key, info, meta, lens);
+  const custom = renderCustom?.(key, info, lens, path);
+  if (custom) return custom;
+  if (info.kind === "object") return objectGroup(key, info, meta, lens, renderCustom, path, joined);
   return renderField(key, info.kind, info.options, meta, lens, placeholder);
 }
 
-// A nested object field as its own fold-away group, its fields wired through a sub-lens.
-// The advanced flag is only honoured at the top level; nested fields render flat.
-function objectGroup(key: string, info: FieldInfo, meta: FieldMeta, lens: DraftLens): JSX.Element {
+// A nested object field as its own collapsible group, open by default (folding is for skipping,
+// not hiding, only the Advanced section starts closed). Fields wire through a sub-lens; the
+// advanced flag is only honoured at the top level, nested fields render flat.
+function objectGroup(
+  key: string,
+  info: FieldInfo,
+  meta: FieldMeta,
+  lens: DraftLens,
+  renderCustom: CustomFieldRenderer | undefined,
+  path: readonly string[],
+  joined: boolean,
+): JSX.Element {
   const sub = subLens(lens, key);
   const children = objectFields(info.core).flatMap(([k, fieldSchema]) => {
     const i = describeField(fieldSchema);
     if (!i.meta) return [];
     const placeholder = i.meta.placeholder ?? defaultPlaceholder(i);
-    return [fieldElement(k, i, i.meta, sub, placeholder)];
+    return [fieldElement(k, i, i.meta, sub, placeholder, renderCustom, [...path, key], joined)];
   });
   return (
-    <CollapsibleGroup key={key} title={meta.label}>
+    <CollapsibleGroup key={key} title={meta.label} defaultOpen joined={joined}>
       {children}
     </CollapsibleGroup>
   );
