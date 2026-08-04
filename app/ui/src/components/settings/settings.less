@@ -93,6 +93,25 @@
       }
     }
 
+    // An array-of-objects field: items listed inside the group, each with a small header row
+    // (index label + remove) above its fields, and a trailing add button.
+    .arrayItem {
+      display: flex;
+      flex-direction: column;
+      gap: @setting-gap;
+
+      .arrayItemHead {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        .label {
+          margin: 0;
+        }
+      }
+    }
+
     // Joined: the group's rows share one card with dividers (like the read-only DetailList)
     // instead of an island per field. For dense contexts, e.g. the block editor pane.
     &.joined > .content {
@@ -103,20 +122,43 @@
       overflow: hidden;
       gap: 0;
 
-      > .field {
+      // Descendant (not child) so fields inside array items flatten too; nested joined groups
+      // re-apply their own card, so the double match is harmless.
+      .field {
         background: none;
         box-shadow: none;
         border-radius: 0;
         padding: 8px 14px;
 
-        &:not(:last-child) {
-          border-bottom: @border-config;
-        }
-
         // The card glow can't render inside overflow:hidden; a left accent bar marks changes.
         &.changed {
           box-shadow: inset 3px 0 0 var(--color-text-acc);
         }
+      }
+
+      > .field:not(:last-child),
+      > .arrayItem:not(:last-child) {
+        border-bottom: @border-config;
+      }
+
+      > .arrayItem {
+        gap: 0;
+
+        .arrayItemHead {
+          padding: 8px 14px 0;
+        }
+      }
+
+      > .arrayAdd {
+        display: flex;
+        padding: 8px 14px;
+      }
+
+      // Nested groups are cards themselves: inset them from the parent card's edges (matching
+      // the fields' side padding) instead of sharing its borders full-bleed.
+      .setting.group {
+        width: auto;
+        margin: 8px 14px;
       }
     }
   }
