@@ -92,6 +92,33 @@
         margin: 0 !important;
       }
     }
+
+    // Joined: the group's rows share one card with dividers (like the read-only DetailList)
+    // instead of an island per field. For dense contexts, e.g. the block editor pane.
+    &.joined > .content {
+      background-color: var(--color-background-primary);
+      border: @border-config;
+      border-radius: @border-radius-container;
+      box-shadow: 2px 4px 10px 0 rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      gap: 0;
+
+      > .field {
+        background: none;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 8px 14px;
+
+        &:not(:last-child) {
+          border-bottom: @border-config;
+        }
+
+        // The card glow can't render inside overflow:hidden; a left accent bar marks changes.
+        &.changed {
+          box-shadow: inset 3px 0 0 var(--color-text-acc);
+        }
+      }
+    }
   }
 
   &.field {
