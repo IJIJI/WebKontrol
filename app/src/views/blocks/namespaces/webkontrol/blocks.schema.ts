@@ -1,4 +1,4 @@
-import z from "zod";
+﻿import z from "zod";
 import { html } from "lit";
 import { blockSlot, ContainerBlockStyleSchema, CoordinateSchema, GridConfigSchema, TextBlockStyleSchema } from "../../types/schema";
 import { createNamespace } from "../../types/config";
@@ -38,7 +38,8 @@ export const ContainerBlock = ns.defineBlock("container", {
 // TODO: add the option to define grid templates, instead of the layout?
 export const GridBlock = ns.defineBlock("grid", {
   layout: GridConfigSchema.default({ rows: 2, columns: 2 }).meta({ label: "Layout" } satisfies FieldMeta),
-  blocks: z.array(blockSlot()).meta({ label: "Blocks" } satisfies FieldMeta),
+  // Defaulted so a freshly added grid (just its type) is already a valid, empty grid.
+  blocks: z.array(blockSlot()).default([]).meta({ label: "Blocks" } satisfies FieldMeta),
 }, {
   info: { label: "Grid", description: "Arrange blocks in a grid", icon: "grid" },
   render: (config, ctx) => html`<div class="grid">${config.blocks.map((block) => ctx.renderChild(block))}</div>`,
@@ -50,7 +51,7 @@ export const FreeFormBlock = ns.defineBlock("freeform", {
     block: blockSlot({ label: "Block" }),
     position: CoordinateSchema.meta({ label: "Position", description: "In % of the screen" } satisfies FieldMeta),
     size: CoordinateSchema.meta({ label: "Size", description: "In % of the screen" } satisfies FieldMeta),
-  })).meta({ label: "Items" } satisfies FieldMeta),
+  })).default([]).meta({ label: "Items" } satisfies FieldMeta),
 }, {
   info: { label: "Free form", description: "Position blocks freely", icon: "selectWindow" },
   render: (config, ctx) => html`<div class="freeform" style="position:relative">${config.items.map((item) => html`
@@ -77,3 +78,4 @@ export const WEBKONTROL_BLOCKS = [
   FreeFormBlock,
   DateTimeBlock,
 ];
+
