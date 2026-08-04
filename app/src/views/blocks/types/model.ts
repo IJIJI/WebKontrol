@@ -44,10 +44,22 @@ export interface RenderContext {
   renderChild(child: ResolvedBlock): TemplateResult;
 }
 
+/**
+ * Editor-facing presentation of a block type. Travels with the definition (via defineBlock) so
+ * plugin blocks bring their own; the registry exposes it through get()/list().
+ */
+export interface BlockInfo {
+  label: string;
+  description?: string;
+  /** Icon id, resolved via the UI icon registry (absent/unknown ids fall back there). */
+  icon?: string;
+}
+
 //* Model Registration:
 export abstract class AbstractBlockType<TConfig = unknown> {
   abstract readonly key: BlockKey;
   abstract readonly configSchema: z.ZodType<TConfig>;
+  abstract readonly info: BlockInfo;
 
   /** DataSources this block always needs, regardless of config. */
   readonly fixedDataDependencies: readonly DataSourceKey[] = [];
