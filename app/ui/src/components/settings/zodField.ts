@@ -27,6 +27,7 @@ interface ZodLike {
     values?: readonly unknown[]; // literal values
     entries?: Record<string, string>; // enum value map
     defaultValue?: unknown; // .default() value
+    catchall?: unknown; // set on loose objects (z.looseObject); absent on plain z.object
   };
   meta: () => FieldMeta | undefined;
 }
