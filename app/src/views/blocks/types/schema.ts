@@ -1,4 +1,6 @@
 import z from "zod";
+// Type-only: views/types/schema imports this file at runtime, so a value import would be a cycle.
+import type { FieldMeta } from "../../types/schema";
 
 const slug = z.string().min(2).max(18).toLowerCase().regex(/^[a-z][a-z0-9_-]*$/);
 
@@ -89,25 +91,25 @@ export const DimensionSchema = z.number().min(0).max(100);
 export type Dimension = z.infer<typeof DimensionSchema>;
 
 export const CoordinateSchema = z.object({
-  x: DimensionSchema, // Coordinate between 0.00 and 100.00, being from one end to the other of the screen.
-  y: DimensionSchema,
+  x: DimensionSchema.meta({ label: "X" } satisfies FieldMeta), // Coordinate between 0.00 and 100.00, being from one end to the other of the screen.
+  y: DimensionSchema.meta({ label: "Y" } satisfies FieldMeta),
 });
 export type Coordinate = z.infer<typeof CoordinateSchema>;
 
 export const GridConfigSchema = z.object({
-  rows: z.number().int().min(1), 
-  columns: z.number().int().min(1),
+  rows: z.number().int().min(1).meta({ label: "Rows" } satisfies FieldMeta),
+  columns: z.number().int().min(1).meta({ label: "Columns" } satisfies FieldMeta),
 });
 export type GridConfig = z.infer<typeof GridConfigSchema>;
 
 //* Block Styling, added as fields in blocks that need them.
-export const BackgroundStyleShape = { background: z.string().optional() };
-export const PaddingStyleShape = { padding: z.string().optional() }; // TODO: Add top right bottom left?
-export const BorderStyleShape = { border: z.string().optional() }; // TODO: Add border radius?
+export const BackgroundStyleShape = { background: z.string().optional().meta({ label: "Background", description: "CSS background" } satisfies FieldMeta) };
+export const PaddingStyleShape = { padding: z.string().optional().meta({ label: "Padding", description: "CSS padding" } satisfies FieldMeta) }; // TODO: Add top right bottom left?
+export const BorderStyleShape = { border: z.string().optional().meta({ label: "Border", description: "CSS border" } satisfies FieldMeta) }; // TODO: Add border radius?
 export const FontStyleShape = {
-  fontFamily: z.string().optional(),
-  fontSize: z.number().min(8).max(500).default(48),
-  align: z.enum(["left", "center", "right"]).default("center"),
+  fontFamily: z.string().optional().meta({ label: "Font family" } satisfies FieldMeta),
+  fontSize: z.number().min(8).max(500).default(48).meta({ label: "Font size" } satisfies FieldMeta),
+  align: z.enum(["left", "center", "right"]).default("center").meta({ label: "Alignment" } satisfies FieldMeta),
 };
 
 //* Block Styling combination sets:
