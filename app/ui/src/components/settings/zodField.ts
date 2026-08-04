@@ -1,7 +1,7 @@
 import { type FieldMeta } from "../../../../src/views/types/schema";
 
 // TODO: Distinction between ways to render a field? For example select vs buttonselect?
-export type FieldKind = "text" | "url" | "number" | "boolean" | "enum" | "record" | "object" | "unknown"; // TODO Convert to enum
+export type FieldKind = "text" | "url" | "number" | "boolean" | "enum" | "record" | "object" | "array" | "unknown"; // TODO Convert to enum
 
 export interface FieldInfo { // TODO: Union for options? Enum is a type and others can be added.
   kind: FieldKind;
@@ -72,6 +72,8 @@ function classify(core: ZodLike): FieldKind {
       // A loose object (catchall set, e.g. a block slot's AnyBlockConfig) has no closed shape to
       // recurse into — only plain objects are schema-editable.
       return core.def.catchall ? "unknown" : "object";
+    case "array":
+      return "array";
     case "literal":
       return literalKind(core.def.values); // e.g. z.literal(0)
     case "union":
