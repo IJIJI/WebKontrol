@@ -1,6 +1,6 @@
 import z from "zod";
 import type { TemplateResult } from "lit";
-import { AbstractBlockType, type RenderContext, type Resolved } from "./model";
+import { AbstractBlockType, type BlockInfo, type RenderContext, type Resolved } from "./model";
 import type { BlockKey, BlockKeyOf, BlockType, DataField, DataKeyOf, DataSourceKey, NamespaceId } from "./schema";
 import type { BlockTypeRegistry } from "../registry";
 
@@ -11,6 +11,8 @@ type BlockConfigOf<K extends BlockKey, S extends z.ZodRawShape> = { type: K } & 
  * The render function and metadata a block supplies to {@link NamespaceKit.defineBlock}.
  */
 export interface BlockImpl<K extends BlockKey, S extends z.ZodRawShape> {
+  /** Editor-facing presentation (label/description/icon). */
+  info: BlockInfo;
   render: (config: Resolved<BlockConfigOf<K, S>>, ctx: RenderContext) => TemplateResult;
   /** DataSources this block always needs, regardless of config. */
   fixedDataDependencies?: readonly DataSourceKey[];
@@ -63,6 +65,7 @@ export function createNamespace<const N extends NamespaceId>(namespace: N): Name
     return new (class extends AbstractBlockType<Config> {
       readonly key = key;
       readonly configSchema = configSchema;
+      readonly info = impl.info;
       override readonly fixedDataDependencies = impl.fixedDataDependencies ?? [];
 
       render(config: Resolved<Config>, ctx: RenderContext): TemplateResult {
