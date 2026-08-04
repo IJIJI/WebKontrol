@@ -49,8 +49,9 @@ export const GridBlock = ns.defineBlock("grid", {
 export const FreeFormBlock = ns.defineBlock("freeform", {
   items: z.array(z.object({ // TODO: Should these items have their own schema?
     block: blockSlot({ label: "Block" }),
-    position: CoordinateSchema.meta({ label: "Position", description: "In % of the screen" } satisfies FieldMeta),
-    size: CoordinateSchema.meta({ label: "Size", description: "In % of the screen" } satisfies FieldMeta),
+    // Prefaulted so a freshly added (empty) item is already positioned somewhere sensible.
+    position: CoordinateSchema.prefault({ x: 0, y: 0 }).meta({ label: "Position", description: "In % of the screen" } satisfies FieldMeta),
+    size: CoordinateSchema.prefault({ x: 25, y: 25 }).meta({ label: "Size", description: "In % of the screen" } satisfies FieldMeta),
   })).default([]).meta({ label: "Items" } satisfies FieldMeta),
 }, {
   info: { label: "Free form", description: "Position blocks freely", icon: "selectWindow" },
