@@ -105,7 +105,9 @@ export function BlockSlotListSetting({
               onClick={() => onChange(raw.filter((_, j) => j !== index))}
               ariaLabel="Remove block"
             >
-              <Icons.close size={14} />
+              {/* Trash, not ✕: removing an entry deletes the block's config subtree. ✕ is
+                  reserved for non-destructive dismissals (closing panes/modals). */}
+              <Icons.delete size={14} />
             </Button>
           </span>
         ))}
