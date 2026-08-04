@@ -60,10 +60,12 @@ export const AnyBlockConfigSchema = z.looseObject({ type: BlockKeySchema });
 export type AnyBlockConfig = z.infer<typeof AnyBlockConfigSchema>;
 
 // A child-block slot. Marked by both meta and brand. Meta is used while walking the schema, brand is used at compile time to resolve blocks to Resolved<T>.
+// Takes an optional FieldMeta since zod's `.meta()` replaces rather than merges. A slot wanting
+// an editor label must supply it here, in the same bag as the slot marker.
 export const BLOCK_SLOT_META = "blockSlot" as const; // TODO: Unify the slot meta and brand value
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
-export const blockSlot = () =>
-  AnyBlockConfigSchema.meta({ [BLOCK_SLOT_META]: true }).brand<"blockSlot">();
+export const blockSlot = (meta?: FieldMeta) =>
+  AnyBlockConfigSchema.meta({ ...meta, [BLOCK_SLOT_META]: true }).brand<"blockSlot">();
 export type BlockSlot = z.infer<ReturnType<typeof blockSlot>>;
 
 export function isBlockSlot(schema: z.ZodType): boolean {
