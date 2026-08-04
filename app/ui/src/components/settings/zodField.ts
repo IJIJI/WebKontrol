@@ -9,6 +9,9 @@ export interface FieldInfo { // TODO: Union for options? Enum is a type and othe
   meta: FieldMeta | undefined;
   options: string[]; // enum values; empty otherwise
   defaultValue?: unknown; // schema default, if the field has a .default()
+  // The unwrapped core schema (below optional/default/nullable). For `object` fields this is the
+  // ZodObject itself, so callers can recurse via objectFields(core).
+  core: unknown;
 }
 
 // Minimal structural view into the zod internals we introspect. Localizes the unavoidable
