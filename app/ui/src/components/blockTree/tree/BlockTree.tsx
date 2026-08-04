@@ -1,17 +1,19 @@
 import { type JSX } from "react/jsx-runtime";
 
 import "./blockTree.less";
-import { type BlockLike, childBlocks } from "../model/blockUtils";
+import { type BlockLike, type BlockPath, childBlocks, pathEquals, pathKey } from "../model/blockUtils";
 import { BlockChip } from "../presentation/BlockChip";
 
 function TreeNode({
   block,
+  path,
   onSelect,
   selected,
 }: {
   block: BlockLike;
-  onSelect?: (block: BlockLike) => void;
-  selected?: BlockLike;
+  path: BlockPath;
+  onSelect?: (path: BlockPath) => void;
+  selected?: BlockPath;
 }): JSX.Element {
   const children = childBlocks(block);
 
@@ -20,15 +22,25 @@ function TreeNode({
       <div className="nodeRow">
         <BlockChip
           type={block.type}
-          selected={block === selected}
-          onClick={onSelect ? () => onSelect(block) : undefined}
+          selected={selected !== undefined && pathEquals(path, selected)}
+          onClick={onSelect ? () => onSelect(path) : undefined}
         />
       </div>
       {children.length > 0 && (
         <div className="children">
-          {children.map((child) => (
-            <TreeNode key={child.key} block={child.block} onSelect={onSelect} selected={selected} />
-          ))}
+          {children.map((child) => {
+            // childBlocks paths are relative to their parent block; absolute paths address the tree.
+            const childPath = [...path, ...child.path];
+            return (
+              <TreeNode
+                key={pathKey(child.path)}
+                block={child.block}
+                path={childPath}
+                onSelect={onSelect}
+                selected={selected}
+              />
+            );
+          })}
         </div>
       )}
     </div>
@@ -36,19 +48,19 @@ function TreeNode({
 }
 
 // A compact block tree (blocks only) with rounded CSS guide lines. When `onSelect` is given,
-// each block is clickable and the `selected` one is highlighted.
+// each block is clickable and the `selected` one (addressed by path) is highlighted.
 export function BlockTree({
   root,
   onSelect,
   selected,
 }: {
   root: BlockLike;
-  onSelect?: (block: BlockLike) => void;
-  selected?: BlockLike;
+  onSelect?: (path: BlockPath) => void;
+  selected?: BlockPath;
 }): JSX.Element {
   return (
     <div className="blockTree">
-      <TreeNode block={root} onSelect={onSelect} selected={selected} />
+      <TreeNode block={root} path={[]} onSelect={onSelect} selected={selected} />
     </div>
   );
 }
