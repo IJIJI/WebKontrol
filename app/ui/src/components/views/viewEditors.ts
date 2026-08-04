@@ -10,6 +10,7 @@ import { type EntityAppearance } from "../../../../src/common/entityAppearance/s
 import { type DisplayName } from "../../../../src/types/CommonTypes";
 import { type Draft } from "../../common/hooks/DraftSave";
 import { VIEW_TYPE_META } from "./viewMeta";
+import { BlockViewBody } from "./BlockViewBody";
 
 // The draft shape the editor works with: a flat, loosely-typed view config. The mapper reads
 // fields by key, so per-type precision lives in each entry's `schema` (used for rendering + save
@@ -24,6 +25,9 @@ export type ViewEditorValues = Record<string, unknown> & {
 
 export interface ViewBodyProps {
   draft: Draft<ViewEditorValues>;
+  // Page-injected placeholder overrides (e.g. the runtime loadTimeout default), same as the
+  // generic mapper receives, a body delegating to SchemaSettings passes them through.
+  placeholders?: Record<string, string>;
 }
 
 // Everything type-specific the ViewEditor needs to edit one view type. Adding a view type is a
@@ -31,8 +35,10 @@ export interface ViewBodyProps {
 export interface ViewEditorEntry {
   // Member schema: fed to the generic SchemaSettings mapper AND used to safeParse on save.
   schema: ZodObject<ZodRawShape>;
-  // Starting draft for a new view, and the type-specific reset when switching to this type
-  // (the page preserves `name` across the switch).
+  // Starting draft for a new view. Not re-applied when the type <select> changes: fields of the
+  // old type simply stay in the draft (harmless, save safeParses against the new type's schema,
+  // which strips them) and the new type's own fields render from their empty state. That also
+  // means switching away and back doesn't lose what was typed.
   emptyDraft: ViewEditorValues;
   // Custom body component for this type's fields. Omit to use the generic SchemaSettings mapper
   // (the default for simple, flat field types).
@@ -46,9 +52,10 @@ export const VIEW_EDITORS: Record<ViewType, ViewEditorEntry> = {
   },
   blocks: {
     schema: BlockViewConfigSchema,
-    emptyDraft: { type: "blocks", name: {} }, // `root` is supplied by the block editor
-    // TODO: give blocks a recursive block-field editor (likely a BlockSetting, not a divorced
-    // body). Until then `body` is omitted, so the mapper renders `root` read-only via its fallback.
+    // No `root`: an empty slot is the editor's own "pick a block" state, so a new view and a
+    // cleared root take the same path instead of seeding an arbitrary block type here.
+    emptyDraft: { type: "blocks", name: {} },
+    body: BlockViewBody,
   },
 };
 
