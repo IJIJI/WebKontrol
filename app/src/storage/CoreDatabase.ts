@@ -77,7 +77,8 @@ export class CoreDatabase {
         set: { value: validation.data.value },
       });
 
-    this._logger.info("Setting updated:", validation.data);
+    this._logger.info("Setting updated:", { domain, type, key });
+    this._logger.debug("New value:", validation.data.value);
   }
 
   public async getSetting(

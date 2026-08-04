@@ -53,10 +53,8 @@ export class WebServer implements RouteRegistrar {
     if (this._sseClients.size > 0) {
       for (const res of this._sseClients) res.write(this._getSseDataPayload);
     }
-    this._logger.info(
-      `Updated state for ${this._sseClients.size} clients. New state:`,
-      state,
-    );
+    this._logger.info(`Updated state for ${this._sseClients.size} clients.`);
+    this._logger.debug(`New state:`, state);
   }
 
   public setHandlers(handlers: WebServerMutationHandlers): void {
@@ -367,7 +365,7 @@ export class WebServer implements RouteRegistrar {
         );
         res.status(204).send();
         this._logger.info(
-          `Assigned view ${resultId.data} to puppet ${resultId.data}`
+          `Assigned view ${resultBody.data.view} to puppet ${resultId.data}`
         );
       } catch (e) {
         this._logger.error("Failed to assign view to puppet:", resultId.data, e);
@@ -391,12 +389,12 @@ export class WebServer implements RouteRegistrar {
         );
         res.status(204).send();
         this._logger.info(
-          `Assigned view ${resultId.data} to puppet ${resultId.data}`
+          `Unassigned view from puppet ${resultId.data}`
         );
       } catch (e) {
-        this._logger.error("Failed to assign view to puppet:", resultId.data, e);
+        this._logger.error("Failed to unassign view from puppet:", resultId.data, e);
         res.status(500).json({
-          error: e instanceof Error ? e.message : "Failed to assign view to puppet",
+          error: e instanceof Error ? e.message : "Failed to unassign view from puppet",
         });
       }
     });
