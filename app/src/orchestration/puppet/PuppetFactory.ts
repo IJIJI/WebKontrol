@@ -9,9 +9,8 @@ export class PuppetFactory {
     switch (config.type) {
       case "puppeteer":
         return new PuppeteerPuppet(config);
-        break;
       default:
-        throw new Error("Could not find given puppet type!");
+        throw new Error(`Unknown puppet type: ${JSON.stringify((config as { type?: unknown }).type)}`);
     }
   }
 }

@@ -25,7 +25,7 @@ export default function PuppetsPage(): JSX.Element {
         getKey={(p) => p.config.id}
         layout={CollectionLayout.LIST}
         title="Puppets"
-        empty="No puppets connected."
+        empty="No puppets configured."
         renderItem={(p) => {
           const appearance = resolvePuppetAppearance(p.appearance);
           const assignedView = p.assignedView ? state?.views.get(p.assignedView) : undefined;

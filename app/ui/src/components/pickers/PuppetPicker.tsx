@@ -35,7 +35,7 @@ export function PuppetPicker({
       confirmLabel={confirmLabel}
       items={puppets}
       getKey={(p) => p.config.id}
-      empty="No puppets connected."
+      empty="No puppets configured."
       onConfirm={(selected) => onConfirm(selected.map((p) => p.config.id))}
       renderCard={(p) => {
         const appearance = resolvePuppetAppearance(p.appearance);
