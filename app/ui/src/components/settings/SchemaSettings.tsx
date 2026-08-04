@@ -2,6 +2,9 @@ import { type JSX } from "react/jsx-runtime";
 
 import { type FieldMeta } from "../../../../src/views/types/schema";
 import { describeField, objectFields, type FieldInfo, type FieldKind } from "./zodField";
+import { Button } from "../button/Button";
+import { Icons } from "../icons/Icons";
+import { FillStyle, Variant } from "../../common/types/variants";
 import { CollapsibleGroup } from "./CollapsibleGroup";
 import { TextSetting } from "./implementations/TextSetting";
 import { UrlSetting } from "./implementations/UrlSetting";
@@ -35,18 +38,38 @@ function subLens(parent: DraftLens, key: string): DraftLens {
   };
 }
 
+// A lens focused on one element of an array-valued field: like subLens, but a write rebuilds the
+// element and the array around it. `saved` pairs items by index, so after an add/remove the
+// per-field changed/restore markers can point at a shifted item — the group-level dirty tracking
+// (deepEqual on the whole root) stays correct regardless.
+function itemLens(parent: DraftLens, key: string, index: number): DraftLens {
+  const array: unknown[] = Array.isArray(parent.values[key]) ? (parent.values[key] as unknown[]) : [];
+  const savedArray: unknown[] = Array.isArray(parent.saved[key]) ? (parent.saved[key] as unknown[]) : [];
+  const values = (array[index] ?? {}) as Values;
+  return {
+    values,
+    saved: (savedArray[index] ?? {}) as Values,
+    setField: (k, v) => {
+      const copy = [...array];
+      copy[index] = { ...values, [k]: v };
+      parent.setField(key, copy);
+    },
+  };
+}
+
 /**
  * Escape hatch for field kinds this generic mapper does not know about. Tried before the built-in
  * widgets (so it can override them) and applied at every nesting depth; return null to fall
  * through. Keeps domain-specific fields, block slots for one, out of the shared mapper.
- * `path` is the field's enclosing object keys relative to the schema root ([] at the top level),
- * so a custom renderer can address nested fields without walking the schema itself.
+ * `path` is the field's enclosing object keys (and array indices) relative to the schema root
+ * ([] at the top level), so a custom renderer can address nested fields without walking the
+ * schema itself.
  */
 export type CustomFieldRenderer = (
   key: string,
   info: FieldInfo,
   lens: DraftLens,
-  path: readonly string[],
+  path: readonly (string | number)[],
 ) => JSX.Element | null;
 
 // Renders Setting components for a zod object schema, driven by each field's FieldMeta and
@@ -88,15 +111,17 @@ export function SchemaSettings({
     const placeholder = placeholders[key] ?? meta.placeholder ?? defaultPlaceholder(info);
 
     // Same dispatch as fieldElement, unrolled because the bucket depends on which branch renders:
-    // flat fields (and custom widgets) share one group; each top-level object field is its own
-    // sibling section (deeper objects render inline inside it). Advanced folds away regardless.
+    // flat fields (and custom widgets) share one group; each top-level object/array field is its
+    // own sibling section (deeper ones render inline inside it). Advanced folds away regardless.
     const custom = renderCustom?.(key, info, draft, []);
-    const isSection = !custom && info.kind === "object";
+    const isSection = !custom && (info.kind === "object" || info.kind === "array");
     const element =
       custom ??
-      (isSection
+      (info.kind === "object"
         ? objectGroup(key, info, meta, draft, renderCustom, [], joined)
-        : renderField(key, info.kind, info.options, meta, draft, placeholder));
+        : info.kind === "array"
+          ? arrayGroup(key, info, meta, draft, renderCustom, [], joined)
+          : renderField(key, info.kind, info.options, meta, draft, placeholder));
     (meta.advanced ? advanced : isSection ? sections : fields).push(element);
   }
 
@@ -116,8 +141,20 @@ function defaultPlaceholder(info: FieldInfo): string | undefined {
     : undefined;
 }
 
+// A new object seeded with each field's schema default/prefault value (shallow), so the editor
+// shows the same values a parse would fill instead of empty inputs. Fields without a default
+// (e.g. a block slot) stay absent.
+function seedFromDefaults(core: unknown): Values {
+  const seed: Values = {};
+  for (const [key, fieldSchema] of objectFields(core)) {
+    const { defaultValue } = describeField(fieldSchema);
+    if (defaultValue !== undefined) seed[key] = defaultValue;
+  }
+  return seed;
+}
+
 // One field: a caller's custom renderer if it claims the field, else a nested group for plain
-// objects, else a Setting widget.
+// objects, else an item list for arrays, else a Setting widget.
 function fieldElement(
   key: string,
   info: FieldInfo,
@@ -125,13 +162,31 @@ function fieldElement(
   lens: DraftLens,
   placeholder: string | undefined,
   renderCustom: CustomFieldRenderer | undefined,
-  path: readonly string[],
+  path: readonly (string | number)[],
   joined: boolean,
 ): JSX.Element {
   const custom = renderCustom?.(key, info, lens, path);
   if (custom) return custom;
   if (info.kind === "object") return objectGroup(key, info, meta, lens, renderCustom, path, joined);
+  if (info.kind === "array") return arrayGroup(key, info, meta, lens, renderCustom, path, joined);
   return renderField(key, info.kind, info.options, meta, lens, placeholder);
+}
+
+// The meta'd fields of one object level (an object field's shape, or one array item), rendered
+// through the given lens. Shared by objectGroup and arrayGroup.
+function levelFields(
+  core: unknown,
+  lens: DraftLens,
+  renderCustom: CustomFieldRenderer | undefined,
+  path: readonly (string | number)[],
+  joined: boolean,
+): JSX.Element[] {
+  return objectFields(core).flatMap(([key, fieldSchema]) => {
+    const info = describeField(fieldSchema);
+    if (!info.meta) return [];
+    const placeholder = info.meta.placeholder ?? defaultPlaceholder(info);
+    return [fieldElement(key, info, info.meta, lens, placeholder, renderCustom, path, joined)];
+  });
 }
 
 // A nested object field as its own collapsible group, open by default (folding is for skipping,
@@ -143,19 +198,68 @@ function objectGroup(
   meta: FieldMeta,
   lens: DraftLens,
   renderCustom: CustomFieldRenderer | undefined,
-  path: readonly string[],
+  path: readonly (string | number)[],
   joined: boolean,
 ): JSX.Element {
-  const sub = subLens(lens, key);
-  const children = objectFields(info.core).flatMap(([k, fieldSchema]) => {
-    const i = describeField(fieldSchema);
-    if (!i.meta) return [];
-    const placeholder = i.meta.placeholder ?? defaultPlaceholder(i);
-    return [fieldElement(k, i, i.meta, sub, placeholder, renderCustom, [...path, key], joined)];
-  });
+  const children = levelFields(info.core, subLens(lens, key), renderCustom, [...path, key], joined);
   return (
     <CollapsibleGroup key={key} title={meta.label} defaultOpen joined={joined}>
       {children}
+    </CollapsibleGroup>
+  );
+}
+
+// An array-of-objects field: its items listed in one collapsible group, each with a small header
+// (index + remove) above its fields, and an add button that appends an empty item (the schema's
+// defaults/prefaults fill it in). Arrays of anything else fall back to the read-only display.
+function arrayGroup(
+  key: string,
+  info: FieldInfo,
+  meta: FieldMeta,
+  lens: DraftLens,
+  renderCustom: CustomFieldRenderer | undefined,
+  path: readonly (string | number)[],
+  joined: boolean,
+): JSX.Element {
+  const element = (info.core as { element?: unknown }).element;
+  const elementInfo = element === undefined ? undefined : describeField(element);
+  if (elementInfo?.kind !== "object") {
+    return renderField(key, "unknown", [], meta, lens, undefined);
+  }
+
+  const raw: unknown[] = Array.isArray(lens.values[key]) ? (lens.values[key] as unknown[]) : [];
+
+  const items = raw.map((_, index) => (
+    <div className="arrayItem" key={index}>
+      <div className="arrayItemHead">
+        <span className="label">#{index + 1}</span>
+        <Button
+          fillStyle={FillStyle.SKELETON}
+          variant={Variant.DANGER}
+          onClick={() => lens.setField(key, raw.filter((_, j) => j !== index))}
+          ariaLabel="Remove item"
+        >
+          <Icons.delete size={14} />
+        </Button>
+      </div>
+      {levelFields(elementInfo.core, itemLens(lens, key, index), renderCustom, [...path, key, index], joined)}
+    </div>
+  ));
+
+  return (
+    <CollapsibleGroup key={key} title={meta.label} defaultOpen joined={joined}>
+      {[
+        ...items,
+        <div className="arrayAdd" key="add">
+          <Button
+            fillStyle={FillStyle.FILLED}
+            onClick={() => lens.setField(key, [...raw, seedFromDefaults(elementInfo.core)])}
+          >
+            <Icons.add size={14} />
+            <span>Add</span>
+          </Button>
+        </div>,
+      ]}
     </CollapsibleGroup>
   );
 }
