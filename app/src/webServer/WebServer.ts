@@ -311,10 +311,6 @@ export class WebServer implements RouteRegistrar {
       }
     });
 
-    this._app.get("/api/puppets", (_req, res) => {
-      res.json(this._state?.puppets);
-    });
-
     this._app.patch("/api/puppets/:id", async (req, res) => {
       const resultId = PuppetKeySchema.safeParse(req.params.id);
 

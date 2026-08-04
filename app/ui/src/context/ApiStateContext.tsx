@@ -24,7 +24,8 @@ import { VIEW_TYPE_META } from "../components/views/viewMeta";
 
 export interface UiPuppetState extends PuppetDataBundle {
   assignedView?: ViewKey;
-  updateRuntime: (runtime: Partial<PuppetRuntime>) => Promise<void>; // TODO: Remove?
+  // Unused today (runtime is orchestrator-driven via assign), kept for future settable runtime variables.
+  updateRuntime: (runtime: Partial<PuppetRuntime>) => Promise<void>;
   updateAppearance: (appearance: EntityAppearance) => Promise<void>;
   assignView: (view: ViewKey) => Promise<void>;
   unassignView: () => Promise<void>;
