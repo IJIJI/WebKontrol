@@ -1,28 +1,12 @@
+import z from "zod";
+
+import { isBlockSlot } from "../../../../../src/views/blocks/types/schema";
+import { unwrap } from "../../../../../src/views/blocks/resolver";
+import { blockDef } from "./registry";
+
 export interface BlockLike {
   type: string;
   [key: string]: unknown;
-}
-
-// Block type keys are namespaced `<namespace>::block::<name>`. Split one into its parts; an
-// unrecognised shape has no namespace and keeps the whole string as its name.
-const DEFAULT_NAMESPACE = "webkontrol";
-export interface BlockTypeParts {
-  namespace: string | null;
-  name: string;
-}
-export function blockTypeParts(type: string): BlockTypeParts {
-  const match = /^(.+)::block::(.+)$/.exec(type);
-  if (!match) return { namespace: null, name: type };
-  return { namespace: match[1], name: match[2] };
-}
-
-// A block's friendly label: drop the `::block::` segment, and the namespace too when it's the
-// default one, so `webkontrol::block::grid` shows as `grid`, while a foreign `acme::block::grid`
-// keeps its namespace as `acme::grid`.
-export function blockLabel(type: string): string {
-  const { namespace, name } = blockTypeParts(type);
-  if (namespace === null) return type;
-  return namespace === DEFAULT_NAMESPACE ? name : `${namespace}::${name}`;
 }
 
 // Duck-typed: any object with a string `type` is treated as a (child) block.
@@ -35,36 +19,47 @@ export function isBlock(v: unknown): v is BlockLike {
   );
 }
 
-// Collect the blocks reachable from a value *without descending through a block*: a block is
-// returned as-is (its own children are walked later by the tree), while plain objects and arrays
-// are searched for blocks nested inside them. This finds blocks tucked into wrapper objects, e.g.
-// freeform's `items[].block`. Scalars are skipped — this is a blocks-only view.
-// TODO: replace with a schema-driven walk over BLOCK_SLOT_META once the block registry lands (#8).
-function collectBlocks(
+// Walk a config value guided by its schema, collecting the block in every slot. Mirrors the
+// shape of the resolver's resolveValue walk (slot -> collect, object -> shape keys, array ->
+// elements), but collects paths instead of resolving. `path` grows like `items[0].block`.
+function collectSlots(
+  schema: z.ZodType,
   value: unknown,
-  key: string,
+  path: string,
   out: { key: string; block: BlockLike }[],
 ): void {
-  if (isBlock(value)) {
-    out.push({ key, block: value });
+  if (value === undefined || value === null) return;
+
+  const core = unwrap(schema);
+
+  if (isBlockSlot(core)) {
+    if (isBlock(value)) out.push({ key: path, block: value });
     return;
   }
-  if (Array.isArray(value)) {
-    value.forEach((item, i) => collectBlocks(item, `${key}[${i}]`, out));
+
+  if (core instanceof z.ZodObject) {
+    const shape = core.shape as Record<string, z.ZodType>;
+    const source = value as Record<string, unknown>;
+    for (const key of Object.keys(shape)) {
+      collectSlots(shape[key], source[key], path === "" ? key : `${path}.${key}`, out);
+    }
     return;
   }
-  if (typeof value === "object" && value !== null) {
-    for (const [k, v] of Object.entries(value)) collectBlocks(v, `${key}.${k}`, out);
+
+  if (core instanceof z.ZodArray) {
+    const element = core.element as z.ZodType;
+    (value as unknown[]).forEach((item, i) => collectSlots(element, item, `${path}[${i}]`, out));
   }
 }
 
-// A block's child blocks, wherever they're nested within its config.
+// A block's child blocks with their config paths, found by walking the block's registered config
+// schema over its value. An unregistered type is a leaf: without a schema there is nothing to
+// walk, so stale configs render as childless nodes instead of crashing the tree.
 export function childBlocks(block: BlockLike): { key: string; block: BlockLike }[] {
+  const def = blockDef(block.type);
+  if (!def) return [];
   const out: { key: string; block: BlockLike }[] = [];
-  for (const [key, value] of Object.entries(block)) {
-    if (key === "type") continue;
-    collectBlocks(value, key, out);
-  }
+  collectSlots(def.configSchema as z.ZodType, block, "", out);
   return out;
 }
 
