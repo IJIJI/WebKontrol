@@ -14,6 +14,27 @@ import { SettingGroup } from "./SettingGroup";
 
 type Values = Record<string, unknown>;
 
+// The slice of a Draft the schema mapper needs. A full useDraft satisfies it, and nested object
+// fields get a derived lens whose setField writes back into the parent's field, so recursion
+// never needs paths, just closures.
+export interface DraftLens { // TODO move to useDraft and make it implement it, or something similar.
+  values: Values;
+  saved: Values;
+  setField: (key: string, value: unknown) => void;
+}
+
+// A lens focused on one object-valued field of `parent`: reads narrow into that object, and a
+// write rebuilds the parent field immutably. Dirty tracking stays with the root useDraft, whose
+// deepEqual already compares object values structurally.
+function subLens(parent: DraftLens, key: string): DraftLens {
+  const values = (parent.values[key] ?? {}) as Values;
+  return {
+    values,
+    saved: (parent.saved[key] ?? {}) as Values,
+    setField: (k, v) => parent.setField(key, { ...values, [k]: v }),
+  };
+}
+
 // Renders Setting components for a zod object schema, driven by each field's FieldMeta and
 // wired through a useDraft. Fields without meta are skipped (e.g. the `type` discriminator);
 // `exclude` skips fields the page renders itself (e.g. name, in the top row). Advanced fields
