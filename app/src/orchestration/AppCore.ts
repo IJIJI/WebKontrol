@@ -77,9 +77,10 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
   }
 
   public async init(): Promise<void> {
-    if(this._isInit){
-      this._logger.warn("Init called on already initialised AppCore. Disregarding.");
+    if (this._isInit) {
+      return this._logger.warn("Init called on already initialised AppCore. Disregarding.");
     }
+    this._isInit = true;
     this._logger.important("Starting AppCore...");
 
     await this._systemManager.init();
