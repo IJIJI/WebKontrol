@@ -1,5 +1,4 @@
 import EventEmitter from "node:events";
-import * as path from "node:path";
 import { Logger } from "../logging/Logger";
 import { ConnectionState } from "../types/CommonTypes";
 import type {
@@ -21,8 +20,6 @@ export type PuppetEvents<TConfig extends BasePuppetConfig> = {
 export abstract class AbstractPuppet<
   TConfig extends BasePuppetConfig = BasePuppetConfig,
 > extends EventEmitter<PuppetEvents<TConfig>> {
-
-  private readonly _imgFolder: string;
 
   protected _logger!: Logger;
   protected _store!: PuppetStore;
@@ -48,15 +45,8 @@ export abstract class AbstractPuppet<
   constructor(config: TConfig) {
     super();
     this._config = config;
-    
+
     this._logger = new Logger(this._getLogLabels());
-    
-    this._imgFolder = path.join(
-      process.cwd(),
-      "db",
-      "images",
-      `${this._config.id}`,
-    );
   }
 
   protected abstract _doInit(): Promise<void>;
@@ -64,12 +54,6 @@ export abstract class AbstractPuppet<
   protected abstract _doSetTarget(target: PuppetTarget): Promise<void>;
 
   protected abstract _getTargetInfo(): Promise<TargetInfo> | TargetInfo;
-
-  // The following is disabled, as the screenshot function is to be implemented optionally in extending classes.
-  // eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
-  protected async _doScreenshot(path: string): Promise<void> {
-    throw new Error("Screenshot not implemented for this puppet"); // TODO: Fail Silently or add another way to differentiate between fails and not implemented? Error type?
-  }
 
   getConfig(): TConfig {
     return this._config;
@@ -216,20 +200,4 @@ export abstract class AbstractPuppet<
     // TODO: Add a way to differentiate between a load fail and a library fail. -> Error types?
   }
 
-  // TODO: Errors if the folder does not exist. Fix!
-  // TODO: Should this have try and catch?
-  // TODO: Use some sort of filename generator and store index in db
-  // TODO: Use db entry as return type.
-  async getScreenshot(): Promise<string> {
-    if (!this._isInit) throw new Error("Puppet not initialized");
-
-    const imgPath: string = path.join( // TODO: Make generate folders in a better way.
-      this._imgFolder,
-      `${new Date().toISOString()}.png`,
-    );
-
-    await this._doScreenshot(imgPath); // TODO: Multiple image history storage? In DB?
-
-    return imgPath;
-  }
 }
