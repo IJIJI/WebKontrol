@@ -9,8 +9,9 @@ import type { BlockTypeRegistry } from "./registry";
  * wrappers expose `def.innerType`; containers (object/array/union) do not, so this
  * stops at the first meaningful schema. Missing a wrapper would silently skip the
  * slots inside it, so peel generically rather than per-type.
+ * Exported: the admin's block-tree walk (blockUtils.childBlocks) peels the same way.
  */
-function unwrap(schema: z.ZodType): z.ZodType {
+export function unwrap(schema: z.ZodType): z.ZodType {
   let s: z.ZodType = schema;
   let inner = (s.def as { innerType?: z.ZodType }).innerType;
   while (inner) {
