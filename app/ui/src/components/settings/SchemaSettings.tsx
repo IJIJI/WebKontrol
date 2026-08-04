@@ -36,9 +36,10 @@ function subLens(parent: DraftLens, key: string): DraftLens {
 }
 
 // Renders Setting components for a zod object schema, driven by each field's FieldMeta and
-// wired through a useDraft. Fields without meta are skipped (e.g. the `type` discriminator);
-// `exclude` skips fields the page renders itself (e.g. name, in the top row). Advanced fields
-// (meta.advanced) fold into a collapsible section, omitted entirely when there are none.
+// wired through a useDraft (or any DraftLens). Fields without meta are skipped (e.g. the `type`
+// discriminator); `exclude` skips fields the page renders itself (e.g. name, in the top row).
+// Advanced fields (meta.advanced) fold into a collapsible section, omitted entirely when there
+// are none. Plain nested objects render as their own collapsible group, recursively.
 export function SchemaSettings({
   schema,
   draft,
@@ -119,7 +120,7 @@ function renderField(
   kind: FieldKind,
   options: string[],
   meta: FieldMeta,
-  draft: Draft<Values>,
+  draft: DraftLens,
   placeholder: string | undefined,
 ): JSX.Element {
   const title = meta.label;
