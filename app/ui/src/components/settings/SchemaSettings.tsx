@@ -47,7 +47,7 @@ export function SchemaSettings({
   placeholders = {},
 }: {
   schema: ZodObject<ZodRawShape>; // the current view type's member schema (any zod object)
-  draft: Draft<Values>;
+  draft: DraftLens;
   exclude?: string[];
   advancedTitle?: string;
   placeholders?: Record<string, string>; // per-key placeholder overrides (e.g. a runtime default)
@@ -79,6 +79,42 @@ export function SchemaSettings({
       </SettingGroup>
       {advanced.length > 0 && <CollapsibleGroup title={advancedTitle}>{advanced}</CollapsibleGroup>}
     </>
+  );
+}
+
+// The field's schema .default() as a placeholder string, for primitive defaults only.
+function defaultPlaceholder(info: FieldInfo): string | undefined {
+  return typeof info.defaultValue === "string" || typeof info.defaultValue === "number"
+    ? String(info.defaultValue)
+    : undefined;
+}
+
+// One field: a nested group for plain objects, a Setting widget for everything else.
+function fieldElement(
+  key: string,
+  info: FieldInfo,
+  meta: FieldMeta,
+  lens: DraftLens,
+  placeholder: string | undefined,
+): JSX.Element {
+  if (info.kind === "object") return objectGroup(key, info, meta, lens);
+  return renderField(key, info.kind, info.options, meta, lens, placeholder);
+}
+
+// A nested object field as its own fold-away group, its fields wired through a sub-lens.
+// The advanced flag is only honoured at the top level; nested fields render flat.
+function objectGroup(key: string, info: FieldInfo, meta: FieldMeta, lens: DraftLens): JSX.Element {
+  const sub = subLens(lens, key);
+  const children = objectFields(info.core).flatMap(([k, fieldSchema]) => {
+    const i = describeField(fieldSchema);
+    if (!i.meta) return [];
+    const placeholder = i.meta.placeholder ?? defaultPlaceholder(i);
+    return [fieldElement(k, i, i.meta, sub, placeholder)];
+  });
+  return (
+    <CollapsibleGroup key={key} title={meta.label}>
+      {children}
+    </CollapsibleGroup>
   );
 }
 
