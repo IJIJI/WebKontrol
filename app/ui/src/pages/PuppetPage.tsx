@@ -29,7 +29,6 @@ export default function PuppetPage(): JSX.Element {
     { label: "ID", value: puppet.config.id, copy: puppet.config.id },
     { label: "Name", value: puppet.config.name.long },
     { label: "Short name", value: puppet.config.name.short },
-    { label: "Load timeout", value: `${puppet.runtime.load_timout} ms` },
   ];
 
   const assignedRows: DetailRow[] = [
@@ -49,9 +48,12 @@ export default function PuppetPage(): JSX.Element {
   if (assignedView) assignedRows.push({ label: "Type", value: <ViewTypeChip type={assignedView.config.type} /> });
 
   const targetInfo = puppet.info.target_info;
+  const { load_timout: loadTimeout } = puppet.runtime;
   const pageRows: DetailRow[] = [
     { label: "Title", value: targetInfo?.title ?? "-" },
     { label: "URL", value: targetInfo?.url ?? "-", copy: targetInfo?.url },
+    // Runtime value, resolved from the shown view's config on navigation (0 disables it).
+    { label: "Load timeout", value: loadTimeout === 0 ? "Disabled" : `${loadTimeout} ms` },
   ];
   if (targetInfo?.description) pageRows.push({ label: "Description", value: targetInfo.description });
   if (targetInfo?.screenshot)
