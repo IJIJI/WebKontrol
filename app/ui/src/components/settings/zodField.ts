@@ -18,7 +18,7 @@ export interface FieldInfo { // TODO: Union for options? Enum is a type and othe
 interface ZodLike {
   def: {
     type: string;
-    innerType?: ZodLike; // optional/default wrap
+    innerType?: ZodLike; // optional/default/nullable wrap
     format?: string; // string sub-format, e.g. "url"
     options?: readonly ZodLike[]; // union members
     values?: readonly unknown[]; // literal values
