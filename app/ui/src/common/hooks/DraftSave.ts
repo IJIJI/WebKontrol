@@ -1,16 +1,36 @@
 import { useMemo, useState } from "react";
 
 
-export interface Draft<T extends Record<string, unknown>> {
+// Everything a save bar needs: whether there are edits, how to throw them away, how to commit
+// them. A single draft and an aggregate of several both satisfy this, so they're interchangeable.
+export interface Savable {
+  anyChanged: boolean;
+  revertAll: () => void;
+  save: SaveFn;
+}
+
+export interface Draft<T extends Record<string, unknown>> extends Savable {
   saved: T;
   patch: Partial<T>;
   values: T;
 
   setField: <U extends keyof T>(key: U, value: T[U]) => void;
   revertField: (key: keyof T) => void;
-  revertAll: () => void;
   isChanged: (key: keyof T) => boolean;
-  anyChanged: () => boolean;
+}
+
+// Runs a save and clears the draft only once it resolves, so a failed save leaves the edits in
+// place to retry. The rejection is logged but not rethrown: the api layer has already toasted it,
+// and rethrowing would only surface as an unhandled rejection in the SaveBar that invoked this.
+export type SaveFn = (fn: () => unknown) => Promise<void>;
+
+async function runSave(fn: () => unknown, revert: () => void): Promise<void> {
+  try {
+    await fn();
+    revert();
+  } catch (error) {
+    console.error("Save failed; keeping the draft.", error);
+  }
 }
 
 // Structural equality, treating an `undefined`-valued key as absent (JSON semantics). Object-valued
@@ -56,34 +76,29 @@ export function useDraft<T extends Record<string, unknown>>(saved: T | undefined
 
   const revertAll = (): void => setPatch({});
 
+  const save: SaveFn = (fn) => runSave(fn, revertAll);
+
   const isChanged = (key: keyof T): boolean => key in patch;
-  const anyChanged = () => Object.keys(patch).length > 0;
+  const anyChanged = Object.keys(patch).length > 0;
 
   return {
     saved: safeSaved, values, patch,
     setField,
     revertField, revertAll,
-    isChanged, anyChanged
+    isChanged, anyChanged,
+    save,
   }
 }
 
-// TODO: Add apply hook in draft and applyAll here?
-export function aggregateDrafts<V extends Record<string, Draft<any>>>(
-  drafts: V,
-): {
-  anyChanged: boolean;
-  patches: { [W in keyof V]: V[W]["patch"] };
-  revertAll: () => void;
-} {
-  const entries = Object.entries(drafts) as [keyof V, Draft<any>][];
+// Treat several drafts as one: dirty if any is, and reverting (whether discarded or after a
+// successful save) applies to all of them. The save callback commits them all, usually as a
+// Promise.all under a single toast. Returns a Savable, so aggregates compose.
+export function aggregateDrafts(drafts: Savable[]): Savable {
+  const revertAll = (): void => drafts.forEach((draft) => draft.revertAll());
 
-  const anyChanged = entries.some(([, draft]) => draft.anyChanged());
-  
-  const patches = Object.fromEntries(
-    entries.map(([key, draft]) => [key, draft.patch]),
-  ) as { [W in keyof V]: V[W]["patch"] };
-
-  const revertAll = (): void => entries.forEach(([, draft]) => draft.revertAll());
-
-  return {anyChanged, patches, revertAll};
+  return {
+    anyChanged: drafts.some((draft) => draft.anyChanged),
+    revertAll,
+    save: (fn) => runSave(fn, revertAll),
+  };
 }
