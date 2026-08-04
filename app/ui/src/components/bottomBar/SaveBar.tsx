@@ -6,6 +6,7 @@ import { Button } from "../button/Button";
 import { Variant } from "../../common/types/variants";
 import { Icons } from "../icons/Icons";
 import { useState } from "react";
+import { useUnsavedPrompt } from "../../common/hooks/useUnsavedPrompt";
 
 export function SaveBar({
   visible,
@@ -18,6 +19,10 @@ export function SaveBar({
 }): JSX.Element {
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
+
+  // The bar is visible exactly while there are unsaved changes, so it doubles as the one place
+  // every draft page gets the leave-warning from.
+  useUnsavedPrompt(visible);
 
   const doSave = async (): Promise<void> => {
     setIsSaving(true);
