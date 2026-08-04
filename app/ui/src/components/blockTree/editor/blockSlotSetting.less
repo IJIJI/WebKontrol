@@ -1,0 +1,47 @@
+// A block slot's control: the block that fills it plus its actions.
+.blockSlot,
+.blockSlotList {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+// A list of slots stacks its rows, each row laid out like a single slot.
+.blockSlotList {
+  flex-direction: column;
+  align-items: stretch;
+
+  .slotRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+// The block itself: a chip that opens it, filling the row so the actions sit at the end.
+.slotBlock {
+  display: inline-flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+
+  background: none;
+  border: 0;
+  padding: 2px;
+  cursor: pointer;
+  border-radius: @border-radius-md;
+  transition: background-color @button-animation-time ease;
+
+  &:hover,
+  &:focus {
+    background-color: var(--color-border-tertiary);
+  }
+}
+
+// The block description shown beside a block's name while picking one.
+.blockPickerHint {
+  color: var(--color-text-tertiary);
+  font-size: 0.85em;
+}
