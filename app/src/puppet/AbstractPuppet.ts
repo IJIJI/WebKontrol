@@ -149,7 +149,7 @@ export abstract class AbstractPuppet<
       this._logger.info("Appied runtime.");
     } catch (error) {
       await this._updateInfo({ state: ConnectionState.FAILED });
-      return this._logger.fatal("Failed to initialize", error);
+      this._logger.error("Failed to initialize", error);
     }
   }
 
