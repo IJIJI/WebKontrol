@@ -48,7 +48,7 @@ export function describeField(schema: unknown): FieldInfo {
 
   const kind = classify(core);
   const options = kind === "enum" ? Object.values(core.def.entries ?? {}) : [];
-  return { kind, optional, meta, options, defaultValue };
+  return { kind, optional, meta, options, defaultValue, core };
 }
 
 function classify(core: ZodLike): FieldKind {
