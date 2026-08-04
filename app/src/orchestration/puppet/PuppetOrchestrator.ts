@@ -211,11 +211,15 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
   public async init(): Promise<void> {
     if (this._hasStarted)
       return this._logger.error("Attempted to initialised, but is already started!");
+    this._hasStarted = true;
 
     this._store = new PuppetOrchestratorStore();
     const runtime = await this._store.loadRuntime(); // TODO: All fields have defaults. Will this ever be null, store uses the schema to parse.
     if (runtime) {
-      this.updateRuntime(runtime);
+      // Adopt and announce the loaded runtime directly; updateRuntime would re-save
+      // to the store what was just loaded from it.
+      this._runtime = runtime;
+      this.emit('runtime_update', this.getRuntime());
     }
     else {
       this._logger.debug("No runtime found, using defaults.");
