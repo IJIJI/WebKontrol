@@ -113,15 +113,19 @@ export const FontStyleShape = {
 };
 
 //* Block Styling combination sets:
-export const ContainerBlockStyleSchema = z.object({ //* Prettymuch all blocks are containers, except things like a website or a grid.
+// Composed from the shapes above, exported prefaulted: an omitted style parses into its inner
+// defaults, so a bare `{type}` block is valid without every use site remembering `.prefault({})`.
+const ContainerBlockStyleShape = { //* Prettymuch all blocks are containers, except things like a website or a grid.
   ...BackgroundStyleShape,
   ...PaddingStyleShape,
   ...BorderStyleShape,
-});
+};
+export const ContainerBlockStyleSchema = z.object(ContainerBlockStyleShape).prefault({});
 export type ContainerBlockStyle = z.infer<typeof ContainerBlockStyleSchema>;
 
-export const TextBlockStyleSchema = ContainerBlockStyleSchema.extend({
+export const TextBlockStyleSchema = z.object({
+  ...ContainerBlockStyleShape,
   ...FontStyleShape,
-});
+}).prefault({});
 
 
