@@ -19,7 +19,8 @@
     "format": "prettier --write .",
     "lint": "eslint .",
     "build:view": "tsx src/views/client/buildCli.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json",
+    "check": "tsx ui/src/components/blockTree/model/blockUtils.check.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
