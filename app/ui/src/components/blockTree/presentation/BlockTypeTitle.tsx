@@ -1,20 +1,20 @@
 import { type JSX } from "react/jsx-runtime";
 
-import { blockTypeParts } from "../model/blockUtils";
+import { blockDef } from "../model/registry";
 
-// A block's type as a colored `namespace › name` breadcrumb. The namespace is dropped when the
-// key has no recognisable namespace.
+// A block's type as a colored `namespace › label` breadcrumb: the namespace segment of its key
+// plus the registry label. Unregistered types show their raw key without a namespace part.
 export function BlockTypeTitle({ type }: { type: string }): JSX.Element {
-  const { namespace, name } = blockTypeParts(type);
+  const def = blockDef(type);
   return (
-    <span className="blockTypeTitle">
-      {namespace !== null && (
+    <span className="blockTypeTitle" title={type}>
+      {def && (
         <>
-          <span className="ns">{namespace}</span>
+          <span className="ns">{def.key.split("::")[0]}</span>
           <span className="sep">›</span>
         </>
       )}
-      <span className="name">{name}</span>
+      <span className="name">{def?.info.label ?? type}</span>
     </span>
   );
 }
