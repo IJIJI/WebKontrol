@@ -8,13 +8,12 @@ import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { type UiPuppetState, useApi } from "../context/ApiStateContext";
 import { resolvePuppetAppearance } from "../common/appearance";
 import { ViewChip } from "../components/views/ViewChip";
-import { ViewPicker } from "../components/pickers/ViewPicker";
+import { AssignToPuppetModal } from "../components/puppets/AssignToPuppetModal";
 import { useState } from "react";
 
 export default function PuppetsPage(): JSX.Element {
   const { state } = useApi();
   const puppets = state ? [...state.puppets.values()] : [];
-  const views = state ? [...state.views.values()] : [];
 
   const [selectedPuppet, setSelectedPuppet] = useState<UiPuppetState | undefined>(undefined);
 
@@ -45,28 +44,16 @@ export default function PuppetsPage(): JSX.Element {
               id: "assign",
               label: "Assign",
               icon: <Icons.installDesktop />,
-              onClick: () => {
-                void setSelectedPuppet(p);
-              },
+              onClick: () => setSelectedPuppet(p),
             },
           ]
         };
         }}
       />
-      <ViewPicker
+      <AssignToPuppetModal
         open={selectedPuppet != undefined}
         onClose={() => setSelectedPuppet(undefined)}
-        views={views}
-        title={
-          <span>
-            Assign view to{" "}
-            <b>
-              <code>{selectedPuppet?.config.name.long}</code>
-            </b>
-          </span>
-        }
-        confirmLabel="Assign"
-        onConfirm={(viewKey) => selectedPuppet?.assignView(viewKey)}
+        puppet={selectedPuppet}
       />
     </>
   );

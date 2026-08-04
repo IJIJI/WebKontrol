@@ -2,7 +2,7 @@ import { useState } from "react";
 import { type JSX } from "react/jsx-runtime";
 
 import { useNavigate } from "react-router-dom";
-import { useApi, type UiPuppetState } from "../../context/ApiStateContext";
+import { type UiPuppetState } from "../../context/ApiStateContext";
 import { Icons } from "../icons/Icons";
 import { Icon } from "../icons/Icon";
 import { Button } from "../button/Button";
@@ -10,15 +10,12 @@ import { FillStyle } from "../../common/types/variants";
 import { Dropdown, type DropdownItem } from "../dropdown/Dropdown";
 import { EntityHeader } from "../entityHeader/EntityHeader";
 import { StatusPill } from "../pill/statusPill/StatusPill";
-import { ViewPicker } from "../pickers/ViewPicker";
+import { AssignToPuppetModal } from "./AssignToPuppetModal";
 import { resolvePuppetAppearance } from "../../common/appearance";
 
 export function PuppetHeader({ puppet }: { puppet: UiPuppetState }): JSX.Element {
-  const { state } = useApi();
   const navigate = useNavigate();
   const [assignOpen, setAssignOpen] = useState(false);
-
-  const views = state ? [...state.views.values()] : [];
 
   const appearance = resolvePuppetAppearance(puppet.appearance);
 
@@ -47,20 +44,10 @@ export function PuppetHeader({ puppet }: { puppet: UiPuppetState }): JSX.Element
           </>
         }
       />
-      <ViewPicker
+      <AssignToPuppetModal
         open={assignOpen}
         onClose={() => setAssignOpen(false)}
-        views={views}
-        title={
-          <span>
-            Assign view to{" "}
-            <b>
-              <code>{puppet.config.name.long}</code>
-            </b>
-          </span>
-        }
-        confirmLabel="Assign"
-        onConfirm={(viewKey) => puppet.assignView(viewKey)}
+        puppet={puppet}
       />
     </>
   );
