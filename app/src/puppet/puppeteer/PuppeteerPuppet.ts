@@ -73,6 +73,9 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
   protected async _getTargetInfo(): Promise<TargetInfo> {
     const result: TargetInfo = {};
 
+    // The final URL after redirects — can differ from the runtime target.
+    result.url = this._page.url();
+
     const title = await this._page.title();
 
     if (title) {
