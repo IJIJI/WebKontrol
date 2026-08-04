@@ -6,10 +6,10 @@ import { ShareModal } from "../modal/ShareModal";
 import { Button } from "../button/Button";
 import { FillStyle } from "../../common/types/variants";
 import { Icons } from "../icons/Icons";
-import { AssignViewModal } from "./AssignViewModal";
+import { AssignToViewModal } from "./AssignToViewModal";
 
 // Share flow for a view: the generic ShareModal (QR + copyable link) plus the two view-specific
-// actions — open the served page, or assign the view to a puppet (the AssignViewModal stacks on top).
+// actions, open the served page, or assign the view to a puppet (the AssignToViewModal stacks on top).
 // Controlled + nullable `view` so the same instance serves the header and a collection row.
 export function ShareViewModal({
   open,
@@ -58,7 +58,7 @@ export function ShareViewModal({
           </>
         }
       />
-      <AssignViewModal
+      <AssignToViewModal
         open={assignOpen}
         onClose={() => setAssignOpen(false)}
         view={view}

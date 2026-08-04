@@ -6,7 +6,7 @@ import { PuppetPicker } from "../pickers/PuppetPicker";
 
 // The "assign this view to a puppet" flow. Owns the view-specific messaging and the 1-vs-many
 // branch: a single puppet gets a confirmation, several get the picker grid. Both call `view.assign`.
-export function AssignViewModal({
+export function AssignToViewModal({
   open,
   onClose,
   view,

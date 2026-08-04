@@ -6,7 +6,7 @@ import { CollectionLayout } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
 import { type UiViewState, useApi } from "../context/ApiStateContext";
-import { AssignViewModal } from "../components/views/AssignViewModal";
+import { AssignToViewModal } from "../components/views/AssignToViewModal";
 import { ShareViewModal } from "../components/views/ShareViewModal";
 import { useState } from "react";
 import { ViewStatusPill } from "../components/views/ViewStatusPill";
@@ -65,7 +65,7 @@ export default function ViewsPage(): JSX.Element {
         };
       }}
     />
-    <AssignViewModal
+    <AssignToViewModal
       open={selectedView != undefined}
       onClose={() => setSelectedView(undefined)}
       view={selectedView}

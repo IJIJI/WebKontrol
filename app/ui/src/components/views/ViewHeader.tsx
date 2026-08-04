@@ -9,7 +9,7 @@ import { Button } from "../button/Button";
 import { FillStyle } from "../../common/types/variants";
 import { Dropdown, type DropdownItem } from "../dropdown/Dropdown";
 import { EntityHeader } from "../entityHeader/EntityHeader";
-import { AssignViewModal } from "./AssignViewModal";
+import { AssignToViewModal } from "./AssignToViewModal";
 import { DeleteViewModal } from "./DeleteViewModal";
 import { DuplicateViewModal } from "./DuplicateViewModal";
 import { ShareViewModal } from "./ShareViewModal";
@@ -64,7 +64,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
           </>
         }
       />
-      <AssignViewModal
+      <AssignToViewModal
         open={assignOpen}
         onClose={() => setAssignOpen(false)}
         view={view}
