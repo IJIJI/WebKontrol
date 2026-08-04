@@ -225,6 +225,20 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
       this._logger.debug("No runtime found, using defaults.");
     }
 
+    // Drop assignments for puppets no longer in the config, so removed puppets don't
+    // leave ghost entries behind (the view-side mirror of this is onViewRemoved).
+    const assignments = { ...this._runtime.assignments };
+    let pruned = false;
+    for (const id of Object.keys(assignments)) {
+      if (!this._puppets.has(id)) {
+        delete assignments[id];
+        pruned = true;
+      }
+    }
+    if (pruned) {
+      await this.updateRuntime({ assignments });
+      this._logger.info("Pruned assignments of puppets not in the config.");
+    }
 
     // Init each puppet, then navigate it to its assigned view (re-resolved from the
     // assignment, so the orchestrator, not the puppet's cached target, is authoritative).
