@@ -66,7 +66,7 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
   }
 
   protected async _doSetTarget(target: PuppetTarget): Promise<void> {
-    await this._page.goto(target, { timeout: this._runtime.load_timout });
+    await this._page.goto(target, { timeout: this._runtime.load_timeout });
   }
 
   // TODO: Add url and image fetching?

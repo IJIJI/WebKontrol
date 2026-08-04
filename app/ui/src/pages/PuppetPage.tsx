@@ -48,7 +48,7 @@ export default function PuppetPage(): JSX.Element {
   if (assignedView) assignedRows.push({ label: "Type", value: <ViewTypeChip type={assignedView.config.type} /> });
 
   const targetInfo = puppet.info.target_info;
-  const { load_timout: loadTimeout } = puppet.runtime;
+  const { load_timeout: loadTimeout } = puppet.runtime;
   const pageRows: DetailRow[] = [
     { label: "Title", value: targetInfo?.title ?? "-" },
     { label: "URL", value: targetInfo?.url ?? "-", copy: targetInfo?.url },

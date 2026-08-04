@@ -200,7 +200,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     if (!vm || viewKey === undefined || !view) return BLANK_PUPPET_TARGET;
     return {
       target: `${this._serveBase}${vm.viewPath(viewKey)}`,
-      load_timout: view.getConfig().loadTimeout ?? vm.getDefaultLoadTimeout(),
+      load_timeout: view.getConfig().loadTimeout ?? vm.getDefaultLoadTimeout(),
     };
   }
 

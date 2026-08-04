@@ -43,11 +43,11 @@ export const LoadTimeoutSchemaDefault = LoadTimeoutSchema.default(LOAD_TIMEOUT_S
 // Puppet Runtime
 export const PuppetRuntimeShape = z.object({
   target: PuppetTargetSchema, // TODO should this be a view? Or should the viewmanager supply the target? Should it have a target field with the url and timeout + etc?
-  load_timout: LoadTimeoutSchema, // 0 disables the timeout
+  load_timeout: LoadTimeoutSchema, // 0 disables the timeout
 });
 
 export const PuppetRuntimeSchema = PuppetRuntimeShape.extend({
-  load_timout: PuppetRuntimeShape.shape.load_timout.default(LOAD_TIMEOUT_SCHEMA_DEFAULT_VAL),
+  load_timeout: PuppetRuntimeShape.shape.load_timeout.default(LOAD_TIMEOUT_SCHEMA_DEFAULT_VAL),
 });
 
 export type PuppetRuntime = z.infer<typeof PuppetRuntimeSchema>;
