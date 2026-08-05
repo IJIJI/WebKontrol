@@ -12,6 +12,12 @@ export interface FieldInfo { // TODO: Union for options? Enum is a type and othe
   // The unwrapped core schema (below optional/default/nullable). For `object` fields this is the
   // ZodObject itself, so callers can recurse via objectFields(core).
   core: unknown;
+  // Kind-specific constraints, flat like `options` above. Numbers only, for now.
+  // TODO: if a third kind needs its own constraints, make FieldInfo a discriminated union on
+  // `kind` (renderField already switches on it, so narrowing comes free) and fold `options` in.
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
 // Minimal structural view into the zod internals we introspect. Localizes the unavoidable
@@ -28,8 +34,16 @@ interface ZodLike {
     entries?: Record<string, string>; // enum value map
     defaultValue?: unknown; // .default() value
     catchall?: unknown; // set on loose objects (z.looseObject); absent on plain z.object
+    checks?: readonly unknown[]; // refinements: .int(), .multipleOf(), .min()/.max(), …
   };
   meta: () => FieldMeta | undefined;
+}
+
+// One entry of `def.checks`, reached via `_zod.def` (or `def` on older shapes).
+interface CheckDef {
+  check?: string; // e.g. "multiple_of", "number_format", "greater_than"
+  value?: unknown;
+  format?: string; // for number_format: "safeint", "int", …
 }
 
 const asZod = (schema: unknown): ZodLike => schema as ZodLike;
@@ -53,7 +67,37 @@ export function describeField(schema: unknown): FieldInfo {
 
   const kind = classify(core);
   const options = kind === "enum" ? Object.values(core.def.entries ?? {}) : [];
-  return { kind, optional, meta, options, defaultValue, core };
+  const bounds = kind === "number" ? numberBounds(core) : {};
+  return { kind, optional, meta, options, defaultValue, core, ...bounds };
+}
+
+// A number schema's input constraints: min/max from zod's getters (dropping unbounded sides,
+// which zod reports as null or ±MAX_SAFE_INTEGER — neither belongs on an <input>), and step from
+// its checks, so an integer field steps by 1 instead of the browser's default 1-with-decimals.
+function numberBounds(core: ZodLike): { min?: number; max?: number; step?: number } {
+  const { minValue, maxValue } = core as unknown as {
+    minValue?: number | null;
+    maxValue?: number | null;
+  };
+  const finite = (v: number | null | undefined): number | undefined =>
+    typeof v === "number" && Math.abs(v) < Number.MAX_SAFE_INTEGER ? v : undefined;
+
+  return { min: finite(minValue), max: finite(maxValue), step: numberStep(core) };
+}
+
+// Zod keeps `.int()` and `.multipleOf()` as checks rather than getters; both map to input step.
+function numberStep(core: ZodLike): number | undefined {
+  let step: number | undefined;
+  for (const check of core.def.checks ?? []) {
+    const def = (check as { _zod?: { def?: CheckDef }; def?: CheckDef })._zod?.def ?? (check as { def?: CheckDef }).def;
+    if (!def) continue;
+    if (def.check === "multiple_of" && typeof def.value === "number") step = def.value;
+    // Any integer format (int / safeint / …) means whole numbers only.
+    if (def.check === "number_format" && typeof def.format === "string" && def.format.includes("int")) {
+      step ??= 1;
+    }
+  }
+  return step;
 }
 
 function classify(core: ZodLike): FieldKind {
