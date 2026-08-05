@@ -17,7 +17,7 @@ function newBlock(type: string): BlockLike {
   return { type };
 }
 
-/** One block slot: the block that fills it (open / replace / clear), or a button to pick one. */
+/** One block slot: the block that fills it (open / clear), or a button to pick one. */
 export function BlockSlotSetting({
   title,
   subtitle,
@@ -67,7 +67,7 @@ export function BlockSlotSetting({
   );
 }
 
-/** An array of block slots (e.g. a grid's children): reorderable-later list with add and remove. */
+/** An array of block slots (e.g. a grid's children): a column of entry rows with add and remove. */
 export function BlockSlotListSetting({
   title,
   subtitle,
@@ -88,13 +88,11 @@ export function BlockSlotListSetting({
   const entries = raw.flatMap((v, index) => (isBlock(v) ? [{ block: v, index }] : []));
 
   return (
-    // COMPACT (not AUTO): the wrapping chip list needs auto height, which the wide layout's
-    // fixed-height input row would clip.
+    // COMPACT (not AUTO): the row list needs auto height, which the wide layout's fixed-height
+    // input row would clip.
     <BaseSetting title={title} subtitle={subtitle} width={SettingWidth.COMPACT}>
       <div className="blockSlotList">
         {entries.map(({ block, index }) => (
-          // Horizontal chip per block (matching the read-only detail view), its remove tucked
-          // alongside; the row wraps when there are many.
           <span className="slotEntry" key={index}>
             <button type="button" className="slotBlock" onClick={() => onOpen(index)} title="Open this block">
               <BlockChip type={block.type} />
@@ -105,8 +103,8 @@ export function BlockSlotListSetting({
               onClick={() => onChange(raw.filter((_, j) => j !== index))}
               ariaLabel="Remove block"
             >
-              {/* Trash, not ✕: removing an entry deletes the block's config subtree. ✕ is
-                  reserved for non-destructive dismissals (closing panes/modals). */}
+              {/* Trash, not a cross: removing an entry deletes the block's config subtree. The
+                  cross is reserved for non-destructive dismissals (closing panes/modals). */}
               <Icons.delete size={14} />
             </Button>
           </span>

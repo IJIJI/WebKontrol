@@ -137,24 +137,3 @@ export function childBlocks(block: BlockLike): { path: BlockPath; block: BlockLi
   return out;
 }
 
-// The block whose children include `target`, searched from `root`. Null when `target` is the root
-// itself or isn't found. Matches by reference, so `target` must come from `root`'s own tree.
-export function findParent(root: BlockLike, target: BlockLike): BlockLike | null {
-  for (const { block } of childBlocks(root)) {
-    if (block === target) return root;
-    const found = findParent(block, target);
-    if (found !== null) return found;
-  }
-  return null;
-}
-
-// The path to `target` within `root`, matched by reference. Bridges callers that still hand
-// around block objects (the read-only detail pane) to the path-addressed tree.
-export function findPath(root: BlockLike, target: BlockLike, base: BlockPath = []): BlockPath | null {
-  if (root === target) return base;
-  for (const child of childBlocks(root)) {
-    const found = findPath(child.block, target, [...base, ...child.path]);
-    if (found !== null) return found;
-  }
-  return null;
-}

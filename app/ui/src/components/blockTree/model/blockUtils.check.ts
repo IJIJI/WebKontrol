@@ -11,8 +11,6 @@ import {
 } from "../../../../../src/views/blocks/namespaces/webkontrol/blocks.schema";
 import {
   childBlocks,
-  findParent,
-  findPath,
   getAtPath,
   parentBlockPath,
   pathKey,
@@ -49,15 +47,6 @@ assert.equal(childBlocks(freeform)[1].block, clock);
 // Leaf blocks have no children; unregistered types are leaves too (no schema to walk).
 assert.deepEqual(childBlocks(text), []);
 assert.deepEqual(childBlocks({ type: "acme::block::unknown", block: text }), []);
-
-// findParent still walks through wrapper objects.
-assert.equal(findParent(freeform, clock), freeform);
-assert.equal(findParent(container, clock), null);
-
-// findPath addresses a reference-held block, absolute from the root.
-assert.deepEqual(findPath(freeform, clock), ["items", 1, "block"]);
-assert.deepEqual(findPath(freeform, freeform), []);
-assert.equal(findPath(container, clock), null);
 
 //* Path helpers
 

@@ -2,31 +2,19 @@ import { useState } from "react";
 import { type JSX } from "react/jsx-runtime";
 
 import "./blockExplorer.less";
-import {
-  type BlockLike,
-  type BlockPath,
-  findPath,
-  getAtPath,
-  isBlock,
-  parentBlockPath,
-} from "./model/blockUtils";
+import { type BlockLike, type BlockPath, getAtPath, isBlock, parentBlockPath } from "./model/blockUtils";
 import { BlockTree } from "./tree/BlockTree";
-import { BlockDetail } from "./detail/BlockDetail";
+import { BlockForm } from "./BlockForm";
 import { BlockPane } from "./presentation/BlockPane";
 
-// The block tree plus a floating detail pane. Clicking a block (in the tree or the pane) inspects
-// its full config; the pane floats over the right of the tree and scrolls independently.
+// The block tree plus a floating detail pane: clicking a block shows its config, read-only. Same
+// schema-driven form the editor uses (so fields carry their real labels), minus the writes.
 export function BlockExplorer({ root }: { root: BlockLike }): JSX.Element {
   const [selectedPath, setSelectedPath] = useState<BlockPath | null>(null);
-  const at = selectedPath ? getAtPath(root, selectedPath) : undefined;
+  const at = selectedPath !== null ? getAtPath(root, selectedPath) : undefined;
   const selected = isBlock(at) ? at : null;
-  const parentPath = selectedPath && selected ? parentBlockPath(root, selectedPath) : null;
-
-  // The detail pane hands back block objects; map them onto paths for selection.
-  const selectBlock = (block: BlockLike): void => {
-    const path = findPath(root, block);
-    if (path !== null) setSelectedPath(path);
-  };
+  const path = selected && selectedPath !== null ? selectedPath : [];
+  const parentPath = selected ? parentBlockPath(root, path) : null;
 
   return (
     <div className="blockExplorer">
@@ -38,7 +26,8 @@ export function BlockExplorer({ root }: { root: BlockLike }): JSX.Element {
           onParent={parentPath ? () => setSelectedPath(parentPath) : undefined}
           onClose={() => setSelectedPath(null)}
         >
-          <BlockDetail block={selected} onSelect={selectBlock} />
+          {/* No setAt: inspection only. */}
+          <BlockForm block={selected} path={path} onOpen={setSelectedPath} />
         </BlockPane>
       )}
     </div>
