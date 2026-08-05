@@ -100,6 +100,14 @@ export default function Sidebar({
           label="Config"
           icon={<Icons.settings />}
         />
+      { import.meta.env.DEV && (
+        <SidebarItem
+          collapsed={collapsed}
+          to="/settings/config"
+          label="Test"
+          icon={<Icons.cogs />}
+        />
+      )}
       </SidebarSection>
 
       <SidebarCollapseButton

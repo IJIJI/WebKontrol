@@ -1,6 +1,7 @@
 import type { JSX } from "react/jsx-runtime";
 
 import "./sidebar.less";
+import { ReactNode } from "react";
 
 export default function SidebarSection({
   children,
@@ -8,7 +9,7 @@ export default function SidebarSection({
   label,
   dissapearOnCollapse = false,
 }: {
-  children?: JSX.Element[] | JSX.Element;
+  children?: ReactNode;
   collapsed: boolean;
   label: string;
   dissapearOnCollapse?: boolean;
