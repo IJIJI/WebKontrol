@@ -21,6 +21,9 @@ export function ValueSetting<T, E extends HTMLElement = HTMLInputElement>({
 }): JSX.Element {
   const inputRef = useRef<E>(null);
 
+  // Fields with no saved value (a new entity) never mark changed: restoring them would mean
+  // "back to unset", which the coerced inputs can't display honestly. Unsaved-new is signalled
+  // at the block level instead (the tree's unsaved outline).
   const changed = props.savedVal !== undefined && props.savedVal !== props.value;
   const restore = (): void => {
     if (props.savedVal === undefined) return;

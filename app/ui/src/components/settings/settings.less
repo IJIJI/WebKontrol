@@ -123,17 +123,14 @@
       gap: 0;
 
       // Descendant (not child) so fields inside array items flatten too; nested joined groups
-      // re-apply their own card, so the double match is harmless.
+      // re-apply their own card, so the double match is harmless. No row-level changed marker:
+      // the card's glow would be clipped by overflow:hidden, and the original input-level glow
+      // (.textfield.changed) plus the restore button already carry the signal.
       .field {
         background: none;
         box-shadow: none;
         border-radius: 0;
         padding: 8px 14px;
-
-        // The card glow can't render inside overflow:hidden; a left accent bar marks changes.
-        &.changed {
-          box-shadow: inset 3px 0 0 var(--color-text-acc);
-        }
       }
 
       > .field:not(:last-child),
@@ -278,7 +275,7 @@
         box-sizing: border-box;
 
         &.changed {
-          box-shadow: 0 0 4px -1px var(--color-text-acc);
+          border-color: var(--color-text-acc);
         }
       }
 
