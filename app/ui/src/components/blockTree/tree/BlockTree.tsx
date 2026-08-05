@@ -9,11 +9,13 @@ function TreeNode({
   path,
   onSelect,
   selected,
+  isUnsaved,
 }: {
   block: BlockLike;
   path: BlockPath;
   onSelect?: (path: BlockPath) => void;
   selected?: BlockPath;
+  isUnsaved?: (path: BlockPath, block: BlockLike) => boolean;
 }): JSX.Element {
   const children = childBlocks(block);
 
@@ -24,6 +26,7 @@ function TreeNode({
           type={block.type}
           selected={selected !== undefined && pathEquals(path, selected)}
           onClick={onSelect ? () => onSelect(path) : undefined}
+          unsaved={isUnsaved?.(path, block)}
         />
       </div>
       {children.length > 0 && (
@@ -38,6 +41,7 @@ function TreeNode({
                 path={childPath}
                 onSelect={onSelect}
                 selected={selected}
+                isUnsaved={isUnsaved}
               />
             );
           })}
@@ -48,19 +52,22 @@ function TreeNode({
 }
 
 // A compact block tree (blocks only) with rounded CSS guide lines. When `onSelect` is given,
-// each block is clickable and the `selected` one (addressed by path) is highlighted.
+// each block is clickable and the `selected` one (addressed by path) is highlighted. `isUnsaved`
+// marks blocks that aren't part of the saved tree (the editor's new/replaced blocks).
 export function BlockTree({
   root,
   onSelect,
   selected,
+  isUnsaved,
 }: {
   root: BlockLike;
   onSelect?: (path: BlockPath) => void;
   selected?: BlockPath;
+  isUnsaved?: (path: BlockPath, block: BlockLike) => boolean;
 }): JSX.Element {
   return (
     <div className="blockTree">
-      <TreeNode block={root} path={[]} onSelect={onSelect} selected={selected} />
+      <TreeNode block={root} path={[]} onSelect={onSelect} selected={selected} isUnsaved={isUnsaved} />
     </div>
   );
 }
