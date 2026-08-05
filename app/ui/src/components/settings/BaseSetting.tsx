@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, type ReactNode } from "react";
 import { type JSX } from "react/jsx-runtime";
 
 import "./settings.less";
@@ -12,7 +12,7 @@ export type BaseSettingsCompProps = {
   // RefObject itself is invariant). Present = clicking the row focuses the control; omit to opt
   // out (e.g. ButtonSelect, Toggle).
   inputRef?: { readonly current: HTMLElement | null };
-  children: JSX.Element | JSX.Element[];
+  children: ReactNode;
   changed?: boolean;
   // Layout of label vs. input. Falls back to the nearest SettingWidthContext, then WIDE.
   width?: SettingWidth;
