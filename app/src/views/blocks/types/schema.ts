@@ -103,7 +103,7 @@ export const GridConfigSchema = z.object({
 export type GridConfig = z.infer<typeof GridConfigSchema>;
 
 //* Block Styling, added as fields in blocks that need them.
-export const BackgroundStyleShape = { background: z.string().optional().meta({ label: "Background", description: "CSS background" } satisfies FieldMeta) };
+export const BackgroundStyleShape = { background: z.string().optional().meta({ label: "Background", description: "CSS background", input: "color" } satisfies FieldMeta) };
 export const PaddingStyleShape = { padding: z.string().optional().meta({ label: "Padding", description: "CSS padding" } satisfies FieldMeta) }; // TODO: Add top right bottom left?
 export const BorderStyleShape = { border: z.string().optional().meta({ label: "Border", description: "CSS border" } satisfies FieldMeta) }; // TODO: Add border radius?
 export const FontStyleShape = {
