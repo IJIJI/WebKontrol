@@ -32,6 +32,9 @@ export interface FieldMeta {
   description?: string; // maps to the Setting subtitle
   advanced?: boolean;
   placeholder?: string;
+  // Input widget hint for kinds the schema alone can't distinguish: "color" renders a
+  // swatch-assisted text field (the value stays a free CSS string — gradients are valid).
+  input?: "color";
 }
 
 //* View config:
