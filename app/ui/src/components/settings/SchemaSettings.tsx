@@ -15,6 +15,7 @@ import { SelectSetting } from "./implementations/SelectSetting";
 import { BaseSetting } from "./BaseSetting";
 import type { ZodObject, ZodRawShape } from "zod";
 import { SettingGroup } from "./SettingGroup";
+import { DetailGroup, DetailRow, InlineValue, countLabel, displayValue } from "./SchemaDetails";
 
 type Values = Record<string, unknown>;
 
@@ -73,11 +74,19 @@ export type CustomFieldRenderer = (
   path: readonly (string | number)[],
 ) => JSX.Element | null;
 
+// Everything the recursion carries that isn't per-field. Bundled so nesting levels (objects,
+// array items) forward one value instead of a growing parameter list.
+interface RenderCtx {
+  renderCustom?: CustomFieldRenderer;
+  joined: boolean;
+  readOnly: boolean;
+}
+
 // Renders Setting components for a zod object schema, driven by each field's FieldMeta and
 // wired through a useDraft (or any DraftLens). Fields without meta are skipped (e.g. the `type`
 // discriminator); `exclude` skips fields the page renders itself (e.g. name, in the top row).
 // Advanced fields (meta.advanced) fold into a collapsible section, omitted entirely when there
-// are none. Plain nested objects render as their own collapsible group, recursively.
+// are none. Plain nested objects and arrays of objects render as their own sections, recursively.
 export function SchemaSettings({
   schema,
   draft,
@@ -87,6 +96,7 @@ export function SchemaSettings({
   renderCustom,
   groupTitle = "Type Specific",
   joined = false,
+  readOnly = false,
 }: {
   schema: ZodObject<ZodRawShape>; // the current view type's member schema (any zod object)
   draft: DraftLens;
@@ -96,7 +106,29 @@ export function SchemaSettings({
   renderCustom?: CustomFieldRenderer;
   groupTitle?: string;
   joined?: boolean; // one divided card per group instead of an island per field
+  readOnly?: boolean; // render values instead of inputs (same walk, inspection presentation)
 }): JSX.Element {
+  const ctx: RenderCtx = { renderCustom, joined, readOnly };
+
+  // Inspection: one compact property list, not form rows. Same walk and labels, no form chrome
+  // (no group cards, no advanced fold) Top-level fields are line-divided sections.
+  if (readOnly) {
+    const rows = levelFields(schema, draft, [], ctx);
+    return (
+      <div className="schemaDetails">
+        {rows.length === 0 ? (
+          <div className="empty">No fields</div>
+        ) : (
+          rows.map((row) => (
+            <div className="section" key={row.key}>
+              {row}
+            </div>
+          ))
+        )}
+      </div>
+    );
+  }
+
   const fields: JSX.Element[] = [];
   const sections: JSX.Element[] = [];
   const advanced: JSX.Element[] = [];
@@ -119,10 +151,10 @@ export function SchemaSettings({
     const element =
       custom ??
       (info.kind === "object"
-        ? objectGroup(key, info, meta, draft, renderCustom, [], joined)
+        ? objectGroup(key, info, meta, draft, [], ctx)
         : info.kind === "array"
-          ? arrayGroup(key, info, meta, draft, renderCustom, [], joined)
-          : renderField(key, info, meta, draft, placeholder));
+          ? arrayGroup(key, info, meta, draft, [], ctx)
+          : renderField(key, info, meta, draft, placeholder, ctx));
     (meta.advanced ? advanced : isSection ? sections : fields).push(element);
   }
 
@@ -162,15 +194,14 @@ function fieldElement(
   meta: FieldMeta,
   lens: DraftLens,
   placeholder: string | undefined,
-  renderCustom: CustomFieldRenderer | undefined,
   path: readonly (string | number)[],
-  joined: boolean,
+  ctx: RenderCtx,
 ): JSX.Element {
-  const custom = renderCustom?.(key, info, lens, path);
+  const custom = ctx.renderCustom?.(key, info, lens, path);
   if (custom) return custom;
-  if (info.kind === "object") return objectGroup(key, info, meta, lens, renderCustom, path, joined);
-  if (info.kind === "array") return arrayGroup(key, info, meta, lens, renderCustom, path, joined);
-  return renderField(key, info, meta, lens, placeholder);
+  if (info.kind === "object") return objectGroup(key, info, meta, lens, path, ctx);
+  if (info.kind === "array") return arrayGroup(key, info, meta, lens, path, ctx);
+  return renderField(key, info, meta, lens, placeholder, ctx);
 }
 
 // The meta'd fields of one object level (an object field's shape, or one array item), rendered
@@ -178,15 +209,14 @@ function fieldElement(
 function levelFields(
   core: unknown,
   lens: DraftLens,
-  renderCustom: CustomFieldRenderer | undefined,
   path: readonly (string | number)[],
-  joined: boolean,
+  ctx: RenderCtx,
 ): JSX.Element[] {
   return objectFields(core).flatMap(([key, fieldSchema]) => {
     const info = describeField(fieldSchema);
     if (!info.meta) return [];
     const placeholder = info.meta.placeholder ?? defaultPlaceholder(info);
-    return [fieldElement(key, info, info.meta, lens, placeholder, renderCustom, path, joined)];
+    return [fieldElement(key, info, info.meta, lens, placeholder, path, ctx)];
   });
 }
 
@@ -198,37 +228,70 @@ function objectGroup(
   info: FieldInfo,
   meta: FieldMeta,
   lens: DraftLens,
-  renderCustom: CustomFieldRenderer | undefined,
   path: readonly (string | number)[],
-  joined: boolean,
+  ctx: RenderCtx,
 ): JSX.Element {
-  const children = levelFields(info.core, subLens(lens, key), renderCustom, [...path, key], joined);
+  const children = levelFields(info.core, subLens(lens, key), [...path, key], ctx);
+  if (ctx.readOnly) {
+    // Top-level groups open, deeper ones start collapsed (matching the old inspector).
+    return (
+      <DetailGroup
+        key={key}
+        label={meta.label}
+        count={countLabel(children.length, "field")}
+        defaultOpen={path.length === 0}
+      >
+        {children}
+      </DetailGroup>
+    );
+  }
   return (
-    <CollapsibleGroup key={key} title={meta.label} defaultOpen joined={joined}>
+    <CollapsibleGroup key={key} title={meta.label} defaultOpen joined={ctx.joined}>
       {children}
     </CollapsibleGroup>
   );
 }
 
 // An array-of-objects field: its items listed in one collapsible group, each with a small header
-// (index + remove) above its fields, and an add button that appends an empty item (the schema's
-// defaults/prefaults fill it in). Arrays of anything else fall back to the read-only display.
+// (index + remove) above its fields, and an add button that appends an item seeded from the
+// schema's defaults. Arrays of anything else fall back to the read-only display.
 function arrayGroup(
   key: string,
   info: FieldInfo,
   meta: FieldMeta,
   lens: DraftLens,
-  renderCustom: CustomFieldRenderer | undefined,
   path: readonly (string | number)[],
-  joined: boolean,
+  ctx: RenderCtx,
 ): JSX.Element {
   const element = (info.core as { element?: unknown }).element;
   const elementInfo = element === undefined ? undefined : describeField(element);
   if (elementInfo?.kind !== "object") {
-    return renderField(key, { ...info, kind: "unknown" }, meta, lens, undefined);
+    return renderField(key, { ...info, kind: "unknown" }, meta, lens, undefined, ctx);
   }
 
   const raw: unknown[] = Array.isArray(lens.values[key]) ? (lens.values[key] as unknown[]) : [];
+  const itemFields = (index: number): JSX.Element[] =>
+    levelFields(elementInfo.core, itemLens(lens, key, index), [...path, key, index], ctx);
+
+  if (ctx.readOnly) {
+    // Array items sit flat at the array's own level: they have no field name of their own, so
+    // indenting them would imply a nesting step that isn't there.
+    return (
+      <DetailGroup
+        key={key}
+        label={meta.label}
+        count={countLabel(raw.length, "item")}
+        flat
+        defaultOpen={path.length === 0}
+      >
+        {raw.map((_, index) => (
+          <DetailGroup key={index} label={`#${index + 1}`} count={countLabel(itemFields(index).length, "field")}>
+            {itemFields(index)}
+          </DetailGroup>
+        ))}
+      </DetailGroup>
+    );
+  }
 
   const items = raw.map((_, index) => (
     <div className="arrayItem" key={index}>
@@ -243,12 +306,12 @@ function arrayGroup(
           <Icons.delete size={14} />
         </Button>
       </div>
-      {levelFields(elementInfo.core, itemLens(lens, key, index), renderCustom, [...path, key, index], joined)}
+      {itemFields(index)}
     </div>
   ));
 
   return (
-    <CollapsibleGroup key={key} title={meta.label} defaultOpen joined={joined}>
+    <CollapsibleGroup key={key} title={meta.label} defaultOpen joined={ctx.joined}>
       {[
         ...items,
         <div className="arrayAdd" key="add">
@@ -265,12 +328,14 @@ function arrayGroup(
   );
 }
 
+
 function renderField(
   key: string,
   info: FieldInfo,
   meta: FieldMeta,
   draft: DraftLens,
   placeholder: string | undefined,
+  ctx: RenderCtx,
 ): JSX.Element {
   const { kind, options } = info;
   const title = meta.label;
@@ -278,6 +343,24 @@ function renderField(
   const value = draft.values[key];
   const saved = draft.saved[key];
   const set = (v: unknown): void => draft.setField(key, v);
+
+  // Inspection: a compact property row, not a form row.
+  if (ctx.readOnly) {
+    return (
+      <DetailRow key={key} label={title}>
+        <InlineValue value={value} />
+      </DetailRow>
+    );
+  }
+
+  // Kinds with no editable widget yet: shown read-only inside the form so nothing disappears.
+  if (kind === "record" || kind === "unknown") {
+    return (
+      <BaseSetting key={key} title={title} subtitle={subtitle}>
+        <span className="readonlyValue">{displayValue(value)}</span>
+      </BaseSetting>
+    );
+  }
 
   switch (kind) {
     case "url":
@@ -315,11 +398,10 @@ function renderField(
           options={options.map((o) => ({ label: o, value: o }))} />
       );
     default:
-      // record / unknown: no editable widget yet. Show it read-only (label + description +
-      // current value) so nothing silently disappears. RecordSetting replaces this in #7.
+      // Object/array reach here only via arrayGroup's non-object-element fallback above.
       return (
         <BaseSetting key={key} title={title} subtitle={subtitle}>
-          <span className="readonlyValue">{value === undefined ? "—" : JSON.stringify(value)}</span>
+          <span className="readonlyValue">{displayValue(value)}</span>
         </BaseSetting>
       );
   }
