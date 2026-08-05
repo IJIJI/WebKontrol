@@ -24,10 +24,6 @@ export default function TestPage(): JSX.Element {
           ),
         )}
       </div>
-      <ColorSetting title="Color" value={color} setValue={setColor} savedVal="#16b058"/>
-      <ColorSetting title="Color" value={color} setValue={setColor} savedVal="#16b058" width={SettingWidth.COMPACT}/>
-      <IconSetting title="Icon" subtitle="bladiebla" value={icon} setValue={setIcon} savedVal="cogs" />
-      <IconSetting title="Icon" value={icon} setValue={setIcon} savedVal="cogs" width={SettingWidth.COMPACT}/>
     </div>
   );
 }
