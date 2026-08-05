@@ -1,7 +1,7 @@
 import { type JSX } from "react/jsx-runtime";
 
 import { type FieldMeta } from "../../../../src/views/types/schema";
-import { describeField, objectFields, type FieldInfo, type FieldKind } from "./zodField";
+import { describeField, objectFields, type FieldInfo } from "./zodField";
 import { Button } from "../button/Button";
 import { Icons } from "../icons/Icons";
 import { FillStyle, Variant } from "../../common/types/variants";
@@ -9,6 +9,7 @@ import { CollapsibleGroup } from "./CollapsibleGroup";
 import { TextSetting } from "./implementations/TextSetting";
 import { UrlSetting } from "./implementations/UrlSetting";
 import { NumberSetting } from "./implementations/NumberSetting";
+import { ColorTextSetting } from "./implementations/ColorTextSetting";
 import { ToggleSetting } from "./implementations/ToggleSetting";
 import { SelectSetting } from "./implementations/SelectSetting";
 import { BaseSetting } from "./BaseSetting";
@@ -121,7 +122,7 @@ export function SchemaSettings({
         ? objectGroup(key, info, meta, draft, renderCustom, [], joined)
         : info.kind === "array"
           ? arrayGroup(key, info, meta, draft, renderCustom, [], joined)
-          : renderField(key, info.kind, info.options, meta, draft, placeholder));
+          : renderField(key, info, meta, draft, placeholder));
     (meta.advanced ? advanced : isSection ? sections : fields).push(element);
   }
 
@@ -169,7 +170,7 @@ function fieldElement(
   if (custom) return custom;
   if (info.kind === "object") return objectGroup(key, info, meta, lens, renderCustom, path, joined);
   if (info.kind === "array") return arrayGroup(key, info, meta, lens, renderCustom, path, joined);
-  return renderField(key, info.kind, info.options, meta, lens, placeholder);
+  return renderField(key, info, meta, lens, placeholder);
 }
 
 // The meta'd fields of one object level (an object field's shape, or one array item), rendered
@@ -224,7 +225,7 @@ function arrayGroup(
   const element = (info.core as { element?: unknown }).element;
   const elementInfo = element === undefined ? undefined : describeField(element);
   if (elementInfo?.kind !== "object") {
-    return renderField(key, "unknown", [], meta, lens, undefined);
+    return renderField(key, { ...info, kind: "unknown" }, meta, lens, undefined);
   }
 
   const raw: unknown[] = Array.isArray(lens.values[key]) ? (lens.values[key] as unknown[]) : [];
@@ -266,12 +267,12 @@ function arrayGroup(
 
 function renderField(
   key: string,
-  kind: FieldKind,
-  options: string[],
+  info: FieldInfo,
   meta: FieldMeta,
   draft: DraftLens,
   placeholder: string | undefined,
 ): JSX.Element {
+  const { kind, options } = info;
   const title = meta.label;
   const subtitle = meta.description;
   const value = draft.values[key];
@@ -285,6 +286,13 @@ function renderField(
           value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
       );
     case "text":
+      // The schema can't distinguish a colour string from any other; the meta hint does.
+      if (meta.input === "color") {
+        return (
+          <ColorTextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder}
+            value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
+        );
+      }
       return (
         <TextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder}
           value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
@@ -292,6 +300,7 @@ function renderField(
     case "number":
       return (
         <NumberSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder}
+          min={info.min} max={info.max} step={info.step}
           value={value as number} savedVal={saved as number | undefined} setValue={set} />
       );
     case "boolean":
