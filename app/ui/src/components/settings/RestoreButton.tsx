@@ -9,7 +9,7 @@ export function RestoreButton({
   onClick: () => void | Promise<void>
 }): JSX.Element {
   return (
-    <button className="setting restore" onClick={onClick}>
+    <button className="setting restore" onClick={() => void onClick()}>
       <Icons.undo size={20} />
     </button>
   );

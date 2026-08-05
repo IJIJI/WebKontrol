@@ -2,32 +2,22 @@ import { type JSX } from "react/jsx-runtime";
 import { Toggle } from "../../toggle/Toggle";
 
 import "../settings.less";
+import { type BaseSettingProps } from "../BaseSetting";
+import { ValueSetting } from "../ValueSetting";
 
-import { BaseSetting, type BaseSettingProps } from "../BaseSetting";
-import { useRef } from "react";
-import { RestoreButton } from "../RestoreButton";
-
-type ToggleProps = BaseSettingProps<boolean>;
-
-export function ToggleSetting(props: ToggleProps): JSX.Element {
-  const inputRef = useRef<HTMLDivElement>(null);
-
-  const changed = props.savedVal !== undefined && props.savedVal !== props.value;
-  const restore = (): void => { // TODO: Does this need a restore button?
-    if (props.savedVal === undefined) return;
-    props.setValue(props.savedVal);
-  };
-
+// No inputRef: the row's focus-on-click is an opt-in for controls that take focus, and Toggle's
+// switch isn't focusable (no tabIndex), so attaching one would be a silent no-op.
+export function ToggleSetting(props: BaseSettingProps<boolean>): JSX.Element {
   return (
-    <BaseSetting {...props} changed={changed} inputRef={inputRef}>
-      {changed ? <RestoreButton onClick={restore} /> : <></>}
-      <Toggle
-        ref={inputRef}
-        className={"toggleField"}
-        checked={props.value}
-        setChecked={props.setValue}
-        disabled={props.disabled}
-      />
-    </BaseSetting>
+    <ValueSetting {...props}>
+      {() => (
+        <Toggle
+          className={"toggleField"}
+          checked={props.value}
+          setChecked={(checked) => void props.setValue(checked)}
+          disabled={props.disabled}
+        />
+      )}
+    </ValueSetting>
   );
 }

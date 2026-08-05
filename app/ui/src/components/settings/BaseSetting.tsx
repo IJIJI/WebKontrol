@@ -8,7 +8,10 @@ import { classNames } from "../../common/helpers/classNames";
 export type BaseSettingsCompProps = {
   title: string;
   subtitle?: string;
-  inputRef?: React.RefObject<any>;
+  // Read-only view of the control's ref (so RefObject<HTMLInputElement> etc. stay assignable —
+  // RefObject itself is invariant). Present = clicking the row focuses the control; omit to opt
+  // out (e.g. ButtonSelect, Toggle).
+  inputRef?: { readonly current: HTMLElement | null };
   children: JSX.Element | JSX.Element[];
   changed?: boolean;
   // Layout of label vs. input. Falls back to the nearest SettingWidthContext, then WIDE.
@@ -22,7 +25,7 @@ export type BaseSettingNonValProps = Omit<
   disabled?: boolean;
 };
 
-export type BaseSettingProps<T = any> = BaseSettingNonValProps & {
+export type BaseSettingProps<T = unknown> = BaseSettingNonValProps & {
   value: T;
   setValue: (value: T) => void | Promise<void>;
   savedVal?: T;
