@@ -8,6 +8,7 @@ import {
   Navigate,
   Route,
   RouterProvider,
+  useRouteError,
 } from "react-router-dom";
 import OverviewPage from "./pages/OverviewPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -23,11 +24,18 @@ import EditViewPage from "./pages/EditViewPage";
 import ViewPage from "./pages/ViewPage";
 import TestPage from "./pages/TestPage";
 
+// The data router installs its own per-route error boundary, which would swallow render errors
+// before AppErrorBoundary (mounted above the router) ever sees them. Rethrowing from the root
+// errorElement lets them bubble out, restoring the pre-data-router behaviour.
+function BubbleRouteError(): never {
+  throw useRouteError();
+}
+
 // A data router (not <BrowserRouter>) so route changes can be blocked while a page holds unsaved
 // changes (useUnsavedPrompt's useBlocker only works under one). The route tree itself is unchanged.
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route element={<PageLayout />}>
+    <Route element={<PageLayout />} errorElement={<BubbleRouteError />}>
       <Route
         index
         element={
