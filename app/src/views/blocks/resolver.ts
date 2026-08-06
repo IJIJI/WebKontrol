@@ -1,6 +1,6 @@
 import z from "zod";
 import { AnyBlockConfigSchema, isBlockSlot, type DataSourceKey } from "./types/schema";
-import type { ResolvedBlock } from "./types/model";
+import { isBroken, type ResolvedNode } from "./types/model";
 import type { BlockTypeRegistry } from "./registry";
 
 /**
@@ -39,7 +39,8 @@ function resolveValue(
 
   if (isBlockSlot(core)) {
     const child = resolveBlock(value, registry);
-    for (const dep of child.dependencies) deps.add(dep);
+    // A broken child contributes no dependencies; it renders a placeholder instead.
+    if (!isBroken(child)) for (const dep of child.dependencies) deps.add(dep);
     return child;
   }
 
@@ -76,22 +77,32 @@ function resolveValue(
 }
 
 /**
- * Resolve a raw block config into a {@link ResolvedBlock}: validate it against
- * its registered type, resolve its child slots recursively, and collect the
- * data sources its subtree depends on.
+ * Resolve a raw block config into a {@link ResolvedNode}: validate it against its registered
+ * type, resolve its child slots recursively, and collect the data sources its subtree depends on.
+ *
+ * Never throws for bad content. An unknown type or a config its schema rejects resolves to a
+ * BrokenBlock, so the failure stays local to that block and the rest of the view still renders.
  *
  * @param raw - The stored/authored block config (an envelope with a `type` key).
  * @param registry - The registry to resolve block types and children against.
  * @returns The resolved block tree.
  */
-export function resolveBlock(raw: unknown, registry: BlockTypeRegistry): ResolvedBlock {
-  const envelope = AnyBlockConfigSchema.parse(raw);
-  const def = registry.get(envelope.type);
-  // TODO: typed error + render an error placeholder for this block instead of
-  // throwing, so one bad block can't take down the whole view.
-  if (!def) throw new Error(`Unknown block type "${envelope.type}".`);
+export function resolveBlock(raw: unknown, registry: BlockTypeRegistry): ResolvedNode {
+  const envelope = AnyBlockConfigSchema.safeParse(raw);
+  if (!envelope.success) {
+    return { broken: true, type: "?", message: "Not a block: missing or malformed `type`." };
+  }
 
-  const config: unknown = def.configSchema.parse(raw);
+  const type = envelope.data.type;
+  const def = registry.get(type);
+  if (!def) return { broken: true, type, message: `Unknown block type "${type}".` };
+
+  const parsed = def.configSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { broken: true, type, message: firstIssue(parsed.error) };
+  }
+
+  const config: unknown = parsed.data;
   const deps = new Set<DataSourceKey>(def.getDataDependencies(config));
   const resolvedConfig = resolveValue(def.configSchema, config, registry, deps);
 
@@ -100,4 +111,12 @@ export function resolveBlock(raw: unknown, registry: BlockTypeRegistry): Resolve
     config: resolvedConfig,
     dependencies: [...deps],
   };
+}
+
+/** The first validation failure as "path: message", e.g. `url: Invalid URL`. */
+function firstIssue(error: z.ZodError): string {
+  const issue = error.issues[0];
+  if (!issue) return "Invalid config.";
+  const path = issue.path.join(".");
+  return path ? `${path}: ${issue.message}` : issue.message;
 }

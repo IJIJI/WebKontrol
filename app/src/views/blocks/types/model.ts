@@ -14,8 +14,10 @@ import type { BlockKey, BlockSlot, DataSourceKey } from "./schema";
  * so the more specific tests must come first.
  */
 export type Resolved<T> =
-  [T] extends [BlockSlot]             ? ResolvedBlock :
-  [T] extends [BlockSlot | undefined] ? ResolvedBlock | undefined :  // optional slot
+  // ResolvedNode, not ResolvedBlock: a child that fails to resolve sits in the config as a
+  // BrokenBlock, so a render fn must go through ctx.renderChild rather than touching child.def.
+  [T] extends [BlockSlot]             ? ResolvedNode :
+  [T] extends [BlockSlot | undefined] ? ResolvedNode | undefined :  // optional slot
   // TODO: add a `| null` mirror branch here if nullable slots are ever needed.
   T extends readonly (infer E)[]      ? ReadonlyArray<Resolved<E>> :
   T extends object                    ? { [K in keyof T]: Resolved<T[K]> } :
@@ -37,11 +39,28 @@ export interface ResolvedBlock<TConfig = unknown> {
 }
 
 /**
+ * A block that could not be resolved: an unknown type, or a config its schema rejects. Kept as a
+ * node rather than thrown so one bad block renders a placeholder instead of blanking the view.
+ */
+export interface BrokenBlock {
+  readonly broken: true;
+  /** The block's `type` as authored, even if it is not a registered key. */
+  readonly type: string;
+  readonly message: string;
+}
+
+export type ResolvedNode<TConfig = unknown> = ResolvedBlock<TConfig> | BrokenBlock;
+
+export function isBroken(node: ResolvedNode): node is BrokenBlock {
+  return "broken" in node;
+}
+
+/**
  * Everything a block needs to render beyond its own (already resolved) config.
  * Live-data access (bindable value) is backed by a subscription and a lit live directive.
  */
 export interface RenderContext {
-  renderChild(child: ResolvedBlock): TemplateResult;
+  renderChild(child: ResolvedNode): TemplateResult;
 }
 
 /**
