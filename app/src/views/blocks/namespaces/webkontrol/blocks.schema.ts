@@ -1,6 +1,8 @@
 ﻿import z from "zod";
 import { html } from "lit";
+import { styleMap } from "lit/directives/style-map.js";
 import { blockSlot, ContainerBlockStyleSchema, CoordinateSchema, GridConfigSchema, TextBlockStyleSchema } from "../../types/schema";
+import { containerStyles, textStyles } from "../../styles";
 import { createNamespace } from "../../types/config";
 import type { FieldMeta } from "../../../types/schema";
 
@@ -11,7 +13,7 @@ export const WebsiteBlock = ns.defineBlock("website", {
   url: z.url().meta({ label: "URL", description: "The website to display" } satisfies FieldMeta),
 }, {
   info: { label: "Website", description: "Display a website", icon: "globe" },
-  render: (config) => html`<iframe src=${config.url} style="border:0;width:100%;height:100%"></iframe>`,
+  render: (config) => html`<iframe class="wk-block wk-website" src=${config.url}></iframe>`,
 });
 
 // TextBlock: show some styled text.
@@ -20,7 +22,7 @@ export const TextBlock = ns.defineBlock("text", {
   style: TextBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Text", description: "Show some styled text", icon: "textFields" },
-  render: (config) => html`<span>${config.text}</span>`, // TODO: apply config.style
+  render: (config) => html`<div class="wk-block wk-text" style=${styleMap(textStyles(config.style))}>${config.text}</div>`,
 });
 
 // ContainerBlock: wrap another block to give it styling it does not have itself.
@@ -29,7 +31,7 @@ export const ContainerBlock = ns.defineBlock("container", {
   style: ContainerBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Container", description: "Wrap a block to style it", icon: "borderOuter" },
-  render: (config, ctx) => html`<div>${ctx.renderChild(config.block)}</div>`, // TODO: apply config.style
+  render: (config, ctx) => html`<div class="wk-block wk-container" style=${styleMap(containerStyles(config.style))}>${ctx.renderChild(config.block)}</div>`,
 });
 
 // GridBlock: Arranges child blocks into the best grid for them.
@@ -55,8 +57,13 @@ export const FreeFormBlock = ns.defineBlock("freeform", {
   })).default([]).meta({ label: "Items" } satisfies FieldMeta),
 }, {
   info: { label: "Free form", description: "Position blocks freely", icon: "selectWindow" },
-  render: (config, ctx) => html`<div class="freeform" style="position:relative">${config.items.map((item) => html`
-    <div style="position:absolute;left:${item.position.x}%;top:${item.position.y}%;width:${item.size.x}%;height:${item.size.y}%">
+  render: (config, ctx) => html`<div class="wk-block wk-freeform">${config.items.map((item) => html`
+    <div class="wk-freeform-item" style=${styleMap({
+      left: `${item.position.x}%`,
+      top: `${item.position.y}%`,
+      width: `${item.size.x}%`,
+      height: `${item.size.y}%`,
+    })}>
       ${ctx.renderChild(item.block)}
     </div>`)}</div>`,
 });

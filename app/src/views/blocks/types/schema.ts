@@ -113,9 +113,11 @@ export const FontStyleShape = {
 };
 
 //* Block Styling combination sets:
-// Composed from the shapes above, exported prefaulted: an omitted style parses into its inner
-// defaults, so a bare `{type}` block is valid without every use site remembering `.prefault({})`.
-const ContainerBlockStyleShape = { //* Prettymuch all blocks are containers, except things like a website or a grid.
+// Composed from the shapes above. Shapes are exported for composition (the prefaulted schemas
+// are no longer ZodObjects, so .extend() is unavailable; plugins spread the shape instead),
+// schemas for direct use: prefaulted, so an omitted style parses into its inner defaults and a
+// bare `{type}` block is valid without every use site remembering `.prefault({})`.
+export const ContainerBlockStyleShape = { //* Prettymuch all blocks are containers, except things like a website or a grid.
   ...BackgroundStyleShape,
   ...PaddingStyleShape,
   ...BorderStyleShape,
@@ -123,9 +125,11 @@ const ContainerBlockStyleShape = { //* Prettymuch all blocks are containers, exc
 export const ContainerBlockStyleSchema = z.object(ContainerBlockStyleShape).prefault({});
 export type ContainerBlockStyle = z.infer<typeof ContainerBlockStyleSchema>;
 
-export const TextBlockStyleSchema = z.object({
+export const TextBlockStyleShape = {
   ...ContainerBlockStyleShape,
   ...FontStyleShape,
-}).prefault({});
+};
+export const TextBlockStyleSchema = z.object(TextBlockStyleShape).prefault({});
+export type TextBlockStyle = z.infer<typeof TextBlockStyleSchema>;
 
 
