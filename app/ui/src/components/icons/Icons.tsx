@@ -238,6 +238,30 @@ export const Icons = {
       />
     </>,
   ),
+  chevronUp: icon(
+    "0 0 13 13",
+    <>
+      <path
+        d="M2 8.5l4.5-4 4.5 4"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>,
+  ),
+  chevronDown: icon(
+    "0 0 13 13",
+    <>
+      <path
+        d="M2 4.5l4.5 4 4.5-4"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>,
+  ), // TODO: Replace chevrons with material design icons.
   home: icon(
     "0 -960 960 960", // From material design
     <path d="M160-120v-480l320-240 320 240v480H560v-280H400v280H160Z" />,

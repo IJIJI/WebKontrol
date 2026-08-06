@@ -16,6 +16,7 @@ import { BaseSetting } from "./BaseSetting";
 import type { ZodObject, ZodRawShape } from "zod";
 import { SettingGroup } from "./SettingGroup";
 import { DetailGroup, DetailRow, InlineValue, countLabel, displayValue } from "./SchemaDetails";
+import { arrayMove } from "../../common/helpers/arrayMove";
 
 type Values = Record<string, unknown>;
 
@@ -306,14 +307,32 @@ function arrayGroup(
     <div className="arrayItem" key={index}>
       <div className="arrayItemHead">
         <span className="label">#{index + 1}</span>
-        <Button
-          fillStyle={FillStyle.SKELETON}
-          variant={Variant.DANGER}
-          onClick={() => lens.setField(key, raw.filter((_, j) => j !== index))}
-          ariaLabel="Remove item"
-        >
-          <Icons.delete size={14} />
-        </Button>
+        <span className="arrayItemActions">
+          <Button
+            fillStyle={FillStyle.SKELETON}
+            onClick={() => lens.setField(key, arrayMove(raw, index, index - 1))}
+            disabled={index === 0}
+            ariaLabel="Move up"
+          >
+            <Icons.chevronUp size={14} />
+          </Button>
+          <Button
+            fillStyle={FillStyle.SKELETON}
+            onClick={() => lens.setField(key, arrayMove(raw, index, index + 1))}
+            disabled={index === raw.length - 1}
+            ariaLabel="Move down"
+          >
+            <Icons.chevronDown size={14} />
+          </Button>
+          <Button
+            fillStyle={FillStyle.SKELETON}
+            variant={Variant.DANGER}
+            onClick={() => lens.setField(key, raw.filter((_, j) => j !== index))}
+            ariaLabel="Remove item"
+          >
+            <Icons.delete size={14} />
+          </Button>
+        </span>
       </div>
       {itemFields(index)}
     </div>

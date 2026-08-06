@@ -16,6 +16,7 @@ import {
 import { BlockTypeRegistry } from "../../../../../src/views/blocks/registry";
 import { resolveBlock } from "../../../../../src/views/blocks/resolver";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
+import { arrayMove } from "../../../common/helpers/arrayMove";
 import { fieldErrors, validateBlockTree } from "./validate";
 import {
   childBlocks,
@@ -135,5 +136,15 @@ assert.equal(fieldErrors(nested, []).size, 0);
     assert.deepEqual(withBadChild.dependencies, [], "broken child contributes no dependencies");
   }
 }
+
+//* arrayMove: the slot-list reorder primitive
+
+assert.deepEqual(arrayMove(["a", "b", "c"], 0, 1), ["b", "a", "c"]);
+assert.deepEqual(arrayMove(["a", "b", "c"], 2, 0), ["c", "a", "b"]);
+assert.deepEqual(arrayMove(["a", "b"], 0, 9), ["a", "b"], "out of range is a no-op");
+// The slot list moves a block to its neighbouring *entry's* index, so junk between blocks still
+// yields one visible step: down lands after the target, up lands before it.
+assert.deepEqual(arrayMove(["a", "junk", "b"], 0, 2), ["junk", "b", "a"], "down past junk");
+assert.deepEqual(arrayMove(["a", "junk", "b"], 2, 0), ["b", "a", "junk"], "up past junk");
 
 console.log("blockUtils.check: all assertions passed");

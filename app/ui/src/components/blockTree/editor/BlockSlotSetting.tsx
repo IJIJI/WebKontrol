@@ -10,6 +10,7 @@ import { Icons } from "../../icons/Icons";
 import { BlockChip } from "../presentation/BlockChip";
 import { BlockPicker } from "./BlockPicker";
 import { type BlockLike, isBlock } from "../model/blockUtils";
+import { arrayMove } from "../../../common/helpers/arrayMove";
 
 // A newly picked block: just its type. Every other field is optional, defaulted by its schema, or
 // filled in by the user — seeding more here would invent config the user didn't ask for.
@@ -96,11 +97,29 @@ export function BlockSlotListSetting({
     // input row would clip.
     <BaseSetting title={title} subtitle={subtitle} error={error} width={SettingWidth.COMPACT}>
       <div className="blockSlotList">
-        {entries.map(({ block, index }) => (
+        {entries.map(({ block, index }, position) => (
           <span className="slotEntry" key={index}>
             <button type="button" className="slotBlock" onClick={() => onOpen(index)} title="Open this block">
               <BlockChip type={block.type} />
             </button>
+            {/* Move to the neighbouring entry's raw position: always one visible step, even with
+                non-block junk sitting between blocks. */}
+            <Button
+              fillStyle={FillStyle.SKELETON}
+              onClick={() => onChange(arrayMove(raw, index, entries[position - 1].index))}
+              disabled={position === 0}
+              ariaLabel="Move up"
+            >
+              <Icons.chevronUp size={14} />
+            </Button>
+            <Button
+              fillStyle={FillStyle.SKELETON}
+              onClick={() => onChange(arrayMove(raw, index, entries[position + 1].index))}
+              disabled={position === entries.length - 1}
+              ariaLabel="Move down"
+            >
+              <Icons.chevronDown size={14} />
+            </Button>
             <Button
               fillStyle={FillStyle.SKELETON}
               variant={Variant.DANGER}
