@@ -11,6 +11,8 @@ import { type DisplayName } from "../../../../src/types/CommonTypes";
 import { type Draft } from "../../common/hooks/DraftSave";
 import { VIEW_TYPE_META } from "./viewMeta";
 import { BlockViewBody } from "./BlockViewBody";
+import { validateBlockTree } from "../blockTree/model/validate";
+import { type BlockLike } from "../blockTree/model/blockUtils";
 
 // The draft shape the editor works with: a flat, loosely-typed view config. The mapper reads
 // fields by key, so per-type precision lives in each entry's `schema` (used for rendering + save
@@ -43,6 +45,10 @@ export interface ViewEditorEntry {
   // Custom body component for this type's fields. Omit to use the generic SchemaSettings mapper
   // (the default for simple, flat field types).
   body?: ComponentType<ViewBodyProps>;
+  // Extra validation the member schema can't express, run on save after safeParse. Returns the
+  // reasons to refuse; empty means fine. Blocks use it because `root` is a loose envelope, so
+  // per-block configs are invisible to the view schema.
+  validate?: (values: ViewEditorValues) => string[];
 }
 
 export const VIEW_EDITORS: Record<ViewType, ViewEditorEntry> = {
@@ -56,6 +62,13 @@ export const VIEW_EDITORS: Record<ViewType, ViewEditorEntry> = {
     // cleared root take the same path instead of seeding an arbitrary block type here.
     emptyDraft: { type: "blocks", name: {} },
     body: BlockViewBody,
+    validate: (values) => {
+      const issues = validateBlockTree(values.root as BlockLike | undefined);
+      if (issues.size === 0) return [];
+      // The tree marks which blocks and the form marks which fields; the toast only needs to say
+      // why the save stopped.
+      return [`${issues.size} block${issues.size === 1 ? "" : "s"} still have problems.`];
+    },
   },
 };
 

@@ -14,6 +14,8 @@ export type BaseSettingsCompProps = {
   inputRef?: { readonly current: HTMLElement | null };
   children: ReactNode;
   changed?: boolean;
+  // A validation failure for this field, shown under the label.
+  error?: string;
   // Layout of label vs. input. Falls back to the nearest SettingWidthContext, then WIDE.
   width?: SettingWidth;
 };
@@ -41,14 +43,18 @@ export function BaseSetting(props: BaseSettingsCompProps): JSX.Element {
   const width = props.width ?? contextWidth ?? SettingWidth.WIDE;
   return (
     <div
-      className={classNames("setting", "field", width, props.changed && "changed")}
+      className={classNames("setting", "field", width, props.changed && "changed", props.error && "invalid")}
       onClick={() => {
         if (props.inputRef) props.inputRef.current?.focus();
       }}
     >
       <div className="titletext">
         <span className="title">{props.title}</span>
-        {props.subtitle && <span className="subtitle">{props.subtitle}</span>}
+        {props.error ? (
+          <span className="errortext">{props.error}</span>
+        ) : (
+          props.subtitle && <span className="subtitle">{props.subtitle}</span>
+        )}
       </div>
       <div className="input">{props.children}</div>
     </div>

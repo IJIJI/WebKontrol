@@ -197,6 +197,11 @@
         font-size: 11px;
         color: var(--color-text-tertiary);
       }
+      // Replaces the subtitle while the field is invalid, so the row keeps its height.
+      .errortext {
+        font-size: 11px;
+        color: var(--color-text-danger);
+      }
     }
     .input {
       display: flex;
@@ -324,6 +329,12 @@
         padding: 0 28px 0 5px;
       }
 
+    }
+
+    // An invalid field outranks the changed marker: its input border turns danger. Matches the
+    // changed rule's depth (.input .textfield) so equal specificity + later source order wins.
+    &.invalid .input .textfield {
+      border-color: var(--color-text-danger);
     }
 
     // COMPACT: always stacked (title/subtitle, then each labelled input full-width).

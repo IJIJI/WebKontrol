@@ -80,6 +80,13 @@ interface RenderCtx {
   renderCustom?: CustomFieldRenderer;
   joined: boolean;
   readOnly: boolean;
+  /** Validation messages by dotted field path, e.g. `url` or `style.fontSize`. */
+  errors?: Map<string, string>;
+}
+
+/** The error for a field at `path` + `key`, if any. */
+function errorAt(ctx: RenderCtx, path: readonly (string | number)[], key: string): string | undefined {
+  return ctx.errors?.get([...path, key].join("."));
 }
 
 // Renders Setting components for a zod object schema, driven by each field's FieldMeta and
@@ -97,6 +104,7 @@ export function SchemaSettings({
   groupTitle = "Type Specific",
   joined = false,
   readOnly = false,
+  errors,
 }: {
   schema: ZodObject<ZodRawShape>; // the current view type's member schema (any zod object)
   draft: DraftLens;
@@ -107,8 +115,9 @@ export function SchemaSettings({
   groupTitle?: string;
   joined?: boolean; // one divided card per group instead of an island per field
   readOnly?: boolean; // render values instead of inputs (same walk, inspection presentation)
+  errors?: Map<string, string>; // validation messages by dotted field path
 }): JSX.Element {
-  const ctx: RenderCtx = { renderCustom, joined, readOnly };
+  const ctx: RenderCtx = { renderCustom, joined, readOnly, errors };
 
   // Inspection: one compact property list, not form rows. Same walk and labels, no form chrome
   // (no group cards, no advanced fold) Top-level fields are line-divided sections.
@@ -154,7 +163,7 @@ export function SchemaSettings({
         ? objectGroup(key, info, meta, draft, [], ctx)
         : info.kind === "array"
           ? arrayGroup(key, info, meta, draft, [], ctx)
-          : renderField(key, info, meta, draft, placeholder, ctx));
+          : renderField(key, info, meta, draft, placeholder, ctx, []));
     (meta.advanced ? advanced : isSection ? sections : fields).push(element);
   }
 
@@ -201,7 +210,7 @@ function fieldElement(
   if (custom) return custom;
   if (info.kind === "object") return objectGroup(key, info, meta, lens, path, ctx);
   if (info.kind === "array") return arrayGroup(key, info, meta, lens, path, ctx);
-  return renderField(key, info, meta, lens, placeholder, ctx);
+  return renderField(key, info, meta, lens, placeholder, ctx, path);
 }
 
 // The meta'd fields of one object level (an object field's shape, or one array item), rendered
@@ -266,7 +275,7 @@ function arrayGroup(
   const element = (info.core as { element?: unknown }).element;
   const elementInfo = element === undefined ? undefined : describeField(element);
   if (elementInfo?.kind !== "object") {
-    return renderField(key, { ...info, kind: "unknown" }, meta, lens, undefined, ctx);
+    return renderField(key, { ...info, kind: "unknown" }, meta, lens, undefined, ctx, path);
   }
 
   const raw: unknown[] = Array.isArray(lens.values[key]) ? (lens.values[key] as unknown[]) : [];
@@ -336,10 +345,12 @@ function renderField(
   draft: DraftLens,
   placeholder: string | undefined,
   ctx: RenderCtx,
+  path: readonly (string | number)[] = [],
 ): JSX.Element {
   const { kind, options } = info;
   const title = meta.label;
   const subtitle = meta.description;
+  const error = errorAt(ctx, path, key);
   const value = draft.values[key];
   const saved = draft.saved[key];
   const set = (v: unknown): void => draft.setField(key, v);
@@ -356,7 +367,7 @@ function renderField(
   // Kinds with no editable widget yet: shown read-only inside the form so nothing disappears.
   if (kind === "record" || kind === "unknown") {
     return (
-      <BaseSetting key={key} title={title} subtitle={subtitle}>
+      <BaseSetting key={key} title={title} subtitle={subtitle} error={error}>
         <span className="readonlyValue">{displayValue(value)}</span>
       </BaseSetting>
     );
@@ -365,42 +376,42 @@ function renderField(
   switch (kind) {
     case "url":
       return (
-        <UrlSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder}
+        <UrlSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
           value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
       );
     case "text":
       // The schema can't distinguish a colour string from any other; the meta hint does.
       if (meta.input === "color") {
         return (
-          <ColorTextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder}
+          <ColorTextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
             value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
         );
       }
       return (
-        <TextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder}
+        <TextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
           value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
       );
     case "number":
       return (
-        <NumberSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder}
+        <NumberSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
           min={info.min} max={info.max} step={info.step}
           value={value as number} savedVal={saved as number | undefined} setValue={set} />
       );
     case "boolean":
       return (
-        <ToggleSetting key={key} title={title} subtitle={subtitle}
+        <ToggleSetting key={key} title={title} subtitle={subtitle} error={error}
           value={Boolean(value)} savedVal={saved as boolean | undefined} setValue={set} />
       );
     case "enum":
       return (
-        <SelectSetting key={key} title={title} subtitle={subtitle}
+        <SelectSetting key={key} title={title} subtitle={subtitle} error={error}
           value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set}
           options={options.map((o) => ({ label: o, value: o }))} />
       );
     default:
       // Object/array reach here only via arrayGroup's non-object-element fallback above.
       return (
-        <BaseSetting key={key} title={title} subtitle={subtitle}>
+        <BaseSetting key={key} title={title} subtitle={subtitle} error={error}>
           <span className="readonlyValue">{displayValue(value)}</span>
         </BaseSetting>
       );

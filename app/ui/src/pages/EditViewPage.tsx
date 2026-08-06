@@ -68,6 +68,13 @@ export default function EditViewPage(): JSX.Element {
       toast.error(details || "Invalid view configuration");
       return;
     }
+    // Checks the member schema can't express (e.g. per-block configs behind a loose `root`).
+    const extra = entry.validate?.(draft.values) ?? [];
+    if (extra.length > 0) {
+      toast.error(extra.join("\n"));
+      return;
+    }
+
     const config = parsed.data as AnyViewConfig;
 
     await draft.save(async () => {

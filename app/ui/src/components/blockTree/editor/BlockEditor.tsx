@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { type JSX } from "react/jsx-runtime";
 
 import "../blockExplorer.less";
@@ -9,12 +9,14 @@ import { BlockTree } from "../tree/BlockTree";
 import { BlockPane } from "../presentation/BlockPane";
 import { BlockForm, savedBlockAt } from "../BlockForm";
 import { BlockPicker } from "./BlockPicker";
+import { fieldErrors, validateBlockTree } from "../model/validate";
 import {
   type BlockLike,
   type BlockPath,
   getAtPath,
   isBlock,
   parentBlockPath,
+  pathKey,
   removeAtPath,
   setAtPath,
 } from "../model/blockUtils";
@@ -36,6 +38,9 @@ export function BlockEditor({
   // Null = pane closed (like the read-only explorer); [] = the root block selected.
   const [selectedPath, setSelectedPath] = useState<BlockPath | null>(null);
   const [pickingRoot, setPickingRoot] = useState(false);
+  // Live validation: derived from the current tree, so there is no stale error state to clear.
+  // Above the early return, since hooks must run in the same order every render.
+  const issues = useMemo(() => validateBlockTree(root), [root]);
 
   // Nothing to show or navigate until there is a root block.
   if (!root) {
@@ -84,6 +89,7 @@ export function BlockEditor({
         selected={selectedPath ?? undefined}
         // Unsaved = no same-typed block at this path in the saved tree (new, or replaced).
         isUnsaved={(blockPath, block) => savedBlockAt(saved, blockPath, block.type) === undefined}
+        invalidAt={(blockPath) => issues.get(pathKey(blockPath))?.[0]?.message}
       />
 
       {selected && (
@@ -108,6 +114,7 @@ export function BlockEditor({
             path={path}
             setAt={setAt}
             onOpen={setSelectedPath}
+            errors={fieldErrors(issues, path)}
           />
         </BlockPane>
       )}

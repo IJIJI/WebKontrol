@@ -22,12 +22,14 @@ export function BlockSlotSetting({
   title,
   subtitle,
   value,
+  error,
   onChange,
   onOpen,
 }: {
   title: string;
   subtitle?: string;
   value: unknown;
+  error?: string;
   onChange: (next: BlockLike | undefined) => void;
   onOpen: () => void;
 }): JSX.Element {
@@ -35,7 +37,7 @@ export function BlockSlotSetting({
   const block = isBlock(value) ? value : undefined;
 
   return (
-    <BaseSetting title={title} subtitle={subtitle} width={SettingWidth.AUTO}>
+    <BaseSetting title={title} subtitle={subtitle} error={error} width={SettingWidth.AUTO}>
       <div className="blockSlot">
         {block ? (
           <>
@@ -72,12 +74,14 @@ export function BlockSlotListSetting({
   title,
   subtitle,
   value,
+  error,
   onChange,
   onOpen,
 }: {
   title: string;
   subtitle?: string;
   value: unknown;
+  error?: string;
   onChange: (next: unknown[]) => void;
   onOpen: (index: number) => void;
 }): JSX.Element {
@@ -90,7 +94,7 @@ export function BlockSlotListSetting({
   return (
     // COMPACT (not AUTO): the row list needs auto height, which the wide layout's fixed-height
     // input row would clip.
-    <BaseSetting title={title} subtitle={subtitle} width={SettingWidth.COMPACT}>
+    <BaseSetting title={title} subtitle={subtitle} error={error} width={SettingWidth.COMPACT}>
       <div className="blockSlotList">
         {entries.map(({ block, index }) => (
           <span className="slotEntry" key={index}>

@@ -33,10 +33,13 @@ export function BlockForm({
   path,
   setAt,
   onOpen,
+  errors,
 }: {
   block: BlockLike;
   savedBlock?: BlockLike;
   path: BlockPath;
+  /** Validation messages for this block, by dotted field path. */
+  errors?: Map<string, string>;
   /** Write a value at an absolute tree path. Omit for a read-only form. */
   setAt?: (target: BlockPath, value: unknown) => void;
   onOpen: (path: BlockPath) => void;
@@ -66,6 +69,7 @@ export function BlockForm({
     const label = info.meta?.label ?? key;
     const childBase: BlockPath = [...path, ...relPath, key];
     const value = fieldLens.values[key];
+    const error = errors?.get([...relPath, key].join("."));
 
     if (isBlockSlot(core)) {
       const child = isBlock(value) ? value : undefined;
@@ -86,6 +90,7 @@ export function BlockForm({
           title={label}
           subtitle={info.meta?.description}
           value={value}
+          error={error}
           onChange={(next) => fieldLens.setField(key, next)}
           onOpen={() => onOpen(childBase)}
         />
@@ -106,6 +111,7 @@ export function BlockForm({
           title={label}
           subtitle={info.meta?.description}
           value={value}
+          error={error}
           onChange={(next) => fieldLens.setField(key, next)}
           onOpen={(index) => onOpen([...childBase, index])}
         />
@@ -137,6 +143,7 @@ export function BlockForm({
       groupTitle="Config"
       joined
       readOnly={readOnly}
+      errors={errors}
     />
   );
 }

@@ -11,9 +11,6 @@
     color: var(--color-text-secondary);
   }
 
-  // Not in the saved tree (new or replaced): an outset accent ring around the badge marks the
-  // block as unsaved, complementing the per-field changed borders on saved blocks. The ring
-  // reaches 4px left of the badge, so the icon gap widens to keep clear of it.
   &.unsaved {
     gap: 6px;
 
@@ -21,5 +18,11 @@
       outline: 2px solid var(--color-text-acc);
       outline-offset: 2px;
     }
+  }
+
+  .blockWarning {
+    display: inline-flex;
+    flex: none;
+    color: var(--color-text-danger);
   }
 }

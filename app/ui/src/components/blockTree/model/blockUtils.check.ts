@@ -1,5 +1,6 @@
-// Self-check for the schema-driven childBlocks walk and the path helpers the editor writes
-// through. No test framework in this repo yet; run with `yarn check`.
+// Self-check for the block model: the schema-driven childBlocks walk, the path helpers the
+// editor writes through, and the per-block tree validation. No test framework in this repo yet;
+// run with `yarn check`.
 import assert from "node:assert/strict";
 
 import {
@@ -8,7 +9,14 @@ import {
   FreeFormBlock,
   GridBlock,
   TextBlock,
+  WebsiteBlock,
+  ns,
+  WEBKONTROL_BLOCKS,
 } from "../../../../../src/views/blocks/namespaces/webkontrol/blocks.schema";
+import { BlockTypeRegistry } from "../../../../../src/views/blocks/registry";
+import { resolveBlock } from "../../../../../src/views/blocks/resolver";
+import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
+import { fieldErrors, validateBlockTree } from "./validate";
 import {
   childBlocks,
   getAtPath,
@@ -79,5 +87,53 @@ assert.deepEqual(parentBlockPath(freeform, ["items", 0, "block"]), []);
 assert.equal(parentBlockPath(freeform, []), null, "root has no parent block");
 // container.block is a text block; a field inside it resolves to that block, not the container.
 assert.deepEqual(parentBlockPath(container, ["block", "text"]), ["block"]);
+
+//* validateBlockTree: per-block schema errors, keyed by block path
+
+// A complete tree is savable.
+const goodSite: BlockLike = { type: WebsiteBlock.key, url: "https://example.com" };
+assert.equal(validateBlockTree({ type: GridBlock.key, blocks: [goodSite] }).size, 0);
+
+// A missing required field is reported against its own block, by field name.
+const badSite: BlockLike = { type: WebsiteBlock.key };
+const nested = validateBlockTree({ type: ContainerBlock.key, block: badSite });
+assert.deepEqual([...nested.keys()], ["block"], "issue keyed by the child's path");
+assert.equal(nested.get("block")?.[0].field, "url");
+
+// The parent is clean: a slot only sees the loose envelope, so a child's problems aren't its own.
+assert.equal(nested.has(""), false);
+
+// Unregistered types report once and stop (no schema to walk below them).
+const foreign = validateBlockTree({ type: "acme::block::nope", block: badSite });
+assert.deepEqual([...foreign.keys()], [""]);
+
+// fieldErrors flattens one block's issues for the form.
+assert.equal(fieldErrors(nested, ["block"]).get("url") !== undefined, true);
+assert.equal(fieldErrors(nested, []).size, 0);
+
+//* resolveBlock: bad content becomes a BrokenBlock node, never a throw
+
+{
+  const registry = new BlockTypeRegistry();
+  ns.register(registry, WEBKONTROL_BLOCKS);
+
+  const good = resolveBlock({ type: ContainerBlock.key, block: goodSite, style: {} }, registry);
+  assert.equal(isBroken(good), false, "valid tree resolves");
+
+  const unknown = resolveBlock({ type: "acme::block::nope" }, registry);
+  assert.equal(isBroken(unknown), true, "unknown type is broken, not thrown");
+
+  const invalid = resolveBlock(badSite, registry);
+  assert.equal(isBroken(invalid) && invalid.message.includes("url"), true, "message names the field");
+
+  // A broken child stays local: the parent resolves, the child slot holds the broken node.
+  const withBadChild = resolveBlock({ type: ContainerBlock.key, block: badSite, style: {} }, registry);
+  assert.equal(isBroken(withBadChild), false, "parent is not broken by its child");
+  if (!isBroken(withBadChild)) {
+    const child = (withBadChild.config as { block: unknown }).block;
+    assert.equal(isBroken(child as ResolvedNode), true, "child slot holds the broken node");
+    assert.deepEqual(withBadChild.dependencies, [], "broken child contributes no dependencies");
+  }
+}
 
 console.log("blockUtils.check: all assertions passed");

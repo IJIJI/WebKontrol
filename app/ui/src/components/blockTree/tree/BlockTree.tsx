@@ -10,12 +10,14 @@ function TreeNode({
   onSelect,
   selected,
   isUnsaved,
+  invalidAt,
 }: {
   block: BlockLike;
   path: BlockPath;
   onSelect?: (path: BlockPath) => void;
   selected?: BlockPath;
   isUnsaved?: (path: BlockPath, block: BlockLike) => boolean;
+  invalidAt?: (path: BlockPath) => string | undefined;
 }): JSX.Element {
   const children = childBlocks(block);
 
@@ -27,6 +29,7 @@ function TreeNode({
           selected={selected !== undefined && pathEquals(path, selected)}
           onClick={onSelect ? () => onSelect(path) : undefined}
           unsaved={isUnsaved?.(path, block)}
+          invalid={invalidAt?.(path)}
         />
       </div>
       {children.length > 0 && (
@@ -42,6 +45,7 @@ function TreeNode({
                 onSelect={onSelect}
                 selected={selected}
                 isUnsaved={isUnsaved}
+                invalidAt={invalidAt}
               />
             );
           })}
@@ -59,15 +63,24 @@ export function BlockTree({
   onSelect,
   selected,
   isUnsaved,
+  invalidAt,
 }: {
   root: BlockLike;
   onSelect?: (path: BlockPath) => void;
   selected?: BlockPath;
   isUnsaved?: (path: BlockPath, block: BlockLike) => boolean;
+  invalidAt?: (path: BlockPath) => string | undefined;
 }): JSX.Element {
   return (
     <div className="blockTree">
-      <TreeNode block={root} path={[]} onSelect={onSelect} selected={selected} isUnsaved={isUnsaved} />
+      <TreeNode
+        block={root}
+        path={[]}
+        onSelect={onSelect}
+        selected={selected}
+        isUnsaved={isUnsaved}
+        invalidAt={invalidAt}
+      />
     </div>
   );
 }
