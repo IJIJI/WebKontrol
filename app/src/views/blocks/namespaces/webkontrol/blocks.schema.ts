@@ -44,7 +44,10 @@ export const GridBlock = ns.defineBlock("grid", {
   blocks: z.array(blockSlot()).default([]).meta({ label: "Blocks" } satisfies FieldMeta),
 }, {
   info: { label: "Grid", description: "Arrange blocks in a grid", icon: "grid" },
-  render: (config, ctx) => html`<div class="grid">${config.blocks.map((block) => ctx.renderChild(block))}</div>`,
+  render: (config, ctx) => html`<div class="wk-block wk-grid" style=${styleMap({
+    gridTemplateRows: `repeat(${config.layout.rows}, 1fr)`,
+    gridTemplateColumns: `repeat(${config.layout.columns}, 1fr)`,
+  })}>${config.blocks.map((block) => ctx.renderChild(block))}</div>`,
 });
 
 // FreeFormBlock: position each child block wherever you want.
