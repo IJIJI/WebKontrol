@@ -7,18 +7,9 @@
       content="width=device-width, initial-scale=1.0, user-scalable=no"
     />
     <title>WebKontrol View</title>
-    <style>
-      html,
-      body {
-        margin: 0;
-        height: 100%;
-        background: #000;
-        color: #fff;
-      }
-      #view-root {
-        height: 100%;
-      }
-    </style>
+    <!-- The default view stylesheet (page base + block classes), served from view.css next to
+         this file at this fixed path (VIEW_CLIENT_STYLE_PATH); keep the two in sync. -->
+    <link rel="stylesheet" href="/viewclient/view.css" />
   </head>
   <body>
     <div id="view-root"></div>

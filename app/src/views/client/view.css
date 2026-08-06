@@ -1,0 +1,72 @@
+/* The default stylesheet for served block views (/viewclient/view.css).
+   Generic, reusable classes the blocks build on; blocks only carry config-driven values
+   (colors, grid templates, positions) as inline styles. User-supplied CSS will layer on
+   top of this later, so keep selectors shallow and class names stable (wk- prefix). */
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+}
+
+#view-root {
+  height: 100%;
+}
+
+/* Every block fills the slot its parent gives it. */
+.wk-block {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+
+/* Grid children may hold iframes/text that would otherwise stretch their tracks. */
+.wk-grid {
+  display: grid;
+}
+.wk-grid > * {
+  min-width: 0;
+  min-height: 0;
+}
+
+/* Freeform positions its items in % of its own box. */
+.wk-freeform {
+  position: relative;
+}
+.wk-freeform-item {
+  position: absolute;
+}
+
+.wk-website {
+  border: 0;
+  display: block;
+}
+
+/* A block that failed to resolve: loud, not a silent gap on a wall display. */
+.wk-broken {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid #e93838;
+  border-radius: 8px;
+  background: rgba(233, 56, 56, 0.08);
+  color: #e93838;
+  font-size: 14px;
+}
+.wk-broken .text {
+  flex: 1;
+  min-width: 0;
+}
+.wk-broken .type {
+  font-weight: 600;
+}
+.wk-broken .message {
+  opacity: 0.85;
+}
+.wk-broken svg {
+  flex: none;
+}

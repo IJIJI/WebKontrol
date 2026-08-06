@@ -3,8 +3,10 @@ import path from "node:path";
 import { buildViewClient } from "./build";
 import { Logger } from "../../logging/Logger";
 
-// The host page lives next to this file; the bundle is produced from client/main.ts.
+// The host page and stylesheet live next to this file; the bundle is produced from client/main.ts.
+// TODO: Sync paths between ViewServer and BlockViewClient
 const HOST_HTML = path.join(process.cwd(), "src", "views", "client", "index.html");
+const VIEW_CSS = path.join(process.cwd(), "src", "views", "client", "view.css");
 
 /**
  * The browser renderer app for block views: the static host page and the esbuild-built
@@ -14,6 +16,7 @@ const HOST_HTML = path.join(process.cwd(), "src", "views", "client", "index.html
 export class BlockViewClient {
   private _logger = new Logger(["VIEW", "CLIENT"]);
   private _hostHtml: string | undefined;
+  private _stylesheet: string | undefined;
   private _bundle: string | null = null;
 
   /**
@@ -35,6 +38,12 @@ export class BlockViewClient {
   getHostHtml(): string {
     this._hostHtml ??= fs.readFileSync(HOST_HTML, "utf8");
     return this._hostHtml;
+  }
+
+  /** The default view stylesheet the host page links. Cached on first read. */
+  getStylesheet(): string {
+    this._stylesheet ??= fs.readFileSync(VIEW_CSS, "utf8");
+    return this._stylesheet;
   }
 
   /** The built browser bundle, or null if the build failed. */

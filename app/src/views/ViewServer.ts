@@ -6,7 +6,9 @@ import { Logger } from "../logging/Logger";
 
 // Fixed path the host page loads the browser bundle from. Kept out of the route base
 // (a single segment under it would collide with /:key), and referenced by client/index.html.
+// TODO: Sync paths between ViewServer and BlockViewClient
 const VIEW_CLIENT_BUNDLE_PATH = "/viewclient/main.js";
+const VIEW_CLIENT_STYLE_PATH = "/viewclient/view.css";
 
 /**
  * Serves views over HTTP/SSE. The transport half of the views feature: it registers the
@@ -40,7 +42,13 @@ export class ViewServer {
     registrar.registerRoute("get", `${base}/:key`, (req) => this._serveView(req));
     registrar.registerSse(`${base}/:key/stream`, (req, conn) => this._openStream(req, conn));
     registrar.registerRoute("get", VIEW_CLIENT_BUNDLE_PATH, () => this._serveBundle());
-    this._logger.info(`Registered view routes "${base}/:key(/stream)" + client bundle.`);
+    // Same no-cache reasoning as the bundle: fixed path, may change across restarts.
+    registrar.registerRoute("get", VIEW_CLIENT_STYLE_PATH, () => ({
+      contentType: "text/css",
+      body: this._client.getStylesheet(),
+      headers: { "Cache-Control": "no-cache" },
+    }));
+    this._logger.info(`Registered view routes "${base}/:key(/stream)" + client bundle and stylesheet.`);
   }
 
   private _serveView(req: RouteRequest): RouteResponse {
