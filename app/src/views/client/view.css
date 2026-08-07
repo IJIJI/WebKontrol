@@ -77,6 +77,14 @@ body {
 .wk-slot.wk-hug > .wk-block {
   flex: 0 1 auto;
   align-self: auto;
+  /* Hug up to the space available, never past it. Sizing decides how big a block is, not
+     whether it may paint outside the space its parent allocated: a filling block is already
+     clipped to its slot, and a hugging one must be too, or it would overlap its neighbours
+     (visibly so in a freeform, where siblings share the same area). Percentages against an
+     indefinite slot resolve to none, so hugging inside an auto-sized parent stays
+     unconstrained, which is what keeps nested hugging (a container around a chip) working. */
+  max-width: 100%;
+  max-height: 100%;
 }
 
 /* Inside a stack the slot must hug too, otherwise it would swallow the free space and the
