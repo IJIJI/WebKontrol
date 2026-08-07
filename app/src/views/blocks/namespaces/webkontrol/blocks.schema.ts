@@ -1,7 +1,7 @@
 ﻿import z from "zod";
 import { html, type TemplateResult } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
-import { blockSlot, ContainerBlockStyleSchema, CoordinateSchema, GridConfigSchema, TextBlockStyleSchema, type TextBlockStyle } from "../../types/schema";
+import { alignmentSchema, blockSlot, ContainerBlockStyleSchema, CoordinateSchema, GridConfigSchema, TextBlockStyleSchema, type TextBlockStyle } from "../../types/schema";
 import { containerStyles, placementStyles, textStyles } from "../../styles";
 import { clock } from "../../clock";
 import { PHP_DATE_TOKENS } from "../../phpDate";
@@ -62,14 +62,20 @@ export const GridBlock = ns.defineBlock("grid", {
   })}>${config.blocks.map((block) => ctx.renderChild(block))}</div>`,
 });
 
-// FreeFormBlock: position each child block wherever you want.
+// FreeFormBlock: position each child block wherever you want. Items later in the list render
+// on top of earlier ones (plain paint order, no z-index involved); reorder to layer.
+const ANCHOR_SHIFT = { left: "0", center: "-50%", right: "-100%", top: "0", middle: "-50%", bottom: "-100%" } as const;
+const ANCHOR_ORIGIN = { left: "left", center: "center", right: "right", top: "top", middle: "center", bottom: "bottom" } as const;
+
 export const FreeFormBlock = ns.defineBlock("freeform", {
   items: z.array(z.object({ // TODO: Should these items have their own schema?
     block: blockSlot({ label: "Block" }),
     // Prefaulted so a freshly added (empty) item is already positioned somewhere sensible.
     position: CoordinateSchema.prefault({ x: 0, y: 0 }).meta({ label: "Position", description: "In % of the screen" } satisfies FieldMeta),
     size: CoordinateSchema.prefault({ x: 25, y: 25 }).meta({ label: "Size", description: "In % of the screen" } satisfies FieldMeta),
-  })).default([]).meta({ label: "Items" } satisfies FieldMeta),
+    alignment: alignmentSchema("left", "top").meta({ label: "Alignment", description: "Which point of the item the position places" } satisfies FieldMeta),
+    rotation: z.number().min(-180).max(180).optional().meta({ label: "Rotation", description: "Degrees, clockwise" } satisfies FieldMeta),
+  })).default([]).meta({ label: "Items", description: "Later items render on top" } satisfies FieldMeta),
 }, {
   info: { label: "Free form", description: "Position blocks freely", icon: "selectWindow" },
   render: (config, ctx) => html`<div class="wk-block wk-freeform">${config.items.map((item) => html`
@@ -78,6 +84,11 @@ export const FreeFormBlock = ns.defineBlock("freeform", {
       top: `${item.position.y}%`,
       width: `${item.size.x}%`,
       height: `${item.size.y}%`,
+      // The translate puts the item's alignment point on `position`; the matching
+      // transform-origin makes rotation pivot around that same anchored point.
+      transform: `translate(${ANCHOR_SHIFT[item.alignment.horizontal]}, ${ANCHOR_SHIFT[item.alignment.vertical]})${
+        item.rotation ? ` rotate(${item.rotation}deg)` : ""}`,
+      transformOrigin: `${ANCHOR_ORIGIN[item.alignment.horizontal]} ${ANCHOR_ORIGIN[item.alignment.vertical]}`,
     })}>
       ${ctx.renderChild(item.block)}
     </div>`)}</div>`,

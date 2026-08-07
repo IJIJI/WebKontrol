@@ -167,6 +167,17 @@ assert.equal(fieldErrors(nested, []).size, 0);
   );
 }
 
+//* freeform items: alignment anchors default top-left so existing views stay identical
+
+{
+  const parsed = FreeFormBlock.configSchema.parse({
+    type: FreeFormBlock.key,
+    items: [{ block: { type: TextBlock.key } }],
+  }) as { items: { alignment: unknown; rotation?: unknown }[] };
+  assert.deepEqual(parsed.items[0].alignment, { horizontal: "left", vertical: "top" });
+  assert.equal(parsed.items[0].rotation, undefined);
+}
+
 //* grid layout: track templates are validated token lists, counts are capped
 
 {

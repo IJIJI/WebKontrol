@@ -136,12 +136,15 @@ export const FontStyleShape = {
   textTransform: z.enum(["uppercase", "lowercase", "capitalize"]).optional().meta({ label: "Transform" } satisfies FieldMeta),
 };
 
-// A reusable position pair (chip placement, freeform item anchors, future pickers). Use sites
-// with other conventions override the field defaults.
-export const AlignmentSchema = z.object({
-  horizontal: z.enum(["left", "center", "right"]).default("center").meta({ label: "Horizontal" } satisfies FieldMeta),
-  vertical: z.enum(["top", "middle", "bottom"]).default("middle").meta({ label: "Vertical" } satisfies FieldMeta),
-}).prefault({});
+// A reusable position pair (chip placement, freeform item anchors, future pickers). The factory
+// lets use sites pick their own defaults (a chip centers, a freeform item anchors top-left).
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
+export const alignmentSchema = (horizontal: "left" | "center" | "right", vertical: "top" | "middle" | "bottom") =>
+  z.object({
+    horizontal: z.enum(["left", "center", "right"]).default(horizontal).meta({ label: "Horizontal" } satisfies FieldMeta),
+    vertical: z.enum(["top", "middle", "bottom"]).default(vertical).meta({ label: "Vertical" } satisfies FieldMeta),
+  }).prefault({});
+export const AlignmentSchema = alignmentSchema("center", "middle");
 export type Alignment = z.infer<typeof AlignmentSchema>;
 
 //* Block Styling combination sets:
