@@ -421,11 +421,17 @@ function renderField(
         <ToggleSetting key={key} title={title} subtitle={subtitle} error={error}
           value={Boolean(value)} savedVal={saved as boolean | undefined} setValue={set} />
       );
-    case "enum":
+    case "enum": // TODO: Default does not get saved -> If the default changes peoples views do to. Change?
       return (
         <SelectSetting key={key} title={title} subtitle={subtitle} error={error}
-          value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set}
-          options={options.map((o) => ({ label: o, value: o }))} />
+          value={(value as string) ?? ""} savedVal={saved as string | undefined}
+          // An optional enum needs a way back to "not set": an empty option that stores
+          // undefined, so the schema/stylesheet default applies again.
+          setValue={(v) => set(v === "" ? undefined : v)}
+          options={[
+            ...(info.optional ? [{ label: "(default)", value: "" }] : []),
+            ...options.map((o) => ({ label: o, value: o })),
+          ]} />
       );
     default:
       // Object/array reach here only via arrayGroup's non-object-element fallback above.

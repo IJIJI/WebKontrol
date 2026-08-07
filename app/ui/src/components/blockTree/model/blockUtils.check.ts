@@ -16,6 +16,8 @@ import {
 import { BlockTypeRegistry } from "../../../../../src/views/blocks/registry";
 import { resolveBlock } from "../../../../../src/views/blocks/resolver";
 import { formatPhpDate } from "../../../../../src/views/blocks/phpDate";
+import { textStyles } from "../../../../../src/views/blocks/styles";
+import { TextBlockStyleSchema } from "../../../../../src/views/blocks/types/schema";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
 import { arrayMove } from "../../../common/helpers/arrayMove";
 import { fieldErrors, validateBlockTree } from "./validate";
@@ -136,6 +138,20 @@ assert.equal(fieldErrors(nested, []).size, 0);
     assert.equal(isBroken(child as ResolvedNode), true, "child slot holds the broken node");
     assert.deepEqual(withBadChild.dependencies, [], "broken child contributes no dependencies");
   }
+}
+
+//* style mappers: units are applied in one place, unset fields skip
+
+{
+  const css = textStyles(TextBlockStyleSchema.parse({ letterSpacing: 2, lineHeight: 1.2, opacity: 0.5 }));
+  assert.equal(css.fontSize, "48px", "default font size, in px");
+  assert.equal(css.letterSpacing, "2px");
+  assert.equal(css.lineHeight, 1.2, "line height stays unitless");
+  assert.equal(css.opacity, 0.5);
+
+  const empty = textStyles(TextBlockStyleSchema.parse({}));
+  assert.equal(empty.letterSpacing, undefined, "unset fields stay undefined so styleMap skips them");
+  assert.equal(empty.overflow, undefined, "the overflow default lives in the stylesheet, not the config");
 }
 
 //* formatPhpDate: the datetime block's formatter

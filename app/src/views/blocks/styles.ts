@@ -11,6 +11,10 @@ export function containerStyles(style: ContainerBlockStyle): StyleInfo {
     background: style.background,
     padding: style.padding,
     border: style.border,
+    borderRadius: style.borderRadius,
+    opacity: style.opacity,
+    boxShadow: style.boxShadow,
+    overflow: style.overflow,
   };
 }
 
@@ -19,6 +23,12 @@ export function textStyles(style: TextBlockStyle): StyleInfo {
     ...containerStyles(style),
     fontFamily: style.fontFamily,
     fontSize: `${style.fontSize}px`,
+    fontWeight: style.fontWeight,
+    color: style.color,
+    // Unitless: the CSS-correct form, relative to the element's own font size.
+    lineHeight: style.lineHeight,
+    letterSpacing: style.letterSpacing === undefined ? undefined : `${style.letterSpacing}px`,
+    textTransform: style.textTransform,
     textAlign: style.align,
   };
 }

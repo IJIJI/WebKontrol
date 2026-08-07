@@ -104,11 +104,26 @@ export type GridConfig = z.infer<typeof GridConfigSchema>;
 
 //* Block Styling, added as fields in blocks that need them.
 export const BackgroundStyleShape = { background: z.string().optional().meta({ label: "Background", description: "CSS background", input: "color" } satisfies FieldMeta) };
-export const PaddingStyleShape = { padding: z.string().optional().meta({ label: "Padding", description: "CSS padding" } satisfies FieldMeta) }; // TODO: Add top right bottom left?
-export const BorderStyleShape = { border: z.string().optional().meta({ label: "Border", description: "CSS border" } satisfies FieldMeta) }; // TODO: Add border radius?
+export const PaddingStyleShape = { padding: z.string().optional().meta({ label: "Padding", description: "CSS padding" } satisfies FieldMeta) }; // TODO: Visual 4-side editor (backlog)
+export const BorderStyleShape = {
+  border: z.string().optional().meta({ label: "Border", description: "CSS border" } satisfies FieldMeta),
+  borderRadius: z.string().optional().meta({ label: "Corner radius", description: "CSS border-radius" } satisfies FieldMeta),
+};
+export const EffectsStyleShape = {
+  opacity: z.number().min(0).max(1).optional().meta({ label: "Opacity", description: "0 (invisible) to 1" } satisfies FieldMeta),
+  boxShadow: z.string().optional().meta({ label: "Shadow", description: "CSS box-shadow" } satisfies FieldMeta),
+  // No default: the stylesheet's `.wk-block { overflow: hidden }` is the default; a value set
+  // here overrides it inline per block.
+  overflow: z.enum(["visible", "hidden"]).optional().meta({ label: "Overflow" } satisfies FieldMeta),
+};
 export const FontStyleShape = {
   fontFamily: z.string().optional().meta({ label: "Font family" } satisfies FieldMeta),
   fontSize: z.number().min(8).max(500).default(48).meta({ label: "Font size" } satisfies FieldMeta),
+  fontWeight: z.enum(["100", "200", "300", "400", "500", "600", "700", "800", "900"]).optional().meta({ label: "Weight", description: "400 is normal, 700 is bold" } satisfies FieldMeta),
+  color: z.string().optional().meta({ label: "Text color", description: "CSS color", input: "color" } satisfies FieldMeta),
+  lineHeight: z.number().min(0.5).max(3).optional().meta({ label: "Line height", description: "Multiplier of the font size" } satisfies FieldMeta),
+  letterSpacing: z.number().min(-10).max(50).optional().meta({ label: "Letter spacing", description: "In px" } satisfies FieldMeta),
+  textTransform: z.enum(["uppercase", "lowercase", "capitalize"]).optional().meta({ label: "Transform" } satisfies FieldMeta),
   align: z.enum(["left", "center", "right"]).default("center").meta({ label: "Alignment" } satisfies FieldMeta),
 };
 
@@ -121,6 +136,7 @@ export const ContainerBlockStyleShape = { //* Prettymuch all blocks are containe
   ...BackgroundStyleShape,
   ...PaddingStyleShape,
   ...BorderStyleShape,
+  ...EffectsStyleShape,
 };
 export const ContainerBlockStyleSchema = z.object(ContainerBlockStyleShape).prefault({});
 export type ContainerBlockStyle = z.infer<typeof ContainerBlockStyleSchema>;
