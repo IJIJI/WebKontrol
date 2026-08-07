@@ -70,16 +70,20 @@ body {
 }
 
 /* Hugging: the box shrinks to its content, and the slot's justify/align (from the block's
-   alignment config) decide where in the slot it sits. */
+   alignment config) decide where in the slot it sits.
+   `0 1 auto`, never `0 0 auto`: hugging means shrink-to-fit, so the box grows to its content
+   but never past the space available. Without the shrink, a paragraph would take its
+   max-content width, i.e. render as one endless line instead of wrapping. */
 .wk-slot.wk-hug > .wk-block {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   align-self: auto;
 }
 
 /* Inside a stack the slot must hug too, otherwise it would swallow the free space and the
-   stack's gap and justify would have nothing left to distribute. */
+   stack's gap and justify would have nothing left to distribute. Shrinkable for the same
+   reason as the box: a hugging child must not be able to blow the stack open. */
 .wk-stack > .wk-slot.wk-hug {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
 }
 
 /* ── Per-block structure ───────────────────────────────────────────────────────
