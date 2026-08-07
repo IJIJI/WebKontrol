@@ -127,7 +127,7 @@ export const EffectsStyleShape = {
   overflow: z.enum(["visible", "hidden"]).optional().meta({ label: "Overflow" } satisfies FieldMeta),
 };
 export const FontStyleShape = {
-  fontFamily: z.string().optional().meta({ label: "Font family" } satisfies FieldMeta),
+  fontFamily: z.string().optional().meta({ label: "Font family", input: "font" } satisfies FieldMeta),
   fontSize: z.number().min(8).max(500).default(48).meta({ label: "Font size" } satisfies FieldMeta),
   fontWeight: z.enum(["100", "200", "300", "400", "500", "600", "700", "800", "900"]).optional().meta({ label: "Weight", description: "400 is normal, 700 is bold" } satisfies FieldMeta),
   color: z.string().optional().meta({ label: "Text color", description: "CSS color", input: "color" } satisfies FieldMeta),

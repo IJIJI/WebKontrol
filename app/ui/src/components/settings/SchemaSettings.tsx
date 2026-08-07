@@ -21,6 +21,14 @@ import { arrayMove } from "../../common/helpers/arrayMove";
 
 type Values = Record<string, unknown>;
 
+// Fonts the editor suggests for `input: "font"` fields: web-safe families every display's
+// browser ships. Bundled self-hosted fonts join this list when they land; keep it matching
+// what really renders on a view.
+const FONT_SUGGESTIONS = [
+  "system-ui", "Arial", "Helvetica", "Verdana", "Tahoma", "Trebuchet MS",
+  "Times New Roman", "Georgia", "Courier New", "monospace", "serif", "sans-serif",
+];
+
 // The slice of a Draft the schema mapper needs. A full useDraft satisfies it, and nested object
 // fields get a derived lens whose setField writes back into the parent's field, so recursion
 // never needs paths, just closures.
@@ -415,7 +423,8 @@ function renderField(
       }
       return (
         <TextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
-          value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
+          value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set}
+          suggestions={meta.input === "font" ? FONT_SUGGESTIONS : undefined} />
       );
     case "number":
       return (
