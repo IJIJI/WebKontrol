@@ -1,6 +1,7 @@
 ﻿import z from "zod";
-import { html, type TemplateResult } from "lit";
+import { html, nothing, type TemplateResult } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
+import { fitScale } from "../../fitScale";
 import { alignmentSchema, blockSlot, ContainerBlockStyleSchema, CoordinateSchema, GridConfigSchema, TextBlockStyleSchema, type TextBlockStyle } from "../../types/schema";
 import { containerStyles, placementStyles, textStyles } from "../../styles";
 import { clock } from "../../clock";
@@ -22,9 +23,16 @@ export const ns = createNamespace("webkontrol");
 // WebsiteBlock: display a website.
 export const WebsiteBlock = ns.defineBlock("website", {
   url: z.url().meta({ label: "URL", description: "The website to display" } satisfies FieldMeta),
+  scaling: z.enum(["fit", "off"]).default("fit").meta({ label: "Scaling", description: "Render the page at full display size, scaled to fit this block" } satisfies FieldMeta),
+  // A cross-origin iframe's scrollbar cannot be styled from outside, only hidden.
+  scrollbar: z.enum(["hidden", "auto"]).default("hidden").meta({ label: "Scrollbar" } satisfies FieldMeta),
 }, {
   info: { label: "Website", description: "Display a website", icon: "globe" },
-  render: (config) => html`<iframe class="wk-block wk-website" src=${config.url}></iframe>`,
+  // The wrapper is the measurable block box; the iframe inside is either plain 100% (off) or
+  // sized/scaled by the fitScale directive (fit).
+  render: (config) => html`<div class="wk-block wk-website">
+    <iframe src=${config.url} scrolling=${config.scrollbar === "hidden" ? "no" : nothing} ${config.scaling === "fit" ? fitScale() : nothing}></iframe>
+  </div>`,
 });
 
 // TextBlock: show some styled text.

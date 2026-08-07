@@ -167,6 +167,14 @@ assert.equal(fieldErrors(nested, []).size, 0);
   );
 }
 
+//* website block: scale-to-fit and hidden scrollbar are the defaults
+
+{
+  const parsed = WebsiteBlock.configSchema.parse({ type: WebsiteBlock.key, url: "https://example.com" }) as Record<string, unknown>;
+  assert.equal(parsed.scaling, "fit");
+  assert.equal(parsed.scrollbar, "hidden");
+}
+
 //* freeform items: alignment anchors default top-left so existing views stay identical
 
 {
