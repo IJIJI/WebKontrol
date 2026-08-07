@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { type JSX } from "react/jsx-runtime";
 
+import "./entityPicker.less";
 import { Modal, ModalSize } from "../modal/Modal";
 import { Collection } from "../collections/Collection";
 import { CollectionLayout, type CollectionItemProps } from "../collections/types";
 import { Button } from "../button/Button";
 import { Variant, FillStyle } from "../../common/types/variants";
+import { classNames } from "../../common/helpers/classNames";
 
 // A modal that presents a grid of entities to pick one from, then confirm. Generic over the entity
 // type; `renderCard` maps an entity to its card (icon/title/chips). Shared by every "pick an X"
@@ -22,6 +24,9 @@ export function EntityPicker<T>({
   confirmLabel = "Select",
   empty,
   multiple = false,
+  searchText,
+  layout = CollectionLayout.GRID,
+  fixedSize = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -34,8 +39,14 @@ export function EntityPicker<T>({
   confirmLabel?: string;
   empty?: ReactNode;
   multiple?: boolean;
+  // When set, a search field filters the grid by this text (case-insensitive substring).
+  searchText?: (item: T) => string;
+  layout?: CollectionLayout;
+  // Pin the body height (scrolling inside) so filtering/content changes never resize the modal.
+  fixedSize?: boolean;
 }): JSX.Element {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState("");
 
   const selectToggle = useCallback((key: string): void => {
     setSelectedKeys((prevKeys) => {
@@ -50,17 +61,25 @@ export function EntityPicker<T>({
       }
       return nextKeys;
     });
-  }, []);
+  }, [multiple]);
 
   const isSelected = (key: string) => selectedKeys.has(key);
 
   useEffect(() => {
     if (open) {
       setSelectedKeys(new Set());
+      setQuery("");
     }
   }, [open]);
 
+  // Selection is applied over ALL items, so a selected item filtered out of view stays selected.
   const selected = items.filter( (item) => selectedKeys.has(getKey(item)) );
+
+  const q = query.trim().toLowerCase();
+  const shown = useMemo(
+    () => (q && searchText ? items.filter((item) => searchText(item).toLowerCase().includes(q)) : items),
+    [items, q, searchText],
+  );
 
   return (
     <Modal
@@ -87,16 +106,27 @@ export function EntityPicker<T>({
         </>
       }
     >
-      <Collection
-        items={items}
-        getKey={getKey}
-        layout={CollectionLayout.GRID}
-        empty={empty}
-        renderItem={(item) => {
-          const key = getKey(item);
-          return { ...renderCard(item), selected: isSelected(key), onSelect: () => selectToggle(key) };
-        }}
-      />
+      <div className={classNames("entityPicker", fixedSize && "fixedSize")}>
+        {searchText && (
+          <input
+            type="text"
+            className="textfield"
+            placeholder="Search…"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        )}
+        <Collection
+          items={shown}
+          getKey={getKey}
+          layout={layout}
+          empty={empty}
+          renderItem={(item) => {
+            const key = getKey(item);
+            return { ...renderCard(item), selected: isSelected(key), onSelect: () => selectToggle(key) };
+          }}
+        />
+      </div>
     </Modal>
   );
 }

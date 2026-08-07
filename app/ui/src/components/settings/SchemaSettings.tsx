@@ -8,6 +8,7 @@ import { FillStyle, Variant } from "../../common/types/variants";
 import { CollapsibleGroup } from "./CollapsibleGroup";
 import { TextSetting } from "./implementations/TextSetting";
 import { TextAreaSetting } from "./implementations/TextAreaSetting";
+import { FontSetting } from "./implementations/FontSetting";
 import { UrlSetting } from "./implementations/UrlSetting";
 import { NumberSetting } from "./implementations/NumberSetting";
 import { ColorTextSetting } from "./implementations/ColorTextSetting";
@@ -20,14 +21,6 @@ import { DetailGroup, DetailRow, InlineValue, countLabel, displayValue } from ".
 import { arrayMove } from "../../common/helpers/arrayMove";
 
 type Values = Record<string, unknown>;
-
-// Fonts the editor suggests for `input: "font"` fields: web-safe families every display's
-// browser ships. Bundled self-hosted fonts join this list when they land; keep it matching
-// what really renders on a view.
-const FONT_SUGGESTIONS = [
-  "system-ui", "Arial", "Helvetica", "Verdana", "Tahoma", "Trebuchet MS",
-  "Times New Roman", "Georgia", "Courier New", "monospace", "serif", "sans-serif",
-];
 
 // The slice of a Draft the schema mapper needs. A full useDraft satisfies it, and nested object
 // fields get a derived lens whose setField writes back into the parent's field, so recursion
@@ -421,10 +414,15 @@ function renderField(
             value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
         );
       }
+      if (meta.input === "font") {
+        return (
+          <FontSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
+            value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
+        );
+      }
       return (
         <TextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
-          value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set}
-          suggestions={meta.input === "font" ? FONT_SUGGESTIONS : undefined} />
+          value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
       );
     case "number":
       return (

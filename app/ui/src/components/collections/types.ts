@@ -25,7 +25,9 @@ export interface CollectionItemProps {
   to?: To; // TODO: Handle collection items without a target but with an onClick.
   label?: string; // accessible name for the link (defaults to `name` when it's a string)
   title: ReactNode;
-  icon: ReactNode; 
+  // `null` means deliberately no icon (compact picker rows); `undefined` falls back to a
+  // default glyph. Currently honoured by ListItem.
+  icon: ReactNode;
   color: string; // TODO: Better color type?
   chips?: ReactNode; // tag chips / status pills row // TODO: Array?
   actions?: ItemAction[];

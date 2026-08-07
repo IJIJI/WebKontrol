@@ -1,0 +1,36 @@
+// Body of the entity picker modal: an optional search field above the collection grid.
+.entityPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  > .textfield {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    color: var(--color-text-primary);
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border-tertiary);
+    border-radius: @border-radius-md;
+  }
+
+  // Fixed-size pickers pin the body height (not max-height): filtering/content changes never
+  // resize the modal under the cursor. Same reasoning as the icon modal's fixed grid.
+  &.fixedSize > section.collection {
+    height: 380px;
+    overflow-y: auto;
+  }
+
+  // List rows inside a picker are dense option rows, not full-page entity cards: tighter
+  // gaps and padding, flatter frame (e.g. the font picker).
+  // TODO: make this a tightlist, and have full list use full entity sizes like in collection?
+  .list {
+    gap: 4px;
+
+    .item {
+      padding: 4px 12px;
+      border-radius: @border-radius-md;
+      box-shadow: none;
+    }
+  }
+}

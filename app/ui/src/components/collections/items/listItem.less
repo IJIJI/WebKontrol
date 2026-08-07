@@ -76,5 +76,24 @@
         padding: 0.25em 1.5em !important;
       }
     }
+
+    // Selectable (picker) row: reset the button, light up on hover/selection (mirrors the
+    // grid card's selectable states).
+    &.selectable {
+      cursor: pointer;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      transition: border-color @button-animation-time ease, background-color @button-animation-time ease;
+
+      &:hover,
+      &:focus-visible {
+        border-color: var(--color-text-tertiary);
+      }
+      &.selected {
+        border-color: var(--color-text-acc);
+        background-color: var(--color-background-acc);
+      }
+    }
   }
 }

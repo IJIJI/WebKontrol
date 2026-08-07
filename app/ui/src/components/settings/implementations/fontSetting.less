@@ -1,0 +1,22 @@
+// The font row's name renders in its own font. Normal weight: the list title's bold would
+// distort what the font actually looks like. Block display: inline, the smaller text would sit
+// on the 1.5rem title's baseline and hang below the row's vertical center.
+.fontPreview {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: normal;
+}
+
+// The picker-opening assist beside the font text field, matching the restore button's box.
+.setting.field .input .fontPickButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  background-color: var(--color-background-secondary);
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: @border-radius-md;
+}
