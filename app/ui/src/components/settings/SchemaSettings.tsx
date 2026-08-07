@@ -7,6 +7,7 @@ import { Icons } from "../icons/Icons";
 import { FillStyle, Variant } from "../../common/types/variants";
 import { CollapsibleGroup } from "./CollapsibleGroup";
 import { TextSetting } from "./implementations/TextSetting";
+import { TextAreaSetting } from "./implementations/TextAreaSetting";
 import { UrlSetting } from "./implementations/UrlSetting";
 import { NumberSetting } from "./implementations/NumberSetting";
 import { ColorTextSetting } from "./implementations/ColorTextSetting";
@@ -403,6 +404,12 @@ function renderField(
       if (meta.input === "color") {
         return (
           <ColorTextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
+            value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
+        );
+      }
+      if (meta.input === "textarea") {
+        return (
+          <TextAreaSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
             value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
         );
       }

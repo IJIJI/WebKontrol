@@ -37,7 +37,7 @@ export const WebsiteBlock = ns.defineBlock("website", {
 
 // TextBlock: show some styled text.
 export const TextBlock = ns.defineBlock("text", {
-  text: z.string().meta({ label: "Text" } satisfies FieldMeta),
+  text: z.string().meta({ label: "Text", input: "textarea" } satisfies FieldMeta),
   style: TextBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Text", description: "Show some styled text", icon: "textFields" },
@@ -147,6 +147,32 @@ export const DividerBlock = ns.defineBlock("divider", {
   </div>`,
 });
 
+// StackBlock: flow child blocks in a row or column (flexbox).
+const FLEX_MAP = {
+  start: "flex-start", end: "flex-end", center: "center", stretch: "stretch",
+  "space-between": "space-between", "space-around": "space-around", "space-evenly": "space-evenly",
+} as const;
+
+export const StackBlock = ns.defineBlock("stack", {
+  direction: z.enum(["row", "column"]).default("row").meta({ label: "Direction" } satisfies FieldMeta),
+  justify: z.enum(["start", "center", "end", "space-between", "space-around", "space-evenly"]).default("start").meta({ label: "Justify", description: "Distribution along the direction" } satisfies FieldMeta),
+  align: z.enum(["stretch", "start", "center", "end"]).default("stretch").meta({ label: "Align", description: "Alignment across the direction" } satisfies FieldMeta),
+  gap: z.number().min(0).max(200).optional().meta({ label: "Gap", description: "Space between blocks, in px" } satisfies FieldMeta),
+  wrap: z.boolean().default(false).meta({ label: "Wrap", description: "Flow overflowing blocks onto the next line" } satisfies FieldMeta),
+  blocks: z.array(blockSlot()).default([]).meta({ label: "Blocks" } satisfies FieldMeta),
+  style: ContainerBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
+}, {
+  info: { label: "Stack", description: "Flow blocks in a row or column", icon: "viewColumn" },
+  render: (config, ctx) => html`<div class="wk-block wk-stack" style=${styleMap({
+    ...containerStyles(config.style),
+    flexDirection: config.direction,
+    justifyContent: FLEX_MAP[config.justify],
+    alignItems: FLEX_MAP[config.align],
+    gap: config.gap === undefined ? undefined : `${config.gap}px`,
+    flexWrap: config.wrap ? "wrap" : undefined,
+  })}>${config.blocks.map((block) => ctx.renderChild(block))}</div>`,
+});
+
 // Every block this namespace ships; index.ts registers from this single list.
 export const WEBKONTROL_BLOCKS = [
   WebsiteBlock,
@@ -154,6 +180,7 @@ export const WEBKONTROL_BLOCKS = [
   ImageBlock,
   ContainerBlock,
   GridBlock,
+  StackBlock,
   FreeFormBlock,
   SpacerBlock,
   DividerBlock,

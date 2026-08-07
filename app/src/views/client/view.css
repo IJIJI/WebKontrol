@@ -86,6 +86,32 @@ body {
   transform-origin: 0 0;
 }
 
+/* A stack flows its children instead of filling cells: the wk-block 100% sizing is wrong for
+   flex children, so they grow from their content size and share the leftover. min sizes at 0
+   so oversized content (iframes, big text) cannot blow up the line. */
+.wk-stack {
+  display: flex;
+}
+.wk-stack > * {
+  min-width: 0;
+  min-height: 0;
+}
+.wk-stack > .wk-block {
+  width: auto;
+  height: auto;
+  flex: 1 1 auto;
+}
+/* Content-sized chips (text/datetime) hug in a stack, so justify and gap actually distribute
+   them; container-sized chips and layout blocks fill the leftover space. */
+.wk-stack > .wk-align:not(.wk-sizing-container) {
+  flex: 0 0 auto;
+}
+
+/* Text keeps its authored line breaks (multi-line text fields). */
+.wk-text-content {
+  white-space: pre-line;
+}
+
 /* The divider's line is centered in its block; the config color overrides this default. */
 .wk-divider {
   display: flex;

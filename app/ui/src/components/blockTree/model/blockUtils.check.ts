@@ -10,6 +10,7 @@ import {
   FreeFormBlock,
   GridBlock,
   SpacerBlock,
+  StackBlock,
   TextBlock,
   WebsiteBlock,
   ns,
@@ -167,6 +168,19 @@ assert.equal(fieldErrors(nested, []).size, 0);
     placementStyles({ horizontal: "right", vertical: "bottom" }),
     { justifyContent: "flex-end", alignItems: "flex-end" },
   );
+}
+
+//* stack: a bare stack is a valid empty row that stretches its children
+
+{
+  const stack = StackBlock.configSchema.parse({ type: StackBlock.key }) as Record<string, unknown>;
+  assert.equal(stack.direction, "row");
+  assert.equal(stack.justify, "start");
+  assert.equal(stack.align, "stretch");
+  assert.deepEqual(stack.blocks, []);
+  // Slot discovery must see stack children like grid children.
+  const withChild = { type: StackBlock.key, blocks: [{ type: TextBlock.key }] };
+  assert.deepEqual(childBlocks(withChild).map((c) => pathKey(c.path)), ["blocks.0"]);
 }
 
 //* content blocks: divider defaults, spacer parses bare

@@ -33,8 +33,9 @@ export interface FieldMeta {
   advanced?: boolean;
   placeholder?: string;
   // Input widget hint for kinds the schema alone can't distinguish: "color" renders a
-  // swatch-assisted text field (the value stays a free CSS string — gradients are valid).
-  input?: "color";
+  // swatch-assisted text field (the value stays a free CSS string — gradients are valid);
+  // "textarea" renders a multi-line text field.
+  input?: "color" | "textarea";
 }
 
 //* View config:

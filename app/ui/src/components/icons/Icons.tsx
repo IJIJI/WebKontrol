@@ -457,6 +457,11 @@ export const Icons = {
     <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm40-80h480L570-480 450-320l-90-120-120 160Zm-40 80v-560 560Z"/>,
     true,
   ),
+  viewColumn: icon(
+    "0 -960 960 960", // From material design
+    <path d="M160-200v-560h160v560H160Zm240 0v-560h160v560H400Zm240 0v-560h160v560H640Z"/>,
+    true,
+  ),
   spaceBar: icon(
     "0 -960 960 960", // From material design
     <path d="M240-360v-240h80v160h320v-160h80v240H240Z"/>,
