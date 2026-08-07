@@ -124,8 +124,15 @@ export const FontStyleShape = {
   lineHeight: z.number().min(0.5).max(3).optional().meta({ label: "Line height", description: "Multiplier of the font size" } satisfies FieldMeta),
   letterSpacing: z.number().min(-10).max(50).optional().meta({ label: "Letter spacing", description: "In px" } satisfies FieldMeta),
   textTransform: z.enum(["uppercase", "lowercase", "capitalize"]).optional().meta({ label: "Transform" } satisfies FieldMeta),
-  align: z.enum(["left", "center", "right"]).default("center").meta({ label: "Alignment" } satisfies FieldMeta),
 };
+
+// A reusable position pair (chip placement, freeform item anchors, future pickers). Use sites
+// with other conventions override the field defaults.
+export const AlignmentSchema = z.object({
+  horizontal: z.enum(["left", "center", "right"]).default("center").meta({ label: "Horizontal" } satisfies FieldMeta),
+  vertical: z.enum(["top", "middle", "bottom"]).default("middle").meta({ label: "Vertical" } satisfies FieldMeta),
+}).prefault({});
+export type Alignment = z.infer<typeof AlignmentSchema>;
 
 //* Block Styling combination sets:
 // Composed from the shapes above. Shapes are exported for composition (the prefaulted schemas
@@ -144,6 +151,13 @@ export type ContainerBlockStyle = z.infer<typeof ContainerBlockStyleSchema>;
 export const TextBlockStyleShape = {
   ...ContainerBlockStyleShape,
   ...FontStyleShape,
+  // Chip model: `content` (default) hugs the content element, so background/padding/border
+  // form a chip that the alignment places inside the block; `container` stretches it over the
+  // whole block. Content-default by design: container styles belong to container blocks, text
+  // styling belongs to the text. One alignment drives placement AND text-align, so there are
+  // never two competing horizontal alignments.
+  sizing: z.enum(["container", "content"]).default("content").meta({ label: "Sizing", description: "Hug the content, or fill the block" } satisfies FieldMeta),
+  alignment: AlignmentSchema.meta({ label: "Alignment" } satisfies FieldMeta),
 };
 export const TextBlockStyleSchema = z.object(TextBlockStyleShape).prefault({});
 export type TextBlockStyle = z.infer<typeof TextBlockStyleSchema>;

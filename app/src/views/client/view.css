@@ -43,6 +43,23 @@ body {
   position: absolute;
 }
 
+/* Chip-capable blocks (text, datetime): the root is a flex wrapper placing its content element
+   per the alignment config. The content element is a flex column, so vertical alignment also
+   works when it is stretched. Container sizing stretches it edge to edge (the classic
+   full-block look); content sizing hugs, so styling forms a chip. */
+.wk-align {
+  display: flex;
+}
+.wk-align > * {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+.wk-align.wk-sizing-container > * {
+  flex: 1 1 auto;
+  align-self: stretch;
+}
+
 .wk-website {
   border: 0;
   display: block;

@@ -16,7 +16,7 @@ import {
 import { BlockTypeRegistry } from "../../../../../src/views/blocks/registry";
 import { resolveBlock } from "../../../../../src/views/blocks/resolver";
 import { formatPhpDate } from "../../../../../src/views/blocks/phpDate";
-import { textStyles } from "../../../../../src/views/blocks/styles";
+import { placementStyles, textStyles } from "../../../../../src/views/blocks/styles";
 import { TextBlockStyleSchema } from "../../../../../src/views/blocks/types/schema";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
 import { arrayMove } from "../../../common/helpers/arrayMove";
@@ -152,6 +152,19 @@ assert.equal(fieldErrors(nested, []).size, 0);
   const empty = textStyles(TextBlockStyleSchema.parse({}));
   assert.equal(empty.letterSpacing, undefined, "unset fields stay undefined so styleMap skips them");
   assert.equal(empty.overflow, undefined, "the overflow default lives in the stylesheet, not the config");
+  assert.equal(empty.textAlign, "center", "the one alignment drives text-align");
+  assert.equal(empty.justifyContent, "center", "vertical middle distributes a stretched chip");
+
+  assert.equal(TextBlockStyleSchema.parse({}).sizing, "content", "text chips hug by default");
+  assert.deepEqual(
+    placementStyles(TextBlockStyleSchema.parse({}).alignment),
+    { justifyContent: "center", alignItems: "center" },
+    "default placement centers the chip",
+  );
+  assert.deepEqual(
+    placementStyles({ horizontal: "right", vertical: "bottom" }),
+    { justifyContent: "flex-end", alignItems: "flex-end" },
+  );
 }
 
 //* formatPhpDate: the datetime block's formatter

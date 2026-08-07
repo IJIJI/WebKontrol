@@ -1,12 +1,21 @@
 ﻿import z from "zod";
-import { html } from "lit";
+import { html, type TemplateResult } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
-import { blockSlot, ContainerBlockStyleSchema, CoordinateSchema, GridConfigSchema, TextBlockStyleSchema } from "../../types/schema";
-import { containerStyles, textStyles } from "../../styles";
+import { blockSlot, ContainerBlockStyleSchema, CoordinateSchema, GridConfigSchema, TextBlockStyleSchema, type TextBlockStyle } from "../../types/schema";
+import { containerStyles, placementStyles, textStyles } from "../../styles";
 import { clock } from "../../clock";
 import { PHP_DATE_TOKENS } from "../../phpDate";
 import { createNamespace } from "../../types/config";
 import type { FieldMeta } from "../../../types/schema";
+
+// Shared by the text-like blocks: a fill wrapper placing a content element per the style's
+// alignment; the content element (`<blockClass>-content`) carries the text/chip styling.
+function textTemplate(blockClass: string, style: TextBlockStyle, content: unknown): TemplateResult {
+  const sizing = style.sizing === "container" ? " wk-sizing-container" : "";
+  return html`<div class="wk-block wk-align ${blockClass}${sizing}" style=${styleMap(placementStyles(style.alignment))}>
+    <span class="${blockClass}-content" style=${styleMap(textStyles(style))}>${content}</span>
+  </div>`;
+}
 
 export const ns = createNamespace("webkontrol");
 
@@ -24,7 +33,7 @@ export const TextBlock = ns.defineBlock("text", {
   style: TextBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Text", description: "Show some styled text", icon: "textFields" },
-  render: (config) => html`<div class="wk-block wk-text" style=${styleMap(textStyles(config.style))}>${config.text}</div>`,
+  render: (config) => textTemplate("wk-text", config.style, config.text),
 });
 
 // ContainerBlock: wrap another block to give it styling it does not have itself.
@@ -81,7 +90,7 @@ export const DateTimeBlock = ns.defineBlock("datetime", {
   style: TextBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Date & time", description: "Show the current date/time", icon: "schedule" },
-  render: (config) => html`<div class="wk-block wk-text wk-datetime" style=${styleMap(textStyles(config.style))}>${clock(config.format)}</div>`,
+  render: (config) => textTemplate("wk-datetime", config.style, clock(config.format)),
 });
 
 // Every block this namespace ships; index.ts registers from this single list.
