@@ -1,12 +1,13 @@
 import type { StyleInfo } from "lit/directives/style-map.js";
-import type { Alignment, ContainerBlockStyle, TextBlockStyle } from "./types/schema";
+import type { Alignment, BlockStyle } from "./types/schema";
 
-// Maps the shared block style schemas to inline styles for Lit's styleMap. Only config-driven
-// values live here; structural styling comes from the wk- classes in the default stylesheet.
-// styleMap skips undefined entries and sets properties via CSSStyleDeclaration, so free CSS
-// strings from config can't escape their own property.
+// Maps the universal block style to inline styles for Lit's styleMap. Only config-driven
+// values live here; structural styling and defaults come from view.css, so unset fields emit
+// nothing (and the inheriting font properties then cascade from ancestor blocks). styleMap
+// sets properties via CSSStyleDeclaration, so free CSS strings can't escape their property.
 
-export function containerStyles(style: ContainerBlockStyle): StyleInfo {
+/** The box half: styles the block's own box, never inherited by children. */
+export function containerStyles(style: BlockStyle): StyleInfo {
   return {
     background: style.background,
     padding: style.padding,
@@ -24,27 +25,29 @@ const FLEX_POS = {
 } as const;
 
 /** How a chip-capable block's root places its content element (pair with the .wk-align class). */
-export function placementStyles(alignment: Alignment): StyleInfo {
+export function placementStyles(alignment: Alignment | undefined): StyleInfo {
+  if (!alignment) return {};
   return {
     justifyContent: FLEX_POS[alignment.horizontal],
     alignItems: FLEX_POS[alignment.vertical],
   };
 }
 
-export function textStyles(style: TextBlockStyle): StyleInfo {
+/** Box + font: the font half cascades to descendant blocks (CSS inheritance). */
+export function textStyles(style: BlockStyle): StyleInfo {
   return {
     ...containerStyles(style),
     fontFamily: style.fontFamily,
-    fontSize: `${style.fontSize}px`,
+    fontSize: style.fontSize === undefined ? undefined : `${style.fontSize}px`,
     fontWeight: style.fontWeight,
     color: style.color,
     // Unitless: the CSS-correct form, relative to the element's own font size.
     lineHeight: style.lineHeight,
     letterSpacing: style.letterSpacing === undefined ? undefined : `${style.letterSpacing}px`,
     textTransform: style.textTransform,
-    textAlign: style.alignment.horizontal,
+    textAlign: style.alignment?.horizontal,
     // The content element is a flex column (.wk-align > *): when it is stretched over the
     // whole block (container sizing), this distributes the text vertically inside it.
-    justifyContent: FLEX_POS[style.alignment.vertical],
+    justifyContent: style.alignment === undefined ? undefined : FLEX_POS[style.alignment.vertical],
   };
 }

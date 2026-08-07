@@ -1,11 +1,11 @@
 import z from "zod";
 import type { TemplateResult } from "lit";
 import { AbstractBlockType, type BlockInfo, type RenderContext, type Resolved } from "./model";
-import type { BlockKey, BlockKeyOf, BlockType, DataField, DataKeyOf, DataSourceKey, NamespaceId } from "./schema";
+import { blockStyleSchema, type BlockKey, type BlockKeyOf, type BlockStyle, type BlockType, type DataField, type DataKeyOf, type DataSourceKey, type NamespaceId } from "./schema";
 import type { BlockTypeRegistry } from "../registry";
 
-/** The parsed config of a block: the exact `type` key plus its shape fields. */
-type BlockConfigOf<K extends BlockKey, S extends z.ZodRawShape> = { type: K } & z.infer<z.ZodObject<S>>;
+/** The parsed config of a block: the exact `type` key, the injected box `style`, plus its shape fields. */
+type BlockConfigOf<K extends BlockKey, S extends z.ZodRawShape> = { type: K; style: BlockStyle } & z.infer<z.ZodObject<S>>;
 
 /**
  * The render function and metadata a block supplies to {@link NamespaceKit.defineBlock}.
@@ -14,6 +14,12 @@ export interface BlockImpl<K extends BlockKey, S extends z.ZodRawShape> {
   /** Editor-facing presentation (label/description/icon). */
   info: BlockInfo;
   render: (config: Resolved<BlockConfigOf<K, S>>, ctx: RenderContext) => TemplateResult;
+  /**
+   * Hug capability: present = the block has an intrinsic content size, so its box offers
+   * `sizing`/`alignment`; the value is the default sizing. Absent = fill-only (a website or
+   * grid has no content size; content sizing would collapse it), and the fields don't exist.
+   */
+  box?: { sizing: "container" | "content" };
   /** DataSources this block always needs, regardless of config. */
   fixedDataDependencies?: readonly DataSourceKey[];
   /** Helper function to derive needed sources from config (a bound field, or one picked from another field). */
@@ -60,7 +66,15 @@ export function createNamespace<const N extends NamespaceId>(namespace: N): Name
     const key = blockKey(type);
     // The `.default(key)` makes `type` optional on input but present on output,
     // so the schema's input type is stricter than Config; hence the assertion.
-    const configSchema = z.object({ type: z.literal(key).default(key), ...shape }) as z.ZodType<Config>;
+    // `style` is the framework-injected universal box (see blockStyleSchema): every block is
+    // styleable without declaring anything. Last in the object so the editor shows a block's
+    // own fields first, the style section after (schema order drives the form).
+    if ("style" in shape) throw new Error(`Block "${key}" declares a "style" field; the framework injects it (use BlockImpl.box to configure).`);
+    const configSchema = z.object({
+      type: z.literal(key).default(key),
+      ...shape,
+      style: blockStyleSchema(impl.box?.sizing),
+    }) as z.ZodType<Config>;
 
     return new (class extends AbstractBlockType<Config> {
       readonly key = key;

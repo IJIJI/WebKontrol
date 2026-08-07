@@ -126,9 +126,12 @@ export const EffectsStyleShape = {
   // here overrides it inline per block.
   overflow: z.enum(["visible", "hidden"]).optional().meta({ label: "Overflow" } satisfies FieldMeta),
 };
+// All optional, deliberately: these are CSS-inheriting properties, so an unset field emits
+// nothing inline and the value cascades from the nearest ancestor block that set it (the
+// page default lives in view.css). Setting a font on a stack styles every text child.
 export const FontStyleShape = {
-  fontFamily: z.string().optional().meta({ label: "Font family", input: "font" } satisfies FieldMeta),
-  fontSize: z.number().min(8).max(500).default(48).meta({ label: "Font size" } satisfies FieldMeta),
+  fontFamily: z.string().optional().meta({ label: "Font family", description: "Unset inherits from the parent block", input: "font" } satisfies FieldMeta),
+  fontSize: z.number().min(8).max(500).optional().meta({ label: "Font size", description: "In px. Unset inherits from the parent block" } satisfies FieldMeta),
   fontWeight: z.enum(["100", "200", "300", "400", "500", "600", "700", "800", "900"]).optional().meta({ label: "Weight", description: "400 is normal, 700 is bold" } satisfies FieldMeta),
   color: z.string().optional().meta({ label: "Text color", description: "CSS color", input: "color" } satisfies FieldMeta),
   lineHeight: z.number().min(0.5).max(3).optional().meta({ label: "Line height", description: "Multiplier of the font size" } satisfies FieldMeta),
@@ -147,32 +150,41 @@ export const alignmentSchema = (horizontal: "left" | "center" | "right", vertica
 export const AlignmentSchema = alignmentSchema("center", "middle");
 export type Alignment = z.infer<typeof AlignmentSchema>;
 
-//* Block Styling combination sets:
-// Composed from the shapes above. Shapes are exported for composition (the prefaulted schemas
-// are no longer ZodObjects, so .extend() is unavailable; plugins spread the shape instead),
-// schemas for direct use: prefaulted, so an omitted style parses into its inner defaults and a
-// bare `{type}` block is valid without every use site remembering `.prefault({})`.
-export const ContainerBlockStyleShape = { //* Prettymuch all blocks are containers, except things like a website or a grid.
+//* The universal block box style:
+// Every block gets this via defineBlock's injection (the framework owns the box). Box fields
+// style the block's own box; font fields cascade to descendants (see FontStyleShape). The
+// shape is exported for composition; `blockStyleSchema` builds the per-block schema.
+export const BlockStyleShape = {
   ...BackgroundStyleShape,
   ...PaddingStyleShape,
   ...BorderStyleShape,
   ...EffectsStyleShape,
-};
-export const ContainerBlockStyleSchema = z.object(ContainerBlockStyleShape).prefault({});
-export type ContainerBlockStyle = z.infer<typeof ContainerBlockStyleSchema>;
-
-export const TextBlockStyleShape = {
-  ...ContainerBlockStyleShape,
   ...FontStyleShape,
-  // Chip model: `content` (default) hugs the content element, so background/padding/border
-  // form a chip that the alignment places inside the block; `container` stretches it over the
-  // whole block. Content-default by design: container styles belong to container blocks, text
-  // styling belongs to the text. One alignment drives placement AND text-align, so there are
-  // never two competing horizontal alignments.
-  sizing: z.enum(["container", "content"]).default("content").meta({ label: "Sizing", description: "Hug the content, or fill the block" } satisfies FieldMeta),
-  alignment: AlignmentSchema.meta({ label: "Alignment" } satisfies FieldMeta),
 };
-export const TextBlockStyleSchema = z.object(TextBlockStyleShape).prefault({});
-export type TextBlockStyle = z.infer<typeof TextBlockStyleSchema>;
+
+// Hug-capable blocks additionally get sizing + alignment. `content` hugs the content, so
+// background/padding/border form a chip the alignment places inside the block; `container`
+// stretches it over the whole block. One alignment drives placement AND text-align, so there
+// are never two competing horizontal alignments. Fill-only blocks (website, grid, …) never
+// get these fields: content sizing would collapse them to nothing.
+const sizingFields = (defaultSizing: "container" | "content") => ({
+  sizing: z.enum(["container", "content"]).default(defaultSizing).meta({ label: "Sizing", description: "Hug the content, or fill the block" } satisfies FieldMeta),
+  alignment: AlignmentSchema.meta({ label: "Alignment" } satisfies FieldMeta),
+});
+
+/** The injected `style` schema for one block: the universal box, plus sizing/alignment when hug-capable. */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
+export const blockStyleSchema = (sizing?: "container" | "content") =>
+  z.object({
+    ...BlockStyleShape,
+    ...(sizing ? sizingFields(sizing) : {}),
+  }).prefault({}).meta({ label: "Style" } satisfies FieldMeta);
+
+// One type for every block's style: sizing/alignment are optional at the type level (fill-only
+// blocks don't have them); a hug-capable block's parse always fills them.
+export type BlockStyle = z.infer<ReturnType<typeof blockStyleSchema>> & {
+  sizing?: "container" | "content";
+  alignment?: Alignment;
+};
 
 

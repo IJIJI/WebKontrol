@@ -2,7 +2,7 @@
 import { html, nothing, type TemplateResult } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { fitScale } from "../../fitScale";
-import { alignmentSchema, blockSlot, ContainerBlockStyleSchema, CoordinateSchema, GridConfigSchema, TextBlockStyleSchema, type TextBlockStyle } from "../../types/schema";
+import { alignmentSchema, blockSlot, CoordinateSchema, GridConfigSchema, type BlockStyle } from "../../types/schema";
 import { containerStyles, placementStyles, textStyles } from "../../styles";
 import { clock } from "../../clock";
 import { PHP_DATE_TOKENS } from "../../phpDate";
@@ -11,7 +11,7 @@ import type { FieldMeta } from "../../../types/schema";
 
 // Shared by the text-like blocks: a fill wrapper placing a content element per the style's
 // alignment; the content element (`<blockClass>-content`) carries the text/chip styling.
-function textTemplate(blockClass: string, style: TextBlockStyle, content: unknown): TemplateResult {
+function textTemplate(blockClass: string, style: BlockStyle, content: unknown): TemplateResult {
   const sizing = style.sizing === "container" ? " wk-sizing-container" : "";
   return html`<div class="wk-block wk-align ${blockClass}${sizing}" style=${styleMap(placementStyles(style.alignment))}>
     <span class="${blockClass}-content" style=${styleMap(textStyles(style))}>${content}</span>
@@ -30,7 +30,7 @@ export const WebsiteBlock = ns.defineBlock("website", {
   info: { label: "Website", description: "Display a website", icon: "globe" },
   // The wrapper is the measurable block box; the iframe inside is either plain 100% (off) or
   // sized/scaled by the fitScale directive (fit).
-  render: (config) => html`<div class="wk-block wk-website">
+  render: (config) => html`<div class="wk-block wk-website" style=${styleMap(containerStyles(config.style))}>
     <iframe src=${config.url} scrolling=${config.scrollbar === "hidden" ? "no" : nothing} ${config.scaling === "fit" ? fitScale() : nothing}></iframe>
   </div>`,
 });
@@ -38,18 +38,18 @@ export const WebsiteBlock = ns.defineBlock("website", {
 // TextBlock: show some styled text.
 export const TextBlock = ns.defineBlock("text", {
   text: z.string().meta({ label: "Text", input: "textarea" } satisfies FieldMeta),
-  style: TextBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Text", description: "Show some styled text", icon: "textFields" },
+  box: { sizing: "content" },
   render: (config) => textTemplate("wk-text", config.style, config.text),
 });
 
 // ContainerBlock: wrap another block to give it styling it does not have itself.
 export const ContainerBlock = ns.defineBlock("container", {
   block: blockSlot({ label: "Content" }),
-  style: ContainerBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Container", description: "Wrap a block to style it", icon: "borderOuter" },
+  box: { sizing: "container" },
   render: (config, ctx) => html`<div class="wk-block wk-container" style=${styleMap(containerStyles(config.style))}>${ctx.renderChild(config.block)}</div>`,
 });
 
@@ -64,6 +64,7 @@ export const GridBlock = ns.defineBlock("grid", {
 }, {
   info: { label: "Grid", description: "Arrange blocks in a grid", icon: "grid" },
   render: (config, ctx) => html`<div class="wk-block wk-grid" style=${styleMap({
+    ...containerStyles(config.style),
     gridTemplateRows: config.layout.templateRows ?? `repeat(${config.layout.rows}, 1fr)`,
     gridTemplateColumns: config.layout.templateColumns ?? `repeat(${config.layout.columns}, 1fr)`,
     gap: config.layout.gap === undefined ? undefined : `${config.layout.gap}px`,
@@ -86,7 +87,7 @@ export const FreeFormBlock = ns.defineBlock("freeform", {
   })).default([]).meta({ label: "Items", description: "Later items render on top" } satisfies FieldMeta),
 }, {
   info: { label: "Free form", description: "Position blocks freely", icon: "selectWindow" },
-  render: (config, ctx) => html`<div class="wk-block wk-freeform">${config.items.map((item) => html`
+  render: (config, ctx) => html`<div class="wk-block wk-freeform" style=${styleMap(containerStyles(config.style))}>${config.items.map((item) => html`
     <div class="wk-freeform-item" style=${styleMap({
       left: `${item.position.x}%`,
       top: `${item.position.y}%`,
@@ -107,9 +108,9 @@ export const DateTimeBlock = ns.defineBlock("datetime", {
   // The regex admits exactly the tokens formatPhpDate implements (plus escapes and separators),
   // so the editor rejects formats the renderer can't do. PHP_DATE_TOKENS is the shared source.
   format: z.string().regex(new RegExp(`^(?:[${PHP_DATE_TOKENS}]|\\\\.|[\\s\\-/:.,|])+$`)).optional().default("H:i:s").meta({ label: "Format", description: "PHP-style date format, e.g. H:i:s" } satisfies FieldMeta),
-  style: TextBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Date & time", description: "Show the current date/time", icon: "schedule" },
+  box: { sizing: "content" },
   render: (config) => textTemplate("wk-datetime", config.style, clock(config.format)),
 });
 
@@ -117,17 +118,23 @@ export const DateTimeBlock = ns.defineBlock("datetime", {
 export const ImageBlock = ns.defineBlock("image", {
   url: z.url().meta({ label: "URL", description: "The image to display" } satisfies FieldMeta),
   fit: z.enum(["cover", "contain", "fill"]).default("cover").meta({ label: "Fit", description: "How the image fills the block" } satisfies FieldMeta),
-  style: ContainerBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Image", description: "Display an image", icon: "image" },
+  box: { sizing: "container" },
   render: (config) => html`<img class="wk-block wk-image" src=${config.url} alt=""
     style=${styleMap({ ...containerStyles(config.style), objectFit: config.fit })} />`,
 });
 
-// SpacerBlock: an empty block, e.g. to leave a grid cell open.
-export const SpacerBlock = ns.defineBlock("spacer", {}, {
+// SpacerBlock: an empty block, e.g. to leave a grid cell open or push stack siblings apart.
+export const SpacerBlock = ns.defineBlock("spacer", {
+  size: z.number().min(1).max(2000).optional().meta({ label: "Size", description: "Fixed size along a stack's direction, in px. Unset shares the space" } satisfies FieldMeta),
+}, {
   info: { label: "Spacer", description: "Empty space", icon: "spaceBar" },
-  render: () => html`<div class="wk-block wk-spacer"></div>`,
+  render: (config) => html`<div class="wk-block wk-spacer" style=${styleMap({
+    ...containerStyles(config.style),
+    // In a stack: a set size is fixed (no grow/shrink); unset shares space. Inert elsewhere.
+    flex: config.size === undefined ? undefined : `0 0 ${config.size}px`,
+  })}></div>`,
 });
 
 // DividerBlock: a separating line, centered in its block. The default line color lives in the
@@ -138,7 +145,7 @@ export const DividerBlock = ns.defineBlock("divider", {
   color: z.string().optional().meta({ label: "Color", description: "CSS color", input: "color" } satisfies FieldMeta),
 }, {
   info: { label: "Divider", description: "A separating line", icon: "horizontalRule" },
-  render: (config) => html`<div class="wk-block wk-divider">
+  render: (config) => html`<div class="wk-block wk-divider" style=${styleMap(containerStyles(config.style))}>
     <div class="wk-divider-line" style=${styleMap({
       background: config.color,
       width: config.direction === "horizontal" ? "100%" : `${config.thickness}px`,
@@ -160,9 +167,9 @@ export const StackBlock = ns.defineBlock("stack", {
   gap: z.number().min(0).max(200).optional().meta({ label: "Gap", description: "Space between blocks, in px" } satisfies FieldMeta),
   wrap: z.boolean().default(false).meta({ label: "Wrap", description: "Flow overflowing blocks onto the next line" } satisfies FieldMeta),
   blocks: z.array(blockSlot()).default([]).meta({ label: "Blocks" } satisfies FieldMeta),
-  style: ContainerBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Stack", description: "Flow blocks in a row or column", icon: "viewColumn" },
+  box: { sizing: "container" },
   render: (config, ctx) => html`<div class="wk-block wk-stack" style=${styleMap({
     ...containerStyles(config.style),
     flexDirection: config.direction,

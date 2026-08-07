@@ -20,7 +20,7 @@ import { BlockTypeRegistry } from "../../../../../src/views/blocks/registry";
 import { resolveBlock } from "../../../../../src/views/blocks/resolver";
 import { formatPhpDate } from "../../../../../src/views/blocks/phpDate";
 import { placementStyles, textStyles } from "../../../../../src/views/blocks/styles";
-import { GridConfigSchema, TextBlockStyleSchema } from "../../../../../src/views/blocks/types/schema";
+import { blockStyleSchema, GridConfigSchema, type BlockStyle } from "../../../../../src/views/blocks/types/schema";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
 import { arrayMove } from "../../../common/helpers/arrayMove";
 import { fieldErrors, validateBlockTree } from "./validate";
@@ -143,24 +143,26 @@ assert.equal(fieldErrors(nested, []).size, 0);
   }
 }
 
-//* style mappers: units are applied in one place, unset fields skip
+//* style mappers: units are applied in one place, unset fields skip (and so inherit)
 
 {
-  const css = textStyles(TextBlockStyleSchema.parse({ letterSpacing: 2, lineHeight: 1.2, opacity: 0.5 }));
-  assert.equal(css.fontSize, "48px", "default font size, in px");
+  const hugStyle = blockStyleSchema("content");
+  const css = textStyles(hugStyle.parse({ fontSize: 100, letterSpacing: 2, lineHeight: 1.2, opacity: 0.5 }) as BlockStyle);
+  assert.equal(css.fontSize, "100px", "set font size, in px");
   assert.equal(css.letterSpacing, "2px");
   assert.equal(css.lineHeight, 1.2, "line height stays unitless");
   assert.equal(css.opacity, 0.5);
 
-  const empty = textStyles(TextBlockStyleSchema.parse({}));
+  const empty = textStyles(hugStyle.parse({}) as BlockStyle);
+  assert.equal(empty.fontSize, undefined, "unset font size emits nothing and inherits (page default in view.css)");
   assert.equal(empty.letterSpacing, undefined, "unset fields stay undefined so styleMap skips them");
   assert.equal(empty.overflow, undefined, "the overflow default lives in the stylesheet, not the config");
   assert.equal(empty.textAlign, "center", "the one alignment drives text-align");
   assert.equal(empty.justifyContent, "center", "vertical middle distributes a stretched chip");
 
-  assert.equal(TextBlockStyleSchema.parse({}).sizing, "content", "text chips hug by default");
+  assert.equal((hugStyle.parse({}) as BlockStyle).sizing, "content", "text chips hug by default");
   assert.deepEqual(
-    placementStyles(TextBlockStyleSchema.parse({}).alignment),
+    placementStyles((hugStyle.parse({}) as BlockStyle).alignment),
     { justifyContent: "center", alignItems: "center" },
     "default placement centers the chip",
   );
@@ -168,6 +170,30 @@ assert.equal(fieldErrors(nested, []).size, 0);
     placementStyles({ horizontal: "right", vertical: "bottom" }),
     { justifyContent: "flex-end", alignItems: "flex-end" },
   );
+  assert.deepEqual(placementStyles(undefined), {}, "fill-only blocks have no alignment to place");
+}
+
+//* injected style: every block is styleable; sizing only exists where hugging works
+
+{
+  // Old saved configs keep their exact meaning through the injection.
+  const oldText = TextBlock.configSchema.parse({
+    type: TextBlock.key, text: "hi",
+    style: { fontSize: 100, sizing: "container", alignment: { horizontal: "left" }, background: "#000" },
+  }) as { style: BlockStyle };
+  assert.equal(oldText.style.fontSize, 100);
+  assert.equal(oldText.style.sizing, "container");
+  assert.equal(oldText.style.alignment?.horizontal, "left");
+  assert.equal(oldText.style.background, "#000");
+
+  // Fill-only blocks: style exists (injected), sizing/alignment do not.
+  const site = WebsiteBlock.configSchema.parse({ type: WebsiteBlock.key, url: "https://example.com" }) as { style: BlockStyle };
+  assert.notEqual(site.style, undefined, "every block gets a style");
+  assert.equal("sizing" in site.style, false, "fill-only blocks have no sizing field");
+
+  // A previously style-less block accepts styling now.
+  const styledGrid = GridBlock.configSchema.safeParse({ type: GridBlock.key, style: { background: "#123" } });
+  assert.equal(styledGrid.success, true);
 }
 
 //* stack: a bare stack is a valid empty row that stretches its children

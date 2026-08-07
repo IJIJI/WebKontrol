@@ -30,6 +30,10 @@ body {
 
 #view-root {
   height: 100%;
+  /* The page default for the inheriting text properties: an unset font field on a block emits
+     nothing inline, so values cascade from the nearest ancestor block that set one, ending
+     here. Root-level on purpose: a per-block rule would reset the cascade at every level. */
+  font-size: 48px;
 }
 
 /* Every block fills the slot its parent gives it, and clips rather than spills: on a wall
