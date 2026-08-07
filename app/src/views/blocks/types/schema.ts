@@ -96,9 +96,19 @@ export const CoordinateSchema = z.object({
 });
 export type Coordinate = z.infer<typeof CoordinateSchema>;
 
+// A whitespace-separated CSS track list, tokens limited to fr/%/px/auto: covers real display
+// layouts while keeping typos and CSS oddities out of the editor. A visual track editor is on
+// the backlog.
+const gridTrackList = /^\s*(?:\d+(?:\.\d+)?(?:fr|%|px)|auto)(?:\s+(?:\d+(?:\.\d+)?(?:fr|%|px)|auto))*\s*$/;
+
 export const GridConfigSchema = z.object({
-  rows: z.number().int().min(1).meta({ label: "Rows" } satisfies FieldMeta),
-  columns: z.number().int().min(1).meta({ label: "Columns" } satisfies FieldMeta),
+  // Capped: every track is a real DOM element, a typo like 200 rows must not build 200 tracks.
+  rows: z.number().int().min(1).max(24).meta({ label: "Rows" } satisfies FieldMeta),
+  columns: z.number().int().min(1).max(24).meta({ label: "Columns" } satisfies FieldMeta),
+  gap: z.number().min(0).max(200).optional().meta({ label: "Gap", description: "Space between cells, in px" } satisfies FieldMeta),
+  // A template overrides the count on its axis with explicit track sizes.
+  templateRows: z.string().regex(gridTrackList).optional().meta({ label: "Row sizes", description: "Track sizes overriding the row count", placeholder: "1fr 2fr" } satisfies FieldMeta),
+  templateColumns: z.string().regex(gridTrackList).optional().meta({ label: "Column sizes", description: "Track sizes overriding the column count", placeholder: "1fr 2fr" } satisfies FieldMeta),
 });
 export type GridConfig = z.infer<typeof GridConfigSchema>;
 

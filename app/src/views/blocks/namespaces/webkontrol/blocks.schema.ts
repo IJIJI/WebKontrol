@@ -56,8 +56,9 @@ export const GridBlock = ns.defineBlock("grid", {
 }, {
   info: { label: "Grid", description: "Arrange blocks in a grid", icon: "grid" },
   render: (config, ctx) => html`<div class="wk-block wk-grid" style=${styleMap({
-    gridTemplateRows: `repeat(${config.layout.rows}, 1fr)`,
-    gridTemplateColumns: `repeat(${config.layout.columns}, 1fr)`,
+    gridTemplateRows: config.layout.templateRows ?? `repeat(${config.layout.rows}, 1fr)`,
+    gridTemplateColumns: config.layout.templateColumns ?? `repeat(${config.layout.columns}, 1fr)`,
+    gap: config.layout.gap === undefined ? undefined : `${config.layout.gap}px`,
   })}>${config.blocks.map((block) => ctx.renderChild(block))}</div>`,
 });
 

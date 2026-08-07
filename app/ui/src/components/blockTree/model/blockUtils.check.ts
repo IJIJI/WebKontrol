@@ -17,7 +17,7 @@ import { BlockTypeRegistry } from "../../../../../src/views/blocks/registry";
 import { resolveBlock } from "../../../../../src/views/blocks/resolver";
 import { formatPhpDate } from "../../../../../src/views/blocks/phpDate";
 import { placementStyles, textStyles } from "../../../../../src/views/blocks/styles";
-import { TextBlockStyleSchema } from "../../../../../src/views/blocks/types/schema";
+import { GridConfigSchema, TextBlockStyleSchema } from "../../../../../src/views/blocks/types/schema";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
 import { arrayMove } from "../../../common/helpers/arrayMove";
 import { fieldErrors, validateBlockTree } from "./validate";
@@ -165,6 +165,16 @@ assert.equal(fieldErrors(nested, []).size, 0);
     placementStyles({ horizontal: "right", vertical: "bottom" }),
     { justifyContent: "flex-end", alignItems: "flex-end" },
   );
+}
+
+//* grid layout: track templates are validated token lists, counts are capped
+
+{
+  const layout = { rows: 2, columns: 2 };
+  assert.equal(GridConfigSchema.safeParse({ ...layout, templateColumns: "1fr 2.5fr auto 100px 30%" }).success, true);
+  assert.equal(GridConfigSchema.safeParse({ ...layout, templateColumns: "minmax(0, 1fr)" }).success, false, "only fr/%/px/auto tokens");
+  assert.equal(GridConfigSchema.safeParse({ ...layout, templateRows: "" }).success, false, "empty template is invalid, omit instead");
+  assert.equal(GridConfigSchema.safeParse({ rows: 200, columns: 2 }).success, false, "counts are capped");
 }
 
 //* formatPhpDate: the datetime block's formatter
