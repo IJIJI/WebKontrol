@@ -1,22 +1,18 @@
 ﻿import z from "zod";
-import { html, nothing, type TemplateResult } from "lit";
+import { html, nothing } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { fitScale } from "../../fitScale";
-import { alignmentSchema, blockSlot, CoordinateSchema, GridConfigSchema, type BlockStyle } from "../../types/schema";
-import { containerStyles, placementStyles, textStyles } from "../../styles";
+import { alignmentSchema, blockSlot, CoordinateSchema, GridConfigSchema } from "../../types/schema";
+import { textBoxStyles } from "../../styles";
 import { clock } from "../../clock";
 import { PHP_DATE_TOKENS } from "../../phpDate";
 import { createNamespace } from "../../types/config";
 import type { FieldMeta } from "../../../types/schema";
 
-// Shared by the text-like blocks: a fill wrapper placing a content element per the style's
-// alignment; the content element (`<blockClass>-content`) carries the text/chip styling.
-function textTemplate(blockClass: string, style: BlockStyle, content: unknown): TemplateResult {
-  const sizing = style.sizing === "container" ? " wk-sizing-container" : "";
-  return html`<div class="wk-block wk-align ${blockClass}${sizing}" style=${styleMap(placementStyles(style.alignment))}>
-    <span class="${blockClass}-content" style=${styleMap(textStyles(style))}>${content}</span>
-  </div>`;
-}
+// Every block below renders only the *contents* of its box: the render core wraps each one in
+// the slot/box skeleton and applies its injected `style`, so no block styles itself. A block
+// that is a container tunes its own box through `boxStyles` (config-driven values only;
+// structural rules live on its `wk-` class in view.css).
 
 export const ns = createNamespace("webkontrol");
 
@@ -28,11 +24,13 @@ export const WebsiteBlock = ns.defineBlock("website", {
   scrollbar: z.enum(["hidden", "auto"]).default("hidden").meta({ label: "Scrollbar" } satisfies FieldMeta),
 }, {
   info: { label: "Website", description: "Display a website", icon: "globe" },
-  // The wrapper is the measurable block box; the iframe inside is either plain 100% (off) or
-  // sized/scaled by the fitScale directive (fit).
-  render: (config) => html`<div class="wk-block wk-website" style=${styleMap(containerStyles(config.style))}>
-    <iframe src=${config.url} scrolling=${config.scrollbar === "hidden" ? "no" : nothing} ${config.scaling === "fit" ? fitScale() : nothing}></iframe>
-  </div>`,
+  // The box is the measurable frame; the iframe inside is either plain 100% (scaling off) or
+  // sized/scaled by the fitScale directive, which measures that box.
+  render: (config) => html`<iframe
+    src=${config.url}
+    scrolling=${config.scrollbar === "hidden" ? "no" : nothing}
+    ${config.scaling === "fit" ? fitScale() : nothing}
+  ></iframe>`,
 });
 
 // TextBlock: show some styled text.
@@ -41,16 +39,18 @@ export const TextBlock = ns.defineBlock("text", {
 }, {
   info: { label: "Text", description: "Show some styled text", icon: "textFields" },
   box: { sizing: "content" },
-  render: (config) => textTemplate("wk-text", config.style, config.text),
+  // The one alignment both places the box and lays the text out inside it.
+  boxStyles: (config) => textBoxStyles(config.style.alignment),
+  render: (config) => html`${config.text}`,
 });
 
 // ContainerBlock: wrap another block to give it styling it does not have itself.
 export const ContainerBlock = ns.defineBlock("container", {
   block: blockSlot({ label: "Content" }),
 }, {
-  info: { label: "Container", description: "Wrap a block to style it", icon: "borderOuter" },
+  info: { label: "Container", description: "Wrap a block in an extra box", icon: "borderOuter" },
   box: { sizing: "container" },
-  render: (config, ctx) => html`<div class="wk-block wk-container" style=${styleMap(containerStyles(config.style))}>${ctx.renderChild(config.block)}</div>`,
+  render: (config, ctx) => ctx.renderChild(config.block),
 });
 
 // GridBlock: Arranges child blocks into the best grid for them.
@@ -63,12 +63,12 @@ export const GridBlock = ns.defineBlock("grid", {
   blocks: z.array(blockSlot()).default([]).meta({ label: "Blocks" } satisfies FieldMeta),
 }, {
   info: { label: "Grid", description: "Arrange blocks in a grid", icon: "grid" },
-  render: (config, ctx) => html`<div class="wk-block wk-grid" style=${styleMap({
-    ...containerStyles(config.style),
+  boxStyles: (config) => ({
     gridTemplateRows: config.layout.templateRows ?? `repeat(${config.layout.rows}, 1fr)`,
     gridTemplateColumns: config.layout.templateColumns ?? `repeat(${config.layout.columns}, 1fr)`,
     gap: config.layout.gap === undefined ? undefined : `${config.layout.gap}px`,
-  })}>${config.blocks.map((block) => ctx.renderChild(block))}</div>`,
+  }),
+  render: (config, ctx) => html`${config.blocks.map((block) => ctx.renderChild(block))}`,
 });
 
 // FreeFormBlock: position each child block wherever you want. Items later in the list render
@@ -87,7 +87,7 @@ export const FreeFormBlock = ns.defineBlock("freeform", {
   })).default([]).meta({ label: "Items", description: "Later items render on top" } satisfies FieldMeta),
 }, {
   info: { label: "Free form", description: "Position blocks freely", icon: "selectWindow" },
-  render: (config, ctx) => html`<div class="wk-block wk-freeform" style=${styleMap(containerStyles(config.style))}>${config.items.map((item) => html`
+  render: (config, ctx) => html`${config.items.map((item) => html`
     <div class="wk-freeform-item" style=${styleMap({
       left: `${item.position.x}%`,
       top: `${item.position.y}%`,
@@ -100,7 +100,7 @@ export const FreeFormBlock = ns.defineBlock("freeform", {
       transformOrigin: `${ANCHOR_ORIGIN[item.alignment.horizontal]} ${ANCHOR_ORIGIN[item.alignment.vertical]}`,
     })}>
       ${ctx.renderChild(item.block)}
-    </div>`)}</div>`,
+    </div>`)}`,
 });
 
 // DateTimeBlock: show the current date/time in a configurable format.
@@ -111,7 +111,8 @@ export const DateTimeBlock = ns.defineBlock("datetime", {
 }, {
   info: { label: "Date & time", description: "Show the current date/time", icon: "schedule" },
   box: { sizing: "content" },
-  render: (config) => textTemplate("wk-datetime", config.style, clock(config.format)),
+  boxStyles: (config) => textBoxStyles(config.style.alignment),
+  render: (config) => html`${clock(config.format)}`,
 });
 
 // ImageBlock: display an image.
@@ -121,8 +122,8 @@ export const ImageBlock = ns.defineBlock("image", {
 }, {
   info: { label: "Image", description: "Display an image", icon: "image" },
   box: { sizing: "container" },
-  render: (config) => html`<img class="wk-block wk-image" src=${config.url} alt=""
-    style=${styleMap({ ...containerStyles(config.style), objectFit: config.fit })} />`,
+  // object-fit belongs to the <img>, not the box around it.
+  render: (config) => html`<img src=${config.url} alt="" style=${styleMap({ objectFit: config.fit })} />`,
 });
 
 // SpacerBlock: an empty block, e.g. to leave a grid cell open or push stack siblings apart.
@@ -130,11 +131,10 @@ export const SpacerBlock = ns.defineBlock("spacer", {
   size: z.number().min(1).max(2000).optional().meta({ label: "Size", description: "Fixed size along a stack's direction, in px. Unset shares the space" } satisfies FieldMeta),
 }, {
   info: { label: "Spacer", description: "Empty space", icon: "spaceBar" },
-  render: (config) => html`<div class="wk-block wk-spacer" style=${styleMap({
-    ...containerStyles(config.style),
-    // In a stack: a set size is fixed (no grow/shrink); unset shares space. Inert elsewhere.
-    flex: config.size === undefined ? undefined : `0 0 ${config.size}px`,
-  })}></div>`,
+  // The size pins the *slot*, since that is what a stack distributes: fixed, no grow/shrink.
+  // Unset keeps the default (share the space). Inert outside a flex parent.
+  slotStyles: (config) => (config.size === undefined ? {} : { flex: `0 0 ${config.size}px` }),
+  render: () => html``,
 });
 
 // DividerBlock: a separating line, centered in its block. The default line color lives in the
@@ -145,13 +145,11 @@ export const DividerBlock = ns.defineBlock("divider", {
   color: z.string().optional().meta({ label: "Color", description: "CSS color", input: "color" } satisfies FieldMeta),
 }, {
   info: { label: "Divider", description: "A separating line", icon: "horizontalRule" },
-  render: (config) => html`<div class="wk-block wk-divider" style=${styleMap(containerStyles(config.style))}>
-    <div class="wk-divider-line" style=${styleMap({
-      background: config.color,
-      width: config.direction === "horizontal" ? "100%" : `${config.thickness}px`,
-      height: config.direction === "horizontal" ? `${config.thickness}px` : "100%",
-    })}></div>
-  </div>`,
+  render: (config) => html`<div class="wk-divider-line" style=${styleMap({
+    background: config.color,
+    width: config.direction === "horizontal" ? "100%" : `${config.thickness}px`,
+    height: config.direction === "horizontal" ? `${config.thickness}px` : "100%",
+  })}></div>`,
 });
 
 // StackBlock: flow child blocks in a row or column (flexbox).
@@ -170,14 +168,14 @@ export const StackBlock = ns.defineBlock("stack", {
 }, {
   info: { label: "Stack", description: "Flow blocks in a row or column", icon: "viewColumn" },
   box: { sizing: "container" },
-  render: (config, ctx) => html`<div class="wk-block wk-stack" style=${styleMap({
-    ...containerStyles(config.style),
+  boxStyles: (config) => ({
     flexDirection: config.direction,
     justifyContent: FLEX_MAP[config.justify],
     alignItems: FLEX_MAP[config.align],
     gap: config.gap === undefined ? undefined : `${config.gap}px`,
     flexWrap: config.wrap ? "wrap" : undefined,
-  })}>${config.blocks.map((block) => ctx.renderChild(block))}</div>`,
+  }),
+  render: (config, ctx) => html`${config.blocks.map((block) => ctx.renderChild(block))}`,
 });
 
 // Every block this namespace ships; index.ts registers from this single list.

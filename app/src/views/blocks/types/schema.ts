@@ -114,7 +114,12 @@ export type GridConfig = z.infer<typeof GridConfigSchema>;
 
 //* Block Styling, added as fields in blocks that need them.
 export const BackgroundStyleShape = { background: z.string().optional().meta({ label: "Background", description: "CSS background", input: "color" } satisfies FieldMeta) };
-export const PaddingStyleShape = { padding: z.string().optional().meta({ label: "Padding", description: "CSS padding" } satisfies FieldMeta) }; // TODO: Visual 4-side editor (backlog)
+export const PaddingStyleShape = {
+  padding: z.string().optional().meta({ label: "Padding", description: "CSS padding" } satisfies FieldMeta), // TODO: Visual 4-side editor (backlog)
+  // Safe because it sits on the box *inside* the slot: it insets the block from its own slot
+  // and can never push a sibling. Gap stays the tool for spacing blocks apart.
+  margin: z.string().optional().meta({ label: "Margin", description: "CSS margin, insets the block inside its own space" } satisfies FieldMeta),
+};
 export const BorderStyleShape = {
   border: z.string().optional().meta({ label: "Border", description: "CSS border" } satisfies FieldMeta),
   borderRadius: z.string().optional().meta({ label: "Corner radius", description: "CSS border-radius" } satisfies FieldMeta),
@@ -137,6 +142,8 @@ export const FontStyleShape = {
   lineHeight: z.number().min(0.5).max(3).optional().meta({ label: "Line height", description: "Multiplier of the font size" } satisfies FieldMeta),
   letterSpacing: z.number().min(-10).max(50).optional().meta({ label: "Letter spacing", description: "In px" } satisfies FieldMeta),
   textTransform: z.enum(["uppercase", "lowercase", "capitalize"]).optional().meta({ label: "Transform" } satisfies FieldMeta),
+  fontStyle: z.enum(["normal", "italic"]).optional().meta({ label: "Italic" } satisfies FieldMeta),
+  textShadow: z.string().optional().meta({ label: "Text shadow", description: "CSS text-shadow, e.g. 0 2px 6px black" } satisfies FieldMeta),
 };
 
 // A reusable position pair (chip placement, freeform item anchors, future pickers). The factory

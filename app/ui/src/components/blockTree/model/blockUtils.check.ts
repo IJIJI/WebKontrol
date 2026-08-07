@@ -19,7 +19,7 @@ import {
 import { BlockTypeRegistry } from "../../../../../src/views/blocks/registry";
 import { resolveBlock } from "../../../../../src/views/blocks/resolver";
 import { formatPhpDate } from "../../../../../src/views/blocks/phpDate";
-import { placementStyles, textStyles } from "../../../../../src/views/blocks/styles";
+import { blockStyles, slotStyles, textBoxStyles } from "../../../../../src/views/blocks/styles";
 import { blockStyleSchema, GridConfigSchema, type BlockStyle } from "../../../../../src/views/blocks/types/schema";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
 import { arrayMove } from "../../../common/helpers/arrayMove";
@@ -147,30 +147,33 @@ assert.equal(fieldErrors(nested, []).size, 0);
 
 {
   const hugStyle = blockStyleSchema("content");
-  const css = textStyles(hugStyle.parse({ fontSize: 100, letterSpacing: 2, lineHeight: 1.2, opacity: 0.5 }) as BlockStyle);
+  const css = blockStyles(hugStyle.parse({ fontSize: 100, letterSpacing: 2, lineHeight: 1.2, opacity: 0.5 }) as BlockStyle);
   assert.equal(css.fontSize, "100px", "set font size, in px");
   assert.equal(css.letterSpacing, "2px");
   assert.equal(css.lineHeight, 1.2, "line height stays unitless");
   assert.equal(css.opacity, 0.5);
 
-  const empty = textStyles(hugStyle.parse({}) as BlockStyle);
+  const empty = blockStyles(hugStyle.parse({}) as BlockStyle);
   assert.equal(empty.fontSize, undefined, "unset font size emits nothing and inherits (page default in view.css)");
   assert.equal(empty.letterSpacing, undefined, "unset fields stay undefined so styleMap skips them");
   assert.equal(empty.overflow, undefined, "the overflow default lives in the stylesheet, not the config");
-  assert.equal(empty.textAlign, "center", "the one alignment drives text-align");
-  assert.equal(empty.justifyContent, "center", "vertical middle distributes a stretched chip");
+  // The box mapper is generic: alignment never leaks into it, or a container's alignment would
+  // silently re-align text in the blocks it wraps.
+  assert.equal(empty.textAlign, undefined, "alignment is not a box style");
+  assert.equal(empty.justifyContent, undefined, "alignment is not a box style");
 
   assert.equal((hugStyle.parse({}) as BlockStyle).sizing, "content", "text chips hug by default");
+
+  // Slot placement, and the text-only echo of the same alignment inside the box.
+  const alignment = (hugStyle.parse({}) as BlockStyle).alignment;
+  assert.deepEqual(slotStyles(alignment), { justifyContent: "center", alignItems: "center" }, "default placement centers the chip");
+  assert.deepEqual(textBoxStyles(alignment), { textAlign: "center", justifyContent: "center" }, "one alignment drives text layout too");
   assert.deepEqual(
-    placementStyles((hugStyle.parse({}) as BlockStyle).alignment),
-    { justifyContent: "center", alignItems: "center" },
-    "default placement centers the chip",
-  );
-  assert.deepEqual(
-    placementStyles({ horizontal: "right", vertical: "bottom" }),
+    slotStyles({ horizontal: "right", vertical: "bottom" }),
     { justifyContent: "flex-end", alignItems: "flex-end" },
   );
-  assert.deepEqual(placementStyles(undefined), {}, "fill-only blocks have no alignment to place");
+  assert.deepEqual(slotStyles(undefined), {}, "fill-only blocks have no alignment to place");
+  assert.deepEqual(textBoxStyles(undefined), {});
 }
 
 //* injected style: every block is styleable; sizing only exists where hugging works
@@ -194,6 +197,20 @@ assert.equal(fieldErrors(nested, []).size, 0);
   // A previously style-less block accepts styling now.
   const styledGrid = GridBlock.configSchema.safeParse({ type: GridBlock.key, style: { background: "#123" } });
   assert.equal(styledGrid.success, true);
+
+  // A realistic saved tree (the shapes a real view nests) still resolves end to end.
+  const registry = new BlockTypeRegistry();
+  ns.register(registry, WEBKONTROL_BLOCKS);
+  const tree = resolveBlock({
+    type: GridBlock.key,
+    layout: { rows: 2, columns: 2 },
+    blocks: [
+      { type: ContainerBlock.key, style: { padding: "20px", background: "#0ea5b7" }, block: { type: WebsiteBlock.key, url: "https://example.com" } },
+      { type: FreeFormBlock.key, items: [{ position: { x: 25, y: 25 }, size: { x: 50, y: 50 }, block: { type: TextBlock.key, text: "hi", style: { fontSize: 100 } } }] },
+      { type: StackBlock.key, blocks: [{ type: DateTimeBlock.key }, { type: SpacerBlock.key, size: 20 }] },
+    ],
+  }, registry);
+  assert.equal(isBroken(tree), false, "a realistic nested tree resolves");
 }
 
 //* stack: a bare stack is a valid empty row that stretches its children

@@ -1,5 +1,6 @@
 import z from "zod";
 import type { TemplateResult } from "lit";
+import type { StyleInfo } from "lit/directives/style-map.js";
 import { AbstractBlockType, type BlockInfo, type RenderContext, type Resolved } from "./model";
 import { blockStyleSchema, type BlockKey, type BlockKeyOf, type BlockStyle, type BlockType, type DataField, type DataKeyOf, type DataSourceKey, type NamespaceId } from "./schema";
 import type { BlockTypeRegistry } from "../registry";
@@ -20,6 +21,10 @@ export interface BlockImpl<K extends BlockKey, S extends z.ZodRawShape> {
    * grid has no content size; content sizing would collapse it), and the fields don't exist.
    */
   box?: { sizing: "container" | "content" };
+  /** Config-driven styles for this block's own box. See {@link AbstractBlockType.boxStyles}. */
+  boxStyles?: (config: Resolved<BlockConfigOf<K, S>>) => StyleInfo;
+  /** Config-driven styles for the slot around this block. See {@link AbstractBlockType.slotStyles}. */
+  slotStyles?: (config: Resolved<BlockConfigOf<K, S>>) => StyleInfo;
   /** DataSources this block always needs, regardless of config. */
   fixedDataDependencies?: readonly DataSourceKey[];
   /** Helper function to derive needed sources from config (a bound field, or one picked from another field). */
@@ -84,6 +89,14 @@ export function createNamespace<const N extends NamespaceId>(namespace: N): Name
 
       render(config: Resolved<Config>, ctx: RenderContext): TemplateResult {
         return impl.render(config, ctx);
+      }
+
+      override boxStyles(config: Resolved<Config>): StyleInfo {
+        return impl.boxStyles?.(config) ?? {};
+      }
+
+      override slotStyles(config: Resolved<Config>): StyleInfo {
+        return impl.slotStyles?.(config) ?? {};
       }
 
       protected override _getConfigDataDependencies(config: Config): readonly DataSourceKey[] {

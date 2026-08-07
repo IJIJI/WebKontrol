@@ -1,5 +1,6 @@
 import type z from "zod";
 import type { TemplateResult } from "lit";
+import type { StyleInfo } from "lit/directives/style-map.js";
 import type { BlockKey, BlockSlot, DataSourceKey } from "./schema";
 
 /**
@@ -102,9 +103,29 @@ export abstract class AbstractBlockType<TConfig = unknown> {
   }
 
   /**
-   * Produce this block's visual output as a Lit template. Pure: the same
+   * Produce the *contents* of this block's box as a Lit template. Pure: the same
    * (config, ctx) yields the same result. Children render via ctx.renderChild;
    * they are reached in-place off the resolved config (e.g. config.block).
+   *
+   * The box itself (and the slot around it) is emitted by the render core, styled from the
+   * injected `style` config, so a block never writes its own box.
    */
   abstract render(config: Resolved<TConfig>, ctx: RenderContext): TemplateResult;
+
+  /**
+   * Config-driven styles for this block's own box, beyond the universal ones: how it behaves
+   * as a container (a grid's tracks, a stack's direction). Structural constants belong in the
+   * stylesheet on the block's `wk-` class; only values derived from config belong here.
+   */
+  boxStyles(_config: Resolved<TConfig>): StyleInfo {
+    return {};
+  }
+
+  /**
+   * Config-driven styles for the *slot* around this block: how it occupies the space its
+   * parent gave it (e.g. a spacer's fixed size in a stack). Rare; most blocks fill their slot.
+   */
+  slotStyles(_config: Resolved<TConfig>): StyleInfo {
+    return {};
+  }
 }

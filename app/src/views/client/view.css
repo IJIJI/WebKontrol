@@ -30,59 +30,110 @@ body {
 
 #view-root {
   height: 100%;
+  /* The root block's slot is a flex child of this, so it fills the viewport. */
+  display: flex;
   /* The page default for the inheriting text properties: an unset font field on a block emits
      nothing inline, so values cascade from the nearest ancestor block that set one, ending
      here. Root-level on purpose: a per-block rule would reset the cascade at every level. */
   font-size: 48px;
 }
 
-/* Every block fills the slot its parent gives it, and clips rather than spills: on a wall
-   display, accidental overflow looks worse than a visible cut. A block's overflow config
-   overrides this inline per block. */
-.wk-block {
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
+/* ── The block skeleton ────────────────────────────────────────────────────────
+   The render core paints every block as a slot (the space its parent gave it) wrapping a box
+   (the block's own styled element). Two rules cover every block and every parent, so blocks
+   and plugins need no layout CSS of their own. */
 
-/* Grid children may hold iframes/text that would otherwise stretch their tracks. */
-.wk-grid {
-  display: grid;
-}
-.wk-grid > * {
+/* The slot takes the space its parent's layout hands it: a grid cell, a flex share, an
+   absolutely positioned freeform item. It is a flex container purely to place the box. */
+.wk-slot {
+  display: flex;
+  box-sizing: border-box;
+  /* Fill when the parent is flex (stack, container, the root). Grid/absolute parents size the
+     slot themselves. No align-self here: the parent's align-items must stay in control, which
+     is what lets a stack's `align` setting reach its children. */
+  flex: 1 1 auto;
+  /* Oversized content (iframes, long text) must never blow up the parent's tracks or lines. */
   min-width: 0;
   min-height: 0;
 }
 
-/* Freeform positions its items in % of its own box. */
+/* The box carries the block's styling and, by default, fills its slot. */
+.wk-block {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+  /* Clip rather than spill: on a wall display, accidental overflow looks worse than a visible
+     cut. A block's overflow config overrides this inline. */
+  overflow: hidden;
+}
+
+/* Hugging: the box shrinks to its content, and the slot's justify/align (from the block's
+   alignment config) decide where in the slot it sits. */
+.wk-slot.wk-hug > .wk-block {
+  flex: 0 0 auto;
+  align-self: auto;
+}
+
+/* Inside a stack the slot must hug too, otherwise it would swallow the free space and the
+   stack's gap and justify would have nothing left to distribute. */
+.wk-stack > .wk-slot.wk-hug {
+  flex: 0 0 auto;
+}
+
+/* ── Per-block structure ───────────────────────────────────────────────────────
+   Structural constants only; every config-driven value arrives inline via boxStyles. */
+
+.wk-grid {
+  display: grid;
+}
+
+.wk-stack {
+  display: flex;
+}
+
+/* A container's single child slot fills its box. */
+.wk-container {
+  display: flex;
+}
+
+/* Text-like boxes lay their content out as a column, so the block's alignment can distribute
+   it vertically (justify-content) while text-align handles the horizontal. */
+.wk-text,
+.wk-datetime {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Text keeps its authored line breaks (multi-line text fields). */
+.wk-text {
+  white-space: pre-line;
+}
+
+/* Freeform positions its items in % of its own box; each item holds one slot. */
 .wk-freeform {
   position: relative;
 }
 .wk-freeform-item {
   position: absolute;
-}
-
-/* Chip-capable blocks (text, datetime): the root is a flex wrapper placing its content element
-   per the alignment config. The content element is a flex column, so vertical alignment also
-   works when it is stretched. Container sizing stretches it edge to edge (the classic
-   full-block look); content sizing hugs, so styling forms a chip. */
-.wk-align {
   display: flex;
 }
-.wk-align > * {
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-.wk-align.wk-sizing-container > * {
-  flex: 1 1 auto;
-  align-self: stretch;
+.wk-freeform-item > .wk-slot {
+  width: 100%;
+  height: 100%;
 }
 
-/* The iframe fills its wrapper by default (scaling off); the fitScale directive overrides
-   with pixel sizes + transform when scale-to-fit is on. */
+/* The iframe fills its box. Out of flow (absolute) so it can never contribute to that box's
+   content size: fitScale derives the iframe's height FROM the box, so an in-flow iframe in
+   any content-sized container feeds back into itself and grows without bound. */
+.wk-website {
+  position: relative;
+}
 .wk-website > iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
   border: 0;
   display: block;
   width: 100%;
@@ -90,33 +141,13 @@ body {
   transform-origin: 0 0;
 }
 
-/* A stack flows its children instead of filling cells: the wk-block 100% sizing is wrong for
-   flex children, so they grow from their content size and share the leftover. min sizes at 0
-   so oversized content (iframes, big text) cannot blow up the line. */
-.wk-stack {
-  display: flex;
-}
-.wk-stack > * {
-  min-width: 0;
-  min-height: 0;
-}
-.wk-stack > .wk-block {
-  width: auto;
-  height: auto;
-  flex: 1 1 auto;
-}
-/* Content-sized chips (text/datetime) hug in a stack, so justify and gap actually distribute
-   them; container-sized chips and layout blocks fill the leftover space. */
-.wk-stack > .wk-align:not(.wk-sizing-container) {
-  flex: 0 0 auto;
+.wk-image > img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-/* Text keeps its authored line breaks (multi-line text fields). */
-.wk-text-content {
-  white-space: pre-line;
-}
-
-/* The divider's line is centered in its block; the config color overrides this default. */
+/* The divider's line is centered in its box; the config color overrides this default. */
 .wk-divider {
   display: flex;
   align-items: center;
@@ -126,7 +157,9 @@ body {
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* A block that failed to resolve: loud, not a silent gap on a wall display. */
+/* A block that failed to resolve: loud, not a silent gap on a wall display. The text
+   properties are reset rather than inherited: the surrounding config is the config that just
+   failed, so an ancestor's 200px uppercase font must not render the error unreadable. */
 .wk-broken {
   display: flex;
   align-items: center;
@@ -136,7 +169,12 @@ body {
   border-radius: 8px;
   background: rgba(233, 56, 56, 0.08);
   color: #e93838;
-  font-size: 14px;
+  font: normal normal 400 14px/1.3 system-ui, sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+  text-align: left;
+  text-shadow: none;
+  white-space: normal;
 }
 .wk-broken .text {
   flex: 1;
