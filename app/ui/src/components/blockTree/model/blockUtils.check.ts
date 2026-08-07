@@ -6,8 +6,10 @@ import assert from "node:assert/strict";
 import {
   ContainerBlock,
   DateTimeBlock,
+  DividerBlock,
   FreeFormBlock,
   GridBlock,
+  SpacerBlock,
   TextBlock,
   WebsiteBlock,
   ns,
@@ -165,6 +167,16 @@ assert.equal(fieldErrors(nested, []).size, 0);
     placementStyles({ horizontal: "right", vertical: "bottom" }),
     { justifyContent: "flex-end", alignItems: "flex-end" },
   );
+}
+
+//* content blocks: divider defaults, spacer parses bare
+
+{
+  const divider = DividerBlock.configSchema.parse({ type: DividerBlock.key }) as Record<string, unknown>;
+  assert.equal(divider.direction, "horizontal");
+  assert.equal(divider.thickness, 2);
+  assert.equal(divider.color, undefined, "line color default lives in the stylesheet");
+  assert.equal(SpacerBlock.configSchema.safeParse({ type: SpacerBlock.key }).success, true);
 }
 
 //* website block: scale-to-fit and hidden scrollbar are the defaults

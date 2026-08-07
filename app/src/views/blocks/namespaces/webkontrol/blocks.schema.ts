@@ -113,13 +113,50 @@ export const DateTimeBlock = ns.defineBlock("datetime", {
   render: (config) => textTemplate("wk-datetime", config.style, clock(config.format)),
 });
 
+// ImageBlock: display an image.
+export const ImageBlock = ns.defineBlock("image", {
+  url: z.url().meta({ label: "URL", description: "The image to display" } satisfies FieldMeta),
+  fit: z.enum(["cover", "contain", "fill"]).default("cover").meta({ label: "Fit", description: "How the image fills the block" } satisfies FieldMeta),
+  style: ContainerBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
+}, {
+  info: { label: "Image", description: "Display an image", icon: "image" },
+  render: (config) => html`<img class="wk-block wk-image" src=${config.url} alt=""
+    style=${styleMap({ ...containerStyles(config.style), objectFit: config.fit })} />`,
+});
+
+// SpacerBlock: an empty block, e.g. to leave a grid cell open.
+export const SpacerBlock = ns.defineBlock("spacer", {}, {
+  info: { label: "Spacer", description: "Empty space", icon: "spaceBar" },
+  render: () => html`<div class="wk-block wk-spacer"></div>`,
+});
+
+// DividerBlock: a separating line, centered in its block. The default line color lives in the
+// stylesheet (.wk-divider-line), the config color overrides it.
+export const DividerBlock = ns.defineBlock("divider", {
+  direction: z.enum(["horizontal", "vertical"]).default("horizontal").meta({ label: "Direction" } satisfies FieldMeta),
+  thickness: z.number().min(1).max(100).default(2).meta({ label: "Thickness", description: "In px" } satisfies FieldMeta),
+  color: z.string().optional().meta({ label: "Color", description: "CSS color", input: "color" } satisfies FieldMeta),
+}, {
+  info: { label: "Divider", description: "A separating line", icon: "horizontalRule" },
+  render: (config) => html`<div class="wk-block wk-divider">
+    <div class="wk-divider-line" style=${styleMap({
+      background: config.color,
+      width: config.direction === "horizontal" ? "100%" : `${config.thickness}px`,
+      height: config.direction === "horizontal" ? `${config.thickness}px` : "100%",
+    })}></div>
+  </div>`,
+});
+
 // Every block this namespace ships; index.ts registers from this single list.
 export const WEBKONTROL_BLOCKS = [
   WebsiteBlock,
   TextBlock,
+  ImageBlock,
   ContainerBlock,
   GridBlock,
   FreeFormBlock,
+  SpacerBlock,
+  DividerBlock,
   DateTimeBlock,
 ];
 

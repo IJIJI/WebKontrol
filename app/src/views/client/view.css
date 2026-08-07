@@ -86,6 +86,16 @@ body {
   transform-origin: 0 0;
 }
 
+/* The divider's line is centered in its block; the config color overrides this default. */
+.wk-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wk-divider-line {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 /* A block that failed to resolve: loud, not a silent gap on a wall display. */
 .wk-broken {
   display: flex;
