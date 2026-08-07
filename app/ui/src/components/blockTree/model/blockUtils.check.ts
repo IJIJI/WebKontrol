@@ -15,6 +15,7 @@ import {
 } from "../../../../../src/views/blocks/namespaces/webkontrol/blocks.schema";
 import { BlockTypeRegistry } from "../../../../../src/views/blocks/registry";
 import { resolveBlock } from "../../../../../src/views/blocks/resolver";
+import { formatPhpDate } from "../../../../../src/views/blocks/phpDate";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
 import { arrayMove } from "../../../common/helpers/arrayMove";
 import { fieldErrors, validateBlockTree } from "./validate";
@@ -135,6 +136,21 @@ assert.equal(fieldErrors(nested, []).size, 0);
     assert.equal(isBroken(child as ResolvedNode), true, "child slot holds the broken node");
     assert.deepEqual(withBadChild.dependencies, [], "broken child contributes no dependencies");
   }
+}
+
+//* formatPhpDate: the datetime block's formatter
+
+{
+  const monday = new Date(2026, 0, 5, 14, 7, 9); // Mon 5 Jan 2026, 14:07:09 local
+  assert.equal(formatPhpDate("H:i:s", monday), "14:07:09");
+  assert.equal(formatPhpDate("D j M Y", monday), "Mon 5 Jan 2026");
+  assert.equal(formatPhpDate("l, jS F", monday), "Monday, 5th January");
+  assert.equal(formatPhpDate("g:i A", monday), "2:07 PM");
+  assert.equal(formatPhpDate("\\Y = Y", monday), "Y = 2026", "backslash escapes a literal");
+
+  const sunday = new Date(2026, 0, 4, 0, 30, 0);
+  assert.equal(formatPhpDate("N w", sunday), "7 0", "ISO vs plain weekday numbering");
+  assert.equal(formatPhpDate("g G h a", sunday), "12 0 12 am", "12h/24h midnight");
 }
 
 //* arrayMove: the slot-list reorder primitive

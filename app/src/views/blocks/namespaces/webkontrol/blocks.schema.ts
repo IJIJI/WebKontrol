@@ -3,6 +3,8 @@ import { html } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { blockSlot, ContainerBlockStyleSchema, CoordinateSchema, GridConfigSchema, TextBlockStyleSchema } from "../../types/schema";
 import { containerStyles, textStyles } from "../../styles";
+import { clock } from "../../clock";
+import { PHP_DATE_TOKENS } from "../../phpDate";
 import { createNamespace } from "../../types/config";
 import type { FieldMeta } from "../../../types/schema";
 
@@ -73,11 +75,13 @@ export const FreeFormBlock = ns.defineBlock("freeform", {
 
 // DateTimeBlock: show the current date/time in a configurable format.
 export const DateTimeBlock = ns.defineBlock("datetime", {
-  format: z.string().regex(/^(?:[dDjlNSwzWFmMntLoYyaABgGhHisuveIOPpTZcrU]|\\.|[\s\-/:.,|])+$/).optional().default("H:i:s").meta({ label: "Format", description: "PHP-style date format, e.g. H:i:s" } satisfies FieldMeta),
+  // The regex admits exactly the tokens formatPhpDate implements (plus escapes and separators),
+  // so the editor rejects formats the renderer can't do. PHP_DATE_TOKENS is the shared source.
+  format: z.string().regex(new RegExp(`^(?:[${PHP_DATE_TOKENS}]|\\\\.|[\\s\\-/:.,|])+$`)).optional().default("H:i:s").meta({ label: "Format", description: "PHP-style date format, e.g. H:i:s" } satisfies FieldMeta),
   style: TextBlockStyleSchema.meta({ label: "Style" } satisfies FieldMeta),
 }, {
   info: { label: "Date & time", description: "Show the current date/time", icon: "schedule" },
-  render: (config) => html`<span>${config.format}</span>`, // TODO: format the current time per config.format + apply config.style
+  render: (config) => html`<div class="wk-block wk-text wk-datetime" style=${styleMap(textStyles(config.style))}>${clock(config.format)}</div>`,
 });
 
 // Every block this namespace ships; index.ts registers from this single list.
