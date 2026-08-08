@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { type JSX } from "react/jsx-runtime";
+import toast from "react-hot-toast";
 
 import "../blockExplorer.less";
 import { Button } from "../../button/Button";
@@ -11,6 +12,7 @@ import { BlockForm, savedBlockAt } from "../BlockForm";
 import { BlockPicker } from "./BlockPicker";
 import { fieldErrors, validateBlockTree } from "../model/validate";
 import { writeBlockClipboard } from "../model/blockClipboard";
+import { blockInfo } from "../model/registry";
 import { useFlash } from "../../../common/hooks/useFlash";
 import {
   type BlockLike,
@@ -126,6 +128,10 @@ export function BlockEditor({
                 onClick={() => {
                   writeBlockClipboard(selected);
                   removeSelected();
+                  // A toast rather than a flash on the button: cutting closes the pane, so there
+                  // is no control left to animate, and the ambiguity is not that something
+                  // happened but that cutting looks exactly like deleting. Say the block was kept.
+                  toast(`Cut ${blockInfo(selected.type)?.label ?? selected.type}. Paste it in any block picker.`);
                 }}
                 ariaLabel="Cut this block"
               >
