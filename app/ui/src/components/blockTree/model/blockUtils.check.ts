@@ -231,9 +231,36 @@ assert.equal(fieldErrors(nested, []).size, 0);
 {
   const divider = DividerBlock.configSchema.parse({ type: DividerBlock.key }) as Record<string, unknown>;
   assert.equal(divider.direction, "horizontal");
-  assert.equal(divider.thickness, 2);
-  assert.equal(divider.color, undefined, "line color default lives in the stylesheet");
+  // Both CSS values default in the stylesheet, not the config, so user CSS can retheme them.
+  assert.equal(divider.thickness, undefined);
+  assert.equal(divider.color, undefined);
   assert.equal(SpacerBlock.configSchema.safeParse({ type: SpacerBlock.key }).success, true);
+}
+
+//* text is trimmed: pre-line makes newlines significant, so stray edges must not survive
+
+{
+  const text = (raw: string): string =>
+    (TextBlock.configSchema.parse({ type: TextBlock.key, text: raw }) as { text: string }).text;
+  assert.equal(text("Test 1\n"), "Test 1", "a trailing return from the textarea is dropped");
+  assert.equal(text("\n  Test 1  \n\n"), "Test 1", "both edges, spaces and returns alike");
+  assert.equal(text("Line 1\n\nLine 2"), "Line 1\n\nLine 2", "interior blank lines are preserved");
+}
+
+//* freeform item size: per-axis optional, so an item can fit its block
+
+{
+  const parse = (item: unknown): { size: { x?: number; y?: number } } =>
+    (FreeFormBlock.configSchema.parse({ type: FreeFormBlock.key, items: [item] }) as { items: { size: { x?: number; y?: number } }[] }).items[0];
+
+  const base = { block: { type: TextBlock.key } };
+  // A fresh item is still a visible 25% box.
+  assert.deepEqual(parse(base).size, { x: 25, y: 25 }, "omitted size keeps the default box");
+  // Either axis can be cleared on its own to fit the block. A cleared axis is absent, not
+  // undefined, which is what makes the render emit no width/height at all for it.
+  assert.deepEqual(parse({ ...base, size: { y: 40 } }).size, { y: 40 }, "width fits the block");
+  assert.deepEqual(parse({ ...base, size: { x: 40 } }).size, { x: 40 }, "height fits the block");
+  assert.deepEqual(parse({ ...base, size: {} }).size, {}, "both axes fit the block");
 }
 
 //* website block: scale-to-fit and hidden scrollbar are the defaults

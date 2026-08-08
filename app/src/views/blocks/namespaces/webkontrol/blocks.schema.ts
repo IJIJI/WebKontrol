@@ -2,7 +2,7 @@
 import { html, nothing } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { fitScale } from "../../fitScale";
-import { alignmentSchema, blockSlot, CoordinateSchema, GridConfigSchema } from "../../types/schema";
+import { alignmentSchema, blockSlot, CoordinateSchema, DimensionSchema, GridConfigSchema } from "../../types/schema";
 import { textBoxStyles } from "../../styles";
 import { clock } from "../../clock";
 import { PHP_DATE_TOKENS } from "../../phpDate";
@@ -35,7 +35,10 @@ export const WebsiteBlock = ns.defineBlock("website", {
 
 // TextBlock: show some styled text.
 export const TextBlock = ns.defineBlock("text", {
-  text: z.string().meta({ label: "Text", input: "textarea" } satisfies FieldMeta),
+  // Trimmed: the block renders with `white-space: pre-line`, which makes newlines significant,
+  // so a stray trailing return from the textarea would show up as a blank line. Interior blank
+  // lines (paragraph breaks) are untouched; space *around* the text is what padding is for.
+  text: z.string().trim().meta({ label: "Text", input: "textarea" } satisfies FieldMeta),
 }, {
   info: { label: "Text", description: "Show some styled text", icon: "textFields" },
   box: { sizing: "content" },
@@ -81,7 +84,13 @@ export const FreeFormBlock = ns.defineBlock("freeform", {
     block: blockSlot({ label: "Block" }),
     // Prefaulted so a freshly added (empty) item is already positioned somewhere sensible.
     position: CoordinateSchema.prefault({ x: 0, y: 0 }).meta({ label: "Position", description: "In % of the screen" } satisfies FieldMeta),
-    size: CoordinateSchema.prefault({ x: 25, y: 25 }).meta({ label: "Size", description: "In % of the screen" } satisfies FieldMeta),
+    // Per-axis optional: an unset axis sizes the item to its block instead of to a percentage,
+    // which is how a chip gets an item that is exactly as big as its text. Prefaulted as a
+    // whole, so a freshly added item is still a visible 25% box.
+    size: z.object({
+      x: DimensionSchema.optional().meta({ label: "X", description: "Width in %. Unset fits the block (only blocks that can hug, e.g. text)" } satisfies FieldMeta),
+      y: DimensionSchema.optional().meta({ label: "Y", description: "Height in %. Unset fits the block (only blocks that can hug, e.g. text)" } satisfies FieldMeta),
+    }).prefault({ x: 25, y: 25 }).meta({ label: "Size", description: "In % of the screen" } satisfies FieldMeta),
     alignment: alignmentSchema("left", "top").meta({ label: "Alignment", description: "Which point of the item the position places" } satisfies FieldMeta),
     rotation: z.number().min(-180).max(180).optional().meta({ label: "Rotation", description: "Degrees, clockwise" } satisfies FieldMeta),
   })).default([]).meta({ label: "Items", description: "Later items render on top" } satisfies FieldMeta),
@@ -91,8 +100,9 @@ export const FreeFormBlock = ns.defineBlock("freeform", {
     <div class="wk-freeform-item" style=${styleMap({
       left: `${item.position.x}%`,
       top: `${item.position.y}%`,
-      width: `${item.size.x}%`,
-      height: `${item.size.y}%`,
+      // Unset = auto: the absolutely positioned item shrink-wraps its block on that axis.
+      width: item.size.x === undefined ? undefined : `${item.size.x}%`,
+      height: item.size.y === undefined ? undefined : `${item.size.y}%`,
       // The translate puts the item's alignment point on `position`; the matching
       // transform-origin makes rotation pivot around that same anchored point.
       transform: `translate(${ANCHOR_SHIFT[item.alignment.horizontal]}, ${ANCHOR_SHIFT[item.alignment.vertical]})${
@@ -141,14 +151,17 @@ export const SpacerBlock = ns.defineBlock("spacer", {
 // stylesheet (.wk-divider-line), the config color overrides it.
 export const DividerBlock = ns.defineBlock("divider", {
   direction: z.enum(["horizontal", "vertical"]).default("horizontal").meta({ label: "Direction" } satisfies FieldMeta),
-  thickness: z.number().min(1).max(100).default(2).meta({ label: "Thickness", description: "In px" } satisfies FieldMeta),
+  // Optional: the direction class in view.css carries the default thickness, so an unset value
+  // stays overridable by user CSS. Only a set value is pinned inline, on the short axis.
+  thickness: z.number().min(1).max(100).optional().meta({ label: "Thickness", description: "In px" } satisfies FieldMeta),
   color: z.string().optional().meta({ label: "Color", description: "CSS color", input: "color" } satisfies FieldMeta),
 }, {
   info: { label: "Divider", description: "A separating line", icon: "horizontalRule" },
-  render: (config) => html`<div class="wk-divider-line" style=${styleMap({
+  render: (config) => html`<div class="wk-divider-line ${config.direction}" style=${styleMap({
     background: config.color,
-    width: config.direction === "horizontal" ? "100%" : `${config.thickness}px`,
-    height: config.direction === "horizontal" ? `${config.thickness}px` : "100%",
+    ...(config.thickness === undefined
+      ? {}
+      : config.direction === "horizontal" ? { height: `${config.thickness}px` } : { width: `${config.thickness}px` }),
   })}></div>`,
 });
 
