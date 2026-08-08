@@ -144,7 +144,7 @@ export const EffectsStyleShape = {
   boxShadow: z.string().optional().meta({ label: "Shadow", description: "CSS box-shadow" } satisfies FieldMeta),
   // No default: the stylesheet's `.wk-block { overflow: hidden }` is the default; a value set
   // here overrides it inline per block.
-  overflow: z.enum(["visible", "hidden"]).optional().meta({ label: "Overflow" } satisfies FieldMeta),
+  overflow: z.enum(["visible", "hidden"]).optional().meta({ label: "Overflow", input: "buttons" } satisfies FieldMeta),
 };
 // All optional, deliberately: these are CSS-inheriting properties, so an unset field emits
 // nothing inline and the value cascades from the nearest ancestor block that set it (the
@@ -157,7 +157,7 @@ export const FontStyleShape = {
   lineHeight: z.number().min(0.5).max(3).optional().meta({ label: "Line height", description: "Multiplier of the font size", input: "range" } satisfies FieldMeta),
   letterSpacing: z.number().min(-10).max(50).optional().meta({ label: "Letter spacing", description: "In px" } satisfies FieldMeta),
   textTransform: z.enum(["uppercase", "lowercase", "capitalize"]).optional().meta({ label: "Transform" } satisfies FieldMeta),
-  fontStyle: z.enum(["normal", "italic"]).optional().meta({ label: "Italic" } satisfies FieldMeta),
+  fontStyle: z.enum(["normal", "italic"]).optional().meta({ label: "Italic", input: "buttons" } satisfies FieldMeta),
   textShadow: z.string().optional().meta({ label: "Text shadow", description: "CSS text-shadow, e.g. 0 2px 6px black" } satisfies FieldMeta),
 };
 
@@ -166,8 +166,8 @@ export const FontStyleShape = {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
 export const alignmentSchema = (horizontal: "left" | "center" | "right", vertical: "top" | "middle" | "bottom") =>
   z.object({
-    horizontal: z.enum(["left", "center", "right"]).default(horizontal).meta({ label: "Horizontal" } satisfies FieldMeta),
-    vertical: z.enum(["top", "middle", "bottom"]).default(vertical).meta({ label: "Vertical" } satisfies FieldMeta),
+    horizontal: z.enum(["left", "center", "right"]).default(horizontal).meta({ label: "Horizontal", input: "buttons" } satisfies FieldMeta),
+    vertical: z.enum(["top", "middle", "bottom"]).default(vertical).meta({ label: "Vertical", input: "buttons" } satisfies FieldMeta),
   }).prefault({});
 export const AlignmentSchema = alignmentSchema("center", "middle");
 export type Alignment = z.infer<typeof AlignmentSchema>;
@@ -194,7 +194,7 @@ export const BlockStyleShape = {
 // are never two competing horizontal alignments. Fill-only blocks (website, grid, …) never
 // get these fields: content sizing would collapse them to nothing.
 const sizingFields = (defaultSizing: "container" | "content") => ({
-  sizing: z.enum(["container", "content"]).default(defaultSizing).meta({ label: "Sizing", description: "Hug the content, or fill the block" } satisfies FieldMeta),
+  sizing: z.enum(["container", "content"]).default(defaultSizing).meta({ label: "Sizing", description: "Hug the content, or fill the block", input: "buttons" } satisfies FieldMeta),
   alignment: AlignmentSchema.meta({ label: "Alignment" } satisfies FieldMeta),
 });
 

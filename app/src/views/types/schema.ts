@@ -44,8 +44,9 @@ export interface FieldMeta {
   // "textarea" renders a multi-line text field; "font" renders a text field with font
   // suggestions (free text stays allowed); "range" pairs a number with a slider (bounds and
   // step still come from the schema, not from here); "box"/"corners" edit a CSS box shorthand
-  // (padding/margin vs border-radius) as numbers, falling back to the raw string.
-  input?: "color" | "textarea" | "font" | "range" | "box" | "corners";
+  // (padding/margin vs border-radius) as numbers, falling back to the raw string; "buttons"
+  // shows a short enum as a button group instead of a dropdown.
+  input?: "color" | "textarea" | "font" | "range" | "box" | "corners" | "buttons";
 }
 
 //* View config:

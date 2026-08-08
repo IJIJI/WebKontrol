@@ -19,9 +19,9 @@ export const ns = createNamespace("webkontrol");
 // WebsiteBlock: display a website.
 export const WebsiteBlock = ns.defineBlock("website", {
   url: z.url().meta({ label: "URL", description: "The website to display" } satisfies FieldMeta),
-  scaling: z.enum(["fit", "off"]).default("fit").meta({ label: "Scaling", description: "Render the page at full display size, scaled to fit this block" } satisfies FieldMeta),
+  scaling: z.enum(["fit", "off"]).default("fit").meta({ label: "Scaling", description: "Render the page at full display size, scaled to fit this block", input: "buttons" } satisfies FieldMeta),
   // A cross-origin iframe's scrollbar cannot be styled from outside, only hidden.
-  scrollbar: z.enum(["hidden", "auto"]).default("hidden").meta({ label: "Scrollbar" } satisfies FieldMeta),
+  scrollbar: z.enum(["hidden", "auto"]).default("hidden").meta({ label: "Scrollbar", input: "buttons" } satisfies FieldMeta),
 }, {
   info: { label: "Website", description: "Display a website", icon: "globe" },
   // The box is the measurable frame; the iframe inside is either plain 100% (scaling off) or
@@ -128,7 +128,7 @@ export const DateTimeBlock = ns.defineBlock("datetime", {
 // ImageBlock: display an image.
 export const ImageBlock = ns.defineBlock("image", {
   url: z.url().meta({ label: "URL", description: "The image to display" } satisfies FieldMeta),
-  fit: z.enum(["cover", "contain", "fill"]).default("cover").meta({ label: "Fit", description: "How the image fills the block" } satisfies FieldMeta),
+  fit: z.enum(["cover", "contain", "fill"]).default("cover").meta({ label: "Fit", description: "How the image fills the block", input: "buttons" } satisfies FieldMeta),
 }, {
   info: { label: "Image", description: "Display an image", icon: "image" },
   box: { sizing: "container" },
@@ -150,7 +150,7 @@ export const SpacerBlock = ns.defineBlock("spacer", {
 // DividerBlock: a separating line, centered in its block. The default line color lives in the
 // stylesheet (.wk-divider-line), the config color overrides it.
 export const DividerBlock = ns.defineBlock("divider", {
-  direction: z.enum(["horizontal", "vertical"]).default("horizontal").meta({ label: "Direction" } satisfies FieldMeta),
+  direction: z.enum(["horizontal", "vertical"]).default("horizontal").meta({ label: "Direction", input: "buttons" } satisfies FieldMeta),
   // Optional: the direction class in view.css carries the default thickness, so an unset value
   // stays overridable by user CSS. Only a set value is pinned inline, on the short axis.
   thickness: z.number().min(1).max(100).optional().meta({ label: "Thickness", description: "In px" } satisfies FieldMeta),
@@ -172,7 +172,7 @@ const FLEX_MAP = {
 } as const;
 
 export const StackBlock = ns.defineBlock("stack", {
-  direction: z.enum(["row", "column"]).default("row").meta({ label: "Direction" } satisfies FieldMeta),
+  direction: z.enum(["row", "column"]).default("row").meta({ label: "Direction", input: "buttons" } satisfies FieldMeta),
   justify: z.enum(["start", "center", "end", "space-between", "space-around", "space-evenly"]).default("start").meta({ label: "Justify", description: "Distribution along the direction" } satisfies FieldMeta),
   align: z.enum(["stretch", "start", "center", "end"]).default("stretch").meta({ label: "Align", description: "Alignment across the direction" } satisfies FieldMeta),
   gap: z.number().min(0).max(200).optional().meta({ label: "Gap", description: "Space between blocks, in px" } satisfies FieldMeta),

@@ -16,6 +16,7 @@ import { RangeSetting } from "./implementations/RangeSetting";
 import { ColorTextSetting } from "./implementations/ColorTextSetting";
 import { ToggleSetting } from "./implementations/ToggleSetting";
 import { SelectSetting } from "./implementations/SelectSetting";
+import { ButtonSelectSetting } from "./implementations/ButtonSelectSetting";
 import { BaseSetting } from "./BaseSetting";
 import type { ZodObject, ZodRawShape } from "zod";
 import { SettingGroup } from "./SettingGroup";
@@ -495,18 +496,32 @@ function renderField(
         <ToggleSetting key={key} title={title} subtitle={subtitle} error={error}
           value={Boolean(value)} savedVal={saved as boolean | undefined} setValue={set} />
       );
-    case "enum": // TODO: Default does not get saved -> If the default changes peoples views do to. Change?
-      return (
-        <SelectSetting key={key} title={title} subtitle={subtitle} error={error}
-          value={(value as string) ?? ""} savedVal={saved as string | undefined}
-          // An optional enum needs a way back to "not set": an empty option that stores
-          // undefined, so the schema/stylesheet default applies again.
-          setValue={(v) => set(v === "" ? undefined : v)}
-          options={[
-            ...(info.optional ? [{ label: "(default)", value: "" }] : []),
-            ...options.map((o) => ({ label: o, value: o })),
-          ]} />
-      );
+    case "enum": {
+      const defaultValue = info.defaultValue as string | undefined;
+      const enumProps = {
+        title, subtitle, error,
+        // Fall back to the schema default so an untouched field shows what it actually renders
+        // as. Without it nothing is selected at all, which reads as "no value" on a field that
+        // very much has one. An optional field has no default, so it lands on "(default)".
+        value: (value as string) ?? defaultValue ?? "",
+        savedVal: saved as string | undefined,
+        // Absent means "the default applies", so picking the default stores nothing: choosing it
+        // *is* the way to unset, without a second reset control competing with the restore
+        // button beside it. Keeps configs to what was actually chosen, and lets a default we
+        // improve later reach the views that never overrode it. An optional enum has no default
+        // of its own, and clears through its explicit "(default)" entry instead.
+        setValue: (v: string) => set(v === "" || v === defaultValue ? undefined : v),
+        options: [
+          ...(info.optional ? [{ label: "(default)", value: "" }] : []),
+          ...options.map((o) => ({ label: o, value: o })),
+        ],
+      };
+      // Buttons are opt-in rather than inferred from the option count: whether they fit depends
+      // on how long the labels are, which only the field's author knows.
+      return meta.input === "buttons"
+        ? <ButtonSelectSetting key={key} {...enumProps} />
+        : <SelectSetting key={key} {...enumProps} />;
+    }
     default:
       // Object/array reach here only via arrayGroup's non-object-element fallback above.
       return (
