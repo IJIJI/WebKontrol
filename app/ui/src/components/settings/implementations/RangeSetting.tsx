@@ -69,6 +69,9 @@ export function RangeSetting(props: RangeProps): JSX.Element {
             step={step}
             value={sliderValue}
             onChange={(event) => void props.setValue(event.target.valueAsNumber)}
+            // The row focuses the number box on click; without this, letting the click bubble
+            // would pull focus off the slider the moment you finish dragging it.
+            onClick={(event) => event.stopPropagation()}
             disabled={props.disabled}
             aria-label={props.title}
           />

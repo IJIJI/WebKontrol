@@ -161,7 +161,9 @@ export function BoxSetting(props: BoxProps): JSX.Element {
                   <input
                     className={classNames("textfield", changed && "changed")}
                     type="number"
-                    ref={slot === 0 ? inputRef : undefined}
+                    // No inputRef here: the row focuses its registered input on any click in the
+                    // row, so registering one of several would drag focus off whichever box was
+                    // actually clicked. Same reasoning as DisplayNameSetting.
                     value={box.sides[slotTargets(mode, slot)[0]] ?? ""}
                     placeholder={props.placeholder}
                     aria-label={`${props.title}: ${caption}`}
