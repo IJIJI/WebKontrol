@@ -74,6 +74,14 @@ body {
    `0 1 auto`, never `0 0 auto`: hugging means shrink-to-fit, so the box grows to its content
    but never past the space available. Without the shrink, a paragraph would take its
    max-content width, i.e. render as one endless line instead of wrapping. */
+/* A hugging box is sized by its content, so it is the one case that can outgrow the space it
+   was given. Clipping here rather than relying on the box's own max-height: that percentage
+   only resolves against a definite slot, and a slot sized by flex (a stack that ran out of
+   room) is not definite, so the box would size to its content and paint over its neighbours. */
+.wk-slot.wk-hug {
+  overflow: hidden;
+}
+
 .wk-slot.wk-hug > .wk-block {
   flex: 0 1 auto;
   align-self: auto;
