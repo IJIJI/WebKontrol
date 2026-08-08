@@ -56,18 +56,6 @@ export const ContainerBlock = ns.defineBlock("container", {
   render: (config, ctx) => ctx.renderChild(config.block),
 });
 
-/**
- * How many columns to arrange `count` blocks into when the config doesn't say. Square-ish, which
- * fills a display reasonably without having to measure it.
- *
- * Deliberately a placeholder: the right answer depends on the display's shape (three tiles want
- * 3x1 on a wide screen but 2x2 on a square one), so this is due to be replaced by a table of
- * chosen layouts per block count.
- */
-export function autoColumns(count: number): number {
-  return Math.max(1, Math.ceil(Math.sqrt(count)));
-}
-
 // GridBlock: Arranges child blocks into the best grid for them.
 // TODO: Check if it is possible and or smart to do a auto arrange, and make layout optional
 // TODO: Check if these defaults are the right.
@@ -78,12 +66,12 @@ export const GridBlock = ns.defineBlock("grid", {
   blocks: z.array(blockSlot()).default([]).meta({ label: "Blocks" } satisfies FieldMeta),
 }, {
   info: { label: "Grid", description: "Arrange blocks in a grid", icon: "grid" },
-  // An axis left empty arranges itself: the columns come from the block count and the rows flow
-  // to match, each taking an equal share, so a grid nobody has configured still fills its space.
+  // Only what the config states. An axis left empty emits nothing, which lets view.css arrange
+  // the grid by its block count and the display's orientation: an inline style would beat any
+  // stylesheet rule, so staying silent here is what makes that table possible (and overridable).
   boxStyles: (config) => ({
-    gridTemplateColumns: config.layout.templateColumns ?? `repeat(${autoColumns(config.blocks.length)}, 1fr)`,
+    gridTemplateColumns: config.layout.templateColumns,
     gridTemplateRows: config.layout.templateRows,
-    gridAutoRows: config.layout.templateRows === undefined ? "1fr" : undefined,
     gap: config.layout.gap === undefined ? undefined : `${config.layout.gap}px`,
   }),
   render: (config, ctx) => html`${config.blocks.map((block) => ctx.renderChild(block))}`,

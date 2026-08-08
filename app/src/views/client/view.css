@@ -109,6 +109,70 @@ body {
 
 .wk-grid {
   display: grid;
+  /* Rows beyond whatever the config asks for share the height evenly, so a grid that only
+     states its columns still fills its space. */
+  grid-auto-rows: 1fr;
+  /* The catch-all past the table below: as many columns as fit at a readable width. */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+/* Automatic arrangement, for a grid whose columns nobody has set. The count comes from the DOM
+   (`:nth-child(n):last-child` matches only when the nth child is the last one), so nothing has
+   to be stored or kept in step, and any entry here can be overridden by user CSS later. A
+   configured grid sets grid-template-columns inline, which beats all of this.
+   Landscape is the unqualified case since displays usually are; the portrait table follows. */
+.wk-grid:has(> :nth-child(1):last-child) {
+  grid-template-columns: 1fr;
+}
+.wk-grid:has(> :nth-child(2):last-child) {
+  grid-template-columns: repeat(2, 1fr);
+}
+.wk-grid:has(> :nth-child(3):last-child) {
+  grid-template-columns: repeat(3, 1fr);
+}
+.wk-grid:has(> :nth-child(4):last-child) {
+  grid-template-columns: repeat(2, 1fr); /* 2x2 beats a row of four thin slivers */
+}
+.wk-grid:has(> :nth-child(5):last-child),
+.wk-grid:has(> :nth-child(6):last-child) {
+  grid-template-columns: repeat(3, 1fr);
+}
+.wk-grid:has(> :nth-child(7):last-child),
+.wk-grid:has(> :nth-child(8):last-child) {
+  grid-template-columns: repeat(4, 1fr);
+}
+.wk-grid:has(> :nth-child(9):last-child) {
+  grid-template-columns: repeat(3, 1fr); /* square counts want a square */
+}
+.wk-grid:has(> :nth-child(10):last-child) {
+  grid-template-columns: repeat(5, 1fr);
+}
+.wk-grid:has(> :nth-child(11):last-child),
+.wk-grid:has(> :nth-child(12):last-child) {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Portrait wants the same blocks stacked deeper rather than spread wide. Orientation is read
+   from the viewport, not the grid's own box: an element cannot container-query itself, and
+   making every slot a size container would break blocks that size to their content. */
+@media (orientation: portrait) {
+  .wk-grid:has(> :nth-child(2):last-child),
+  .wk-grid:has(> :nth-child(3):last-child) {
+    grid-template-columns: 1fr;
+  }
+  .wk-grid:has(> :nth-child(4):last-child),
+  .wk-grid:has(> :nth-child(5):last-child),
+  .wk-grid:has(> :nth-child(6):last-child),
+  .wk-grid:has(> :nth-child(7):last-child),
+  .wk-grid:has(> :nth-child(8):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .wk-grid:has(> :nth-child(9):last-child),
+  .wk-grid:has(> :nth-child(10):last-child),
+  .wk-grid:has(> :nth-child(11):last-child),
+  .wk-grid:has(> :nth-child(12):last-child) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .wk-stack {

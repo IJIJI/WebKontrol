@@ -10,7 +10,6 @@ import { formatHexAlpha, parseHexAlpha } from "../../settings/implementations/cs
 import { formatTracks, parseTracks, type Track } from "../../settings/implementations/cssTracks";
 
 import {
-  autoColumns,
   ContainerBlock,
   DateTimeBlock,
   DividerBlock,
@@ -415,8 +414,15 @@ assert.equal(fieldErrors(nested, []).size, 0);
   assert.equal(formatTracks(parseTracks("30% 1fr auto") as Track[]), "30% 1fr auto");
   assert.equal(formatTracks([]), undefined, "clearing the tracks clears the field");
 
-  // The placeholder arrangement: square-ish, and never zero columns for an empty grid.
-  assert.deepEqual([0, 1, 2, 3, 4, 5, 9].map(autoColumns), [1, 1, 2, 2, 2, 3, 3]);
+  // An unset axis must emit no inline style at all, or it would beat view.css's automatic
+  // arrangement: an inline style wins over every stylesheet rule.
+  const auto = GridBlock.boxStyles(GridBlock.configSchema.parse({ type: GridBlock.key }) as never);
+  assert.equal(auto.gridTemplateColumns, undefined, "an unset axis leaves the arrangement to CSS");
+  assert.equal(auto.gridTemplateRows, undefined);
+  const stated = GridBlock.boxStyles(
+    GridBlock.configSchema.parse({ type: GridBlock.key, layout: { templateColumns: "1fr 2fr" } }) as never,
+  );
+  assert.equal(stated.gridTemplateColumns, "1fr 2fr", "a stated axis overrides it inline");
 }
 
 //* formatPhpDate: the datetime block's formatter
