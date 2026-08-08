@@ -17,6 +17,7 @@ import { ColorTextSetting } from "./implementations/ColorTextSetting";
 import { ToggleSetting } from "./implementations/ToggleSetting";
 import { SelectSetting } from "./implementations/SelectSetting";
 import { ButtonSelectSetting } from "./implementations/ButtonSelectSetting";
+import { AlignmentSetting, type AlignmentValue } from "./implementations/AlignmentSetting";
 import { BaseSetting } from "./BaseSetting";
 import type { ZodObject, ZodRawShape } from "zod";
 import { SettingGroup } from "./SettingGroup";
@@ -223,6 +224,11 @@ function fieldElement(
 ): JSX.Element {
   const custom = ctx.renderCustom?.(key, info, lens, path);
   if (custom) return custom;
+  // An object rendered as one widget instead of a nested group. Inspection keeps the group: a
+  // read-only picker would be a worse way to read two values than simply listing them.
+  if (info.kind === "object" && meta.input === "alignment" && !ctx.readOnly) {
+    return alignmentField(key, info, meta, lens, path, ctx);
+  }
   if (info.kind === "object") return objectGroup(key, info, meta, lens, path, ctx);
   if (info.kind === "array") return arrayGroup(key, info, meta, lens, path, ctx);
   return renderField(key, info, meta, lens, placeholder, ctx, path);
@@ -274,6 +280,44 @@ function subsection(title: string, fields: JSX.Element[], ctx: RenderCtx): JSX.E
     <CollapsibleGroup key={`group:${title}`} title={title} defaultOpen joined={ctx.joined}>
       {fields}
     </CollapsibleGroup>
+  );
+}
+
+/**
+ * A two-axis position pair as a single grid picker. The stored shape is untouched: the widget
+ * reads and writes the same `{horizontal, vertical}` object the nested group would have.
+ */
+function alignmentField(
+  key: string,
+  info: FieldInfo,
+  meta: FieldMeta,
+  lens: DraftLens,
+  path: readonly (string | number)[],
+  ctx: RenderCtx,
+): JSX.Element {
+  // The pair's own field defaults (a chip centres, a freeform item anchors top-left), which the
+  // prefaulted object itself doesn't carry: its fallback is a bare `{}`.
+  const defaults = seedFromDefaults(info.core) as unknown as AlignmentValue;
+  const stored = lens.values[key] as Partial<AlignmentValue> | undefined;
+
+  return (
+    <AlignmentSetting
+      key={key}
+      title={meta.label}
+      subtitle={meta.description}
+      error={errorAt(ctx, path, key)}
+      // Merged per axis, so a config holding only one of the two still shows the other.
+      value={{ ...defaults, ...stored }}
+      savedVal={lens.saved[key] as AlignmentValue | undefined}
+      setValue={(next) =>
+        // Absent means the defaults apply, the same rule the enums follow: picking the default
+        // position stores nothing rather than pinning it.
+        lens.setField(
+          key,
+          next.horizontal === defaults.horizontal && next.vertical === defaults.vertical ? undefined : next,
+        )
+      }
+    />
   );
 }
 

@@ -230,7 +230,7 @@ export const BlockStyleShape = {
 // get these fields: content sizing would collapse them to nothing.
 const sizingFields = (defaultSizing: "container" | "content") => ({
   sizing: z.enum(["container", "content"]).default(defaultSizing).meta({ label: "Sizing", description: "Hug the content, or fill the block", input: "buttons" } satisfies FieldMeta),
-  alignment: AlignmentSchema.meta({ label: "Alignment" } satisfies FieldMeta),
+  alignment: AlignmentSchema.meta({ label: "Alignment", input: "alignment" } satisfies FieldMeta),
 });
 
 /** The injected `style` schema for one block: the universal box, plus sizing/alignment when hug-capable. */

@@ -91,7 +91,7 @@ export const FreeFormBlock = ns.defineBlock("freeform", {
       x: DimensionSchema.optional().meta({ label: "X", description: "Width in %. Unset fits the block (only blocks that can hug, e.g. text)" } satisfies FieldMeta),
       y: DimensionSchema.optional().meta({ label: "Y", description: "Height in %. Unset fits the block (only blocks that can hug, e.g. text)" } satisfies FieldMeta),
     }).prefault({ x: 25, y: 25 }).meta({ label: "Size", description: "In % of the screen" } satisfies FieldMeta),
-    alignment: alignmentSchema("left", "top").meta({ label: "Alignment", description: "Which point of the item the position places" } satisfies FieldMeta),
+    alignment: alignmentSchema("left", "top").meta({ label: "Alignment", description: "Which point of the item the position places", input: "alignment" } satisfies FieldMeta),
     rotation: z.number().min(-180).max(180).optional().meta({ label: "Rotation", description: "Degrees, clockwise", placeholder: "0", input: "range" } satisfies FieldMeta),
   })).default([]).meta({ label: "Items", description: "Later items render on top" } satisfies FieldMeta),
 }, {
