@@ -103,7 +103,7 @@ export default function Sidebar({
       { import.meta.env.DEV && (
         <SidebarItem
           collapsed={collapsed}
-          to="/settings/config"
+          to="/test"
           label="Test"
           icon={<Icons.cogs />}
         />
