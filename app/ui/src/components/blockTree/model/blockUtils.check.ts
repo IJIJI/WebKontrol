@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import z from "zod";
 
 import { describeField } from "../../settings/zodField";
-import { formatBox, isUniform, parseBox, type BoxValue } from "../../settings/implementations/cssBox";
+import { boxMode, formatBox, parseBox, slotCount, slotTargets, type BoxValue } from "../../settings/implementations/cssBox";
 
 import {
   ContainerBlock,
@@ -179,8 +179,21 @@ assert.equal(fieldErrors(nested, []).size, 0);
   assert.equal(round("0"), "0", "zero needs no unit");
   assert.equal(formatBox({ sides: [4, undefined, 4, undefined], unit: "px" }), "4px 0",
     "a blank side among set ones is a zero, since the shorthand cannot skip a position");
-  assert.equal(isUniform(parseBox("3px") as BoxValue), true);
-  assert.equal(isUniform(parseBox("3px 4px") as BoxValue), false);
+
+  // The editor's link modes are the CSS shorthand forms, so the inputs shown always match the
+  // value stored: one, one per opposite pair, or one per position.
+  const mode = (raw: string): string => boxMode(parseBox(raw) as BoxValue);
+  assert.equal(mode("3px"), "all");
+  assert.equal(mode("3px 4px"), "pair");
+  assert.equal(mode("1px 2px 3px"), "each", "a three-value form still needs four inputs");
+  assert.equal(mode("1px 2px 3px 4px"), "each");
+  assert.deepEqual([slotCount("all"), slotCount("pair"), slotCount("each")], [1, 2, 4]);
+  // Which positions each input drives. For corners the pair is diagonal, which is the same
+  // arithmetic: the CSS two-value form is [a, b, a, b] either way.
+  assert.deepEqual(slotTargets("all", 0), [0, 1, 2, 3]);
+  assert.deepEqual(slotTargets("pair", 0), [0, 2]);
+  assert.deepEqual(slotTargets("pair", 1), [1, 3]);
+  assert.deepEqual(slotTargets("each", 2), [2]);
 }
 
 //* number bounds: a bounded float needs a usable step, or its arrows jump the whole range

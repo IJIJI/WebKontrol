@@ -65,7 +65,28 @@ export function formatBox({ sides, unit }: BoxValue): string | undefined {
   return `${length(top)} ${length(right)} ${length(bottom)} ${length(left)}`;
 }
 
-/** Whether every side holds the same value, i.e. the editor can show one linked input. */
-export function isUniform({ sides }: BoxValue): boolean {
-  return sides.every((side) => side === sides[0]);
+/**
+ * How many values a box actually needs, which is also how the editor links its inputs. The three
+ * modes are exactly CSS's own 1-, 2- and 4-value shorthands, so what the editor shows always
+ * mirrors what gets stored: one value for all, a pair (opposite sides, or opposite corners), or
+ * each on its own.
+ */
+export type BoxMode = "all" | "pair" | "each";
+
+export function boxMode({ sides: [a, b, c, d] }: BoxValue): BoxMode {
+  if (a === b && b === c && c === d) return "all";
+  if (a === c && b === d) return "pair";
+  return "each";
+}
+
+/** Which of the four positions an input at `slot` writes, under the given mode. */
+export function slotTargets(mode: BoxMode, slot: number): number[] {
+  if (mode === "all") return [0, 1, 2, 3];
+  if (mode === "pair") return slot === 0 ? [0, 2] : [1, 3];
+  return [slot];
+}
+
+/** How many inputs a mode shows. */
+export function slotCount(mode: BoxMode): number {
+  return mode === "all" ? 1 : mode === "pair" ? 2 : 4;
 }
