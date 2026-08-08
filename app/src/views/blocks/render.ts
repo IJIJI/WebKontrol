@@ -56,13 +56,18 @@ function renderNode(node: ResolvedNode, ctx: RenderContext): TemplateResult {
   // one place that knows the convention, so blocks and the resolver stay unaware of it.
   const style = (node.config as { style?: BlockStyle }).style ?? {};
   const hug = style.sizing === "content";
+  // Separate from `hug`, which is about size: a hugging box is the one thing that can outgrow
+  // its slot, so the slot clips it, unless the block asked for visible overflow. That keeps
+  // `overflow` meaning the same thing whichever way a block is sized (it decides what may paint
+  // outside the block) while sizing only decides how big the block is.
+  const spill = hug && style.overflow === "visible";
 
   // The tag breaks hang (`\n    >`) rather than sitting on their own lines: any newline or
   // indent between these tags becomes a real text node inside the block, and a text block
   // renders with `white-space: pre-line`, so the template's own formatting would show up as
   // blank lines in the rendered text. The framework must contribute no content of its own.
   return html`<div
-    class="wk-slot${hug ? " wk-hug" : ""}"
+    class="wk-slot${hug ? " wk-hug" : ""}${spill ? " wk-spill" : ""}"
     style=${styleMap({ ...slotStyles(style.alignment), ...node.def.slotStyles(node.config) })}
     ><div
       class="wk-block ${blockClass(node.def.key)}"

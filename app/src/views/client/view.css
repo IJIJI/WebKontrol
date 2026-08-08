@@ -77,8 +77,10 @@ body {
 /* A hugging box is sized by its content, so it is the one case that can outgrow the space it
    was given. Clipping here rather than relying on the box's own max-height: that percentage
    only resolves against a definite slot, and a slot sized by flex (a stack that ran out of
-   room) is not definite, so the box would size to its content and paint over its neighbours. */
-.wk-slot.wk-hug {
+   room) is not definite, so the box would size to its content and paint over its neighbours.
+   A block asking for visible overflow opts out (wk-spill), so the setting means the same thing
+   for a hugging block as for a filling one, and a shadow can extend past the slot. */
+.wk-slot.wk-hug:not(.wk-spill) {
   overflow: hidden;
 }
 
