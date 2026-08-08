@@ -47,9 +47,9 @@ function blockClass(key: string): string {
 /** One block: the slot/box skeleton around whatever the block itself renders. */
 function renderNode(node: ResolvedNode, ctx: RenderContext): TemplateResult {
   if (isBroken(node)) {
-    return html`<div class="wk-slot">
-      <div class="wk-block wk-broken">${brokenContent(node)}</div>
-    </div>`;
+    return html`<div class="wk-slot"
+      ><div class="wk-block wk-broken">${brokenContent(node)}</div
+    ></div>`;
   }
 
   // Every block's schema carries the injected `style` (see blockStyleSchema); the cast is the
@@ -57,17 +57,18 @@ function renderNode(node: ResolvedNode, ctx: RenderContext): TemplateResult {
   const style = (node.config as { style?: BlockStyle }).style ?? {};
   const hug = style.sizing === "content";
 
+  // The tag breaks hang (`\n    >`) rather than sitting on their own lines: any newline or
+  // indent between these tags becomes a real text node inside the block, and a text block
+  // renders with `white-space: pre-line`, so the template's own formatting would show up as
+  // blank lines in the rendered text. The framework must contribute no content of its own.
   return html`<div
     class="wk-slot${hug ? " wk-hug" : ""}"
     style=${styleMap({ ...slotStyles(style.alignment), ...node.def.slotStyles(node.config) })}
-  >
-    <div
+    ><div
       class="wk-block ${blockClass(node.def.key)}"
       style=${styleMap({ ...blockStyles(style), ...node.def.boxStyles(node.config) })}
-    >
-      ${node.def.render(node.config, ctx)}
-    </div>
-  </div>`;
+      >${node.def.render(node.config, ctx)}</div
+  ></div>`;
 }
 
 /**
