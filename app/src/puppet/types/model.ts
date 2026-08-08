@@ -1,5 +1,5 @@
 import type { ConnectionState } from "../../types/CommonTypes";
-import type { BasePuppetConfig, PuppetRuntime } from "./schema";
+import type { BasePuppetConfig, NavigationRequest, PuppetRuntime } from "./schema";
 import type { EntityAppearance } from "../../common/entityAppearance/schema";
 
 /**
@@ -7,7 +7,22 @@ import type { EntityAppearance } from "../../common/entityAppearance/schema";
  * Those are types that are internally created, and can be blindly trusted to be valid.
  */
 
-// Puppet's target info.
+// Puppet's navigation info: What was requested
+export enum NavigationState {
+  IDLE = "Idle",       // nothing asked for yet
+  LOADING = "Loading",
+  LOADED = "Loaded",
+  FAILED = "Failed",
+}
+
+export interface NavigationInfo {
+  state: NavigationState;
+  request?: NavigationRequest;
+  error?: string;
+  moment: number;
+}
+
+// Puppet's target info: What was loaded
 export type OgTargetInfo = {
   title?: string;
   description?: string;
@@ -25,7 +40,10 @@ export type TargetInfo = {
 // Puppet runtime info
 export interface PuppetInfo {
   state: ConnectionState;
+  error?: string; // Why it is not ONLINE. Absent while healthy.
+  navigation: NavigationInfo;
   target_info?: TargetInfo;
+  moment: number;
 }
 
 

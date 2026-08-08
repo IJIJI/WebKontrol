@@ -118,7 +118,7 @@ export const ViewManagerRuntimeShape = z.object({
 });
 
 export const ViewManagerRuntimeSchema = ViewManagerRuntimeShape.extend({
-  default_load_timeout: LoadTimeoutSchemaDefault.default(20_000),
+  default_load_timeout: LoadTimeoutSchema.default(20_000),
 });
 
 export type ViewManagerRuntime = z.infer<typeof ViewManagerRuntimeSchema>;
