@@ -42,8 +42,9 @@ export interface FieldMeta {
   // Input widget hint for kinds the schema alone can't distinguish: "color" renders a
   // swatch-assisted text field (the value stays a free CSS string — gradients are valid);
   // "textarea" renders a multi-line text field; "font" renders a text field with font
-  // suggestions (free text stays allowed).
-  input?: "color" | "textarea" | "font";
+  // suggestions (free text stays allowed); "range" pairs a number with a slider (bounds and
+  // step still come from the schema, not from here).
+  input?: "color" | "textarea" | "font" | "range";
 }
 
 //* View config:

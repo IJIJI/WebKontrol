@@ -138,7 +138,9 @@ export const BorderStyleShape = {
   borderRadius: z.string().optional().meta({ label: "Corner radius", description: "CSS border-radius" } satisfies FieldMeta),
 };
 export const EffectsStyleShape = {
-  opacity: z.number().min(0).max(1).optional().meta({ label: "Opacity", description: "0 (invisible) to 1" } satisfies FieldMeta),
+  // Placeholder doubles as the slider's resting position while unset: leaving this empty renders
+  // fully opaque, so the thumb belongs at 1, not at the 0 end.
+  opacity: z.number().min(0).max(1).optional().meta({ label: "Opacity", description: "0 (invisible) to 1", placeholder: "1", input: "range" } satisfies FieldMeta),
   boxShadow: z.string().optional().meta({ label: "Shadow", description: "CSS box-shadow" } satisfies FieldMeta),
   // No default: the stylesheet's `.wk-block { overflow: hidden }` is the default; a value set
   // here overrides it inline per block.
@@ -152,7 +154,7 @@ export const FontStyleShape = {
   fontSize: z.number().min(8).max(500).optional().meta({ label: "Font size", description: "In px. Unset inherits from the parent block" } satisfies FieldMeta),
   fontWeight: z.enum(["100", "200", "300", "400", "500", "600", "700", "800", "900"]).optional().meta({ label: "Weight", description: "400 is normal, 700 is bold" } satisfies FieldMeta),
   color: z.string().optional().meta({ label: "Text color", description: "CSS color", input: "color" } satisfies FieldMeta),
-  lineHeight: z.number().min(0.5).max(3).optional().meta({ label: "Line height", description: "Multiplier of the font size" } satisfies FieldMeta),
+  lineHeight: z.number().min(0.5).max(3).optional().meta({ label: "Line height", description: "Multiplier of the font size", input: "range" } satisfies FieldMeta),
   letterSpacing: z.number().min(-10).max(50).optional().meta({ label: "Letter spacing", description: "In px" } satisfies FieldMeta),
   textTransform: z.enum(["uppercase", "lowercase", "capitalize"]).optional().meta({ label: "Transform" } satisfies FieldMeta),
   fontStyle: z.enum(["normal", "italic"]).optional().meta({ label: "Italic" } satisfies FieldMeta),

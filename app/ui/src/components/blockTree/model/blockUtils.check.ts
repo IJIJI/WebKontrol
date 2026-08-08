@@ -2,6 +2,9 @@
 // editor writes through, and the per-block tree validation. No test framework in this repo yet;
 // run with `yarn check`.
 import assert from "node:assert/strict";
+import z from "zod";
+
+import { describeField } from "../../settings/zodField";
 
 import {
   ContainerBlock,
@@ -142,6 +145,22 @@ assert.equal(fieldErrors(nested, []).size, 0);
     assert.equal(isBroken(child as ResolvedNode), true, "child slot holds the broken node");
     assert.deepEqual(withBadChild.dependencies, [], "broken child contributes no dependencies");
   }
+}
+
+//* number bounds: a bounded float needs a usable step, or its arrows jump the whole range
+
+{
+  const step = (schema: unknown): number | undefined => describeField(schema).step;
+  // Narrow ranges are fractions and get a fine step...
+  assert.equal(step(z.number().min(0).max(1)), 0.01, "opacity steps by a hundredth, not by 1");
+  assert.equal(step(z.number().min(0.5).max(3)), 0.01, "line height likewise");
+  // ...wide ones are pixels or percent, and keep whole numbers.
+  assert.equal(step(z.number().min(-180).max(180)), undefined, "rotation stays in whole degrees");
+  assert.equal(step(z.number().min(1).max(100)), undefined, "thickness stays in whole px");
+  assert.equal(step(z.number().min(0).max(100)), undefined, "coordinates stay in whole %");
+  assert.equal(step(z.number().int().min(1).max(24)), 1, "an explicit int check still wins");
+  assert.equal(step(z.number().multipleOf(5)), 5, "so does multipleOf");
+  assert.equal(step(z.number()), undefined, "an unbounded field has nothing to derive from");
 }
 
 //* withGroup: tags a composition for the editor without disturbing the shapes it composes

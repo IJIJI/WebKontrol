@@ -11,6 +11,7 @@ import { TextAreaSetting } from "./implementations/TextAreaSetting";
 import { FontSetting } from "./implementations/FontSetting";
 import { UrlSetting } from "./implementations/UrlSetting";
 import { NumberSetting } from "./implementations/NumberSetting";
+import { RangeSetting } from "./implementations/RangeSetting";
 import { ColorTextSetting } from "./implementations/ColorTextSetting";
 import { ToggleSetting } from "./implementations/ToggleSetting";
 import { SelectSetting } from "./implementations/SelectSetting";
@@ -469,12 +470,18 @@ function renderField(
         <TextSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
           value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
       );
-    case "number":
+    case "number": {
+      // A slider needs both ends to have somewhere to travel; without them fall back to the
+      // plain number box rather than rendering a slider with no range.
+      const Widget = meta.input === "range" && info.min !== undefined && info.max !== undefined
+        ? RangeSetting
+        : NumberSetting;
       return (
-        <NumberSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
+        <Widget key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
           min={info.min} max={info.max} step={info.step}
           value={value as number | undefined} savedVal={saved as number | undefined} setValue={set} />
       );
+    }
     case "boolean":
       return (
         <ToggleSetting key={key} title={title} subtitle={subtitle} error={error}

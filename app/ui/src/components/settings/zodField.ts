@@ -82,7 +82,23 @@ function numberBounds(core: ZodLike): { min?: number; max?: number; step?: numbe
   const finite = (v: number | null | undefined): number | undefined =>
     typeof v === "number" && Math.abs(v) < Number.MAX_SAFE_INTEGER ? v : undefined;
 
-  return { min: finite(minValue), max: finite(maxValue), step: numberStep(core) };
+  const min = finite(minValue);
+  const max = finite(maxValue);
+  return { min, max, step: numberStep(core) ?? fractionalStep(min, max) };
+}
+
+// A bounded field the schema says nothing else about still needs a usable step: HTML defaults to
+// 1, which on a 0-to-1 opacity means the arrows jump the entire range. A range spanning fewer
+// than ten units is expressing a fraction (opacity 0-1, line height 0.5-3) rather than a count
+// of pixels or percent, so give it a hundredth of its range, rounded down to a tidy power of
+// ten. Wider ranges keep the whole-number default, which is what px and % actually want.
+const FRACTIONAL_RANGE = 10;
+
+function fractionalStep(min: number | undefined, max: number | undefined): number | undefined {
+  if (min === undefined || max === undefined || max <= min) return undefined;
+  const range = max - min;
+  if (range >= FRACTIONAL_RANGE) return undefined;
+  return 10 ** Math.floor(Math.log10(range / 100));
 }
 
 // Zod keeps `.int()` and `.multipleOf()` as checks rather than getters; both map to input step.
