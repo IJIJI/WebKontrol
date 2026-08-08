@@ -10,6 +10,7 @@ import { BlockPane } from "../presentation/BlockPane";
 import { BlockForm, savedBlockAt } from "../BlockForm";
 import { BlockPicker } from "./BlockPicker";
 import { fieldErrors, validateBlockTree } from "../model/validate";
+import { writeBlockClipboard } from "../model/blockClipboard";
 import {
   type BlockLike,
   type BlockPath,
@@ -57,6 +58,10 @@ export function BlockEditor({
             onChange({ type });
             setSelectedPath([]);
           }}
+          onPaste={(block) => {
+            onChange(block);
+            setSelectedPath([]);
+          }}
           title="Choose a root block"
         />
       </div>
@@ -98,14 +103,35 @@ export function BlockEditor({
           onParent={parentPath ? () => setSelectedPath(parentPath) : undefined}
           onClose={() => setSelectedPath(null)}
           actions={
-            <Button
-              fillStyle={FillStyle.SKELETON}
-              variant={Variant.DANGER}
-              onClick={removeSelected}
-              ariaLabel={path.length === 0 ? "Remove the root block" : "Remove this block"}
-            >
-              <Icons.delete size={16} />
-            </Button>
+            <>
+              <Button
+                fillStyle={FillStyle.SKELETON}
+                onClick={() => writeBlockClipboard(selected)}
+                ariaLabel="Copy this block"
+              >
+                <Icons.copy size={16} />
+              </Button>
+              <Button
+                fillStyle={FillStyle.SKELETON}
+                // Removes straight away, as delete does: the draft's revert is the way back
+                // until the view is saved.
+                onClick={() => {
+                  writeBlockClipboard(selected);
+                  removeSelected();
+                }}
+                ariaLabel="Cut this block"
+              >
+                <Icons.cut size={16} />
+              </Button>
+              <Button
+                fillStyle={FillStyle.SKELETON}
+                variant={Variant.DANGER}
+                onClick={removeSelected}
+                ariaLabel={path.length === 0 ? "Remove the root block" : "Remove this block"}
+              >
+                <Icons.delete size={16} />
+              </Button>
+            </>
           }
         >
           <BlockForm

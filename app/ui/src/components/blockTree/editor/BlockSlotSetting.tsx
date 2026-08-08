@@ -65,6 +65,7 @@ export function BlockSlotSetting({
         open={picking}
         onClose={() => setPicking(false)}
         onPick={(type) => onChange(newBlock(type))}
+        onPaste={(block) => onChange(block)}
       />
     </BaseSetting>
   );
@@ -140,6 +141,7 @@ export function BlockSlotListSetting({
         open={picking}
         onClose={() => setPicking(false)}
         onPick={(type) => onChange([...raw, newBlock(type)])}
+        onPaste={(block) => onChange([...raw, block])}
       />
     </BaseSetting>
   );

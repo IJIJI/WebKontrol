@@ -27,6 +27,7 @@ export function EntityPicker<T>({
   searchText,
   layout = CollectionLayout.GRID,
   fixedSize = false,
+  header,
 }: {
   open: boolean;
   onClose: () => void;
@@ -44,6 +45,9 @@ export function EntityPicker<T>({
   layout?: CollectionLayout;
   // Pin the body height (scrolling inside) so filtering/content changes never resize the modal.
   fixedSize?: boolean;
+  // Pinned above the search: actions that aren't one of the items and shouldn't be filtered out
+  // by a search (e.g. "paste what you copied"). Acts immediately rather than needing Confirm.
+  header?: ReactNode;
 }): JSX.Element {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
@@ -107,6 +111,7 @@ export function EntityPicker<T>({
       }
     >
       <div className={classNames("entityPicker", fixedSize && "fixedSize")}>
+        {header}
         {searchText && (
           <input
             type="text"
