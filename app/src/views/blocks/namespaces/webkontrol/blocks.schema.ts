@@ -153,7 +153,7 @@ export const DividerBlock = ns.defineBlock("divider", {
   direction: z.enum(["horizontal", "vertical"]).default("horizontal").meta({ label: "Direction", input: "buttons" } satisfies FieldMeta),
   // Optional: the direction class in view.css carries the default thickness, so an unset value
   // stays overridable by user CSS. Only a set value is pinned inline, on the short axis.
-  thickness: z.number().min(1).max(100).optional().meta({ label: "Thickness", description: "In px" } satisfies FieldMeta),
+  thickness: z.number().min(1).max(100).optional().meta({ label: "Thickness", description: "In px. Unset follows the stylesheet (2px)" } satisfies FieldMeta),
   color: z.string().optional().meta({ label: "Color", description: "CSS color", input: "color" } satisfies FieldMeta),
 }, {
   info: { label: "Divider", description: "A separating line", icon: "horizontalRule" },

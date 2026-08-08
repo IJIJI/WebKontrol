@@ -142,9 +142,16 @@ export const EffectsStyleShape = {
   // fully opaque, so the thumb belongs at 1, not at the 0 end.
   opacity: z.number().min(0).max(1).optional().meta({ label: "Opacity", description: "0 (invisible) to 1", placeholder: "1", input: "range" } satisfies FieldMeta),
   boxShadow: z.string().optional().meta({ label: "Shadow", description: "CSS box-shadow" } satisfies FieldMeta),
-  // No default: the stylesheet's `.wk-block { overflow: hidden }` is the default; a value set
-  // here overrides it inline per block.
-  overflow: z.enum(["visible", "hidden"]).optional().meta({ label: "Overflow", input: "buttons" } satisfies FieldMeta),
+  // No schema default: the stylesheet's `.wk-block { overflow: hidden }` is the default, and a
+  // value set here overrides it inline. So unset is not the same as picking `hidden`, even
+  // though they render alike today: unset keeps following the stylesheet (and so any user CSS
+  // layered over it), while `hidden` pins this block against a change to either.
+  overflow: z.enum(["visible", "hidden"]).optional().meta({
+    label: "Overflow",
+    description: "Unset follows the view stylesheet, which clips",
+    input: "buttons",
+    optionLabels: { "": "Default" },
+  } satisfies FieldMeta),
 };
 // All optional, deliberately: these are CSS-inheriting properties, so an unset field emits
 // nothing inline and the value cascades from the nearest ancestor block that set it (the
@@ -152,13 +159,31 @@ export const EffectsStyleShape = {
 export const FontStyleShape = {
   fontFamily: z.string().optional().meta({ label: "Font family", description: "Unset inherits from the parent block", input: "font" } satisfies FieldMeta),
   fontSize: z.number().min(8).max(500).optional().meta({ label: "Font size", description: "In px. Unset inherits from the parent block" } satisfies FieldMeta),
-  fontWeight: z.enum(["100", "200", "300", "400", "500", "600", "700", "800", "900"]).optional().meta({ label: "Weight", description: "400 is normal, 700 is bold" } satisfies FieldMeta),
-  color: z.string().optional().meta({ label: "Text color", description: "CSS color", input: "color" } satisfies FieldMeta),
-  lineHeight: z.number().min(0.5).max(3).optional().meta({ label: "Line height", description: "Multiplier of the font size", input: "range" } satisfies FieldMeta),
-  letterSpacing: z.number().min(-10).max(50).optional().meta({ label: "Letter spacing", description: "In px" } satisfies FieldMeta),
-  textTransform: z.enum(["uppercase", "lowercase", "capitalize"]).optional().meta({ label: "Transform" } satisfies FieldMeta),
-  fontStyle: z.enum(["normal", "italic"]).optional().meta({ label: "Italic", input: "buttons" } satisfies FieldMeta),
-  textShadow: z.string().optional().meta({ label: "Text shadow", description: "CSS text-shadow, e.g. 0 2px 6px black" } satisfies FieldMeta),
+  // Numeric values rather than the `normal`/`bold` keywords: they stay correct for a variable
+  // font with real weight steps, while the labels keep the list readable. Most web-safe fonts
+  // only render 400 and 700 whatever is picked, hence the names rather than nine bare numbers.
+  fontWeight: z.enum(["100", "200", "300", "400", "500", "600", "700", "800", "900"]).optional().meta({
+    label: "Weight",
+    optionLabels: {
+      "": "Inherit", // font-weight inherits: unset takes the parent's weight, which is not 400
+      "100": "100 Thin", "200": "200 Extra light", "300": "300 Light",
+      "400": "400 Normal", "500": "500 Medium", "600": "600 Semibold",
+      "700": "700 Bold", "800": "800 Extra bold", "900": "900 Black",
+    },
+  } satisfies FieldMeta),
+  color: z.string().optional().meta({ label: "Text color", description: "CSS color. Unset inherits from the parent block", input: "color" } satisfies FieldMeta),
+  lineHeight: z.number().min(0.5).max(3).optional().meta({ label: "Line height", description: "Multiplier of the font size. Unset inherits", input: "range" } satisfies FieldMeta),
+  letterSpacing: z.number().min(-10).max(50).optional().meta({ label: "Letter spacing", description: "In px. Unset inherits" } satisfies FieldMeta),
+  textTransform: z.enum(["uppercase", "lowercase", "capitalize"]).optional().meta({
+    label: "Transform",
+    optionLabels: { "": "Inherit", uppercase: "UPPER", lowercase: "lower", capitalize: "Capitalise" },
+  } satisfies FieldMeta),
+  fontStyle: z.enum(["normal", "italic"]).optional().meta({
+    label: "Italic",
+    input: "buttons",
+    optionLabels: { "": "Inherit", normal: "Normal", italic: "Italic" },
+  } satisfies FieldMeta),
+  textShadow: z.string().optional().meta({ label: "Text shadow", description: "CSS text-shadow, e.g. 0 2px 6px black. Unset inherits" } satisfies FieldMeta),
 };
 
 // A reusable position pair (chip placement, freeform item anchors, future pickers). The factory

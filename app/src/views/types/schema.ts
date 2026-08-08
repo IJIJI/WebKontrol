@@ -47,6 +47,10 @@ export interface FieldMeta {
   // (padding/margin vs border-radius) as numbers, falling back to the raw string; "buttons"
   // shows a short enum as a button group instead of a dropdown.
   input?: "color" | "textarea" | "font" | "range" | "box" | "corners" | "buttons";
+  // Readable labels for an enum's raw values, where the stored value has to stay machine-shaped
+  // (a CSS keyword, a numeric weight). The "" key relabels the unset entry of an optional enum,
+  // which is worth doing for inheriting properties: there "unset" means inherit, not default.
+  optionLabels?: Record<string, string>;
 }
 
 //* View config:

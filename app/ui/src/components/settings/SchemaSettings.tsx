@@ -512,8 +512,8 @@ function renderField(
         // of its own, and clears through its explicit "(default)" entry instead.
         setValue: (v: string) => set(v === "" || v === defaultValue ? undefined : v),
         options: [
-          ...(info.optional ? [{ label: "(default)", value: "" }] : []),
-          ...options.map((o) => ({ label: o, value: o })),
+          ...(info.optional ? [{ label: meta.optionLabels?.[""] ?? "(default)", value: "" }] : []),
+          ...options.map((o) => ({ label: meta.optionLabels?.[o] ?? o, value: o })),
         ],
       };
       // Buttons are opt-in rather than inferred from the option count: whether they fit depends
