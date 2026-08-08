@@ -92,6 +92,15 @@ function errorAt(ctx: RenderCtx, path: readonly (string | number)[], key: string
   return ctx.errors?.get([...path, key].join("."));
 }
 
+/** Whether anything at or below `path` + `key` is invalid, so a folded group can open itself. */
+function hasErrorWithin(ctx: RenderCtx, path: readonly (string | number)[], key: string): boolean {
+  const base = [...path, key].join(".");
+  for (const field of ctx.errors?.keys() ?? []) {
+    if (field === base || field.startsWith(`${base}.`)) return true;
+  }
+  return false;
+}
+
 // Renders Setting components for a zod object schema, driven by each field's FieldMeta and
 // wired through a useDraft (or any DraftLens). Fields without meta are skipped (e.g. the `type`
 // discriminator); `exclude` skips fields the page renders itself (e.g. name, in the top row).
@@ -217,19 +226,52 @@ function fieldElement(
 }
 
 // The meta'd fields of one object level (an object field's shape, or one array item), rendered
-// through the given lens. Shared by objectGroup and arrayGroup.
+// through the given lens. Fields carrying `meta.group` are gathered into a collapsed subsection
+// per group, listed after the ungrouped ones; the stored shape is untouched, this is purely how
+// a wide level is presented. Shared by objectGroup and arrayGroup.
 function levelFields(
   core: unknown,
   lens: DraftLens,
   path: readonly (string | number)[],
   ctx: RenderCtx,
 ): JSX.Element[] {
-  return objectFields(core).flatMap(([key, fieldSchema]) => {
+  const loose: JSX.Element[] = [];
+  const grouped = new Map<string, JSX.Element[]>(); // insertion order = schema order
+
+  for (const [key, fieldSchema] of objectFields(core)) {
     const info = describeField(fieldSchema);
-    if (!info.meta) return [];
+    if (!info.meta) continue; // no meta => not auto-rendered
     const placeholder = info.meta.placeholder ?? defaultPlaceholder(info);
-    return [fieldElement(key, info, info.meta, lens, placeholder, path, ctx)];
-  });
+    const element = fieldElement(key, info, info.meta, lens, placeholder, path, ctx);
+
+    const group = info.meta.group;
+    if (group === undefined) {
+      loose.push(element);
+      continue;
+    }
+    const existing = grouped.get(group);
+    if (existing) existing.push(element);
+    else grouped.set(group, [element]);
+  }
+
+  return [...loose, ...[...grouped].map(([title, fields]) => subsection(title, fields, ctx))];
+}
+
+// One `meta.group` subsection. Open: these label the parts of a level, they are not another
+// thing to unfold. Folding a whole section is the parent group's job (see meta.collapsed).
+function subsection(title: string, fields: JSX.Element[], ctx: RenderCtx): JSX.Element {
+  if (ctx.readOnly) {
+    return (
+      <DetailGroup key={`group:${title}`} label={title} count={countLabel(fields.length, "field")} defaultOpen>
+        {fields}
+      </DetailGroup>
+    );
+  }
+  return (
+    <CollapsibleGroup key={`group:${title}`} title={title} defaultOpen joined={ctx.joined}>
+      {fields}
+    </CollapsibleGroup>
+  );
 }
 
 // A nested object field as its own collapsible group, open by default (folding is for skipping,
@@ -244,6 +286,9 @@ function objectGroup(
   ctx: RenderCtx,
 ): JSX.Element {
   const children = levelFields(info.core, subLens(lens, key), [...path, key], ctx);
+  // `collapsed` groups start folded, but never while something inside them is invalid: folding
+  // must not hide the reason a save was refused.
+  const open = !meta.collapsed || hasErrorWithin(ctx, path, key);
   if (ctx.readOnly) {
     // Top-level groups open, deeper ones start collapsed (matching the old inspector).
     return (
@@ -251,14 +296,14 @@ function objectGroup(
         key={key}
         label={meta.label}
         count={countLabel(children.length, "field")}
-        defaultOpen={path.length === 0}
+        defaultOpen={path.length === 0 && open}
       >
         {children}
       </DetailGroup>
     );
   }
   return (
-    <CollapsibleGroup key={key} title={meta.label} defaultOpen joined={ctx.joined}>
+    <CollapsibleGroup key={key} title={meta.label} defaultOpen={open} joined={ctx.joined}>
       {children}
     </CollapsibleGroup>
   );

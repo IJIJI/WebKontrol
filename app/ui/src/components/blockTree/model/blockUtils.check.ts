@@ -20,7 +20,8 @@ import { BlockTypeRegistry } from "../../../../../src/views/blocks/registry";
 import { resolveBlock } from "../../../../../src/views/blocks/resolver";
 import { formatPhpDate } from "../../../../../src/views/blocks/phpDate";
 import { blockStyles, slotStyles, textBoxStyles } from "../../../../../src/views/blocks/styles";
-import { blockStyleSchema, GridConfigSchema, type BlockStyle } from "../../../../../src/views/blocks/types/schema";
+import { BackgroundStyleShape, BlockStyleShape, blockStyleSchema, GridConfigSchema, type BlockStyle } from "../../../../../src/views/blocks/types/schema";
+import type { FieldMeta } from "../../../../../src/views/types/schema";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
 import { arrayMove } from "../../../common/helpers/arrayMove";
 import { fieldErrors, validateBlockTree } from "./validate";
@@ -141,6 +142,21 @@ assert.equal(fieldErrors(nested, []).size, 0);
     assert.equal(isBroken(child as ResolvedNode), true, "child slot holds the broken node");
     assert.deepEqual(withBadChild.dependencies, [], "broken child contributes no dependencies");
   }
+}
+
+//* withGroup: tags a composition for the editor without disturbing the shapes it composes
+
+{
+  const meta = (field: { meta: () => unknown }): FieldMeta => field.meta() as FieldMeta;
+
+  const background = meta(BlockStyleShape.background);
+  assert.equal(background.group, "Box");
+  // zod's .meta() replaces rather than merges, so the pre-existing meta must be carried over.
+  assert.equal(background.label, "Background", "label survives the group tag");
+  assert.equal(background.input, "color", "so do the other hints");
+  assert.equal(meta(BlockStyleShape.fontSize).group, "Text");
+  // The source shape is untouched: composing it elsewhere can group it differently, or not.
+  assert.equal(meta(BackgroundStyleShape.background).group, undefined);
 }
 
 //* style mappers: units are applied in one place, unset fields skip (and so inherit)

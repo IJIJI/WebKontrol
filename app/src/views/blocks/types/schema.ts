@@ -113,6 +113,19 @@ export const GridConfigSchema = z.object({
 export type GridConfig = z.infer<typeof GridConfigSchema>;
 
 //* Block Styling, added as fields in blocks that need them.
+/**
+ * Tag every field of a shape with an editor `group` (see FieldMeta), merging into whatever meta
+ * each field already declares. Grouping belongs to the composition, not to the shape: the same
+ * shape reused in another schema is free to be grouped differently, or not at all.
+ */
+// `z.ZodType`, not `z.ZodRawShape`: the raw-shape type widens to zod's core type, which has no
+// `.meta()`. Any shape built from `z.string()` and friends satisfies this.
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns the shape type it was given; inference is clearer.
+export const withGroup = <S extends Record<string, z.ZodType>>(group: string, shape: S) =>
+  Object.fromEntries(
+    Object.entries(shape).map(([key, field]) => [key, field.meta({ ...field.meta(), group })]),
+  ) as S;
+
 export const BackgroundStyleShape = { background: z.string().optional().meta({ label: "Background", description: "CSS background", input: "color" } satisfies FieldMeta) };
 export const PaddingStyleShape = {
   padding: z.string().optional().meta({ label: "Padding", description: "CSS padding" } satisfies FieldMeta), // TODO: Visual 4-side editor (backlog)
@@ -161,12 +174,16 @@ export type Alignment = z.infer<typeof AlignmentSchema>;
 // Every block gets this via defineBlock's injection (the framework owns the box). Box fields
 // style the block's own box; font fields cascade to descendants (see FontStyleShape). The
 // shape is exported for composition; `blockStyleSchema` builds the per-block schema.
+// Grouped for the editor here, at the composition, since every block carries this whole set:
+// the box half folds under "Box", the inheriting text half under "Text".
 export const BlockStyleShape = {
-  ...BackgroundStyleShape,
-  ...PaddingStyleShape,
-  ...BorderStyleShape,
-  ...EffectsStyleShape,
-  ...FontStyleShape,
+  ...withGroup("Box", {
+    ...BackgroundStyleShape,
+    ...PaddingStyleShape,
+    ...BorderStyleShape,
+    ...EffectsStyleShape,
+  }),
+  ...withGroup("Text", FontStyleShape),
 };
 
 // Hug-capable blocks additionally get sizing + alignment. `content` hugs the content, so
@@ -185,7 +202,7 @@ export const blockStyleSchema = (sizing?: "container" | "content") =>
   z.object({
     ...BlockStyleShape,
     ...(sizing ? sizingFields(sizing) : {}),
-  }).prefault({}).meta({ label: "Style" } satisfies FieldMeta);
+  }).prefault({}).meta({ label: "Style", collapsed: true } satisfies FieldMeta);
 
 // One type for every block's style: sizing/alignment are optional at the type level (fill-only
 // blocks don't have them); a hug-capable block's parse always fills them.

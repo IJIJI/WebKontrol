@@ -109,6 +109,9 @@ export function BlockEditor({
           }
         >
           <BlockForm
+            // Keyed per block: the form's local state (which groups are folded open, whether a
+            // picker modal is up) belongs to the block being edited, not to the pane.
+            key={pathKey(path)}
             block={selected}
             savedBlock={savedBlockAt(saved, path, selected.type)}
             path={path}

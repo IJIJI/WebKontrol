@@ -31,6 +31,13 @@ export interface FieldMeta {
   label: string;
   description?: string; // maps to the Setting subtitle
   advanced?: boolean;
+  // Collects this field into a named subsection of its own level, so a wide shape (a block's
+  // ~20 style fields) stays scannable without nesting the stored data. Honoured for nested
+  // levels; `advanced` is the equivalent at the top level of a config.
+  group?: string;
+  // An object field whose group starts folded. For sections that are large and only sometimes
+  // relevant; a group holding a validation error opens regardless, so nothing hides.
+  collapsed?: boolean;
   placeholder?: string;
   // Input widget hint for kinds the schema alone can't distinguish: "color" renders a
   // swatch-assisted text field (the value stays a free CSS string — gradients are valid);
