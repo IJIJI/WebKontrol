@@ -128,14 +128,14 @@ export const withGroup = <S extends Record<string, z.ZodType>>(group: string, sh
 
 export const BackgroundStyleShape = { background: z.string().optional().meta({ label: "Background", description: "CSS background", input: "color" } satisfies FieldMeta) };
 export const PaddingStyleShape = {
-  padding: z.string().optional().meta({ label: "Padding", description: "CSS padding" } satisfies FieldMeta), // TODO: Visual 4-side editor (backlog)
+  padding: z.string().optional().meta({ label: "Padding", description: "CSS padding", input: "box" } satisfies FieldMeta),
   // Safe because it sits on the box *inside* the slot: it insets the block from its own slot
   // and can never push a sibling. Gap stays the tool for spacing blocks apart.
-  margin: z.string().optional().meta({ label: "Margin", description: "CSS margin, insets the block inside its own space" } satisfies FieldMeta),
+  margin: z.string().optional().meta({ label: "Margin", description: "CSS margin, insets the block inside its own space", input: "box" } satisfies FieldMeta),
 };
 export const BorderStyleShape = {
   border: z.string().optional().meta({ label: "Border", description: "CSS border" } satisfies FieldMeta),
-  borderRadius: z.string().optional().meta({ label: "Corner radius", description: "CSS border-radius" } satisfies FieldMeta),
+  borderRadius: z.string().optional().meta({ label: "Corner radius", description: "CSS border-radius", input: "corners" } satisfies FieldMeta),
 };
 export const EffectsStyleShape = {
   // Placeholder doubles as the slider's resting position while unset: leaving this empty renders

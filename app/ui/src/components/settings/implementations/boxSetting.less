@@ -1,0 +1,48 @@
+// The box shorthand editor: up to four small number boxes, a unit select and the mode toggles.
+// Sized so the unlinked (four-input) form still fits a narrow detail pane.
+.setting.field .input {
+  .boxNumber {
+    flex: 0 1 auto;
+    width: 58px;
+    min-width: 44px;
+    // The spinners cost more width than they earn at this size.
+    appearance: textfield;
+    -moz-appearance: textfield;
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+
+  select.boxUnit {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 62px;
+    padding-right: 20px;
+  }
+
+  .boxToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 26px;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border-tertiary);
+    border-radius: @border-radius-md;
+    transition: color @button-animation-time ease, border-color @button-animation-time ease;
+
+    &.active {
+      color: var(--color-text-acc);
+      border-color: var(--color-text-acc);
+    }
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}

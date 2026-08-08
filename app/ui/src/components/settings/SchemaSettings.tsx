@@ -9,6 +9,7 @@ import { CollapsibleGroup } from "./CollapsibleGroup";
 import { TextSetting } from "./implementations/TextSetting";
 import { TextAreaSetting } from "./implementations/TextAreaSetting";
 import { FontSetting } from "./implementations/FontSetting";
+import { BoxSetting } from "./implementations/BoxSetting";
 import { UrlSetting } from "./implementations/UrlSetting";
 import { NumberSetting } from "./implementations/NumberSetting";
 import { RangeSetting } from "./implementations/RangeSetting";
@@ -464,6 +465,13 @@ function renderField(
         return (
           <FontSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
             value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
+        );
+      }
+      if (meta.input === "box" || meta.input === "corners") {
+        return (
+          <BoxSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
+            corners={meta.input === "corners"}
+            value={value as string | undefined} savedVal={saved as string | undefined} setValue={set} />
         );
       }
       return (

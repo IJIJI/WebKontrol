@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import z from "zod";
 
 import { describeField } from "../../settings/zodField";
+import { formatBox, isUniform, parseBox, type BoxValue } from "../../settings/implementations/cssBox";
 
 import {
   ContainerBlock,
@@ -145,6 +146,41 @@ assert.equal(fieldErrors(nested, []).size, 0);
     assert.equal(isBroken(child as ResolvedNode), true, "child slot holds the broken node");
     assert.deepEqual(withBadChild.dependencies, [], "broken child contributes no dependencies");
   }
+}
+
+//* cssBox: the box editor must round-trip a shorthand, and refuse what it can't represent
+
+{
+  const sides = (raw: string): unknown => parseBox(raw)?.sides;
+  // The CSS 1/2/3/4-value expansion, in top-right-bottom-left order.
+  assert.deepEqual(sides("20px"), [20, 20, 20, 20]);
+  assert.deepEqual(sides("5px 10px"), [5, 10, 5, 10]);
+  assert.deepEqual(sides("1px 2px 3px"), [1, 2, 3, 2]);
+  assert.deepEqual(sides("1px 2px 3px 4px"), [1, 2, 3, 4]);
+  assert.equal(parseBox("5px 10px")?.unit, "px");
+  assert.equal(parseBox("50%")?.unit, "%");
+  assert.deepEqual(parseBox("")?.sides, [undefined, undefined, undefined, undefined], "unset parses as blank");
+
+  // Beyond the widget: it shows the raw string rather than mangling these.
+  assert.equal(parseBox("0 auto"), null, "keywords");
+  assert.equal(parseBox("calc(100% - 4px)"), null, "expressions");
+  assert.equal(parseBox("5px 2em"), null, "mixed units");
+  assert.equal(parseBox("1 2"), null, "a non-zero length needs a unit");
+  assert.equal(parseBox("1px 2px 3px 4px 5px"), null, "too many values");
+
+  // Round trip: shortest equivalent form, and clearing unsets rather than storing "".
+  const round = (raw: string): string | undefined => formatBox(parseBox(raw) as BoxValue);
+  assert.equal(round("20px"), "20px");
+  assert.equal(round("5px 5px"), "5px", "collapses to the shortest form");
+  assert.equal(round("1px 2px 1px 2px"), "1px 2px");
+  assert.equal(round("1px 2px 3px 2px"), "1px 2px 3px");
+  assert.equal(round("1px 2px 3px 4px"), "1px 2px 3px 4px");
+  assert.equal(round(""), undefined, "an empty box clears the field");
+  assert.equal(round("0"), "0", "zero needs no unit");
+  assert.equal(formatBox({ sides: [4, undefined, 4, undefined], unit: "px" }), "4px 0",
+    "a blank side among set ones is a zero, since the shorthand cannot skip a position");
+  assert.equal(isUniform(parseBox("3px") as BoxValue), true);
+  assert.equal(isUniform(parseBox("3px 4px") as BoxValue), false);
 }
 
 //* number bounds: a bounded float needs a usable step, or its arrows jump the whole range
