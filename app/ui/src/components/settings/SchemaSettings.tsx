@@ -428,7 +428,7 @@ function renderField(
       return (
         <NumberSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
           min={info.min} max={info.max} step={info.step}
-          value={value as number} savedVal={saved as number | undefined} setValue={set} />
+          value={value as number | undefined} savedVal={saved as number | undefined} setValue={set} />
       );
     case "boolean":
       return (

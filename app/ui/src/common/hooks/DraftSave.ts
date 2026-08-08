@@ -14,7 +14,10 @@ export interface Draft<T extends Record<string, unknown>> extends Savable {
   patch: Partial<T>;
   values: T;
 
-  setField: <U extends keyof T>(key: U, value: T[U]) => void;
+  // `| undefined` even for required fields: an editor must be able to clear an input, and the
+  // patch (a Partial<T>) can already hold that. Save-time validation is what reports a
+  // required field left empty; storing NaN or a stale value to keep the type happy would not.
+  setField: <U extends keyof T>(key: U, value: T[U] | undefined) => void;
   revertField: (key: keyof T) => void;
   isChanged: (key: keyof T) => boolean;
 }
@@ -54,7 +57,7 @@ export function useDraft<T extends Record<string, unknown>>(saved: T | undefined
 
   const values = useMemo(() => ({ ...safeSaved, ...patch }), [safeSaved, patch]);
 
-  const setField = <U extends keyof T>(key: U, value: T[U]): void => {
+  const setField = <U extends keyof T>(key: U, value: T[U] | undefined): void => {
     setPatch((prev) => {
       const next: Partial<T> = { ...prev };
       if (deepEqual(safeSaved[key], value)) {

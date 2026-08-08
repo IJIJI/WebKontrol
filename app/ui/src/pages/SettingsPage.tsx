@@ -129,7 +129,8 @@ export default function SettingsPage(): JSX.Element {
             // TODO: Add a default placeholder / background value? 
             // TODO: Add a way to set default? Remove the value?
             // TODO: Add a postfix for seconds? Add a formatting in general?
-            setValue={(value) => viewManagerDraft.setField("default_load_timeout", value * 1000)}
+            // Cleared field: store nothing and let the schema's default apply on save.
+            setValue={(value) => viewManagerDraft.setField("default_load_timeout", value === undefined ? undefined : value * 1000)}
         />
       </SettingGroup>
       <SettingGroup title="Configuration">
