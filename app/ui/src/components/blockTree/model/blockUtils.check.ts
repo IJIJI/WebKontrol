@@ -7,8 +7,10 @@ import z from "zod";
 import { describeField } from "../../settings/zodField";
 import { boxMode, formatBox, parseBox, slotCount, slotTargets, type BoxValue } from "../../settings/implementations/cssBox";
 import { formatHexAlpha, parseHexAlpha } from "../../settings/implementations/cssColor";
+import { formatTracks, parseTracks, type Track } from "../../settings/implementations/cssTracks";
 
 import {
+  autoColumns,
   ContainerBlock,
   DateTimeBlock,
   DividerBlock,
@@ -393,14 +395,28 @@ assert.equal(fieldErrors(nested, []).size, 0);
   assert.equal(parsed.items[0].rotation, undefined);
 }
 
-//* grid layout: track templates are validated token lists, counts are capped
+//* grid layout: an axis is its track list, and an empty axis arranges itself
 
 {
-  const layout = { rows: 2, columns: 2 };
-  assert.equal(GridConfigSchema.safeParse({ ...layout, templateColumns: "1fr 2.5fr auto 100px 30%" }).success, true);
-  assert.equal(GridConfigSchema.safeParse({ ...layout, templateColumns: "minmax(0, 1fr)" }).success, false, "only fr/%/px/auto tokens");
-  assert.equal(GridConfigSchema.safeParse({ ...layout, templateRows: "" }).success, false, "empty template is invalid, omit instead");
-  assert.equal(GridConfigSchema.safeParse({ rows: 200, columns: 2 }).success, false, "counts are capped");
+  assert.equal(GridConfigSchema.safeParse({ templateColumns: "1fr 2.5fr auto 100px 30%" }).success, true);
+  assert.equal(GridConfigSchema.safeParse({ templateColumns: "minmax(0, 1fr)" }).success, false, "only fr/%/px/auto tokens");
+  assert.equal(GridConfigSchema.safeParse({ templateRows: "" }).success, false, "empty string is invalid; omit for automatic");
+  assert.equal(GridConfigSchema.safeParse({}).success, true, "an unconfigured grid is valid and arranges itself");
+  // The counts this replaced are unknown keys now, so an older grid loses them rather than
+  // failing to parse, and falls back to the automatic arrangement.
+  const legacy = GridConfigSchema.parse({ rows: 3, columns: 4 }) as Record<string, unknown>;
+  assert.deepEqual(Object.keys(legacy), [], "old counts are dropped, not rejected");
+
+  // Track lists round-trip, and refuse what the editor can't show.
+  assert.deepEqual(parseTracks("1fr 2fr auto"), [{ value: 1, unit: "fr" }, { value: 2, unit: "fr" }, { unit: "auto" }]);
+  assert.deepEqual(parseTracks(""), [], "no tracks is automatic, not an error");
+  assert.equal(parseTracks("repeat(2, 1fr)"), null);
+  assert.equal(parseTracks("1"), null, "a sized track needs a unit");
+  assert.equal(formatTracks(parseTracks("30% 1fr auto") as Track[]), "30% 1fr auto");
+  assert.equal(formatTracks([]), undefined, "clearing the tracks clears the field");
+
+  // The placeholder arrangement: square-ish, and never zero columns for an empty grid.
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 9].map(autoColumns), [1, 1, 2, 2, 2, 3, 3]);
 }
 
 //* formatPhpDate: the datetime block's formatter

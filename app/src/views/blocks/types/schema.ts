@@ -101,14 +101,17 @@ export type Coordinate = z.infer<typeof CoordinateSchema>;
 // the backlog.
 const gridTrackList = /^\s*(?:\d+(?:\.\d+)?(?:fr|%|px)|auto)(?:\s+(?:\d+(?:\.\d+)?(?:fr|%|px)|auto))*\s*$/;
 
+/**
+ * A grid axis is its list of track sizes, and nothing else. There used to be a row/column count
+ * alongside these, which was a second way to say what a list of equal tracks already says; an
+ * axis left empty now means the grid arranges its blocks itself, so the count has nothing left
+ * to express. Older configs carrying the counts simply drop them: zod strips unknown keys, so
+ * such a grid falls back to the automatic arrangement rather than breaking.
+ */
 export const GridConfigSchema = z.object({
-  // Capped: every track is a real DOM element, a typo like 200 rows must not build 200 tracks.
-  rows: z.number().int().min(1).max(24).meta({ label: "Rows" } satisfies FieldMeta),
-  columns: z.number().int().min(1).max(24).meta({ label: "Columns" } satisfies FieldMeta),
   gap: z.number().min(0).max(200).optional().meta({ label: "Gap", description: "Space between cells, in px" } satisfies FieldMeta),
-  // A template overrides the count on its axis with explicit track sizes.
-  templateRows: z.string().regex(gridTrackList).optional().meta({ label: "Row sizes", description: "Track sizes overriding the row count", placeholder: "1fr 2fr" } satisfies FieldMeta),
-  templateColumns: z.string().regex(gridTrackList).optional().meta({ label: "Column sizes", description: "Track sizes overriding the column count", placeholder: "1fr 2fr" } satisfies FieldMeta),
+  templateRows: z.string().regex(gridTrackList).optional().meta({ label: "Rows", description: "Empty arranges the blocks automatically", input: "tracks" } satisfies FieldMeta),
+  templateColumns: z.string().regex(gridTrackList).optional().meta({ label: "Columns", description: "Empty arranges the blocks automatically", input: "tracks" } satisfies FieldMeta),
 });
 export type GridConfig = z.infer<typeof GridConfigSchema>;
 

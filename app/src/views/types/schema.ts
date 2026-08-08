@@ -46,8 +46,9 @@ export interface FieldMeta {
   // step still come from the schema, not from here); "box"/"corners" edit a CSS box shorthand
   // (padding/margin vs border-radius) as numbers, falling back to the raw string; "buttons"
   // shows a short enum as a button group instead of a dropdown; "alignment" renders a
-  // {horizontal, vertical} object as one nine-cell grid rather than a nested group.
-  input?: "color" | "textarea" | "font" | "range" | "box" | "corners" | "buttons" | "alignment";
+  // {horizontal, vertical} object as one nine-cell grid rather than a nested group; "tracks"
+  // edits a CSS grid track list as one row per track.
+  input?: "color" | "textarea" | "font" | "range" | "box" | "corners" | "buttons" | "alignment" | "tracks";
   // Readable labels for an enum's raw values, where the stored value has to stay machine-shaped
   // (a CSS keyword, a numeric weight). The "" key relabels the unset entry of an optional enum,
   // which is worth doing for inheriting properties: there "unset" means inherit, not default.

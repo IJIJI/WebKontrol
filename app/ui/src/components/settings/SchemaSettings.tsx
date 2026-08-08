@@ -10,6 +10,7 @@ import { TextSetting } from "./implementations/TextSetting";
 import { TextAreaSetting } from "./implementations/TextAreaSetting";
 import { FontSetting } from "./implementations/FontSetting";
 import { BoxSetting } from "./implementations/BoxSetting";
+import { TrackSetting } from "./implementations/TrackSetting";
 import { UrlSetting } from "./implementations/UrlSetting";
 import { NumberSetting } from "./implementations/NumberSetting";
 import { RangeSetting } from "./implementations/RangeSetting";
@@ -510,6 +511,12 @@ function renderField(
         return (
           <FontSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
             value={(value as string) ?? ""} savedVal={saved as string | undefined} setValue={set} />
+        );
+      }
+      if (meta.input === "tracks") {
+        return (
+          <TrackSetting key={key} title={title} subtitle={subtitle} placeholder={placeholder} error={error}
+            value={value as string | undefined} savedVal={saved as string | undefined} setValue={set} />
         );
       }
       if (meta.input === "box" || meta.input === "corners") {
