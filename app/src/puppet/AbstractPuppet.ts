@@ -26,6 +26,10 @@ export abstract class AbstractPuppet<
   protected _store!: PuppetStore;
   protected _isInit = false;
 
+  // Set for the whole of close(), so crash handlers can tell a deliberate shutdown
+  // from a browser that died on its own.
+  protected _isClosing = false;
+
   protected _getLogLabels(): Array<string> {
     return ["PPT", ...this._getLogLabelExtensions(), this._config.id];
   }
@@ -57,6 +61,8 @@ export abstract class AbstractPuppet<
   }
 
   protected abstract _doInit(): Promise<void>;
+
+  protected abstract _doClose(): Promise<void>;
 
   protected abstract _doNavigate(request: NavigationRequest): Promise<void>;
 
@@ -147,6 +153,27 @@ export abstract class AbstractPuppet<
     } catch (error) {
       await this._setConnection(ConnectionState.FAILED, error);
       this._logger.error("Failed to initialize", error);
+    }
+  }
+
+  /**
+   * Shut the puppet down. Idempotent, and swallows on purpose: a close that went badly
+   * leaves the puppet just as unusable as one that went well, so there is nothing for a
+   * caller to do about it beyond seeing the log.
+   */
+  async close(): Promise<void> {
+    if (!this._isInit || this._isClosing) return;
+    this._isClosing = true;
+
+    this._logger.info("Closing...");
+    try {
+      await this._doClose();
+    } catch (error) {
+      this._logger.warn("Close did not complete cleanly.", error);
+    } finally {
+      // No error: this state was asked for, it is not a fault.
+      await this._setConnection(ConnectionState.OFFLINE);
+      this._logger.info("Closed.");
     }
   }
 
