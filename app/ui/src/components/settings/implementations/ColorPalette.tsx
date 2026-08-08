@@ -1,9 +1,11 @@
 import { type JSX } from "react/jsx-runtime";
 
 import "./colorSetting.less";
+import "./rangeSetting.less";
 import { COLOR_PALETTE } from "../../../common/appearance";
 import { classNames } from "../../../common/helpers/classNames";
 import { Icons } from "../../icons/Icons";
+import { formatHexAlpha, parseHexAlpha } from "./cssColor";
 
 /** A colour outside the palette is a custom one. Marked with a pencil, inline and in the modal. */
 export const isCustomColor = (c: string): boolean => !COLOR_PALETTE.includes(c);
@@ -27,11 +29,20 @@ export function ColorPalette({
   value,
   onSelect,
   onSet,
+  alpha = false,
 }: {
   value: string | undefined;
   onSelect: (c: string) => void; // palette pick: set + close
   onSet: (c: string) => void; // custom picker: set, keep open while adjusting
+  // Opt-in: composes `#rrggbbaa`, which only hosts accepting a free CSS colour can store.
+  // ColorSetting's value is a plain hex colour and its schema rejects the eight-digit form.
+  alpha?: boolean;
 }): JSX.Element {
+  // Only hex carries an alpha channel; a gradient or a keyword has nothing to attach one to.
+  const parsed = alpha ? parseHexAlpha(value) : null;
+  // Picking a colour keeps the transparency already set, rather than silently resetting it.
+  const withAlpha = (c: string): string => (parsed === null ? c : formatHexAlpha(c, parsed.alpha));
+
   return (
     <div className="colorModal">
       <div className="colorSwatches">
@@ -39,11 +50,11 @@ export function ColorPalette({
           <button
             key={c}
             type="button"
-            className={classNames("swatch", value === c && "selected")}
+            className={classNames("swatch", (parsed?.rgb ?? value) === c && "selected")}
             style={{ backgroundColor: c }}
             title={c}
             aria-label={c}
-            onClick={() => onSelect(c)}
+            onClick={() => onSelect(withAlpha(c))}
           />
         ))}
         <label
@@ -52,13 +63,33 @@ export function ColorPalette({
         >
           <input
             type="color"
-            value={toPickerHex(value)}
+            value={toPickerHex(parsed?.rgb ?? value)}
             aria-label="Custom colour"
-            onChange={(e) => onSet(e.target.value)}
+            onChange={(e) => onSet(withAlpha(e.target.value))}
           />
           <Icons.edit size={16} className="swatchPencil" />
         </label>
       </div>
+
+      {parsed !== null && (
+        // Its own control rather than part of the native picker, which is RGB-only by spec.
+        // The track shows the colour fading over a checkerboard, so the slider reads as
+        // transparency rather than as a number.
+        <label className="colorAlpha">
+          <span className="alphaLabel">Opacity</span>
+          <input
+            type="range"
+            className="rangeSlider alphaSlider"
+            style={{ "--alpha-color": parsed.rgb, "--fill-start": "0%", "--fill-end": "0%" } as React.CSSProperties}
+            min={0}
+            max={1}
+            step={0.01}
+            value={parsed.alpha}
+            onChange={(e) => onSet(formatHexAlpha(parsed.rgb, e.target.valueAsNumber))}
+          />
+          <span className="alphaValue">{Math.round(parsed.alpha * 100)}%</span>
+        </label>
+      )}
     </div>
   );
 }

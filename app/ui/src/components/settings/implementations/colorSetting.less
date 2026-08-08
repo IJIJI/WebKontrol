@@ -58,4 +58,54 @@
       }
     }
   }
+
+  // Alpha, shown only for hex values (nothing else carries a channel to drive). The track is
+  // the colour fading out over a checkerboard, so it reads as transparency rather than a number.
+  .colorAlpha {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+
+    .alphaLabel {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+    }
+
+    .alphaSlider {
+      flex: 1 1 auto;
+      min-width: 80px;
+
+      // Both engines need the track painted on their own pseudo-element.
+      &::-webkit-slider-runnable-track {
+        .alpha-track();
+      }
+      &::-moz-range-track {
+        .alpha-track();
+      }
+    }
+
+    .alphaValue {
+      flex: 0 0 auto;
+      width: 36px;
+      text-align: right;
+      font-size: 11px;
+      color: var(--color-text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+// Transparent-to-opaque over the usual checkerboard, the standard way to show an alpha ramp.
+.alpha-track() {
+  background:
+    linear-gradient(to right, transparent, var(--alpha-color, #fff)),
+    conic-gradient(
+        var(--color-border-tertiary) 0deg 90deg,
+        transparent 90deg 180deg,
+        var(--color-border-tertiary) 180deg 270deg,
+        transparent 270deg 360deg
+      )
+      0 0 / 8px 8px;
 }

@@ -6,6 +6,7 @@ import z from "zod";
 
 import { describeField } from "../../settings/zodField";
 import { boxMode, formatBox, parseBox, slotCount, slotTargets, type BoxValue } from "../../settings/implementations/cssBox";
+import { formatHexAlpha, parseHexAlpha } from "../../settings/implementations/cssColor";
 
 import {
   ContainerBlock,
@@ -145,6 +146,32 @@ assert.equal(fieldErrors(nested, []).size, 0);
     const child = (withBadChild.config as { block: unknown }).block;
     assert.equal(isBroken(child as ResolvedNode), true, "child slot holds the broken node");
     assert.deepEqual(withBadChild.dependencies, [], "broken child contributes no dependencies");
+  }
+}
+
+//* cssColor: hex + alpha must round-trip, and leave non-hex colours alone
+
+{
+  assert.deepEqual(parseHexAlpha("#ff0000"), { rgb: "#ff0000", alpha: 1 });
+  assert.deepEqual(parseHexAlpha("#F00"), { rgb: "#ff0000", alpha: 1 }, "shorthand expands, case folds");
+  assert.deepEqual(parseHexAlpha("#ff000080"), { rgb: "#ff0000", alpha: 0.5 });
+  assert.deepEqual(parseHexAlpha("#f008"), { rgb: "#ff0000", alpha: 0.53 }, "four-digit shorthand");
+
+  // Anything without an alpha channel to drive: the slider stays hidden rather than guessing.
+  assert.equal(parseHexAlpha("red"), null);
+  assert.equal(parseHexAlpha("rgb(255 0 0)"), null);
+  assert.equal(parseHexAlpha("linear-gradient(red, blue)"), null);
+  assert.equal(parseHexAlpha(undefined), null);
+  assert.equal(parseHexAlpha("#ff000"), null, "a five-digit hex is not a colour");
+  assert.deepEqual(parseHexAlpha("#ff00"), { rgb: "#ffff00", alpha: 0 }, "but four digits is #rgba");
+
+  // Opaque keeps the plain form, so a colour nobody made transparent is left untouched.
+  assert.equal(formatHexAlpha("#ff0000", 1), "#ff0000");
+  assert.equal(formatHexAlpha("#ff0000", 0.5), "#ff000080");
+  assert.equal(formatHexAlpha("#ff0000", 0), "#ff000000");
+  // Stable: writing a slider value and reading it back lands on the same number.
+  for (const alpha of [0, 0.25, 0.33, 0.5, 0.75, 0.99]) {
+    assert.equal(parseHexAlpha(formatHexAlpha("#123456", alpha))?.alpha, alpha, `alpha ${alpha} round-trips`);
   }
 }
 

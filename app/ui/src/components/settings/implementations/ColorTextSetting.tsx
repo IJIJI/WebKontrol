@@ -16,10 +16,6 @@ export function ColorTextSetting(props: InputSettingProps<string>): JSX.Element 
   const [picking, setPicking] = useState(false);
 
   const set = (c: string): void => void props.setValue(c);
-  const select = (c: string): void => {
-    set(c);
-    setPicking(false);
-  };
 
   return (
     <ValueSetting {...props}>
@@ -45,7 +41,10 @@ export function ColorTextSetting(props: InputSettingProps<string>): JSX.Element 
             disabled={props.disabled}
           />
           <Modal open={picking} onClose={() => setPicking(false)} title="Choose colour">
-            <ColorPalette value={props.value || undefined} onSelect={select} onSet={set} />
+            {/* Alpha is safe here: the value is a free CSS colour, so `#rrggbbaa` is valid.
+                It also makes this a two-step control, so picking a swatch sets without closing:
+                dismissing the modal mid-edit would strand you before setting transparency. */}
+            <ColorPalette value={props.value || undefined} onSelect={set} onSet={set} alpha />
           </Modal>
         </>
       )}
