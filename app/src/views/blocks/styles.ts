@@ -31,7 +31,9 @@ export function blockStyles(style: BlockStyle): StyleInfo {
     // Unitless: the CSS-correct form, relative to the element's own font size.
     lineHeight: style.lineHeight,
     letterSpacing: style.letterSpacing === undefined ? undefined : `${style.letterSpacing}px`,
+    wordSpacing: style.wordSpacing === undefined ? undefined : `${style.wordSpacing}px`,
     textTransform: style.textTransform,
+    textDecoration: style.textDecoration,
     textShadow: style.textShadow,
   };
 }

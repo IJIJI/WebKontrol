@@ -183,6 +183,16 @@ export const FontStyleShape = {
     input: "buttons",
     optionLabels: { "": "Inherit", normal: "Normal", italic: "Italic" },
   } satisfies FieldMeta),
+  // A separate CSS property from font-style, and one that does *not* inherit, so unset means
+  // none rather than "take the parent's". No explicit `none` option for that same reason: it
+  // would only duplicate unset, and CSS gives a descendant no way to cancel a decoration an
+  // ancestor drew anyway. One line at a time, as in every other builder; the shorthand's wavy
+  // and coloured forms stay out of reach here by design.
+  textDecoration: z.enum(["underline", "line-through", "overline"]).optional().meta({
+    label: "Decoration",
+    optionLabels: { "": "None", underline: "Underline", "line-through": "Strikethrough", overline: "Overline" },
+  } satisfies FieldMeta),
+  wordSpacing: z.number().min(-20).max(100).optional().meta({ label: "Word spacing", description: "In px. Unset inherits" } satisfies FieldMeta),
   textShadow: z.string().optional().meta({ label: "Text shadow", description: "CSS text-shadow, e.g. 0 2px 6px black. Unset inherits" } satisfies FieldMeta),
 };
 
