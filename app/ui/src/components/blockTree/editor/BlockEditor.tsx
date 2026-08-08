@@ -11,6 +11,7 @@ import { BlockForm, savedBlockAt } from "../BlockForm";
 import { BlockPicker } from "./BlockPicker";
 import { fieldErrors, validateBlockTree } from "../model/validate";
 import { writeBlockClipboard } from "../model/blockClipboard";
+import { useFlash } from "../../../common/hooks/useFlash";
 import {
   type BlockLike,
   type BlockPath,
@@ -39,6 +40,7 @@ export function BlockEditor({
   // Null = pane closed (like the read-only explorer); [] = the root block selected.
   const [selectedPath, setSelectedPath] = useState<BlockPath | null>(null);
   const [pickingRoot, setPickingRoot] = useState(false);
+  const [copied, flashCopied] = useFlash();
   // Live validation: derived from the current tree, so there is no stale error state to clear.
   // Above the early return, since hooks must run in the same order every render.
   const issues = useMemo(() => validateBlockTree(root), [root]);
@@ -106,10 +108,16 @@ export function BlockEditor({
             <>
               <Button
                 fillStyle={FillStyle.SKELETON}
-                onClick={() => writeBlockClipboard(selected)}
+                // Copying changes nothing on screen, so the button says so for a moment.
+                variant={copied ? Variant.ACCENT : Variant.DEFAULT}
+                className={copied ? "confirmed" : undefined}
+                onClick={() => {
+                  writeBlockClipboard(selected);
+                  flashCopied();
+                }}
                 ariaLabel="Copy this block"
               >
-                <Icons.copy size={16} />
+                {copied ? <Icons.check size={16} /> : <Icons.copy size={16} />}
               </Button>
               <Button
                 fillStyle={FillStyle.SKELETON}

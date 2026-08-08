@@ -161,3 +161,20 @@
 .blockEditor .blockTree {
   min-height: 40rem;
 }
+
+// Copy leaves nothing on screen to show it worked, so the button confirms for a moment. The
+// tick is a fresh element when it swaps in, so the animation runs on its own.
+.blockEditor .buttonComp.confirmed svg {
+  animation: confirmPop 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes confirmPop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
