@@ -28,6 +28,22 @@ export enum NavigationFailure {
 }
 
 /**
+ * A failure whose kind the thrower already knew, so classification never has to
+ * recognise a driver's own throws by their message text. Lives with the model rather
+ * than a driver because AbstractPuppet reads `status` off it when recording a failure.
+ */
+export class KnownFailure extends Error {
+  constructor(
+    readonly kind: NavigationFailure,
+    message: string,
+    readonly status?: number, // HTTP code, STATUS kind only
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+  }
+}
+
+/**
  * The record of the most recent navigation. Nothing clears it, it gets superseded:
  * a FAILED entry stays until a newer navigation overwrites it, because the display
  * genuinely still shows that failure.
