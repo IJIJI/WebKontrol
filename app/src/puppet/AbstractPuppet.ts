@@ -12,6 +12,7 @@ import { PuppetStore } from "../storage/stores/PuppetStore";
 import { BLANK_NAVIGATION_REQUEST, PuppetRuntimeSchema, type BasePuppetConfig, type NavigationRequest, type PuppetKey, type PuppetRuntime } from "./types/schema";
 import type { EntityAppearance } from "../common/entityAppearance/schema";
 import { errorMessage } from "../helpers/error";
+import { REPAIR_WINDOW_MS, repairDelay } from "./repairPacing";
 
 
 /**
@@ -76,6 +77,9 @@ export abstract class AbstractPuppet<
   protected abstract _doClose(): Promise<void>;
 
   protected abstract _doNavigate(request: NavigationRequest): Promise<void>;
+
+  /** Driver hook: make the puppet usable again after ERROR. Default: nothing to repair. */
+  protected async _doRepair(): Promise<void> {}
 
   protected abstract _getTargetInfo(): Promise<TargetInfo> | TargetInfo;
 
@@ -175,6 +179,7 @@ export abstract class AbstractPuppet<
   async close(): Promise<void> {
     if (!this._isInit || this._isClosing) return;
     this._isClosing = true;
+    this._cancelPendingRepair();
 
     this._logger.info("Closing...");
     try {
@@ -322,6 +327,13 @@ export abstract class AbstractPuppet<
 
     this._logger.info(`Navigation #${generation} loaded.`);
     this._setNavigation({ state: NavigationState.LOADED, request });
+
+    // A successful navigation is proof the machinery works: end a crash-recovery cycle
+    // and make any still-queued repair pointless (its replay would only flash a blank
+    // replacement page over a working one).
+    if (this._info.state === ConnectionState.ERROR) this._setConnection(ConnectionState.ONLINE);
+    this._cancelPendingRepair();
+
     void this._refreshTargetInfo();
   }
 
@@ -333,5 +345,73 @@ export abstract class AbstractPuppet<
 
   async clearNavigation(): Promise<void> {
     await this.navigate({ ...BLANK_NAVIGATION_REQUEST });
+  }
+
+
+  private _pendingRepair?: ReturnType<typeof setTimeout>;
+  private _crashMoments: number[] = [];
+
+  /**
+   * Schedule a repair, paced by recent crash density (see repairPacing). Fire and
+   * forget for crash handlers; a repair already pending absorbs further requests.
+   */
+  protected _requestRepair(): void {
+    if (!this._isInit || this._isClosing || this._pendingRepair !== undefined) return;
+
+    const now = Date.now();
+    this._crashMoments = this._crashMoments.filter((m) => now - m < REPAIR_WINDOW_MS);
+    this._crashMoments.push(now);
+
+    const delay = repairDelay(this._crashMoments.length);
+    this._logger.warn(`Repair scheduled in ${delay}ms (${this._crashMoments.length} recent crashes).`);
+    this._pendingRepair = setTimeout(() => {
+      this._pendingRepair = undefined;
+      void this.repair();
+    }, delay);
+  }
+
+  private _cancelPendingRepair(): void {
+    if (this._pendingRepair === undefined) return;
+    clearTimeout(this._pendingRepair);
+    this._pendingRepair = undefined;
+  }
+
+  /**
+   * Recover from ERROR: fix the machinery, then restore what was showing. For OFFLINE
+   * (the process is gone) use re-init via the orchestrator instead; repair only covers
+   * faults below the process boundary.
+   *
+   * Never rejects: a repair that could not fix the machinery lands on OFFLINE, and a
+   * restore that failed is recorded by navigate() as the failure it is. Must never be
+   * called from inside the navigation path (_ensurePage repairs the handle there);
+   * the replay below would recurse.
+   */
+  async repair(): Promise<void> {
+    if (!this._isInit || this._isClosing) return;
+    this._logger.warn("Repairing...");
+
+    try {
+      await this._doRepair();
+    } catch (error) {
+      // Could not even rebuild: the fault is at or above the process boundary,
+      // which is the orchestrator's layer, so report and stop.
+      this._setConnection(ConnectionState.OFFLINE, error);
+      this._logger.error("Repair failed.", error);
+      return;
+    }
+
+    this._setConnection(ConnectionState.ONLINE);
+
+    // Restore what the display was showing; a repaired page is blank until navigated.
+    const navigation = this._info.navigation;
+    if (navigation.state === NavigationState.IDLE) return;
+
+    try {
+      await this.navigate(navigation.request);
+      this._logger.warn("Repaired and restored.");
+    } catch {
+      // navigate() recorded and logged it. FAILED after a repair is real: the
+      // machinery works and the restore still did not, so something is wrong.
+    }
   }
 }

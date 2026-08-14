@@ -73,10 +73,15 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
    * @param page - An existing page to adopt. Repairs pass nothing, so they can never
    *   adopt back the very page they are replacing.
    */
-  private async _createPage(page?: Page): Promise<void> {
-    this._page = page ?? (await this._browser.newPage());
+  private async _createPage(adopt?: Page): Promise<void> {
+    // Every listener below is bound to this variable and opens by checking it is still
+    // the live page: a replaced page whose close failed keeps emitting, and without the
+    // guard its handlers would act on the replacement's behalf (a dead page's crash
+    // handler scheduling a repair of the healthy one).
+    const page = adopt ?? (await this._browser.newPage());
+    this._page = page;
 
-    const client = await this._page.createCDPSession();
+    const client = await page.createCDPSession();
     await client.send("Emulation.setDefaultBackgroundColorOverride", {
       color: { r: 0, g: 0, b: 0, a: 1 },
     });
@@ -87,42 +92,53 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
 
     // Nothing else dismisses these, and an open dialog blocks both the display and every
     // later navigation, so one alert() from a page would hang the puppet for good.
-    this._page.on("dialog", (dialog) => {
+    page.on("dialog", (dialog) => {
+      if (page !== this._page) return;
       this._logger.info(`Dismissed ${dialog.type()} dialog: ${dialog.message()}`);
       void dialog.dismiss().catch(() => { }); // TODO: Add failed dismiss handeling, the catch is already there.
     });
 
     // A popup is a tab the puppet does not drive, sitting on top of the one it does.
-    this._page.on("popup", (popup) => {
+    page.on("popup", (popup) => {
+      if (page !== this._page) return;
       this._logger.info("Closed a popup opened by the page.");
       void popup?.close().catch(() => { }); // TODO: Add failed close handeling, the catch is already there.
     });
 
-    // The renderer died while the tab object lived on, so whatever was loaded is gone
-    // even though the browser is fine. Report it against the request that put it there;
-    // a crash with nothing requested has no navigation to fail.
-    this._page.on("error", (error) => {
+    // The renderer died while the tab object lived on: the machinery broke (connection
+    // ERROR), and whatever was loaded is gone (navigation FAILED, when something was).
+    // An in-flight navigation owns its own outcome: it will hit the dead page, report,
+    // and its retry path owns recovery, so only an idle puppet schedules the repair.
+    page.on("error", (error) => {
+      if (page !== this._page) return;
       this._logger.error("Renderer crashed.", error);
+
+      const failure = new KnownFailure(NavigationFailure.PUPPET, "Renderer crashed.", undefined, { cause: error });
+      this._setConnection(ConnectionState.ERROR, failure);
+      if (this._isNavigating) return;
+
       const navigation = this._info.navigation;
-      if (navigation.state === NavigationState.IDLE) return;
-      this._setNavigation({
-        state: NavigationState.FAILED,
-        request: navigation.request,
-        error: new KnownFailure(NavigationFailure.PUPPET, "Renderer crashed.", undefined, { cause: error }),
-      });
+      if (navigation.state !== NavigationState.IDLE)
+        this._setNavigation({ state: NavigationState.FAILED, request: navigation.request, error: failure });
+
+      this._requestRepair();
     });
 
     // Navigations nobody asked for: a link click, a redirect, a meta refresh. The URL is
     // already right at commit but the document is not parsed yet, so the title only
     // becomes readable on load. Two listeners because they carry different halves.
-    this._page.on("framenavigated", (frame) => {
-      if (frame !== this._page.mainFrame() || this._isNavigating) return;
+    page.on("framenavigated", (frame) => {
+      if (page !== this._page || frame !== page.mainFrame() || this._isNavigating) return;
       void this._refreshTargetInfo();
     });
-    this._page.on("load", () => {
-      if (this._isNavigating) return;
+    page.on("load", () => {
+      if (page !== this._page || this._isNavigating) return;
       void this._refreshTargetInfo();
     });
+
+    // A new tab is not guaranteed focus, and in kiosk mode an unfocused tab means the
+    // display keeps showing the dead one this replaces.
+    await page.bringToFront();
   }
 
   /**
@@ -148,12 +164,15 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     if (this._isPageUsable()) return;
     this._logger.warn("Page is unusable, opening a replacement.");
 
-    try {
-      await this._page.close();
-    } catch {
-      // Already gone, or never opened. Either way there is nothing left to close.
-    }
+    // Not awaited: a wedged renderer can hang the close forever, and only the new page
+    // is needed. The cost is a lingering dead tab behind the live one.
+    void this._page.close().catch(() => { });
 
+    await this._createPage();
+  }
+
+  protected override async _doRepair(): Promise<void> {
+    void this._page.close().catch(() => { }); // same reasoning as _ensurePage
     await this._createPage();
   }
 

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { TimeoutError } from "puppeteer";
 import { KnownFailure, NavigationFailure } from "../types/model";
 import { classifyNavigationFailure } from "./failures";
+import { repairDelay } from "../repairPacing";
 
 // The classifier is an ordered ladder, and the ordering is the point of these checks:
 // a reorder that typechecks fine can still misclassify.
@@ -42,5 +43,14 @@ assert.equal(classifyNavigationFailure(undefined, true), NavigationFailure.UNKNO
 const caught: unknown = new KnownFailure(NavigationFailure.STATUS, "Target responded 503", 503);
 assert.ok(caught instanceof KnownFailure);
 assert.equal(caught.status, 503);
+
+// Repair pacing: a first crash repairs immediately, density escalates, the cap holds.
+assert.equal(repairDelay(0), 0);
+assert.equal(repairDelay(1), 0);
+assert.equal(repairDelay(2), 2_000);
+assert.equal(repairDelay(3), 4_000);
+assert.equal(repairDelay(4), 8_000);
+assert.equal(repairDelay(20), 5 * 60_000); // capped, never longer
+assert.equal(repairDelay(1000), 5 * 60_000); // no overflow past the cap
 
 console.log("failures.check: all assertions passed");
