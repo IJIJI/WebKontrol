@@ -55,7 +55,9 @@ function renderNode(node: ResolvedNode, ctx: RenderContext): TemplateResult {
   // Every block's schema carries the injected `style` (see blockStyleSchema); the cast is the
   // one place that knows the convention, so blocks and the resolver stay unaware of it.
   const style = (node.config as { style?: BlockStyle }).style ?? {};
-  const hug = style.sizing === "content";
+  // TODO (box sizing v2, step 3): per-axis slot classes. Both axes always agreed under the old
+  // single sizing enum, so reading one reproduces today's behaviour exactly until then.
+  const hug = style.size?.x === "content";
   // Separate from `hug`, which is about size: a hugging box is the one thing that can outgrow
   // its slot, so the slot clips it, unless the block asked for visible overflow. That keeps
   // `overflow` meaning the same thing whichever way a block is sized (it decides what may paint

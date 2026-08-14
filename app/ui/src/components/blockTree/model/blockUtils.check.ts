@@ -259,13 +259,13 @@ assert.equal(fieldErrors(nested, []).size, 0);
 
 {
   const hugStyle = blockStyleSchema("content");
-  const css = blockStyles(hugStyle.parse({ fontSize: 100, letterSpacing: 2, lineHeight: 1.2, opacity: 0.5 }) as BlockStyle);
+  const css = blockStyles(hugStyle.parse({ fontSize: 100, letterSpacing: 2, lineHeight: 1.2, opacity: 0.5 }));
   assert.equal(css.fontSize, "100px", "set font size, in px");
   assert.equal(css.letterSpacing, "2px");
   assert.equal(css.lineHeight, 1.2, "line height stays unitless");
   assert.equal(css.opacity, 0.5);
 
-  const empty = blockStyles(hugStyle.parse({}) as BlockStyle);
+  const empty = blockStyles(hugStyle.parse({}));
   assert.equal(empty.fontSize, undefined, "unset font size emits nothing and inherits (page default in view.css)");
   assert.equal(empty.letterSpacing, undefined, "unset fields stay undefined so styleMap skips them");
   assert.equal(empty.overflow, undefined, "the overflow default lives in the stylesheet, not the config");
@@ -274,7 +274,8 @@ assert.equal(fieldErrors(nested, []).size, 0);
   assert.equal(empty.textAlign, undefined, "alignment is not a box style");
   assert.equal(empty.justifyContent, undefined, "alignment is not a box style");
 
-  assert.equal((hugStyle.parse({}) as BlockStyle).sizing, "content", "text chips hug by default");
+  assert.equal((hugStyle.parse({}) as BlockStyle).size?.x, "content", "text chips hug by default");
+  assert.equal((hugStyle.parse({}) as BlockStyle).size?.y, "content", "on both axes");
 
   // Slot placement, and the text-only echo of the same alignment inside the box.
   const alignment = (hugStyle.parse({}) as BlockStyle).alignment;
@@ -294,17 +295,19 @@ assert.equal(fieldErrors(nested, []).size, 0);
   // Old saved configs keep their exact meaning through the injection.
   const oldText = TextBlock.configSchema.parse({
     type: TextBlock.key, text: "hi",
-    style: { fontSize: 100, sizing: "container", alignment: { horizontal: "left" }, background: "#000" },
+    style: { fontSize: 100, size: { x: "container" }, alignment: { horizontal: "left" }, background: "#000" },
   }) as { style: BlockStyle };
   assert.equal(oldText.style.fontSize, 100);
-  assert.equal(oldText.style.sizing, "container");
+  assert.equal(oldText.style.size?.x, "container");
+  assert.equal(oldText.style.size?.y, "content", "an unset axis still takes the block default");
   assert.equal(oldText.style.alignment?.horizontal, "left");
   assert.equal(oldText.style.background, "#000");
 
-  // Fill-only blocks: style exists (injected), sizing/alignment do not.
+  // Fill-only blocks: same universal box, defaulting to container on both axes. Size is not
+  // gated per block, a length is meaningful everywhere and gating would be a list to curate.
   const site = WebsiteBlock.configSchema.parse({ type: WebsiteBlock.key, url: "https://example.com" }) as { style: BlockStyle };
   assert.notEqual(site.style, undefined, "every block gets a style");
-  assert.equal("sizing" in site.style, false, "fill-only blocks have no sizing field");
+  assert.deepEqual(site.style.size, { x: "container", y: "container" }, "fill-only blocks default to container");
 
   // A previously style-less block accepts styling now.
   const styledGrid = GridBlock.configSchema.safeParse({ type: GridBlock.key, style: { background: "#123" } });
@@ -449,5 +452,45 @@ assert.deepEqual(arrayMove(["a", "b"], 0, 9), ["a", "b"], "out of range is a no-
 // yields one visible step: down lands after the target, up lands before it.
 assert.deepEqual(arrayMove(["a", "junk", "b"], 0, 2), ["junk", "b", "a"], "down past junk");
 assert.deepEqual(arrayMove(["a", "junk", "b"], 2, 0), ["b", "a", "junk"], "up past junk");
+
+// ── Box sizing v2 ─────────────────────────────────────────────────────
+// Size is a per-axis {x, y} pair, defaulting from the block itself, with bounds and ratio
+// beside it. These pin the defaults and the value space; the render mapping is verified by
+// browser measurement, not here.
+{
+  // Each block's own default reaches both axes.
+  const textDefault = TextBlock.configSchema.parse({ type: TextBlock.key, text: "x" });
+  assert.deepEqual(textDefault.style.size, { x: "content", y: "content" }, "text hugs by default");
+
+  const containerDefault = ContainerBlock.configSchema.parse({
+    type: ContainerBlock.key,
+    block: { type: TextBlock.key, text: "x" }, // a child is still required; step 5 relaxes that
+  });
+  assert.deepEqual(containerDefault.style.size, { x: "container", y: "container" });
+
+  // One axis set leaves the other on the block default, which is the point of the pair.
+  const half = TextBlock.configSchema.parse({ type: TextBlock.key, text: "x", style: { size: { x: "50%" } } });
+  assert.equal(half.style.size?.x, "50%");
+  assert.equal(half.style.size?.y, "content", "the untouched axis keeps the block default");
+
+  // Lengths and keywords are both accepted, and stored verbatim (no unit normalising).
+  const sized = TextBlock.configSchema.parse({
+    type: TextBlock.key, text: "x",
+    style: { size: { x: "12px", y: "container" }, minSize: { x: "50%" }, maxSize: { y: "10vh" }, aspectRatio: "16/9" },
+  });
+  assert.deepEqual(sized.style.size, { x: "12px", y: "container" });
+  assert.equal(sized.style.minSize?.x, "50%");
+  assert.equal(sized.style.maxSize?.y, "10vh");
+  assert.equal(sized.style.aspectRatio, "16/9");
+
+  // Bounds and ratio have no defaults: unset must stay unset, or every block would pin itself.
+  const bare = DividerBlock.configSchema.parse({ type: DividerBlock.key });
+  assert.deepEqual(bare.style.minSize, {}, "no default minimum");
+  assert.deepEqual(bare.style.maxSize, {}, "no default maximum");
+  assert.equal(bare.style.aspectRatio, undefined);
+
+  // Alignment is universal now: any block can be smaller than its slot, so all can place it.
+  assert.deepEqual(bare.style.alignment, { horizontal: "center", vertical: "middle" });
+}
 
 console.log("blockUtils.check: all assertions passed");

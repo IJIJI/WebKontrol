@@ -90,10 +90,21 @@ export const bindable = <T extends z.ZodType>(value: T) =>
 export const DimensionSchema = z.number().min(0).max(100);
 export type Dimension = z.infer<typeof DimensionSchema>;
 
-export const CoordinateSchema = z.object({
-  x: DimensionSchema.meta({ label: "X" } satisfies FieldMeta), // Coordinate between 0.00 and 100.00, being from one end to the other of the screen.
-  y: DimensionSchema.meta({ label: "Y" } satisfies FieldMeta),
-});
+/**
+ * An {x, y} pair of one value type. Coordinates carry bounded percentages, box size carries CSS
+ * strings; the shape and its labels are the same, so the pairing lives here once.
+ * (Alignment is deliberately not built on this: horizontal/vertical name a placement, not an
+ * axis, and the nine-cell widget reads off those names.)
+ */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
+export const axisPair = <T extends z.ZodType>(value: T) =>
+  z.object({
+    x: value.meta({ label: "X" } satisfies FieldMeta),
+    y: value.meta({ label: "Y" } satisfies FieldMeta),
+  });
+
+// Coordinate between 0.00 and 100.00, being from one end to the other of the screen.
+export const CoordinateSchema = axisPair(DimensionSchema);
 export type Coordinate = z.infer<typeof CoordinateSchema>;
 
 // A whitespace-separated CSS track list, tokens limited to fr/%/px/auto: covers real display
@@ -226,29 +237,52 @@ export const BlockStyleShape = {
   ...withGroup("Text", FontStyleShape),
 };
 
-// Hug-capable blocks additionally get sizing + alignment. `content` hugs the content, so
-// background/padding/border form a chip the alignment places inside the block; `container`
-// stretches it over the whole block. One alignment drives placement AND text-align, so there
-// are never two competing horizontal alignments. Fill-only blocks (website, grid, …) never
-// get these fields: content sizing would collapse them to nothing.
-const sizingFields = (defaultSizing: "container" | "content") => ({
-  sizing: z.enum(["container", "content"]).default(defaultSizing).meta({ label: "Sizing", description: "Hug the content, or fill the block", input: "buttons" } satisfies FieldMeta),
-  alignment: AlignmentSchema.meta({ label: "Alignment", input: "alignment" } satisfies FieldMeta),
-});
-
-/** The injected `style` schema for one block: the universal box, plus sizing/alignment when hug-capable. */
+/**
+ * The injected `style` schema for one block: the universal box, plus the size group whose
+ * defaults come from the block itself.
+ *
+ * @param defaultSizing - How this block sizes when nothing is set (see BlockImpl.box).
+ *   Fill-only blocks pass nothing and get `container`; the fields exist either way, since
+ *   a length is meaningful on every block and gating them would only be a list to curate.
+ */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types -- returns an unwieldy zod schema type; inference is clearer.
-export const blockStyleSchema = (sizing?: "container" | "content") =>
+export const blockStyleSchema = (defaultSizing: "container" | "content" = "container") =>
   z.object({
+    ...withGroup("Size", {
+      // Per axis: any CSS length, or the two keywords the box has always spoken. `content`
+      // sizes to what is inside, `container` fills the slot. A length pins its axis (fixed
+      // means fixed), and the slot clips any excess rather than letting a box shrink out from
+      // under a value someone typed.
+      size: axisPair(z.string().default(defaultSizing)).prefault({}).meta({
+        label: "Size", input: "size",
+        description: "content, container, or a length (px, %, vw, vh). Percentages need a container-sized ancestor",
+      } satisfies FieldMeta),
+      // Bounds participate in intrinsic sizing where size percentages do not, which is the
+      // only way a block can claim space inside a content-sized parent: a divider spanning a
+      // hugging stack has no other means of being visible. Secondary to the size itself, so
+      // these sit behind `advanced` rather than in front of every edit.
+      minSize: axisPair(z.string().optional()).prefault({}).meta({
+        label: "Min size", input: "size", advanced: true,
+        description: "A length. Claims space even inside a content-sized parent",
+      } satisfies FieldMeta),
+      maxSize: axisPair(z.string().optional()).prefault({}).meta({
+        label: "Max size", input: "size", advanced: true, description: "A length",
+      } satisfies FieldMeta),
+      aspectRatio: z.string().optional().meta({
+        label: "Aspect ratio", advanced: true,
+        description: "CSS aspect-ratio, e.g. 1 or 16/9. Derives the axis you leave unset",
+      } satisfies FieldMeta),
+    }),
     ...BlockStyleShape,
-    ...(sizing ? sizingFields(sizing) : {}),
+    // Alignment places a box smaller than its slot. Universal, because per-axis size means any
+    // block can now be smaller than its slot: a website block at 50% has to sit somewhere. One
+    // alignment drives placement AND text-align, so two horizontal alignments never compete.
+    alignment: AlignmentSchema.meta({ label: "Alignment", input: "alignment" } satisfies FieldMeta),
   }).prefault({}).meta({ label: "Style", collapsed: true } satisfies FieldMeta);
 
-// One type for every block's style: sizing/alignment are optional at the type level (fill-only
-// blocks don't have them); a hug-capable block's parse always fills them.
-export type BlockStyle = z.infer<ReturnType<typeof blockStyleSchema>> & {
-  sizing?: "container" | "content";
-  alignment?: Alignment;
-};
+// One type for every block's style. Wholly partial: the render core reads style off a config
+// it has not necessarily parsed (and must keep rendering one that predates a field), so every
+// key including the prefaulted objects has to be allowed to be missing.
+export type BlockStyle = Partial<z.infer<ReturnType<typeof blockStyleSchema>>>;
 
 

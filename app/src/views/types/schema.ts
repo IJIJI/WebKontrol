@@ -48,7 +48,9 @@ export interface FieldMeta {
   // shows a short enum as a button group instead of a dropdown; "alignment" renders a
   // {horizontal, vertical} object as one nine-cell grid rather than a nested group; "tracks"
   // edits a CSS grid track list as one row per track.
-  input?: "color" | "textarea" | "font" | "range" | "box" | "corners" | "buttons" | "alignment" | "tracks";
+  // ... "size" renders an {x, y} pair as one two-axis control, each axis a length-with-unit or
+  // one of the sizing keywords.
+  input?: "color" | "textarea" | "font" | "range" | "box" | "corners" | "buttons" | "alignment" | "tracks" | "size";
   // Readable labels for an enum's raw values, where the stored value has to stay machine-shaped
   // (a CSS keyword, a numeric weight). The "" key relabels the unset entry of an optional enum,
   // which is worth doing for inheriting properties: there "unset" means inherit, not default.
