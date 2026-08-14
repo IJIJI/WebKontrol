@@ -188,7 +188,9 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     // goto only rejects on network level failures and timeouts, so a 404 or a 500 would
     // otherwise report as loaded while the screen shows the server's error page. A null
     // response means no navigation happened at all (same document, or about:blank).
-    if (response && !response.ok()) {
+    // >= 400 rather than !ok(): ok() is 2xx only, and a 304 (Express auto-ETags, so
+    // revisiting a cached view revalidates) is a success the browser renders from cache.
+    if (response && response.status() >= 400) {
       const text = response.statusText(); // empty on HTTP/2, which has no reason phrases
       throw new KnownFailure(
         NavigationFailure.STATUS,
