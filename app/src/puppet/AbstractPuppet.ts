@@ -38,9 +38,14 @@ export abstract class AbstractPuppet<
   protected _store!: PuppetStore;
   protected _isInit = false;
 
-  // Set for the whole of close(), so crash handlers can tell a deliberate shutdown
-  // from a browser that died on its own.
-  protected _isClosing = false;
+  /**
+   * True for the whole of close(), so crash handlers can tell a deliberate shutdown
+   * from a browser that died on its own. Derived from the broadcast state rather than
+   * a flag, so the two can never disagree and the UI sees the transition too.
+   */
+  protected get _isClosing(): boolean {
+    return this._info.state === ConnectionState.CLOSING;
+  }
 
   protected _getLogLabels(): Array<string> {
     return ["PPT", ...this._getLogLabelExtensions(), this._config.id];
@@ -178,7 +183,7 @@ export abstract class AbstractPuppet<
    */
   async close(): Promise<void> {
     if (!this._isInit || this._isClosing) return;
-    this._isClosing = true;
+    this._setConnection(ConnectionState.CLOSING);
     this._cancelPendingRepair();
 
     this._logger.info("Closing...");
