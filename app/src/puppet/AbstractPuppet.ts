@@ -13,6 +13,7 @@ import { BLANK_NAVIGATION_REQUEST, PuppetRuntimeSchema, type BasePuppetConfig, t
 import type { EntityAppearance } from "../common/entityAppearance/schema";
 import { errorMessage } from "../helpers/error";
 import { REPAIR_WINDOW_MS, repairDelay, RetryHandler } from "./pacing";
+import { renderFallbackPage, type FallbackData } from "./fallbackPage";
 
 
 /**
@@ -85,6 +86,9 @@ export abstract class AbstractPuppet<
 
   /** Driver hook: make the puppet usable again after ERROR. Default: nothing to repair. */
   protected async _doRepair(): Promise<void> {}
+
+  /** Driver hook: put locally rendered HTML on the display. Default: nowhere to show it. */
+  protected async _doShowFallback(_html: string): Promise<void> {}
 
   protected abstract _getTargetInfo(): Promise<TargetInfo> | TargetInfo;
 
@@ -308,7 +312,9 @@ export abstract class AbstractPuppet<
               state: input.state,
               request: input.request,
               failure: this._deriveFailureKind(input.error),
-              error: errorMessage(input.error),
+              // The record needn't repeat its own target: driver messages often embed
+              // it ("net::ERR_X at http://..."), and request.target sits right here.
+              error: errorMessage(input.error).replaceAll(` at ${input.request.target}`, ""),
               status: input.error instanceof KnownFailure ? input.error.status : undefined,
               moment: Date.now(),
             }
@@ -369,6 +375,21 @@ export abstract class AbstractPuppet<
 
   async clearNavigation(): Promise<void> {
     await this.navigate({ ...BLANK_NAVIGATION_REQUEST });
+  }
+
+  /**
+   * Show the local fallback page (clock + failure + retry countdown) on the display.
+   * Best effort and state-free: the navigation record stays FAILED, this only changes
+   * what the screen shows, and a display that cannot even show this is already
+   * reporting why through its connection state.
+   */
+  async showFallback(data: FallbackData): Promise<void> {
+    if (!this._isInit || this._isClosing) return;
+    try {
+      await this._doShowFallback(renderFallbackPage(data));
+    } catch (error) {
+      this._logger.warn("Failed to show the fallback page.", error);
+    }
   }
 
 

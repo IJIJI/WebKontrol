@@ -90,10 +90,17 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     const id = config.id;
 
     puppet.on('runtime_update', (runtime) => this._updatePuppetData(id, {runtime}));
+    // All reaction to puppet trouble hangs off the broadcast, edge-triggered: it covers
+    // every source of a state change (orchestrator navigations, repair replays, future
+    // reload timers) with one pattern, instead of each initiator handling its own.
     puppet.on('info_update', (info) => {
-      const previous = this._puppets.get(id)?.info.state;
+      const previous = this._puppets.get(id)?.info;
       this._updatePuppetData(id, {info});
-      if (previous !== undefined && previous !== info.state) this._onConnectionChange(id, previous, info.state);
+      if (!previous) return;
+      if (previous.state !== info.state)
+        this._onConnectionChange(id, previous.state, info.state);
+      if (previous.navigation.state !== info.navigation.state && info.navigation.state === NavigationState.FAILED)
+        this._onNavigationFailed(id);
     });
     puppet.on('appearance_update', (appearance) => this._updatePuppetData(id, {appearance}));
 
@@ -255,27 +262,56 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
       await puppet.navigate(this._resolveNavigation(id));
       retry.reset();
     } catch (error) {
+      // Recorded failures reach _onNavigationFailed via the broadcast edge; a throw
+      // without a record (puppet not initialized, closing) is relaunch territory.
       this._logger.error(`Navigation failed for puppet "${id}".`, error);
-      this._scheduleNavRetry(id);
     }
   }
 
-  private _scheduleNavRetry(id: PuppetKey): void {
-    const navigation = this._puppets.get(id)?.info.navigation;
-    const failure = navigation?.state === NavigationState.FAILED ? navigation.failure : undefined;
-    // A throw without a failure record means the navigation never started (puppet not
-    // initialized, or closing): re-navigating cannot fix those, relaunching does.
-    if (failure === undefined) return;
+  /**
+   * A navigation was recorded FAILED, whoever initiated it: schedule the retry and put
+   * the fallback page (clock + failure + countdown) on the display.
+   */
+  private _onNavigationFailed(id: PuppetKey): void {
+    if (this._isClosing) return;
+
+    const bundle = this._puppets.get(id);
+    const navigation = bundle?.info.navigation;
+    if (!bundle || navigation?.state !== NavigationState.FAILED) return;
+
+    // A puppet whose machinery is down is relaunch territory; navigation retries
+    // against a dead browser only churn, and the relaunch ends in a fresh navigation.
+    if (bundle.info.state !== ConnectionState.ONLINE) return;
 
     // STATUS enters at the cap: the target answered and said no, so retrying changes
     // nothing until the target or the config does. Everything else starts at the
     // bottom, where a wrong guess costs a few cheap retries that escalate on their own.
     const delay = this._navRetryFor(id).schedule(
       () => void this._navigatePuppet(id, true),
-      { atCap: failure === NavigationFailure.STATUS },
+      { atCap: navigation.failure === NavigationFailure.STATUS },
     );
-    if (delay !== undefined)
-      this._logger.warn(`Retrying navigation for puppet "${id}" in ${delay}ms (${failure}).`);
+    if (delay === undefined) return; // one already pending, and its countdown is already on screen
+
+    this._logger.warn(`Retrying navigation for puppet "${id}" in ${delay}ms (${navigation.failure}).`);
+    void bundle.puppet.showFallback({
+      label: this._resolveLabel(id, navigation.request.target),
+      failure: navigation.failure,
+      error: navigation.error,
+      retryInMs: delay,
+    });
+  }
+
+  /** What the display was supposed to show, in operator terms: the view's name, or a short URL when no view resolves. */
+  private _resolveLabel(id: PuppetKey, target: string): string {
+    const viewKey = this._resolvedViewKey(id);
+    const view = viewKey !== undefined ? this._viewManager?.getView(viewKey) : undefined;
+    if (view) return view.getConfig().name.long;
+    try {
+      const url = new URL(target);
+      return url.host + (url.pathname === "/" ? "" : url.pathname);
+    } catch {
+      return target;
+    }
   }
 
   /**

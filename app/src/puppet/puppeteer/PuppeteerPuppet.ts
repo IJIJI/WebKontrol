@@ -190,6 +190,16 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     await this._createPage();
   }
 
+  protected override async _doShowFallback(html: string): Promise<void> {
+    await this._ensurePage();
+    // A failed goto leaves Chromium still committing its own error page, and setContent
+    // evaluates against the document that commit destroys ("Execution context was
+    // destroyed"). Navigating to blank first supersedes the pending commit, latest wins
+    // inside the browser too, so setContent writes into a settled document.
+    await this._page.goto("about:blank");
+    await this._page.setContent(html);
+  }
+
   protected override _classifyFailure(error: unknown): NavigationFailure {
     return classifyNavigationFailure(error, this._isPageUsable());
   }
