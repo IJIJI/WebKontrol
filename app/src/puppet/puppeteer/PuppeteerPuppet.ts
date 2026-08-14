@@ -49,16 +49,24 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
 
     this._browser = await puppeteer.launch(settings);
 
-    // A puppet is only alive while its browser is. Without this a crashed Chromium keeps
-    // reporting Online and the orchestrator goes on navigating a dead process.
-    this._browser.on("disconnected", () => {
-      if (this._isClosing) return; // a shutdown we asked for is not a crash
-      this._setConnection(ConnectionState.OFFLINE, "Browser disconnected.");
-    });
+    // From here the browser exists: a failure below would leave init FAILED with an
+    // orphaned Chromium that close() never reaches (its guard sees a never-inited
+    // puppet), so close what we launched before rethrowing.
+    try {
+      // A puppet is only alive while its browser is. Without this a crashed Chromium
+      // keeps reporting Online and the orchestrator goes on navigating a dead process.
+      this._browser.on("disconnected", () => {
+        if (this._isClosing) return; // a shutdown we asked for is not a crash
+        this._setConnection(ConnectionState.OFFLINE, "Browser disconnected.");
+      });
 
-    // Reuse the browser's initial tab; fall back to a new one if it opened without any.
-    const [firstPage] = await this._browser.pages();
-    await this._createPage(firstPage);
+      // Reuse the browser's initial tab; fall back to a new one if it opened without any.
+      const [firstPage] = await this._browser.pages();
+      await this._createPage(firstPage);
+    } catch (error) {
+      await this._browser.close().catch(() => { });
+      throw error;
+    }
   }
 
   protected async _doClose(): Promise<void> {
