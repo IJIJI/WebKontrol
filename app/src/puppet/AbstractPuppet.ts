@@ -12,7 +12,7 @@ import { PuppetStore } from "../storage/stores/PuppetStore";
 import { BLANK_NAVIGATION_REQUEST, PuppetRuntimeSchema, type BasePuppetConfig, type NavigationRequest, type PuppetKey, type PuppetRuntime } from "./types/schema";
 import type { EntityAppearance } from "../common/entityAppearance/schema";
 import { errorMessage } from "../helpers/error";
-import { REPAIR_WINDOW_MS, repairDelay } from "./repairPacing";
+import { REPAIR_WINDOW_MS, repairDelay } from "./pacing";
 
 
 /**
@@ -352,7 +352,7 @@ export abstract class AbstractPuppet<
   private _crashMoments: number[] = [];
 
   /**
-   * Schedule a repair, paced by recent crash density (see repairPacing). Fire and
+   * Schedule a repair, paced by recent crash density (see pacing.ts). Fire and
    * forget for crash handlers; a repair already pending absorbs further requests.
    */
   protected _requestRepair(): void {

@@ -9,6 +9,8 @@ import type { PuppetWebhandlers } from "../../webServer/model";
 import type { PuppetDataBundle } from "../../puppet/types/model";
 import { PuppetOrchestratorStore } from "../../storage/stores/PuppetOrchestratorStore";
 import { PuppetOrchestratorRuntimeSchema, type PuppetOrchestratorRuntime } from "./schema";
+import { NavigationFailure, NavigationState } from "../../puppet/types/model";
+import { backoffDelay, DELAY_CAP_MS } from "../../puppet/pacing";
 
 
 export type PuppetOrchestratorEvents = {
@@ -201,24 +203,65 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     };
   }
 
+  private _retryAttempts: Map<PuppetKey, number> = new Map();
+  private _retryTimers: Map<PuppetKey, ReturnType<typeof setTimeout>> = new Map();
+
   /**
    * Navigate a puppet to whatever its assignment currently resolves to. Never rejects:
    * a load failure is an ongoing condition carried by the puppet's broadcast state, not
    * an error of whichever call happened to trigger the navigation, and the loops that
    * navigate many puppets must not stop at the first broken one.
+   *
+   * Failures retry forever on a backoff, always re-resolving (an assignment edited
+   * between failure and retry navigates to the current target, never a replay). Any
+   * fresh navigation supersedes a pending retry and resets the backoff: a config change
+   * is new information, and nobody should wait out a five minute delay to see their fix.
    */
-  private async _navigatePuppet(id: PuppetKey): Promise<void> {
+  private async _navigatePuppet(id: PuppetKey, isRetry = false): Promise<void> {
     const puppet = this._puppets.get(id)?.puppet;
     if (!puppet)
       return this._logger.error(`Attempted to navigate puppet ${id}. It does not exist.`);
 
+    this._cancelRetry(id);
+    if (!isRetry) this._retryAttempts.delete(id);
+
     try {
       await puppet.navigate(this._resolveNavigation(id));
+      this._retryAttempts.delete(id);
     } catch (error) {
-      // TODO: Retry with backoff (orchestrator recovery step); the failure kind on the
-      // puppet's navigation state says whether and how fast.
       this._logger.error(`Navigation failed for puppet "${id}".`, error);
+      this._scheduleRetry(id);
     }
+  }
+
+  private _cancelRetry(id: PuppetKey): void {
+    const timer = this._retryTimers.get(id);
+    if (timer === undefined) return;
+    clearTimeout(timer);
+    this._retryTimers.delete(id);
+  }
+
+  private _scheduleRetry(id: PuppetKey): void {
+    const navigation = this._puppets.get(id)?.info.navigation;
+    const failure = navigation?.state === NavigationState.FAILED ? navigation.failure : undefined;
+    // A throw without a failure record means the navigation never started (puppet not
+    // initialized, or closing): re-navigating cannot fix those.
+    // TODO: Relaunch on OFFLINE/FAILED is the recovery for that class (step C).
+    if (failure === undefined) return;
+
+    const attempt = (this._retryAttempts.get(id) ?? 0) + 1;
+    this._retryAttempts.set(id, attempt);
+
+    // STATUS enters at the cap: the target answered and said no, so retrying changes
+    // nothing until the target or the config does. Everything else starts at the
+    // bottom, where a wrong guess costs a few cheap retries that escalate on their own.
+    const delay = failure === NavigationFailure.STATUS ? DELAY_CAP_MS : backoffDelay(attempt);
+    this._logger.warn(`Retrying navigation for puppet "${id}" in ${delay}ms (attempt ${attempt}, ${failure}).`);
+
+    this._retryTimers.set(id, setTimeout(() => {
+      this._retryTimers.delete(id);
+      void this._navigatePuppet(id, true);
+    }, delay));
   }
 
   public async init(): Promise<void> {
@@ -265,6 +308,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
   /** Close every puppet, in parallel. Puppet close() never rejects, so neither does this. */
   public async close(): Promise<void> {
+    for (const id of [...this._retryTimers.keys()]) this._cancelRetry(id);
     await Promise.all([...this._puppets.values()].map((bundle) => bundle.puppet.close()));
     this._logger.info("Closed all puppets.");
   }

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { TimeoutError } from "puppeteer";
 import { KnownFailure, NavigationFailure } from "../types/model";
 import { classifyNavigationFailure } from "./failures";
-import { repairDelay } from "../repairPacing";
+import { repairDelay } from "../pacing";
 
 // The classifier is an ordered ladder, and the ordering is the point of these checks:
 // a reorder that typechecks fine can still misclassify.
