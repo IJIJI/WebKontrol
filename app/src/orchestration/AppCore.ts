@@ -132,6 +132,17 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
 
   }
 
+  /**
+   * Deliberate shutdown. Only the puppets need closing: they own external Chromium
+   * processes that outlive a killed node process, while the web server's sockets die
+   * with it.
+   */
+  public async close(): Promise<void> {
+    this._logger.important("Shutting down...");
+    await this._puppetOrchestrator.close();
+    this._logger.important("Shutdown complete.");
+  }
+
   private _updateState(state: Partial<WebServerState>) {
     this._webState = {...this._webState, ...state};
     this._logger.debug(`Updating webstate and syncing to webserver...`);

@@ -263,6 +263,12 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     );
   }
 
+  /** Close every puppet, in parallel. Puppet close() never rejects, so neither does this. */
+  public async close(): Promise<void> {
+    await Promise.all([...this._puppets.values()].map((bundle) => bundle.puppet.close()));
+    this._logger.info("Closed all puppets.");
+  }
+
   public getHandlers(): PuppetWebhandlers {
     return {
       updateOrchestratorRuntime: (runtime: Partial<PuppetOrchestratorRuntime>) => this.updateRuntime(runtime),
