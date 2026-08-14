@@ -287,21 +287,48 @@ export abstract class AbstractPuppet<
     });
   }
 
+  // Increments per navigate() call: the latest call owns the navigation record, and a
+  // superseded call must write nothing. Not a queue on purpose: queueing would make a
+  // superseded target burn its full load_timeout before the current one starts.
+  private _navigationGeneration = 0;
+
+  /**
+   * Contract: throwing means the navigation failed. Returning means it either succeeded
+   * or was superseded by a newer call, and in both cases the caller has nothing left to
+   * do; the newer navigation owns the outcome.
+   */
   async navigate(request: NavigationRequest): Promise<void> {
     if (!this._isInit) throw new Error("Puppet not initialized");
+    if (this._isClosing) return;
 
+    const generation = ++this._navigationGeneration;
+    this._logger.info(`Navigation #${generation} to ${request.target} starting.`);
     this._setNavigation({ state: NavigationState.LOADING, request });
 
     try {
       await this._doNavigate(request);
     } catch (error) {
-      this._logger.error(`Navigation failed (${this._deriveFailureKind(error)}).`, error);
+      // The loser of two concurrent navigations rejects ("Navigation interrupted by
+      // another one") after the winner wrote LOADING; without this check that lands
+      // as a spurious FAILED on top of the winner.
+      if (this._isSuperseded(generation)) return;
+
+      this._logger.error(`Navigation #${generation} failed (${this._deriveFailureKind(error)}).`, error);
       this._setNavigation({ state: NavigationState.FAILED, request, error });
       throw error;
     }
 
+    if (this._isSuperseded(generation)) return;
+
+    this._logger.info(`Navigation #${generation} loaded.`);
     this._setNavigation({ state: NavigationState.LOADED, request });
     void this._refreshTargetInfo();
+  }
+
+  private _isSuperseded(generation: number): boolean {
+    if (generation === this._navigationGeneration && !this._isClosing) return false;
+    this._logger.debug(`Navigation #${generation} superseded, discarding its result.`);
+    return true;
   }
 
   async clearNavigation(): Promise<void> {
