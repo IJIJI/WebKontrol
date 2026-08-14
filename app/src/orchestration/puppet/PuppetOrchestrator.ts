@@ -10,7 +10,8 @@ import type { PuppetDataBundle } from "../../puppet/types/model";
 import { PuppetOrchestratorStore } from "../../storage/stores/PuppetOrchestratorStore";
 import { PuppetOrchestratorRuntimeSchema, type PuppetOrchestratorRuntime } from "./schema";
 import { NavigationFailure, NavigationState } from "../../puppet/types/model";
-import { backoffDelay, DELAY_CAP_MS } from "../../puppet/pacing";
+import { RetryHandler, type BackoffPacing } from "../../puppet/pacing";
+import { ConnectionState } from "../../types/CommonTypes";
 
 
 export type PuppetOrchestratorEvents = {
@@ -89,7 +90,11 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     const id = config.id;
 
     puppet.on('runtime_update', (runtime) => this._updatePuppetData(id, {runtime}));
-    puppet.on('info_update', (info) => this._updatePuppetData(id, {info}));
+    puppet.on('info_update', (info) => {
+      const previous = this._puppets.get(id)?.info.state;
+      this._updatePuppetData(id, {info});
+      if (previous !== undefined && previous !== info.state) this._onConnectionChange(id, previous, info.state);
+    });
     puppet.on('appearance_update', (appearance) => this._updatePuppetData(id, {appearance}));
 
     const pupBundle: PuppetFullBundle = {
@@ -203,8 +208,28 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     };
   }
 
-  private _retryAttempts: Map<PuppetKey, number> = new Map();
-  private _retryTimers: Map<PuppetKey, ReturnType<typeof setTimeout>> = new Map();
+  // Navigation retries are cheap (a page load), so their cap is low: a display should
+  // never show wrong content for minutes because of a network blip. Relaunches start a
+  // whole Chromium, so they escalate to the default five minute cap.
+  private _navRetries: Map<PuppetKey, RetryHandler> = new Map();
+  private _relaunches: Map<PuppetKey, RetryHandler> = new Map();
+
+  private _handlerFor(map: Map<PuppetKey, RetryHandler>, id: PuppetKey, pacing?: BackoffPacing): RetryHandler {
+    let handler = map.get(id);
+    if (!handler) {
+      handler = new RetryHandler(pacing);
+      map.set(id, handler);
+    }
+    return handler;
+  }
+
+  private _navRetryFor(id: PuppetKey): RetryHandler {
+    return this._handlerFor(this._navRetries, id, { baseMs: 2_000, capMs: 60_000 });
+  }
+
+  private _relaunchFor(id: PuppetKey): RetryHandler {
+    return this._handlerFor(this._relaunches, id);
+  }
 
   /**
    * Navigate a puppet to whatever its assignment currently resolves to. Never rejects:
@@ -215,53 +240,80 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
    * Failures retry forever on a backoff, always re-resolving (an assignment edited
    * between failure and retry navigates to the current target, never a replay). Any
    * fresh navigation supersedes a pending retry and resets the backoff: a config change
-   * is new information, and nobody should wait out a five minute delay to see their fix.
+   * is new information, and nobody should wait out the delay to see their fix.
    */
   private async _navigatePuppet(id: PuppetKey, isRetry = false): Promise<void> {
     const puppet = this._puppets.get(id)?.puppet;
     if (!puppet)
       return this._logger.error(`Attempted to navigate puppet ${id}. It does not exist.`);
 
-    this._cancelRetry(id);
-    if (!isRetry) this._retryAttempts.delete(id);
+    const retry = this._navRetryFor(id);
+    if (isRetry) retry.cancel();
+    else retry.reset();
 
     try {
       await puppet.navigate(this._resolveNavigation(id));
-      this._retryAttempts.delete(id);
+      retry.reset();
     } catch (error) {
       this._logger.error(`Navigation failed for puppet "${id}".`, error);
-      this._scheduleRetry(id);
+      this._scheduleNavRetry(id);
     }
   }
 
-  private _cancelRetry(id: PuppetKey): void {
-    const timer = this._retryTimers.get(id);
-    if (timer === undefined) return;
-    clearTimeout(timer);
-    this._retryTimers.delete(id);
-  }
-
-  private _scheduleRetry(id: PuppetKey): void {
+  private _scheduleNavRetry(id: PuppetKey): void {
     const navigation = this._puppets.get(id)?.info.navigation;
     const failure = navigation?.state === NavigationState.FAILED ? navigation.failure : undefined;
     // A throw without a failure record means the navigation never started (puppet not
-    // initialized, or closing): re-navigating cannot fix those.
-    // TODO: Relaunch on OFFLINE/FAILED is the recovery for that class (step C).
+    // initialized, or closing): re-navigating cannot fix those, relaunching does.
     if (failure === undefined) return;
-
-    const attempt = (this._retryAttempts.get(id) ?? 0) + 1;
-    this._retryAttempts.set(id, attempt);
 
     // STATUS enters at the cap: the target answered and said no, so retrying changes
     // nothing until the target or the config does. Everything else starts at the
     // bottom, where a wrong guess costs a few cheap retries that escalate on their own.
-    const delay = failure === NavigationFailure.STATUS ? DELAY_CAP_MS : backoffDelay(attempt);
-    this._logger.warn(`Retrying navigation for puppet "${id}" in ${delay}ms (attempt ${attempt}, ${failure}).`);
+    const delay = this._navRetryFor(id).schedule(
+      () => void this._navigatePuppet(id, true),
+      { atCap: failure === NavigationFailure.STATUS },
+    );
+    if (delay !== undefined)
+      this._logger.warn(`Retrying navigation for puppet "${id}" in ${delay}ms (${failure}).`);
+  }
 
-    this._retryTimers.set(id, setTimeout(() => {
-      this._retryTimers.delete(id);
-      void this._navigatePuppet(id, true);
-    }, delay));
+  /**
+   * Process-level recovery: a puppet that went OFFLINE (browser died) or FAILED (never
+   * came up) gets restarted on the backoff, forever. Edge-triggered off the broadcast
+   * state, so a boot-order failure heals within the first escalating minute and a
+   * genuinely broken config settles into an occasional relaunch attempt.
+   */
+  private _onConnectionChange(id: PuppetKey, previous: ConnectionState, next: ConnectionState): void {
+    if (this._isClosing) return;
+
+    if (next === ConnectionState.ONLINE) {
+      this._relaunchFor(id).reset();
+      return;
+    }
+
+    if (next !== ConnectionState.OFFLINE && next !== ConnectionState.FAILED) return;
+    // CLOSING → OFFLINE is a teardown we asked for: app shutdown (guarded above too)
+    // or a restart's own close, which concludes with ONLINE or FAILED on its own.
+    if (previous === ConnectionState.CLOSING) return;
+
+    // A dead puppet's navigation retries only churn; the relaunch ends in a fresh
+    // navigation anyway.
+    this._navRetryFor(id).cancel();
+
+    const delay = this._relaunchFor(id).schedule(() => void this._relaunchPuppet(id));
+    if (delay !== undefined)
+      this._logger.warn(`Relaunching puppet "${id}" in ${delay}ms (went ${next}).`);
+  }
+
+  private async _relaunchPuppet(id: PuppetKey): Promise<void> {
+    const puppet = this._puppets.get(id)?.puppet;
+    if (!puppet || this._isClosing) return;
+
+    await puppet.restart(); // never rejects; the outcome is the resulting state
+    // Landing FAILED re-enters _onConnectionChange, which schedules the next attempt.
+    if (this._puppets.get(id)?.info.state === ConnectionState.ONLINE)
+      await this._navigatePuppet(id);
   }
 
   public async init(): Promise<void> {
@@ -306,9 +358,13 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     );
   }
 
+  private _isClosing = false;
+
   /** Close every puppet, in parallel. Puppet close() never rejects, so neither does this. */
   public async close(): Promise<void> {
-    for (const id of [...this._retryTimers.keys()]) this._cancelRetry(id);
+    this._isClosing = true;
+    for (const handler of this._navRetries.values()) handler.cancel();
+    for (const handler of this._relaunches.values()) handler.cancel();
     await Promise.all([...this._puppets.values()].map((bundle) => bundle.puppet.close()));
     this._logger.info("Closed all puppets.");
   }

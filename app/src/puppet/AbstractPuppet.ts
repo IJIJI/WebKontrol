@@ -12,7 +12,7 @@ import { PuppetStore } from "../storage/stores/PuppetStore";
 import { BLANK_NAVIGATION_REQUEST, PuppetRuntimeSchema, type BasePuppetConfig, type NavigationRequest, type PuppetKey, type PuppetRuntime } from "./types/schema";
 import type { EntityAppearance } from "../common/entityAppearance/schema";
 import { errorMessage } from "../helpers/error";
-import { REPAIR_WINDOW_MS, repairDelay } from "./pacing";
+import { REPAIR_WINDOW_MS, repairDelay, RetryHandler } from "./pacing";
 
 
 /**
@@ -372,7 +372,7 @@ export abstract class AbstractPuppet<
   }
 
 
-  private _pendingRepair?: ReturnType<typeof setTimeout>;
+  private _repairRetry = new RetryHandler();
   private _crashMoments: number[] = [];
 
   /**
@@ -380,7 +380,7 @@ export abstract class AbstractPuppet<
    * forget for crash handlers; a repair already pending absorbs further requests.
    */
   protected _requestRepair(): void {
-    if (!this._isInit || this._isClosing || this._pendingRepair !== undefined) return;
+    if (!this._isInit || this._isClosing || this._repairRetry.isPending) return;
 
     const now = Date.now();
     this._crashMoments = this._crashMoments.filter((m) => now - m < REPAIR_WINDOW_MS);
@@ -388,16 +388,11 @@ export abstract class AbstractPuppet<
 
     const delay = repairDelay(this._crashMoments.length);
     this._logger.warn(`Repair scheduled in ${delay}ms (${this._crashMoments.length} recent crashes).`);
-    this._pendingRepair = setTimeout(() => {
-      this._pendingRepair = undefined;
-      void this.repair();
-    }, delay);
+    this._repairRetry.scheduleIn(delay, () => void this.repair());
   }
 
   private _cancelPendingRepair(): void {
-    if (this._pendingRepair === undefined) return;
-    clearTimeout(this._pendingRepair);
-    this._pendingRepair = undefined;
+    this._repairRetry.cancel();
   }
 
   /**
