@@ -1,5 +1,5 @@
 import z from "zod";
-import { LoadTimeoutSchema, LoadTimeoutSchemaDefault } from "../../puppet/types/schema";
+import { LoadTimeoutSchema } from "../../puppet/types/schema";
 import { DisplayNameSchema } from "../../types/CommonTypes";
 import { blockSlot } from "../blocks/types/schema";
 import { EntityAppearanceField } from "../../common/entityAppearance/schema";

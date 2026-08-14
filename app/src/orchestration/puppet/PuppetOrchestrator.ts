@@ -1,7 +1,7 @@
 import EventEmitter from "node:events";
 import { Logger } from "../../logging/Logger";
 import type { AbstractPuppet } from "../../puppet/AbstractPuppet";
-import { BLANK_PUPPET_TARGET, type PuppetKey, type PuppetRuntime } from "../../puppet/types/schema";
+import { BLANK_NAVIGATION_REQUEST, type NavigationRequest, type PuppetKey, type PuppetRuntime } from "../../puppet/types/schema";
 import type { EntityAppearance } from "../../common/entityAppearance/schema";
 import type { ViewKey } from "../../views/types/schema";
 import type { ViewManager } from "../../views/ViewManager";
@@ -88,7 +88,6 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
 
     puppet.on('runtime_update', (runtime) => this._updatePuppetData(id, {runtime}));
     puppet.on('info_update', (info) => this._updatePuppetData(id, {info}));
-    puppet.on('config_update', (config) => this._updatePuppetData(id, {config}));
     puppet.on('appearance_update', (appearance) => this._updatePuppetData(id, {appearance}));
 
     const pupBundle: PuppetFullBundle = {
@@ -124,9 +123,8 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
   public async assignView(id: PuppetKey, viewKey: ViewKey): Promise<void> {
     await this.updateRuntime({ assignments: { ...this._runtime.assignments, [id]: viewKey } });
     // Kick off navigation but don't block the caller on the browser load (up to load_timeout).
-    // Load success/failure reaches the UI via the state broadcast (puppet Online/Error).
-    // TODO: Add feedback toast to ui? Or make it actually wait?
-    void this._navigatePuppet(id).catch((e) => this._logger.error(`Navigation failed for puppet "${id}":`, e));
+    // Load success/failure reaches the UI via the puppet's broadcast navigation state.
+    void this._navigatePuppet(id);
     this._logger.info(`Assigned puppet "${id}" to view "${viewKey}".`);
   }
 
@@ -135,8 +133,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     delete assignments[id];
     await this.updateRuntime({ assignments });
     // Fire-and-forget the navigation (→ default view or about:blank); see assignView.
-    // TODO: Add feedback toast to ui? Or make it actually wait?
-    void this._navigatePuppet(id).catch((e) => this._logger.error(`Navigation failed for puppet "${id}":`, e));
+    void this._navigatePuppet(id);
     this._logger.info(`Unassigned puppet "${id}".`);
   }
 
@@ -192,20 +189,36 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     this._logger.info(`Cleared references to removed view "${key}".`);
   }
 
-  /** Resolve a puppet's assigned (or default) view into the runtime target it should load. */
-  private _resolveTargetRuntime(id: PuppetKey): PuppetRuntime {
+  /** Resolve a puppet's assigned (or default) view into the navigation it should perform. */
+  private _resolveNavigation(id: PuppetKey): NavigationRequest {
     const vm = this._viewManager;
     const viewKey = this._resolvedViewKey(id);
     const view = vm && viewKey !== undefined ? vm.getView(viewKey) : undefined;
-    if (!vm || viewKey === undefined || !view) return BLANK_PUPPET_TARGET;
+    if (!vm || viewKey === undefined || !view) return { ...BLANK_NAVIGATION_REQUEST };
     return {
       target: `${this._serveBase}${vm.viewPath(viewKey)}`,
       load_timeout: view.getConfig().loadTimeout ?? vm.getDefaultLoadTimeout(),
     };
   }
 
+  /**
+   * Navigate a puppet to whatever its assignment currently resolves to. Never rejects:
+   * a load failure is an ongoing condition carried by the puppet's broadcast state, not
+   * an error of whichever call happened to trigger the navigation, and the loops that
+   * navigate many puppets must not stop at the first broken one.
+   */
   private async _navigatePuppet(id: PuppetKey): Promise<void> {
-    await this.updatePuppetRuntime(id, this._resolveTargetRuntime(id));
+    const puppet = this._puppets.get(id)?.puppet;
+    if (!puppet)
+      return this._logger.error(`Attempted to navigate puppet ${id}. It does not exist.`);
+
+    try {
+      await puppet.navigate(this._resolveNavigation(id));
+    } catch (error) {
+      // TODO: Retry with backoff (orchestrator recovery step); the failure kind on the
+      // puppet's navigation state says whether and how fast.
+      this._logger.error(`Navigation failed for puppet "${id}".`, error);
+    }
   }
 
   public async init(): Promise<void> {

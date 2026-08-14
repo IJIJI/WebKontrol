@@ -7,6 +7,7 @@ import { DetailList, type DetailRow } from "../components/detailList/DetailList"
 import { ViewTypeChip } from "../components/views/ViewTypeChip";
 import { Icon } from "../components/icons/Icon";
 import { Icons } from "../components/icons/Icons";
+import { NavigationState } from "../../../src/puppet/types/model";
 import "./puppetPage.less";
 
 export default function PuppetPage(): JSX.Element {
@@ -48,12 +49,14 @@ export default function PuppetPage(): JSX.Element {
   if (assignedView) assignedRows.push({ label: "Type", value: <ViewTypeChip type={assignedView.config.type} /> });
 
   const targetInfo = puppet.info.target_info;
-  const { load_timeout: loadTimeout } = puppet.runtime;
+  const navigation = puppet.info.navigation;
+  // The request exists on every navigation state except IDLE (never navigated).
+  const request = navigation.state !== NavigationState.IDLE ? navigation.request : undefined;
   const pageRows: DetailRow[] = [
     { label: "Title", value: targetInfo?.title ?? "-" },
     { label: "URL", value: targetInfo?.url ?? "-", copy: targetInfo?.url },
-    // Runtime value, resolved from the shown view's config on navigation (0 disables it).
-    { label: "Load timeout", value: loadTimeout === 0 ? "Disabled" : `${loadTimeout} ms` },
+    // Resolved from the shown view's config on navigation (0 disables it).
+    { label: "Load timeout", value: request ? (request.load_timeout === 0 ? "Disabled" : `${request.load_timeout} ms`) : "-" },
   ];
   if (targetInfo?.description) pageRows.push({ label: "Description", value: targetInfo.description });
   if (targetInfo?.screenshot)
