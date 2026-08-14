@@ -87,7 +87,7 @@ export function renderFallbackPage(data: FallbackData): string {
   .clock .bg {
     position: absolute;
     inset: 0;
-    opacity: 0.07;
+    opacity: 0.12;
     user-select: none;
   }
   .clock .face {
