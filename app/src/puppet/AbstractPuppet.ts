@@ -200,6 +200,25 @@ export abstract class AbstractPuppet<
 
 
   /**
+   * Tear down and come back up: the recovery for OFFLINE (the browser process is gone)
+   * and FAILED (it never came up), where repair() cannot help because there is nothing
+   * left to repair inside. Never rejects, like the lifecycle methods it composes; the
+   * outcome is the resulting connection state.
+   *
+   * Exists as a method because it is close() + init() plus the lifecycle resets a
+   * caller must not reach in from outside to make.
+   */
+  async restart(): Promise<void> {
+    if (this._isClosing) return;
+    this._logger.warn("Restarting...");
+
+    await this.close(); // returns immediately for a puppet that never came up
+    this._isInit = false;
+    this._crashMoments = []; // a fresh browser starts with a clean crash history
+    await this.init();
+  }
+
+  /**
    * Commit a state change and broadcast it. Deliberately synchronous and never touching
    * the live page: recording a state must not be blockable by the page that caused it,
    * or a wedged page could hang the recording of its own failure. Freshness of target
