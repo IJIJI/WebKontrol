@@ -2,6 +2,8 @@ import EventEmitter from "node:events";
 import { Logger } from "../logging/Logger";
 import { ConnectionState } from "../types/CommonTypes";
 import {
+  KnownFailure,
+  NavigationFailure,
   NavigationState,
   type PuppetInfo,
   type TargetInfo,
@@ -11,6 +13,15 @@ import { BLANK_NAVIGATION_REQUEST, PuppetRuntimeSchema, type BasePuppetConfig, t
 import type { EntityAppearance } from "../common/entityAppearance/schema";
 import { errorMessage } from "../helpers/error";
 
+
+/**
+ * What a navigation transition may claim (Introduce Parameter Object: the validity of
+ * the other fields depends on the state, which positional optionals cannot express).
+ * No IDLE member: nothing transitions to IDLE, it is only ever the initial state.
+ */
+type NavigationInput =
+  | { state: NavigationState.LOADING | NavigationState.LOADED; request: NavigationRequest }
+  | { state: NavigationState.FAILED; request: NavigationRequest; error: unknown };
 
 export type PuppetEvents = {
   info_update: [info: PuppetInfo];
@@ -147,11 +158,11 @@ export abstract class AbstractPuppet<
       await this._doInit();
       this._isInit = true;
 
-      await this._setConnection(ConnectionState.ONLINE);
+      this._setConnection(ConnectionState.ONLINE);
       this._logger.info("Initialized.");
 
     } catch (error) {
-      await this._setConnection(ConnectionState.FAILED, error);
+      this._setConnection(ConnectionState.FAILED, error);
       this._logger.error("Failed to initialize", error);
     }
   }
@@ -172,16 +183,47 @@ export abstract class AbstractPuppet<
       this._logger.warn("Close did not complete cleanly.", error);
     } finally {
       // No error: this state was asked for, it is not a fault.
-      await this._setConnection(ConnectionState.OFFLINE);
+      this._setConnection(ConnectionState.OFFLINE);
       this._logger.info("Closed.");
     }
   }
 
 
-  protected async _updateInfo(info?: Partial<PuppetInfo>): Promise<void> {
+  /**
+   * Commit a state change and broadcast it. Deliberately synchronous and never touching
+   * the live page: recording a state must not be blockable by the page that caused it,
+   * or a wedged page could hang the recording of its own failure. Freshness of target
+   * info is _refreshTargetInfo's job.
+   */
+  protected _updateInfo(info?: Partial<PuppetInfo>): void {
     this._info = { ...this._info, ...info };
 
-    this.emit("info_update", await this.getInfo());
+    try {
+      this.emit("info_update", this.getLastInfo());
+    } catch (error) {
+      // A listener's bug must not join the puppet's state machine, where it would be
+      // misrecorded as this puppet failing. One line per emit, not per listener, so a
+      // broken listener firing on every broadcast cannot flood the log.
+      this._logger.error("An info_update listener threw.", error);
+    }
+  }
+
+  /**
+   * Read fresh target info from the live page into the cache and rebroadcast.
+   * Fire and forget.
+   */
+  // ponytail: unguarded concurrent reads; an older read resolving late can briefly
+  // leave stale title/description in the broadcast. Cosmetic, self-corrects on the
+  // next navigation event. Add a read generation if it ever misleads anyone.
+  protected async _refreshTargetInfo(): Promise<void> {
+    if (this._info.state !== ConnectionState.ONLINE || this._isNavigating) return;
+
+    try {
+      this._lastTargetInfo = await this._getTargetInfo();
+      this._updateInfo();
+    } catch (error) {
+      this._logger.debug("Failed to read target info, keeping the last known.", error);
+    }
   }
 
 
@@ -203,39 +245,63 @@ export abstract class AbstractPuppet<
    * degraded state and omit it on the way back out: `_updateInfo` merges partials, so a
    * state set without it would keep reporting the previous failure's message.
    */
-  protected async _setConnection(state: ConnectionState, error?: unknown): Promise<void> {
-    await this._updateInfo({
+  protected _setConnection(state: ConnectionState, error?: unknown): void {
+    this._updateInfo({
       state,
       error: error === undefined ? undefined : errorMessage(error),
       moment: Date.now(),
     });
   }
 
-  /** Record what the puppet was asked to show and how that went. */
-  protected async _setNavigation(state: NavigationState, request?: NavigationRequest, error?: unknown): Promise<void> {
-    await this._updateInfo({
-      navigation: {
-        state,
-        request,
-        error: error === undefined ? undefined : errorMessage(error),
-        moment: Date.now(),
-      },
+  /**
+   * What kind of failure this was, in whatever terms the driver can tell. Non-abstract
+   * and defaulting to UNKNOWN so a driver with nothing better to say is not forced to
+   * pretend it knows.
+   */
+  protected _classifyFailure(_error: unknown): NavigationFailure {
+    return NavigationFailure.UNKNOWN;
+  }
+
+  /** A thrower that already stated its kind outranks whatever the driver can guess. */
+  private _deriveFailureKind(error: unknown): NavigationFailure {
+    return error instanceof KnownFailure ? error.kind : this._classifyFailure(error);
+  }
+
+  /**
+   * Record what the puppet was asked to show and how that went. Failure kind and HTTP
+   * status are derived here rather than passed, so no call site can forget them.
+   */
+  protected _setNavigation(input: NavigationInput): void {
+    this._updateInfo({
+      navigation:
+        input.state === NavigationState.FAILED
+          ? {
+              state: input.state,
+              request: input.request,
+              failure: this._deriveFailureKind(input.error),
+              error: errorMessage(input.error),
+              status: input.error instanceof KnownFailure ? input.error.status : undefined,
+              moment: Date.now(),
+            }
+          : { state: input.state, request: input.request, moment: Date.now() },
     });
   }
-  
+
   async navigate(request: NavigationRequest): Promise<void> {
     if (!this._isInit) throw new Error("Puppet not initialized");
-    
-    try {  
-      await this._setNavigation(NavigationState.LOADING, request);
+
+    this._setNavigation({ state: NavigationState.LOADING, request });
+
+    try {
       await this._doNavigate(request);
-      await this._setNavigation(NavigationState.LOADED, request);
     } catch (error) {
-      this._logger.error("Failed to navigate puppet", error);
-      await this._setNavigation(NavigationState.FAILED, request, error);
+      this._logger.error(`Navigation failed (${this._deriveFailureKind(error)}).`, error);
+      this._setNavigation({ state: NavigationState.FAILED, request, error });
       throw error;
-      // TODO: Implement failed loading handeling -> Better differentiate on errors to decide if it is a webpage error or a puppeteer error.
     }
+
+    this._setNavigation({ state: NavigationState.LOADED, request });
+    void this._refreshTargetInfo();
   }
 
   async clearNavigation(): Promise<void> {

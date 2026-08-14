@@ -1,9 +1,10 @@
 import puppeteer, { type Browser, type Page } from "puppeteer";
 import { AbstractPuppet } from "../AbstractPuppet";
-import { NavigationState, type TargetInfo } from "../types/model";
+import { KnownFailure, NavigationFailure, NavigationState, type TargetInfo } from "../types/model";
 import { type PuppeteerPuppetConfig } from "./schema";
 import { BLANK_NAVIGATION_REQUEST, type NavigationRequest } from "../types/schema";
 import { ConnectionState } from "../../types/CommonTypes";
+import { classifyNavigationFailure } from "./failures";
 
 export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
   protected override _getLogLabelExtensions(): Array<string> {
@@ -52,7 +53,7 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     // reporting Online and the orchestrator goes on navigating a dead process.
     this._browser.on("disconnected", () => {
       if (this._isClosing) return; // a shutdown we asked for is not a crash
-      void this._setConnection(ConnectionState.OFFLINE, "Browser disconnected.");
+      this._setConnection(ConnectionState.OFFLINE, "Browser disconnected.");
     });
 
     // Reuse the browser's initial tab; fall back to a new one if it opened without any.
@@ -98,10 +99,17 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     });
 
     // The renderer died while the tab object lived on, so whatever was loaded is gone
-    // even though the browser is fine. Report it against the request that put it there.
+    // even though the browser is fine. Report it against the request that put it there;
+    // a crash with nothing requested has no navigation to fail.
     this._page.on("error", (error) => {
       this._logger.error("Renderer crashed.", error);
-      void this._setNavigation(NavigationState.FAILED, this._info.navigation.request, error);
+      const navigation = this._info.navigation;
+      if (navigation.state === NavigationState.IDLE) return;
+      this._setNavigation({
+        state: NavigationState.FAILED,
+        request: navigation.request,
+        error: new KnownFailure(NavigationFailure.PUPPET, "Renderer crashed.", undefined, { cause: error }),
+      });
     });
 
     // Navigations nobody asked for: a link click, a redirect, a meta refresh. The URL is
@@ -109,11 +117,11 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     // becomes readable on load. Two listeners because they carry different halves.
     this._page.on("framenavigated", (frame) => {
       if (frame !== this._page.mainFrame() || this._isNavigating) return;
-      void this._updateInfo();
+      void this._refreshTargetInfo();
     });
     this._page.on("load", () => {
       if (this._isNavigating) return;
-      void this._updateInfo();
+      void this._refreshTargetInfo();
     });
   }
 
@@ -149,6 +157,10 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     await this._createPage();
   }
 
+  protected override _classifyFailure(error: unknown): NavigationFailure {
+    return classifyNavigationFailure(error, this._isPageUsable());
+  }
+
   protected async _doNavigate(request: NavigationRequest): Promise<void> {
     await this._ensurePage();
 
@@ -157,8 +169,14 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     // goto only rejects on network level failures and timeouts, so a 404 or a 500 would
     // otherwise report as loaded while the screen shows the server's error page. A null
     // response means no navigation happened at all (same document, or about:blank).
-    if (response && !response.ok())
-      throw new Error(`Target responded ${response.status()} ${response.statusText()}`);
+    if (response && !response.ok()) {
+      const text = response.statusText(); // empty on HTTP/2, which has no reason phrases
+      throw new KnownFailure(
+        NavigationFailure.STATUS,
+        `Target responded ${response.status()}${text ? ` ${text}` : ""}`,
+        response.status(),
+      );
+    }
   }
 
   // TODO: Add url and image fetching?
