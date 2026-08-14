@@ -60,7 +60,7 @@ export function renderFallbackPage(data: FallbackData): string {
   html, body {
     margin: 0;
     height: 100%;
-    background: #1c1c1e;
+    background: #000;
     color: #d6d6d6;
     font-family: system-ui, sans-serif;
     overflow: hidden;
