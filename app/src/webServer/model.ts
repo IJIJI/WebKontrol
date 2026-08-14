@@ -85,7 +85,7 @@ export interface RouteRequest {
 export interface RouteResponse {
   status?: number;
   redirect?: string; // if set, redirect here (status defaults to 302)
-  body?: string;
+  body?: string | Buffer; // Buffer for binary assets (fonts); express res.send handles both
   contentType?: string; // for body, e.g. "text/html"
   headers?: Record<string, string>; // extra response headers, e.g. Cache-Control
   // If set, the handler declines to respond and the request continues down the

@@ -3,6 +3,18 @@
    (colors, grid templates, positions) as inline styles. User-supplied CSS will layer on
    top of this later, so keep selectors shallow and class names stable (wk- prefix). */
 
+/* Bundled display fonts (SIL OFL), served by the ViewServer next to this stylesheet.
+   The admin declares the same faces in ui/src/styles/font/font.less so pickers preview
+   truthfully; keep the two in sync with FONT_SUGGESTIONS. */
+@font-face {
+  font-family: "DSEG7 Classic";
+  src: url("/viewclient/fonts/DSEG7Classic-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DSEG14 Classic";
+  src: url("/viewclient/fonts/DSEG14Classic-Regular.woff2") format("woff2");
+}
+
 html,
 body {
   margin: 0;
