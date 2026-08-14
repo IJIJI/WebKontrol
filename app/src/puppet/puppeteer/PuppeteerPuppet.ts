@@ -24,6 +24,12 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     const settings = {
       headless: false, // extension are allowed only in head-full mode
       defaultViewport: null,
+      // The app owns shutdown (app.ts walks close() on SIGINT/SIGTERM). Puppeteer's own
+      // handlers force-kill the browser tree and process.exit, racing the graceful
+      // close: the loser taskkills already-dead processes and logs errors for a stop.
+      handleSIGINT: false,
+      handleSIGTERM: false,
+      handleSIGHUP: false,
       ignoreDefaultArgs: ["--enable-automation"],
       // executablePath: '/usr/bin/chromium-browser',
       executablePath: <string | undefined>undefined,
