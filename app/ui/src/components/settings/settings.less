@@ -57,8 +57,10 @@
       margin: 0 0 3px 2px;
     }
 
-    &.collapsible { 
-      .toggle {
+    &.collapsible {
+      // Child combinators throughout: groups nest, and a descendant selector would let an open
+      // outer group rotate every chevron inside it, including those of folded inner groups.
+      > .toggle {
         background: none;
         border: 0;
         padding: 0;
@@ -72,7 +74,7 @@
           transition: transform @button-animation-time ease;
         }
       }
-      &.open .toggle svg {
+      &.open > .toggle svg {
         transform: rotate(90deg);
       }
     }
