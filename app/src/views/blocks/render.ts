@@ -102,6 +102,13 @@ export function renderBlockView(
   registry: BlockTypeRegistry,
   container: HTMLElement | DocumentFragment,
 ): void {
+  // An empty view (no root yet) paints a blank page rather than a broken block: nothing is
+  // wrong with it, it simply has no content.
+  if (raw === null || raw === undefined) {
+    litRender(html``, container);
+    return;
+  }
+
   const root = resolveBlock(raw, registry);
   litRender(renderResolvedBlock(root), container);
 }

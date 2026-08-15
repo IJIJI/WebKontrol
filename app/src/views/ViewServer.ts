@@ -113,7 +113,10 @@ export class ViewServer {
   /** The config payload a stream sends for a view, or null if it isn't a (renderable) block view. */
   private _blockConfigJson(key: ViewKey): string | null {
     const result = this._views.getView(key)?.serve();
-    return result?.kind === "blocks" ? JSON.stringify(result.root) : null;
+    // `null` here means "no stream to give" (not a block view, or no such view) and closes the
+    // connection. An empty block view is different: it streams the JSON literal null, which the
+    // client paints as a blank page and can later replace when a root is added.
+    return result?.kind === "blocks" ? JSON.stringify(result.root ?? null) : null;
   }
 
   /** A client opened a view's config stream: seed with the current config, then subscribe. */

@@ -80,7 +80,10 @@ export function extendViewConfig<const B extends ViewType, T extends z.ZodRawSha
 //* Concrete view configs:
 // BlockView: renders a block tree (its single root block) as a page.
 export const BlockViewConfigSchema = extendViewConfig("blocks", {
-  root: blockSlot({ label: "Root block" } satisfies FieldMeta),
+  // Optional: a view has to be savable before anything is placed in it, and clearing the tree
+  // to start over must not require deleting the view. An empty view serves a blank page, which
+  // is a legitimate thing to point a display at.
+  root: blockSlot({ label: "Root block" } satisfies FieldMeta).optional(),
 });
 export type BlockViewConfig = z.infer<typeof BlockViewConfigSchema>;
 
