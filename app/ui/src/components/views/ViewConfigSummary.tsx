@@ -23,7 +23,7 @@ export function ViewConfigSummary({ view }: { view: UiViewState }): JSX.Element 
           {/* An empty view is a valid, savable state, not a broken one: say so rather than
               rendering an explorer with nothing to explore. */}
           {config.root === undefined
-            ? <p className="emptyNote">This view has no blocks yet.</p>
+            ? <div className="empty">No blocks yet.</div>
             : <BlockExplorer root={config.root} />}
         </SettingGroup>
       );
