@@ -61,7 +61,12 @@ export function isBroken(node: ResolvedNode): node is BrokenBlock {
  * Live-data access (bindable value) is backed by a subscription and a lit live directive.
  */
 export interface RenderContext {
-  renderChild(child: ResolvedNode): TemplateResult;
+  /**
+   * @param parentAxis - Pass the direction when this block flows its children (a stack), so the
+   *   child's slot knows which of its axes the parent's main axis is. Omit otherwise: a grid
+   *   cell, a freeform item and a container slot are sized by the parent instead.
+   */
+  renderChild(child: ResolvedNode, parentAxis?: "row" | "column"): TemplateResult;
 }
 
 /**

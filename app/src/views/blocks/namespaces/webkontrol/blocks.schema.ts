@@ -135,8 +135,16 @@ export const ImageBlock = ns.defineBlock("image", {
 }, {
   info: { label: "Image", description: "Display an image", icon: "image" },
   box: { sizing: "container" },
-  // object-fit belongs to the <img>, not the box around it.
-  render: (config) => html`<img src=${config.url} alt="" style=${styleMap({ objectFit: config.fit })} />`,
+  // object-fit belongs to the <img>, not the box around it. So does the per-axis fill: an axis
+  // the box fills wants the image to fill it too (so `fit` can crop or letterbox), while an
+  // axis the box hugs must leave the image free, or the percentage is circular and the box
+  // ends up at the image's intrinsic size. Leaving one axis auto is also what lets a
+  // constrained height derive the width from the intrinsic ratio.
+  render: (config) => html`<img src=${config.url} alt="" style=${styleMap({
+    objectFit: config.fit,
+    width: config.style.size?.x === "container" ? "100%" : "auto",
+    height: config.style.size?.y === "container" ? "100%" : "auto",
+  })} />`,
 });
 
 // SpacerBlock: an empty block, e.g. to leave a grid cell open or push stack siblings apart.
@@ -191,7 +199,7 @@ export const StackBlock = ns.defineBlock("stack", {
     gap: config.gap === undefined ? undefined : `${config.gap}px`,
     flexWrap: config.wrap ? "wrap" : undefined,
   }),
-  render: (config, ctx) => html`${config.blocks.map((block) => ctx.renderChild(block))}`,
+  render: (config, ctx) => html`${config.blocks.map((block) => ctx.renderChild(block, config.direction))}`,
 });
 
 // Every block this namespace ships; index.ts registers from this single list.

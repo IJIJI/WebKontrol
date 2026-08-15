@@ -38,6 +38,65 @@ export function blockStyles(style: BlockStyle): StyleInfo {
   };
 }
 
+/** Anything that is not one of the two keywords (and not blank) is a CSS length. */
+const isLength = (value?: string): value is string =>
+  value !== undefined && value !== "" && value !== "content" && value !== "container";
+
+/** Blank means unset: a cleared editor field stores "", which must not reach CSS. */
+const orUnset = (value?: string): string | undefined => (value === "" ? undefined : value);
+
+/**
+ * The box's own size, per axis. The slot around it is always a flex row, so within it X is the
+ * main axis and Y the cross one whichever way the block's *parent* flows: this mapping is the
+ * same everywhere, and only the slot (see slotSizeStyles) needs to know the parent's direction.
+ *
+ * A length pins its axis (`0 0 <len>`): fixed means fixed, and the slot clips any excess rather
+ * than letting a box shrink out from under a value someone typed. `content` keeps `0 1 auto`
+ * (never `0 0 auto`, which would render a paragraph as one endless line) clamped to the slot.
+ */
+export function sizeStyles(style: BlockStyle): StyleInfo {
+  const x = style.size?.x;
+  const y = style.size?.y;
+  return {
+    // Main axis: how the box takes width inside its slot.
+    flex: x === "container" ? "1 1 auto" : isLength(x) ? `0 0 ${x}` : "0 1 auto",
+    width: isLength(x) ? x : undefined,
+    // An explicit maximum wins over the hug clamp; both stop a box painting over its neighbours.
+    maxWidth: orUnset(style.maxSize?.x) ?? (x === "content" ? "100%" : undefined),
+    minWidth: orUnset(style.minSize?.x),
+
+    // Cross axis: stretch to the slot, or take the height the content asks for.
+    alignSelf: y === "container" ? "stretch" : "auto",
+    height: isLength(y) ? y : undefined,
+    maxHeight: orUnset(style.maxSize?.y) ?? (y === "content" ? "100%" : undefined),
+    minHeight: orUnset(style.minSize?.y),
+
+    aspectRatio: orUnset(style.aspectRatio),
+  };
+}
+
+/**
+ * The slot's own sizing, which is the only part that depends on how the parent flows: inside a
+ * stack the slot must hug on the stack's main axis, or it would swallow the free space and the
+ * stack's gap and justify would have nothing left to distribute.
+ *
+ * @param parentAxis - The enclosing stack's direction, absent outside a stack (a grid cell,
+ *   a freeform item and a container slot are all sized by the parent instead).
+ */
+export function slotSizeStyles(style: BlockStyle, parentAxis?: "row" | "column"): StyleInfo {
+  const x = style.size?.x;
+  const y = style.size?.y;
+  const alongParent = parentAxis === "column" ? y : x;
+  // Only a box that is not filling can outgrow the space it was given. Clipping belongs on the
+  // slot rather than the box's own max-*: that percentage resolves only against a definite
+  // slot, and a slot sized by flex (a stack that ran out of room) is not definite.
+  const canOutgrow = x !== "container" || y !== "container";
+  return {
+    flex: parentAxis !== undefined && alongParent !== "container" ? "0 1 auto" : undefined,
+    overflow: canOutgrow && style.overflow !== "visible" ? "hidden" : undefined,
+  };
+}
+
 const FLEX_POS = {
   left: "flex-start", center: "center", right: "flex-end",
   top: "flex-start", middle: "center", bottom: "flex-end",

@@ -81,40 +81,12 @@ body {
   overflow: hidden;
 }
 
-/* Hugging: the box shrinks to its content, and the slot's justify/align (from the block's
-   alignment config) decide where in the slot it sits.
-   `0 1 auto`, never `0 0 auto`: hugging means shrink-to-fit, so the box grows to its content
-   but never past the space available. Without the shrink, a paragraph would take its
-   max-content width, i.e. render as one endless line instead of wrapping. */
-/* A hugging box is sized by its content, so it is the one case that can outgrow the space it
-   was given. Clipping here rather than relying on the box's own max-height: that percentage
-   only resolves against a definite slot, and a slot sized by flex (a stack that ran out of
-   room) is not definite, so the box would size to its content and paint over its neighbours.
-   A block asking for visible overflow opts out (wk-spill), so the setting means the same thing
-   for a hugging block as for a filling one, and a shadow can extend past the slot. */
-.wk-slot.wk-hug:not(.wk-spill) {
-  overflow: hidden;
-}
-
-.wk-slot.wk-hug > .wk-block {
-  flex: 0 1 auto;
-  align-self: auto;
-  /* Hug up to the space available, never past it. Sizing decides how big a block is, not
-     whether it may paint outside the space its parent allocated: a filling block is already
-     clipped to its slot, and a hugging one must be too, or it would overlap its neighbours
-     (visibly so in a freeform, where siblings share the same area). Percentages against an
-     indefinite slot resolve to none, so hugging inside an auto-sized parent stays
-     unconstrained, which is what keeps nested hugging (a container around a chip) working. */
-  max-width: 100%;
-  max-height: 100%;
-}
-
-/* Inside a stack the slot must hug too, otherwise it would swallow the free space and the
-   stack's gap and justify would have nothing left to distribute. Shrinkable for the same
-   reason as the box: a hugging child must not be able to blow the stack open. */
-.wk-stack > .wk-slot.wk-hug {
-  flex: 0 1 auto;
-}
+/* Sizing is per axis and config-driven, so it arrives inline from the render core
+   (see styles.ts: sizeStyles for the box, slotSizeStyles for the slot). Only the resting
+   state lives here: a box fills its slot, and clipping stays on the slot because a box's own
+   max-* percentage resolves only against a definite slot, and a slot sized by flex (a stack
+   that ran out of room) is not definite. A block asking for visible overflow opts out, so the
+   setting means the same thing for a hugging block as for a filling one. */
 
 /* ── Per-block structure ───────────────────────────────────────────────────────
    Structural constants only; every config-driven value arrives inline via boxStyles. */
@@ -239,8 +211,11 @@ body {
 
 .wk-image > img {
   display: block;
-  width: 100%;
-  height: 100%;
+  /* Whether each axis is 100% or auto is per axis and config-driven, so it arrives inline from
+     the block (a percentage against a content-sized box is circular, and the image would drag
+     the box out to its intrinsic size). These maxes are the safety clamp under both. */
+  max-width: 100%;
+  max-height: 100%;
 }
 
 /* The divider's line is centered in its box. Colour and thickness default here rather than in
