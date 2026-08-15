@@ -103,8 +103,9 @@ const FLEX_POS = {
 } as const;
 
 /**
- * The slot: where the box sits inside the space the parent gave it. Inert while the box fills
- * that space (the box overrides with align-self: stretch); it bites once the box hugs.
+ * Where the box sits inside the space the parent gave it. Inert on an axis the box fills (it
+ * overrides with flex-grow or align-self: stretch); it bites on an axis the box hugs or pins,
+ * which is the only time there is leftover space to place it in.
  */
 export function slotStyles(alignment: Alignment | undefined): StyleInfo {
   if (!alignment) return {};

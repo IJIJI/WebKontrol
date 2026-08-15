@@ -229,6 +229,10 @@ body {
 .wk-divider-line {
   background: rgba(255, 255, 255, 0.25);
 }
+/* The long axis is a percentage, which is circular inside a parent sized by its own content:
+   there is genuinely no length to span there, and no CSS keyword conjures one (measured:
+   100%, stretch, fill-available and fit-content all resolve to zero). Give such a divider a
+   Min size instead, which does participate in intrinsic sizing. */
 .wk-divider-line.horizontal {
   width: 100%;
   height: 2px;

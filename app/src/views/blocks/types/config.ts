@@ -16,9 +16,14 @@ export interface BlockImpl<K extends BlockKey, S extends z.ZodRawShape> {
   info: BlockInfo;
   render: (config: Resolved<BlockConfigOf<K, S>>, ctx: RenderContext) => TemplateResult;
   /**
-   * Hug capability: present = the block has an intrinsic content size, so its box offers
-   * `sizing`/`alignment`; the value is the default sizing. Absent = fill-only (a website or
-   * grid has no content size; content sizing would collapse it), and the fields don't exist.
+   * How this block sizes when nothing is set, on both axes. Present = it has an intrinsic
+   * content size worth hugging (text, an image); absent = it has none, so it fills (a website
+   * or a grid would collapse to nothing if it hugged).
+   *
+   * A default, not a capability: every block gets the full size group either way, since a
+   * length is meaningful on all of them and gating would only be a list to curate.
+   * TODO: per-axis defaults, the mixed cases (fill one, hug the other) are often what is
+   * wanted and this single value cannot say them. See the backlog.
    */
   box?: { sizing: "container" | "content" };
   /** Config-driven styles for this block's own box. See {@link AbstractBlockType.boxStyles}. */
