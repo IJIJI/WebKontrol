@@ -48,6 +48,10 @@ export const TextBlock = ns.defineBlock("text", {
 });
 
 // ContainerBlock: wrap another block to give it styling it does not have itself.
+// The child stays required: a container without one would be indistinguishable from a spacer,
+// which is already a block that renders nothing and carries the universal box. An empty slot
+// also has nowhere for the editor to hang its add button, since childBlocks reports slots by
+// what fills them.
 export const ContainerBlock = ns.defineBlock("container", {
   block: blockSlot({ label: "Content" }),
 }, {
@@ -148,13 +152,13 @@ export const ImageBlock = ns.defineBlock("image", {
 });
 
 // SpacerBlock: an empty block, e.g. to leave a grid cell open or push stack siblings apart.
-export const SpacerBlock = ns.defineBlock("spacer", {
-  size: z.number().min(1).max(2000).optional().meta({ label: "Size", description: "Fixed size along a stack's direction, in px. Unset shares the space" } satisfies FieldMeta),
-}, {
+// It carries no fields of its own: the universal box's per-axis size says everything its old
+// `size` did and says it on both axes, and having two owners for one dimension meant a margin
+// had nowhere to inset (the field pinned the slot while the margin insets the box inside it).
+// What is left is discoverability: "Spacer" in the picker names an intent nobody would go
+// looking for a container to satisfy.
+export const SpacerBlock = ns.defineBlock("spacer", {}, {
   info: { label: "Spacer", description: "Empty space", icon: "spaceBar" },
-  // The size pins the *slot*, since that is what a stack distributes: fixed, no grow/shrink.
-  // Unset keeps the default (share the space). Inert outside a flex parent.
-  slotStyles: (config) => (config.size === undefined ? {} : { flex: `0 0 ${config.size}px` }),
   render: () => html``,
 });
 

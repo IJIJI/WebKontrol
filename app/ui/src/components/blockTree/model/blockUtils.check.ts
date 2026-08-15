@@ -465,7 +465,7 @@ assert.deepEqual(arrayMove(["a", "junk", "b"], 2, 0), ["b", "a", "junk"], "up pa
 
   const containerDefault = ContainerBlock.configSchema.parse({
     type: ContainerBlock.key,
-    block: { type: TextBlock.key, text: "x" }, // a child is still required; step 5 relaxes that
+    block: { type: TextBlock.key, text: "x" },
   });
   assert.deepEqual(containerDefault.style.size, { x: "container", y: "container" });
 
@@ -515,6 +515,21 @@ assert.deepEqual(arrayMove(["a", "junk", "b"], 2, 0), ["b", "a", "junk"], "up pa
     assert.equal(formatSize(parseSize(raw)!), raw, `${raw} round-trips`);
   assert.equal(formatSize({ unit: "px" }), undefined, "no value means unset");
   assert.equal(formatSize({ value: 0, unit: "%" }), "0", "zero carries no unit");
+}
+
+// ── A spacer is the empty styled box ───────────────────────────────────
+{
+  // Its size field is gone: the universal box owns both axes now, so a margin has somewhere to
+  // inset instead of fighting a slot the field had pinned. What is left is a block that renders
+  // nothing and carries the box, which is how a plain shape (a dot, a swatch) is expressed.
+  const spacer = SpacerBlock.configSchema.parse({ type: SpacerBlock.key, size: 12 });
+  assert.equal("size" in spacer, false, "the legacy size field is stripped, not honoured");
+  assert.deepEqual(spacer.style.size, { x: "container", y: "container" });
+
+  // The container keeps its required child, so it stays distinguishable from the spacer and the
+  // editor keeps a slot to hang its add button on.
+  const childless = ContainerBlock.configSchema.safeParse({ type: ContainerBlock.key });
+  assert.equal(childless.success, false, "a container still needs its child");
 }
 
 console.log("blockUtils.check: all assertions passed");
