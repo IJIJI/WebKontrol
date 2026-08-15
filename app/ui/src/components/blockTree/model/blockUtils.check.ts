@@ -8,6 +8,7 @@ import { describeField } from "../../settings/zodField";
 import { boxMode, formatBox, parseBox, slotCount, slotTargets, type BoxValue } from "../../settings/implementations/cssBox";
 import { formatHexAlpha, parseHexAlpha } from "../../settings/implementations/cssColor";
 import { formatTracks, parseTracks, type Track } from "../../settings/implementations/cssTracks";
+import { formatSize, parseSize } from "../../settings/implementations/cssSize";
 
 import {
   ContainerBlock,
@@ -491,6 +492,29 @@ assert.deepEqual(arrayMove(["a", "junk", "b"], 2, 0), ["b", "a", "junk"], "up pa
 
   // Alignment is universal now: any block can be smaller than its slot, so all can place it.
   assert.deepEqual(bare.style.alignment, { horizontal: "center", vertical: "middle" });
+}
+
+// ── cssSize: one axis round-trips, and says so when it cannot ───────────────────
+{
+  assert.deepEqual(parseSize(undefined), { unit: "px" }, "unset is an empty px value");
+  assert.deepEqual(parseSize(""), { unit: "px" });
+  assert.deepEqual(parseSize("content"), { keyword: "content", unit: "px" });
+  assert.deepEqual(parseSize("container"), { keyword: "container", unit: "px" });
+  assert.deepEqual(parseSize("12px"), { value: 12, unit: "px" });
+  assert.deepEqual(parseSize("50%"), { value: 50, unit: "%" });
+  assert.deepEqual(parseSize("10vh"), { value: 10, unit: "vh" });
+  assert.deepEqual(parseSize(" 8 "), { value: 8, unit: "px" }, "a bare number is px");
+
+  // Anything CSS-valid but not representable falls back to raw text rather than being rewritten.
+  assert.equal(parseSize("calc(100% - 10px)"), null);
+  assert.equal(parseSize("fit-content"), null);
+  assert.equal(parseSize("auto"), null);
+
+  // Round-trip, including the two values that must not gain noise.
+  for (const raw of ["12px", "50%", "content", "container", "1.5rem"])
+    assert.equal(formatSize(parseSize(raw)!), raw, `${raw} round-trips`);
+  assert.equal(formatSize({ unit: "px" }), undefined, "no value means unset");
+  assert.equal(formatSize({ value: 0, unit: "%" }), "0", "zero carries no unit");
 }
 
 console.log("blockUtils.check: all assertions passed");
