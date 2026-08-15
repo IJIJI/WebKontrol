@@ -28,6 +28,8 @@ export default function EditViewPage(): JSX.Element {
   const { viewKey } = useParams();
   const { state, callBacks } = useApi();
   const navigate = useNavigate();
+  // Set by a successful create, consumed by the effect below.
+  const [createdKey, setCreatedKey] = useState<string | undefined>(undefined);
   const { setMeta } = usePageContext();
   const [title, setTitle] = useState<string>(viewKey ?? "New View");
 
@@ -41,6 +43,7 @@ export default function EditViewPage(): JSX.Element {
   useEffect(() => {
     setTitle(savedConfig?.name.long ?? viewKey ?? "New View");
   }, [savedConfig])
+
 
   useEffect(() => {
     // if (puppet) setMeta({ title: ["Puppet", puppet.displayName] }, true);
@@ -56,6 +59,18 @@ export default function EditViewPage(): JSX.Element {
   const defaultLoadTimeout = state?.runtime.view.default_load_timeout;
   const placeholders: Record<string, string> =
     defaultLoadTimeout != null ? { loadTimeout: String(defaultLoadTimeout) } : {};
+
+
+  // Creating differs from editing only in not having a key yet, so once it has one the page
+  // becomes the editor for it: same screen, no interruption. Deferred to an effect rather than
+  // done inline after save(): the unsaved-changes guard reads the draft as last rendered, and
+  // navigating in the same tick as the save still sees it dirty. Waiting for the clean render
+  // is what silences the warning.
+  // TODO: Check for cleaner solution
+  useEffect(() => {
+    if (createdKey === undefined || draft.anyChanged) return;
+    void navigate(`/views/${createdKey}/edit`, { replace: true });
+  }, [createdKey, draft.anyChanged, navigate]);
 
   const onSave = async (): Promise<void> => {
     // Validate against the current type's real schema (strips stale fields from a type switch).
@@ -81,8 +96,7 @@ export default function EditViewPage(): JSX.Element {
       if (viewKey) {
         await callBacks.view.update(viewKey, config);
       } else {
-        const key = await callBacks.view.create(config);
-        void navigate(`/views/${key}`);
+        setCreatedKey(await callBacks.view.create(config));
       }
     });
   };
