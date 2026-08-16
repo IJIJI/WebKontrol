@@ -569,4 +569,19 @@ assert.deepEqual(arrayMove(["a", "junk", "b"], 2, 0), ["b", "a", "junk"], "up pa
   assert.equal(isBroken(children(unparked)[0] as ResolvedNode), true, "enabling it brings the breakage back");
 }
 
+// ── A parked block is reported, but does not gate the save ─────────────
+{
+  // Both are the same broken block; one is switched off. The editor sees both (nothing is
+  // hidden by saving), the save gate sees only the one that will actually render.
+  const mixed = { type: GridBlock.key, blocks: [{ ...badSite, disabled: true }, badSite] };
+  assert.deepEqual([...validateBlockTree(mixed).keys()], ["blocks.0", "blocks.1"], "the tree marks both");
+  assert.deepEqual([...validateBlockTree(mixed, { skipDisabled: true }).keys()], ["blocks.1"],
+    "only the live one blocks the save");
+
+  // A disabled block takes its subtree out of the view, so nothing below it gates either.
+  const parkedParent = { type: ContainerBlock.key, disabled: true, block: badSite };
+  assert.deepEqual([...validateBlockTree(parkedParent).keys()], ["block"], "the child is still reported");
+  assert.equal(validateBlockTree(parkedParent, { skipDisabled: true }).size, 0, "and still does not gate");
+}
+
 console.log("blockUtils.check: all assertions passed");
