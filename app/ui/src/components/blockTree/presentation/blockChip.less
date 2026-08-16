@@ -20,9 +20,26 @@
     }
   }
 
-  .blockWarning {
+  // Switched off: dimmed, so a glance down the tree separates what renders from what does not.
+  // The markers stay at full strength; they are what explains the dimming.
+  &.disabled {
+    .blockIcon,
+    .blockBadge {
+      opacity: 0.45;
+    }
+  }
+
+  // The markers after the badge (disabled, invalid, ...). One row, so a block can carry several.
+  .blockMarker {
     display: inline-flex;
     flex: none;
-    color: var(--color-text-danger);
+
+    &.warning {
+      color: var(--color-text-danger);
+    }
+
+    &.off {
+      color: var(--color-text-tertiary);
+    }
   }
 }

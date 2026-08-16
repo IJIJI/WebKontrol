@@ -10,6 +10,7 @@ import { Icons } from "../../icons/Icons";
 import { BlockChip } from "../presentation/BlockChip";
 import { BlockPicker } from "./BlockPicker";
 import { type BlockLike, isBlock } from "../model/blockUtils";
+import { isDisabledBlock } from "../../../../../src/views/blocks/resolver";
 import { arrayMove } from "../../../common/helpers/arrayMove";
 
 // A newly picked block: just its type. Every other field is optional, defaulted by its schema, or
@@ -43,7 +44,7 @@ export function BlockSlotSetting({
         {block ? (
           <>
             <button type="button" className="slotBlock" onClick={onOpen} title="Open this block">
-              <BlockChip type={block.type} />
+              <BlockChip type={block.type} disabled={isDisabledBlock(block)} />
             </button>
             <Button
               fillStyle={FillStyle.SKELETON}
@@ -101,7 +102,7 @@ export function BlockSlotListSetting({
         {entries.map(({ block, index }, position) => (
           <span className="slotEntry" key={index}>
             <button type="button" className="slotBlock" onClick={() => onOpen(index)} title="Open this block">
-              <BlockChip type={block.type} />
+              <BlockChip type={block.type} disabled={isDisabledBlock(block)} />
             </button>
             {/* Move to the neighbouring entry's raw position: always one visible step, even with
                 non-block junk sitting between blocks. */}

@@ -3,6 +3,8 @@ import { type JSX } from "react/jsx-runtime";
 import "./blockTree.less";
 import { type BlockLike, type BlockPath, childBlocks, pathEquals, pathKey } from "../model/blockUtils";
 import { BlockChip } from "../presentation/BlockChip";
+import { isDisabledBlock } from "../../../../../src/views/blocks/resolver";
+import { classNames } from "../../../common/helpers/classNames";
 
 function TreeNode({
   block,
@@ -20,15 +22,19 @@ function TreeNode({
   invalidAt?: (path: BlockPath) => string | undefined;
 }): JSX.Element {
   const children = childBlocks(block);
+  // A disabled block takes its whole subtree out of the view with it, so the subtree reads as
+  // switched off too. Its children keep their own markers; only the dimming is inherited.
+  const disabled = isDisabledBlock(block);
 
   return (
-    <div className="treeNode">
+    <div className={classNames("treeNode", disabled && "disabled")}>
       <div className="nodeRow">
         <BlockChip
           type={block.type}
           selected={selected !== undefined && pathEquals(path, selected)}
           onClick={onSelect ? () => onSelect(path) : undefined}
           unsaved={isUnsaved?.(path, block)}
+          disabled={disabled}
           invalid={invalidAt?.(path)}
         />
       </div>

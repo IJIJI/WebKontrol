@@ -4,9 +4,10 @@ import type { StyleInfo } from "lit/directives/style-map.js";
 import { AbstractBlockType, type BlockInfo, type RenderContext, type Resolved } from "./model";
 import { blockStyleSchema, type BlockKey, type BlockKeyOf, type BlockStyle, type BlockType, type DataField, type DataKeyOf, type DataSourceKey, type NamespaceId } from "./schema";
 import type { BlockTypeRegistry } from "../registry";
+import type { FieldMeta } from "../../types/schema";
 
-/** The parsed config of a block: the exact `type` key, the injected box `style`, plus its shape fields. */
-type BlockConfigOf<K extends BlockKey, S extends z.ZodRawShape> = { type: K; style: BlockStyle } & z.infer<z.ZodObject<S>>;
+/** The parsed config of a block: the exact `type` key, the injected `disabled` and box `style`, plus its shape fields. */
+type BlockConfigOf<K extends BlockKey, S extends z.ZodRawShape> = { type: K; disabled: boolean; style: BlockStyle } & z.infer<z.ZodObject<S>>;
 
 /**
  * The render function and metadata a block supplies to {@link NamespaceKit.defineBlock}.
@@ -80,8 +81,16 @@ export function createNamespace<const N extends NamespaceId>(namespace: N): Name
     // styleable without declaring anything. Last in the object so the editor shows a block's
     // own fields first, the style section after (schema order drives the form).
     if ("style" in shape) throw new Error(`Block "${key}" declares a "style" field; the framework injects it (use BlockImpl.box to configure).`);
+    if ("disabled" in shape) throw new Error(`Block "${key}" declares a "disabled" field; the framework injects it.`);
     const configSchema = z.object({
       type: z.literal(key).default(key),
+      // Also framework-injected, and first in the form: it decides whether the fields under it
+      // matter at all. Defaulted rather than optional so every block answers the question.
+      // The resolver leaves a disabled block out of the tree entirely (see isDisabledBlock).
+      disabled: z.boolean().default(false).meta({
+        label: "Disabled",
+        description: "Keep the block in the view's config, but leave it out of the view",
+      } satisfies FieldMeta),
       ...shape,
       style: blockStyleSchema(impl.box?.sizing),
     }) as z.ZodType<Config>;

@@ -2,7 +2,7 @@ import { html, render as litRender, type TemplateResult } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { isBroken, type BrokenBlock, type RenderContext, type ResolvedNode } from "./types/model";
 import { blockStyles, sizeStyles, slotSizeStyles, slotStyles } from "./styles";
-import { resolveBlock } from "./resolver";
+import { isDisabledBlock, resolveBlock } from "./resolver";
 import type { BlockStyle } from "./types/schema";
 import type { BlockTypeRegistry } from "./registry";
 
@@ -31,8 +31,10 @@ import type { BlockTypeRegistry } from "./registry";
  */
 function createRenderContext(): RenderContext {
   const ctx: RenderContext = {
-    renderChild(child: ResolvedNode, parentAxis?: "row" | "column"): TemplateResult {
-      return renderNode(child, ctx, parentAxis);
+    renderChild(child: ResolvedNode | undefined, parentAxis?: "row" | "column"): TemplateResult {
+      // No child (disabled, or an unfilled optional slot): no slot either, so the parent's
+      // layout counts and spaces its children as if the block were not in the config.
+      return child === undefined ? html`` : renderNode(child, ctx, parentAxis);
     },
   };
   return ctx;
@@ -102,9 +104,9 @@ export function renderBlockView(
   registry: BlockTypeRegistry,
   container: HTMLElement | DocumentFragment,
 ): void {
-  // An empty view (no root yet) paints a blank page rather than a broken block: nothing is
-  // wrong with it, it simply has no content.
-  if (raw === null || raw === undefined) {
+  // An empty view (no root yet, or a root switched off) paints a blank page rather than a
+  // broken block: nothing is wrong with it, it simply has no content.
+  if (raw === null || raw === undefined || isDisabledBlock(raw)) {
     litRender(html``, container);
     return;
   }

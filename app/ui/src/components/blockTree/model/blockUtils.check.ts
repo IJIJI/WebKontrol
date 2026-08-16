@@ -532,4 +532,41 @@ assert.deepEqual(arrayMove(["a", "junk", "b"], 2, 0), ["b", "a", "junk"], "up pa
   assert.equal(childless.success, false, "a container still needs its child");
 }
 
+// ── A disabled block leaves the tree, rather than rendering invisibly ──
+{
+  const registry = new BlockTypeRegistry();
+  ns.register(registry, WEBKONTROL_BLOCKS);
+
+  // Universal and defaulted, so every block answers the question and none starts off.
+  for (const block of WEBKONTROL_BLOCKS) {
+    // The extras cover every block's required fields; the rest strip them as unknown keys.
+    const bare = block.configSchema.parse({ type: block.key, url: "https://example.com", block: text, text: "x" });
+    assert.equal((bare as { disabled: boolean }).disabled, false, `${block.key} defaults to enabled`);
+  }
+
+  const children = (node: ResolvedNode): unknown[] =>
+    isBroken(node) ? [] : (node.config as { blocks: unknown[] }).blocks;
+
+  // A slot in a list resolves to nothing, and the render core emits no element for it, so the
+  // parent's DOM child count drops: what spaces a stack and what view.css reads to arrange a
+  // grid. The list keeps its length (nothing renumbers), which is why nothing may read it.
+  // Measured in a browser: 4 blocks with one disabled arrange as 3 columns, not 2x2 with a hole.
+  const arranged = resolveBlock({ type: GridBlock.key, blocks: [text, { ...clock, disabled: true }, text] }, registry);
+  assert.deepEqual(children(arranged).map((child) => child === undefined), [false, true, false],
+    "the disabled child resolved to nothing");
+
+  // A single slot empties instead; the render core paints the parent's box with nothing in it.
+  const emptied = resolveBlock({ type: ContainerBlock.key, block: { ...goodSite, disabled: true } }, registry);
+  assert.equal(isBroken(emptied), false, "the parent still resolves");
+  if (!isBroken(emptied)) assert.equal((emptied.config as { block: unknown }).block, undefined, "its slot is empty");
+
+  // Read before validating: parking a half-finished block is the point, so a disabled block
+  // with a missing required field resolves away instead of resolving to a broken node.
+  const parked = resolveBlock({ type: GridBlock.key, blocks: [{ ...badSite, disabled: true }] }, registry);
+  assert.deepEqual(children(parked), [undefined], "a disabled invalid block never reaches its schema");
+  // Enabled, the same block is the loud red placeholder it should be.
+  const unparked = resolveBlock({ type: GridBlock.key, blocks: [badSite] }, registry);
+  assert.equal(isBroken(children(unparked)[0] as ResolvedNode), true, "enabling it brings the breakage back");
+}
+
 console.log("blockUtils.check: all assertions passed");
