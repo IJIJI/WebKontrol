@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import path from "node:path";
+import { asset } from "../helpers/assets";
 import type { RouteRegistrar, RouteRequest, RouteResponse, SseConnection } from "../webServer/model";
 import type { ViewKey } from "./types/schema";
 import type { ViewManager } from "./ViewManager";
@@ -18,8 +18,8 @@ const VIEW_CLIENT_FONTS_PATH = "/viewclient/fonts";
 // outside the assets directory. view.css and the admin's font.less declare the matching
 // @font-face rules, and FONT_SUGGESTIONS offers the families in the editor.
 const BUNDLED_FONTS: Record<string, string> = {
-  "DSEG7Classic-Regular.woff2": path.join(process.cwd(), "src", "assets", "fonts", "DSEG", "DSEG7Classic-Regular.woff2"),
-  "DSEG14Classic-Regular.woff2": path.join(process.cwd(), "src", "assets", "fonts", "DSEG", "DSEG14Classic-Regular.woff2"),
+  "DSEG7Classic-Regular.woff2": asset("assets/fonts/DSEG/DSEG7Classic-Regular.woff2"),
+  "DSEG14Classic-Regular.woff2": asset("assets/fonts/DSEG/DSEG14Classic-Regular.woff2"),
 };
 
 /**

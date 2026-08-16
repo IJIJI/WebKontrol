@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { asset } from "../helpers/assets";
 import type { NavigationFailure } from "./types/model";
 
 /**
@@ -35,9 +35,9 @@ const CLOCK_FONT_STACK = `"DSEG7 Classic", "Segment7", ui-monospace, "Cascadia M
 // stack rather than breaking the page.
 const CLOCK_FONT_FACE = (() => {
   try {
-    const woff2 = readFileSync(
-      fileURLToPath(new URL("../assets/fonts/DSEG/DSEG7Classic-Regular.woff2", import.meta.url)),
-    );
+    // asset(), not import.meta.url: this module bundles into dist/app.js, where a
+    // module-relative "../assets" would point outside dist entirely.
+    const woff2 = readFileSync(asset("assets/fonts/DSEG/DSEG7Classic-Regular.woff2"));
     return `@font-face {
     font-family: "DSEG7 Classic";
     src: url("data:font/woff2;base64,${woff2.toString("base64")}") format("woff2");

@@ -4,6 +4,7 @@ import type http from "http";
 import { Logger } from "../logging/Logger";
 import { WebServerStatus, type AppInfo, type RouteHandler, type RouteMethod, type RouteRegistrar, type SseConnection, type SseHandler, type WebServerMutationHandlers, type WebServerState } from "./model";
 import { jsonReplacer } from "../helpers/json";
+import { asset, IS_PROD } from "../helpers/assets";
 import {
   PuppetPatchSchema,
   ViewKeyPackageShape,
@@ -177,11 +178,21 @@ export class WebServer implements RouteRegistrar {
       });
     });
 
-    // TODO: Check if (when implemented) production is loaded correctly.
+    // The artifact decides the mode, not the environment (see IS_PROD): a bare
+    // `node dist/app.js` must never come up in development mode, where vite-express would
+    // try to spin up Vite dev middleware that deployments do not install.
+    //
+    // In production the Vite config file must not be resolved at all. It imports our
+    // Logger (needing vite's TS loader), and vite-express's fallback regex-parses the
+    // file, which would silently depend on shipping vite.config.ts. The built admin's
+    // location is stated inline instead: dist/ui, beside the bundle, wherever that is
+    // (deliberately not cwd: the launcher will run the artifact from its own cwd).
+    // Static serving and the SPA index fallback are mounted by listen() AFTER our
+    // routes, so /api and /view keep priority.
     ViteExpress.config({
       verbosity: ViteExpress.Verbosity.Silent,
-      mode:
-        process.env.NODE_ENV === "production" ? "production" : "development",
+      mode: IS_PROD ? "production" : "development",
+      ...(IS_PROD && { inlineViteConfig: { root: asset("ui"), build: { outDir: "." } } }),
     });
 
     this._registerRoutes();
