@@ -395,6 +395,27 @@ export class WebServer implements RouteRegistrar {
       }
     });
 
+    this._app.post("/api/puppets/:id/reload", async (req, res) => {
+      const resultId = PuppetKeySchema.safeParse(req.params.id);
+
+      if (!resultId.success) {
+        return res.status(400).json({ errors: resultId.error.format() });
+      }
+
+      try {
+        // Fire and forget, like assign: the reload's outcome is the puppet's broadcast
+        // navigation state, not this request's, and a page load can take load_timeout.
+        await this._handlers.puppet.reload(resultId.data);
+        res.status(204).send();
+        this._logger.info(`Reloaded puppet ${resultId.data}`);
+      } catch (e) {
+        this._logger.error("Failed to reload puppet:", resultId.data, e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to reload puppet",
+        });
+      }
+    });
+
     this._app.post("/api/views", async (req, res) => {
       const result = AnyViewConfigSchema.safeParse(req.body);
       if (!result.success) {

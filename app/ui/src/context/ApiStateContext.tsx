@@ -29,6 +29,8 @@ export interface UiPuppetState extends PuppetDataBundle {
   updateAppearance: (appearance: EntityAppearance) => Promise<void>;
   assignView: (view: ViewKey) => Promise<void>;
   unassignView: () => Promise<void>;
+  /** Re-navigate to the assigned view now, rather than waiting out a pending automatic retry. */
+  reload: () => Promise<void>;
 }
 
 // A view enriched with mutations bound to its key (like UiPuppetState). The wire ships a
@@ -93,6 +95,10 @@ interface ApiState {
         notify?: boolean,
       ) => Promise<void>;
       unassignView: (
+        puppet: PuppetKey,
+        notify?: boolean,
+      ) => Promise<void>;
+      reload: (
         puppet: PuppetKey,
         notify?: boolean,
       ) => Promise<void>;
@@ -197,6 +203,7 @@ export function ApiStateProvider({
             updateAppearance: async (appearance: EntityAppearance): Promise<void> => puppetUpdateAppearance(key, appearance),
             assignView: async (view: ViewKey): Promise<void> => puppetAssignView(key, view),
             unassignView: async (): Promise<void> => puppetUnassignView(key),
+            reload: async (): Promise<void> => puppetReload(key),
           };
           puppets.set(key, full);
         }
@@ -309,6 +316,17 @@ export function ApiStateProvider({
     );
   };
 
+  const puppetReload = async (
+    puppet: PuppetKey,
+    notify = true,
+  ): Promise<void> => {
+    return withToast(
+      Api.post(`/puppets/${puppet}/reload`, {}),
+      { loading: "Reloading page...", success: "Page reloaded" },
+      notify,
+    );
+  };
+
   const systemUpdateRuntime = async (
     config: Partial<SystemRuntimeInput>,
     notify = false,
@@ -406,6 +424,7 @@ export function ApiStateProvider({
             updateAppearance: puppetUpdateAppearance,
             assignView: puppetAssignView,
             unassignView: puppetUnassignView,
+            reload: puppetReload,
           },
           view: {
             create: viewCreate,

@@ -21,6 +21,9 @@ export function PuppetHeader({ puppet }: { puppet: UiPuppetState }): JSX.Element
 
   const menu: DropdownItem[] = [
     { id: "edit", label: "Edit", icon: <Icons.edit />, onClick: () => void navigate(`/puppets/${puppet.config.id}/edit`) },
+    // A failed load already retries on its own; this is for the operator who just fixed the
+    // target and would rather not wait out the backoff.
+    { id: "reload", label: "Reload page", icon: <Icons.refresh />, onClick: () => void puppet.reload() },
     ...(puppet.assignedView
       ? [{ id: "unassign", label: "Unassign view", onClick: () => void puppet.unassignView() }] // TODO: Should this be here?
       : []),

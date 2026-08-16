@@ -151,6 +151,20 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     this._logger.info(`Unassigned puppet "${id}".`);
   }
 
+  /**
+   * Re-navigate a puppet to whatever it currently resolves to, now. Failures already retry on
+   * their own, so this is for the operator who just fixed the target and does not want to wait
+   * out the backoff: navigating fresh (not as a retry) supersedes the pending attempt and puts
+   * the escalation back to the bottom, which is exactly the semantics of "try again now".
+   */
+  public reloadPuppet(id: PuppetKey): void {
+    // Not awaited, exactly as assignView is not: the load can take the whole load_timeout, and
+    // its outcome is the puppet's broadcast navigation state rather than this call's. Awaiting
+    // would hang the request for 20s and then report success even for a load that failed.
+    void this._navigatePuppet(id);
+    this._logger.info(`Reloading puppet "${id}" on request.`);
+  }
+
   public getDefaultViewKey(): ViewKey | undefined {
     return this._runtime.default_view;
   }
@@ -412,6 +426,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
       updateAppearance: (id: PuppetKey, appearance: EntityAppearance) => this.updatePuppetAppearance(id, appearance),
       assignView: (puppet: PuppetKey, view: ViewKey) => this.assignView(puppet, view),
       unassignView: (puppet: PuppetKey) => this.unassignView(puppet),
+      reload: (puppet: PuppetKey) => Promise.resolve(this.reloadPuppet(puppet)),
     }
   }
 }

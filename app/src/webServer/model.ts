@@ -45,6 +45,10 @@ export interface PuppetWebhandlers {
   unassignView: (
     puppet: PuppetKey,
   ) => Promise<void>;
+  /** Re-navigate to the current assignment now, instead of waiting out a pending retry. */
+  reload: (
+    puppet: PuppetKey,
+  ) => Promise<void>;
 }
 export interface SystemWebhandlers {
   updateRuntime: (config: Partial<SystemRuntime>) => void | Promise<void>;
