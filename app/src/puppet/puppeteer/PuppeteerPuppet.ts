@@ -1,3 +1,4 @@
+import { execFileSync, type ChildProcess } from "node:child_process";
 import puppeteer, { type Browser, type Page } from "puppeteer";
 import { AbstractPuppet } from "../AbstractPuppet";
 import { KnownFailure, NavigationFailure, NavigationState, type TargetInfo } from "../types/model";
@@ -54,6 +55,7 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     }
 
     this._browser = await puppeteer.launch(settings);
+    const browser = this._browser;
 
     // From here the browser exists: a failure below would leave init FAILED with an
     // orphaned Chromium that close() never reaches (its guard sees a never-inited
@@ -61,7 +63,10 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
     try {
       // A puppet is only alive while its browser is. Without this a crashed Chromium
       // keeps reporting Online and the orchestrator goes on navigating a dead process.
-      this._browser.on("disconnected", () => {
+      // Bound to this browser, like every page listener is bound to its page: a replaced
+      // browser dies eventually, and its death is not the running one's business.
+      browser.on("disconnected", () => {
+        if (browser !== this._browser) return; // a previous browser, already replaced
         if (this._isClosing) return; // a shutdown we asked for is not a crash
         this._setConnection(ConnectionState.OFFLINE, "Browser disconnected.");
       });
@@ -70,13 +75,55 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
       const [firstPage] = await this._browser.pages();
       await this._createPage(firstPage);
     } catch (error) {
-      await this._browser.close().catch(() => { });
+      await this._doClose().catch(() => { }); // same teardown a real close does, orphan guard included
       throw error;
     }
   }
 
   protected async _doClose(): Promise<void> {
-    await this._browser.close();
+    // Taken before closing: close() disposes the connection this handle comes from.
+    const proc = this._browser.process();
+
+    // A disconnected browser cannot be asked to quit, so puppeteer falls back to its own
+    // kill path, which deletes the temporary profile FIRST: that delete throws on the files
+    // the live Chromium still holds, and the kill on the next line never runs, leaving a
+    // kiosk window on the display with nothing driving it (observed after a host hibernate,
+    // 2026-08-16). Killing first lets that same cleanup run against a dead process instead,
+    // which best-effort takes the profile directory with it.
+    if (!this._browser.connected) this._killBrowser(proc);
+
+    try {
+      await this._browser.close();
+    } finally {
+      this._killBrowser(proc); // a graceful close that did not end the process
+    }
+  }
+
+  /**
+   * Make sure the browser process is gone. Never trust close() for this: its only handle on
+   * the browser is the CDP connection, which is exactly what is missing whenever a browser
+   * dies on us rather than at our request.
+   */
+  private _killBrowser(proc: ChildProcess | null): void {
+    if (!proc?.pid || proc.exitCode !== null || proc.signalCode !== null) return;
+
+    this._logger.warn(`Browser process ${proc.pid} outlived its close; killing it.`);
+    try {
+      if (process.platform === "win32") {
+        // Chromium's renderer and GPU children are processes of their own, and killing the
+        // parent on Windows leaves them running: /T takes the tree, /F skips asking.
+        execFileSync("taskkill", ["/pid", String(proc.pid), "/T", "/F"], { stdio: "ignore" });
+      } else {
+        // Puppeteer launches detached off Windows, so the browser leads its own process
+        // group and the negated pid takes the group with it.
+        process.kill(-proc.pid, "SIGKILL");
+      }
+    } catch (error) {
+      // Missing permissions, a pid that exited in between, or no process group to speak of.
+      // The plain kill leaves any children behind, but the browser itself still goes.
+      this._logger.warn(`Could not kill the process tree of ${proc.pid}, killing the process alone.`, error);
+      proc.kill("SIGKILL");
+    }
   }
 
   /**
