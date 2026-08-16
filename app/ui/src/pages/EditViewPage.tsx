@@ -19,6 +19,10 @@ import { useDraft } from "../common/hooks/DraftSave";
 import { useApi } from "../context/ApiStateContext";
 import { type ViewType, type AnyViewConfig } from "../../../src/views/types/schema";
 import { usePageContext } from "../context/PageContext";
+import { Button } from "../components/button/Button";
+import { Icons } from "../components/icons/Icons";
+import { FillStyle } from "../common/types/variants";
+import { AssignToViewModal } from "../components/views/AssignToViewModal";
 
 const DEFAULT_TYPE: ViewType = "url";
 
@@ -33,8 +37,12 @@ export default function EditViewPage(): JSX.Element {
   const { setMeta } = usePageContext();
   const [title, setTitle] = useState<string>(viewKey ?? "New View");
 
+  const [assignOpen, setAssignOpen] = useState(false);
+
   // Edit => the saved config; new => the default type's empty draft.
-  const savedConfig = viewKey ? state?.views.get(viewKey)?.config : undefined;
+  const view = viewKey ? state?.views.get(viewKey) : undefined;
+  const savedConfig = view?.config;
+  const puppets = state ? [...state.puppets.values()] : [];
   const initial = useMemo<ViewEditorValues>(
     () => ({ ...(savedConfig ?? VIEW_EDITORS[DEFAULT_TYPE].emptyDraft) }),
     [savedConfig],
@@ -103,7 +111,17 @@ export default function EditViewPage(): JSX.Element {
 
   return (
     <>
-      <h1 style={{ marginBottom: "20px" }}>{`${viewKey ? "Edit " : ""}${title}`}</h1>
+      <div style={{ marginBottom: "20px", width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}> {/* Add styling in stylesheet? Some generic header? */}
+        <h1 >{`${viewKey ? "Edit " : ""}${title}`}</h1>
+        {/* Only once the view exists: a view being created has nothing to put on a display yet,
+            and the modal would open onto nothing. It appears by itself after the first save. */}
+        {view && (
+          <Button onClick={() => setAssignOpen(true)} fillStyle={FillStyle.FILLED}>
+            <Icons.installDesktop />
+            <span>Assign</span>
+          </Button>
+        )}
+      </div>
 
       <SaveBar visible={draft.anyChanged} onSave={onSave} onDiscard={draft.revertAll} />
 
@@ -146,6 +164,15 @@ export default function EditViewPage(): JSX.Element {
         ) : (
           <SchemaSettings schema={entry.schema} draft={draft} exclude={["name"]} placeholders={placeholders} />
         )}
+
+      {/* Assigns the SAVED view: a display shows what the server has, not the draft on screen.
+          The SaveBar is right there when the two differ. */}
+      <AssignToViewModal
+        open={assignOpen}
+        onClose={() => setAssignOpen(false)}
+        view={view}
+        puppets={puppets}
+      />
     </>
   );
 }
