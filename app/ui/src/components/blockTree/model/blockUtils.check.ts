@@ -32,6 +32,15 @@ import type { FieldMeta } from "../../../../../src/views/types/schema";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
 import { arrayMove } from "../../../common/helpers/arrayMove";
 import { timeAgo } from "../../../common/helpers/relativeTime";
+import { puppetStatus } from "../../puppets/puppetStatus";
+import { ConnectionState } from "../../../../../src/types/CommonTypes";
+import { BLANK_NAVIGATION_REQUEST } from "../../../../../src/puppet/types/schema";
+import {
+  NavigationFailure,
+  NavigationState,
+  type NavigationInfo,
+  type PuppetInfo,
+} from "../../../../../src/puppet/types/model";
 import { fieldErrors, validateBlockTree } from "./validate";
 import {
   childBlocks,
@@ -454,6 +463,41 @@ assert.deepEqual(arrayMove(["a", "b"], 0, 9), ["a", "b"], "out of range is a no-
 // yields one visible step: down lands after the target, up lands before it.
 assert.deepEqual(arrayMove(["a", "junk", "b"], 0, 2), ["junk", "b", "a"], "down past junk");
 assert.deepEqual(arrayMove(["a", "junk", "b"], 2, 0), ["b", "a", "junk"], "up past junk");
+
+//* puppetStatus: one status from two axes, connection first
+
+{
+  const at = 1_786_840_876_709;
+  const info = (state: ConnectionState, navigation: NavigationInfo): PuppetInfo =>
+    ({ state, navigation, moment: at });
+  const loaded: NavigationInfo = { state: NavigationState.LOADED, request: BLANK_NAVIGATION_REQUEST, moment: at };
+  const failed = (failure: NavigationFailure, status?: number): NavigationInfo =>
+    ({ state: NavigationState.FAILED, request: BLANK_NAVIGATION_REQUEST, failure, error: "boom", status, moment: at });
+
+  // Healthy on both axes reports the connection's own word.
+  assert.deepEqual(puppetStatus(info(ConnectionState.ONLINE, loaded)), { status: ConnectionState.ONLINE });
+
+  // Online browser, dead page: the page is the interesting axis, named by its kind.
+  assert.deepEqual(
+    puppetStatus(info(ConnectionState.ONLINE, failed(NavigationFailure.NETWORK))),
+    { status: ConnectionState.FAILED, label: "Network" },
+  );
+  assert.equal(
+    puppetStatus(info(ConnectionState.ONLINE, failed(NavigationFailure.STATUS, 404))).label,
+    "Status 404",
+    "an HTTP code is the whole story for a STATUS failure",
+  );
+
+  // The case the pair got wrong: nothing clears the navigation record, so a browser that died
+  // while showing a page still reports LOADED. The connection has to win, or a dead puppet
+  // reads as a cheerful "Online".
+  assert.deepEqual(
+    puppetStatus(info(ConnectionState.OFFLINE, loaded)),
+    { status: ConnectionState.OFFLINE },
+    "a dead browser outranks its own stale navigation record",
+  );
+  assert.deepEqual(puppetStatus(info(ConnectionState.ERROR, loaded)), { status: ConnectionState.ERROR });
+}
 
 //* timeAgo: the largest unit that fits, and never the future
 

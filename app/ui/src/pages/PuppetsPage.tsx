@@ -4,7 +4,7 @@ import { Collection } from "../components/collections/Collection";
 import { CollectionLayout } from "../components/collections/types";
 import { Icons } from "../components/icons/Icons";
 import { Icon } from "../components/icons/Icon";
-import { StatusPill } from "../components/pill/statusPill/StatusPill";
+import { PuppetStatusPill } from "../components/puppets/PuppetStatusPill";
 import { type UiPuppetState, useApi } from "../context/ApiStateContext";
 import { resolvePuppetAppearance } from "../common/appearance";
 import { ViewChip } from "../components/views/ViewChip";
@@ -35,7 +35,7 @@ export default function PuppetsPage(): JSX.Element {
           color: appearance.color,
           chips: (
             <>
-              <StatusPill status={p.info.state} />
+              <PuppetStatusPill info={p.info} />
               {assignedView && <ViewChip view={assignedView} />}
             </>
           ),
