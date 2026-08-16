@@ -31,6 +31,7 @@ import { BackgroundStyleShape, BlockStyleShape, blockStyleSchema, GridConfigSche
 import type { FieldMeta } from "../../../../../src/views/types/schema";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
 import { arrayMove } from "../../../common/helpers/arrayMove";
+import { timeAgo } from "../../../common/helpers/relativeTime";
 import { fieldErrors, validateBlockTree } from "./validate";
 import {
   childBlocks,
@@ -453,6 +454,19 @@ assert.deepEqual(arrayMove(["a", "b"], 0, 9), ["a", "b"], "out of range is a no-
 // yields one visible step: down lands after the target, up lands before it.
 assert.deepEqual(arrayMove(["a", "junk", "b"], 0, 2), ["junk", "b", "a"], "down past junk");
 assert.deepEqual(arrayMove(["a", "junk", "b"], 2, 0), ["b", "a", "junk"], "up past junk");
+
+//* timeAgo: the largest unit that fits, and never the future
+
+{
+  const now = 1_786_840_876_709; // a fixed "now" so the assertions do not depend on the clock
+  assert.equal(timeAgo(now, now), "just now");
+  assert.equal(timeAgo(now - 5_000, now), "5 seconds ago");
+  assert.equal(timeAgo(now - 4 * 60_000, now), "4 minutes ago");
+  assert.equal(timeAgo(now - 90 * 60_000, now), "1 hour ago", "the unit that fits, not the nearest");
+  assert.equal(timeAgo(now - 2 * 86_400_000, now), "2 days ago");
+  // A display without a real-time clock stamps against a wrong clock and then jumps on NTP sync.
+  assert.equal(timeAgo(now + 3 * 3_600_000, now), "just now", "a clock jump never reads as the future");
+}
 
 // ── Box sizing v2 ─────────────────────────────────────────────────────
 // Size is a per-axis {x, y} pair, defaulting from the block itself, with bounds and ratio
