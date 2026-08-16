@@ -36,6 +36,7 @@ function BubbleRouteError(): never {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<PageLayout />} errorElement={<BubbleRouteError />}>
+      {import.meta.env.DEV && (
       <Route
         index
         element={
@@ -44,6 +45,8 @@ const router = createBrowserRouter(
           </PageRoute>
         }
       />
+      )}
+      {import.meta.env.DEV && (
       <Route
         path="dashboard"
         element={
@@ -52,6 +55,7 @@ const router = createBrowserRouter(
           </PageRoute>
         }
       />
+      )}
       <Route
         path="views"
         element={
@@ -116,6 +120,7 @@ const router = createBrowserRouter(
         }
       />
 
+      {import.meta.env.DEV && (
       <Route
         path="settings/plugins"
         element={
@@ -124,6 +129,7 @@ const router = createBrowserRouter(
           </PageRoute>
         }
       />
+      )}
       <Route
         path="settings/config"
         element={
