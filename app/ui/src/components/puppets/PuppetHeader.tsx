@@ -25,7 +25,7 @@ export function PuppetHeader({ puppet }: { puppet: UiPuppetState }): JSX.Element
     // target and would rather not wait out the backoff.
     { id: "reload", label: "Reload page", icon: <Icons.refresh />, onClick: () => void puppet.reload() },
     ...(puppet.assignedView
-      ? [{ id: "unassign", label: "Unassign view", onClick: () => void puppet.unassignView() }] // TODO: Should this be here?
+      ? [{ id: "unassign", label: "Unassign view", icon: <Icons.close />, onClick: () => void puppet.unassignView() }] // TODO: Should this be here?
       : []),
   ];
 
