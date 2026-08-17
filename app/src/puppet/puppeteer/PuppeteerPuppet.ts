@@ -1,5 +1,6 @@
-import { execFileSync, type ChildProcess } from "node:child_process";
+import { type ChildProcess } from "node:child_process";
 import puppeteer, { type Browser, type Page } from "puppeteer";
+import { killProcessTree } from "../../helpers/processTree";
 import { AbstractPuppet } from "../AbstractPuppet";
 import { KnownFailure, NavigationFailure, NavigationState, type TargetInfo } from "../types/model";
 import { type PuppeteerPuppetConfig } from "./schema";
@@ -105,25 +106,7 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
    * dies on us rather than at our request.
    */
   private _killBrowser(proc: ChildProcess | null): void {
-    if (!proc?.pid || proc.exitCode !== null || proc.signalCode !== null) return;
-
-    this._logger.warn(`Browser process ${proc.pid} outlived its close; killing it.`);
-    try {
-      if (process.platform === "win32") {
-        // Chromium's renderer and GPU children are processes of their own, and killing the
-        // parent on Windows leaves them running: /T takes the tree, /F skips asking.
-        execFileSync("taskkill", ["/pid", String(proc.pid), "/T", "/F"], { stdio: "ignore" });
-      } else {
-        // Puppeteer launches detached off Windows, so the browser leads its own process
-        // group and the negated pid takes the group with it.
-        process.kill(-proc.pid, "SIGKILL");
-      }
-    } catch (error) {
-      // Missing permissions, a pid that exited in between, or no process group to speak of.
-      // The plain kill leaves any children behind, but the browser itself still goes.
-      this._logger.warn(`Could not kill the process tree of ${proc.pid}, killing the process alone.`, error);
-      proc.kill("SIGKILL");
-    }
+    if (killProcessTree(proc)) this._logger.warn(`Browser process ${proc?.pid} outlived its close; killed its tree.`);
   }
 
   /**

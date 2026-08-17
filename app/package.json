@@ -13,6 +13,10 @@
   "packageManager": "yarn@4.9.2",
   "scripts": {
     "dev": "tsx app.ts",
+    "build": "tsup && vite build && tsx scripts/assembleDist.ts",
+    "serve": "node dist/supervisor.js",
+    "serve:app": "node dist/app.js",
+    "start": "yarn build && yarn serve",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
