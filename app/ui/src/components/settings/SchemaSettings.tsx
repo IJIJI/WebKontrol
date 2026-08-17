@@ -590,7 +590,13 @@ function renderField(
     case "boolean":
       return (
         <ToggleSetting key={key} title={title} subtitle={subtitle} error={error}
-          value={Boolean(value)} savedVal={saved as boolean | undefined} setValue={set} />
+          // Same contract as the enum case below: absent means "the default applies", shown as
+          // that default, and toggling BACK to the default stores nothing. Without the
+          // collapse, on-then-off wrote an explicit `false` over an absent saved value and the
+          // save bar stayed up for a draft identical to what is stored.
+          value={Boolean(value ?? info.defaultValue)}
+          savedVal={saved as boolean | undefined}
+          setValue={(v) => set(v === (info.defaultValue as boolean | undefined) ? undefined : v)} />
       );
     case "enum": {
       const defaultValue = info.defaultValue as string | undefined;
