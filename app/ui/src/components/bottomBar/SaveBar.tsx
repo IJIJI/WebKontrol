@@ -5,7 +5,7 @@ import { BottomBar } from "./BottomBar";
 import { Button } from "../button/Button";
 import { Variant } from "../../common/types/variants";
 import { Icons } from "../icons/Icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUnsavedPrompt } from "../../common/hooks/useUnsavedPrompt";
 
 export function SaveBar({
@@ -32,6 +32,21 @@ export function SaveBar({
       setIsSaving(false);
     }
   }
+
+  // Ctrl+S saves the draft, and is claimed even when there is nothing to save: the browser's
+  // save-page dialog is never what someone editing an admin form wants. Mounted here so every
+  // draft page gets the shortcut the same way it gets the leave-warning. Cmd+S for macOS.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "s") return;
+      event.preventDefault();
+      // A held key repeats keydown; one save per press. isSaving guards a re-entrant save.
+      if (event.repeat || !visible || isSaving) return;
+      void doSave();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
 
   return (
     <BottomBar visible={visible} className="saveBar">
