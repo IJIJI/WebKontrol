@@ -7,6 +7,7 @@ import { Variant } from "../../common/types/variants";
 import { Icons } from "../icons/Icons";
 import { useEffect, useState } from "react";
 import { useUnsavedPrompt } from "../../common/hooks/useUnsavedPrompt";
+import { ConfirmModal } from "../modal/ConfirmModal";
 
 export function SaveBar({
   visible,
@@ -21,8 +22,10 @@ export function SaveBar({
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // The bar is visible exactly while there are unsaved changes, so it doubles as the one place
-  // every draft page gets the leave-warning from.
-  useUnsavedPrompt(visible);
+  // every draft page gets the leave-warning from. The hook blocks the navigation; the modal
+  // below asks the question. Tab close keeps the browser's native prompt (beforeunload is not
+  // stylable), so only in-app navigation gets this dialog.
+  const blocker = useUnsavedPrompt(visible);
 
   const doSave = async (): Promise<void> => {
     setIsSaving(true);
@@ -49,18 +52,33 @@ export function SaveBar({
   });
 
   return (
-    <BottomBar visible={visible} className="saveBar">
-      <span className="saveTitle">Unsaved changes</span>
-      <div className="saveButtons">
-        <Button variant={Variant.DANGER} onClick={onDiscard} disabled={isSaving}>
-          <Icons.undo size={20} />
-          <p>Discard</p>
-        </Button>
-        <Button variant={Variant.SUCCESS} onClick={doSave} >
-          { isSaving ? <Icons.loading size={19}/> : <Icons.check size={19} /> }
-          <p>Save</p>
-        </Button>
-      </div>
-    </BottomBar>
+    <>
+      <BottomBar visible={visible} className="saveBar">
+        <span className="saveTitle">Unsaved changes</span>
+        <div className="saveButtons">
+          <Button variant={Variant.DANGER} onClick={onDiscard} disabled={isSaving}>
+            <Icons.undo size={20} />
+            <p>Discard</p>
+          </Button>
+          <Button variant={Variant.SUCCESS} onClick={doSave} >
+            { isSaving ? <Icons.loading size={19}/> : <Icons.check size={19} /> }
+            <p>Save</p>
+          </Button>
+        </div>
+      </BottomBar>
+      {/* Leaving discards the draft, hence the danger variant on the same rule that gives
+          delete a trash icon. Staying is the safe default (Cancel position and Escape). */}
+      <ConfirmModal
+        open={blocker.state === "blocked"}
+        onClose={() => blocker.reset?.()}
+        title="Unsaved changes"
+        confirmLabel="Leave"
+        cancelLabel="Stay"
+        confirmVariant={Variant.DANGER}
+        onConfirm={() => blocker.proceed?.()}
+      >
+        <span>Leave this page? Your changes are not saved.</span>
+      </ConfirmModal>
+    </>
   );
 }
