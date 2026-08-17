@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { RetryHandler } from "./src/puppet/pacing";
 import { killProcessTree } from "./src/helpers/processTree";
+import { Logger } from "./src/logging/Logger";
 
 // Keeps the app running: restart on any exit we did not ask for, on the shared backoff
 // curve so a permanently broken app settles at the cap instead of looping hot. Runs in
@@ -11,11 +12,17 @@ import { killProcessTree } from "./src/helpers/processTree";
 //
 // Production-only by design: it always runs the built app beside itself (no tsx, no
 // NODE_ENV branch), and `yarn dev` runs app.ts directly so a dev crash stays visible
-// instead of being restarted under you. Console-only logging: journald and Docker capture
-// stdout, and the app owns the log file.
+// instead of being restarted under you.
 //
 // An update later needs nothing from this file: the app applies it and exits, and the
 // restart comes back on the new code.
+
+// Same cwd as the app, so both write ONE logs/webkontrol.log: a crash and the
+// supervisor's reaction to it read as one timeline in a post-mortem.
+// ponytail: the Logger's size rotation is not multi-process safe; if both processes cross
+// the 10MB boundary in the same instant, one rotated generation can be lost. Rare and it
+// only costs old lines; give the Logger a lock/owner if it ever bites.
+const logger = new Logger(["SUPERVISOR"]);
 
 const APP_ENTRY = path.join(path.dirname(fileURLToPath(import.meta.url)), "app.js");
 
@@ -40,7 +47,9 @@ function start(): void {
     stdio: ["inherit", "inherit", "inherit", "ipc"],
   });
   child = proc;
-  console.log(`[supervisor] Started app (pid ${proc.pid}).`);
+  // IMPORTANT, like the app's "Admin server running": under systemd/Docker the console is
+  // the journal, and "the service came up" belongs in it.
+  logger.important(`Started app (pid ${proc.pid}).`);
 
   // exit and error can both fire for one child (a failed spawn errors, then exits).
   let settled = false;
@@ -51,7 +60,7 @@ function start(): void {
     if (shuttingDown) return; // the shutdown path owns this exit
     if (Date.now() - spawnedAt > HEALTHY_MS) retry.reset();
     const delay = retry.schedule(start);
-    console.log(`[supervisor] App ${what}; restarting in ${delay}ms.`);
+    logger.warn(`App ${what}; restarting in ${delay}ms.`);
   };
   proc.on("exit", (code, signal) => onDown(`exited (code=${code}, signal=${signal})`));
   proc.on("error", (error) => onDown(`failed to start (${String(error)})`));
@@ -63,7 +72,7 @@ function shutdown(origin: string): void {
   retry.cancel();
 
   const proc = child;
-  console.log(`[supervisor] ${origin}: shutting down.`);
+  logger.important(`${origin}: shutting down.`);
   if (!proc) process.exit(0);
 
   try {
@@ -72,7 +81,7 @@ function shutdown(origin: string): void {
     // channel already closed; the exit listener below still resolves the shutdown
   }
   const force = setTimeout(() => {
-    console.warn(`[supervisor] App ignored the stop for ${GRACE_MS}ms; killing its tree.`);
+    logger.warn(`App ignored the stop for ${GRACE_MS}ms; killing its tree.`);
     killProcessTree(proc);
     setTimeout(() => process.exit(1), 2_000).unref(); // even the kill failing must not hang the stop
   }, GRACE_MS);
