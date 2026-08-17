@@ -4,6 +4,8 @@ import { Logger } from "./src/logging/Logger";
 const logger = new Logger(["LIFECYCLE", "GUARD"]);
 
 // Assigned once construction finishes; the guards below can fire before that.
+// TODO: Check if this can be done in a cleaner manner, maybe move code out of the construct.
+// eslint-disable-next-line prefer-const -- assigned exactly once, but the guards that close over it must register first, so declaration and assignment cannot merge.
 let app: Awaited<ReturnType<LifeCycle["construct"]>> | undefined;
 
 // Close deliberately on shutdown so puppet browsers are told apart from crashes and do
