@@ -30,6 +30,9 @@ export interface ViewBodyProps {
   // Page-injected placeholder overrides (e.g. the runtime loadTimeout default), same as the
   // generic mapper receives, a body delegating to SchemaSettings passes them through.
   placeholders?: Record<string, string>;
+  // The page's live view-level validation, by dotted field path; a body delegating to
+  // SchemaSettings passes it through so its fields mark errors like the page's own.
+  errors?: Map<string, string>;
 }
 
 // Everything type-specific the ViewEditor needs to edit one view type. Adding a view type is a

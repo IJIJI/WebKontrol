@@ -63,6 +63,21 @@ export default function EditViewPage(): JSX.Element {
   const type = draft.values.type ?? DEFAULT_TYPE;
   const entry = VIEW_EDITORS[type] ?? VIEW_EDITORS[DEFAULT_TYPE];
   const Body = entry.body;
+
+  // Live, like the block tree: derived from the current draft on every edit, so there is no
+  // stale error state to clear and no "first save attempt" bookkeeping. Keyed by dotted field
+  // path; the first issue per field wins, matching the block form's fieldErrors.
+  const viewIssues = useMemo(() => {
+    const parsed = entry.schema.safeParse(draft.values);
+    const issues = new Map<string, string>();
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        const path = issue.path.map(String).join(".");
+        if (!issues.has(path)) issues.set(path, issue.message);
+      }
+    }
+    return issues;
+  }, [entry.schema, draft.values]);
   // The ViewManager's configured default, shown as the loadTimeout placeholder when unset.
   const defaultLoadTimeout = state?.runtime.view.default_load_timeout;
   const placeholders: Record<string, string> =
@@ -84,11 +99,10 @@ export default function EditViewPage(): JSX.Element {
     // Validate against the current type's real schema (strips stale fields from a type switch).
     const parsed = entry.schema.safeParse(draft.values);
     if (!parsed.success) {
-      // List each failing field until inline per-field errors land (task #12).
-      const details = parsed.error.issues
-        .map((issue) => `${issue.path.join(".") || "value"}: ${issue.message}`)
-        .join("\n");
-      toast.error(details || "Invalid view configuration");
+      // The fields say what is wrong inline (viewIssues renders live); the toast only explains
+      // why the save button appeared to do nothing, since the SaveBar sits at the bottom and
+      // the failing field can be scrolled out of view.
+      toast.error("Fix the marked fields first.");
       return;
     }
     // Checks the member schema can't express (e.g. per-block configs behind a loose `root`).
@@ -132,6 +146,8 @@ export default function EditViewPage(): JSX.Element {
           value={draft.values.name ?? {}}
           savedVal={draft.saved.name}
           setValue={(v) => draft.setField("name", v)}
+          // One row renders both halves, so it shows whichever half fails first.
+          error={viewIssues.get("name.long") ?? viewIssues.get("name.short") ?? viewIssues.get("name")}
         />
         <SelectSetting
           title="Type"
@@ -150,6 +166,7 @@ export default function EditViewPage(): JSX.Element {
           value={draft.values.appearance?.color}
           savedVal={draft.saved.appearance?.color}
           setValue={(color) => draft.setField("appearance", { ...draft.values.appearance, color })}
+          error={viewIssues.get("appearance.color")}
         />
         <IconSetting
           title="Icon"
@@ -160,9 +177,9 @@ export default function EditViewPage(): JSX.Element {
         />
       </SettingGroup>
         {Body ? (
-          <Body draft={draft} placeholders={placeholders} />
+          <Body draft={draft} placeholders={placeholders} errors={viewIssues} />
         ) : (
-          <SchemaSettings schema={entry.schema} draft={draft} exclude={["name"]} placeholders={placeholders} />
+          <SchemaSettings schema={entry.schema} draft={draft} exclude={["name"]} placeholders={placeholders} errors={viewIssues} />
         )}
 
       {/* Assigns the SAVED view: a display shows what the server has, not the draft on screen.

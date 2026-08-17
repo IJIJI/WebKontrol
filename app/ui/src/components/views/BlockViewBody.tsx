@@ -9,10 +9,10 @@ import { type ViewBodyProps } from "./viewEditors";
 
 // The blocks view's editor body. The ordinary fields still go through the generic schema mapper
 // (so they never drift from it); only `root` is taken over, by the full-width tree editor.
-export function BlockViewBody({ draft, placeholders }: ViewBodyProps): JSX.Element {
+export function BlockViewBody({ draft, placeholders, errors }: ViewBodyProps): JSX.Element {
   return (
     <>
-      <SchemaSettings schema={BlockViewConfigSchema} draft={draft} exclude={["name", "root"]} placeholders={placeholders} />
+      <SchemaSettings schema={BlockViewConfigSchema} draft={draft} exclude={["name", "root"]} placeholders={placeholders} errors={errors} />
       <SettingGroup title="Blocks">
         <BlockEditor
           root={draft.values.root as BlockLike | undefined}
