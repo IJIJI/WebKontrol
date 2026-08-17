@@ -36,7 +36,7 @@ function BubbleRouteError(): never {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<PageLayout />} errorElement={<BubbleRouteError />}>
-      {import.meta.env.DEV && (
+      {import.meta.env.DEV ? (
       <Route
         index
         element={
@@ -45,6 +45,10 @@ const router = createBrowserRouter(
           </PageRoute>
         }
       />
+      ) : (
+      // The overview is a dev page for now, and a front door must lead somewhere: land an
+      // operator on the displays. The catch-all below funnels unknown paths here too.
+      <Route index element={<Navigate to="/puppets" replace />} />
       )}
       {import.meta.env.DEV && (
       <Route
