@@ -64,11 +64,12 @@
       }
     }
 
+    // Chrome (height, padding) comes from the shared stacked-select rule; only the width
+    // is this widget's own, since a unit list never shows more than one short token.
     .trackUnit {
       flex: 0 0 auto;
       width: 62px;
       min-width: 0;
-      padding: 6px 20px 6px 6px;
     }
 
     // Icon-only actions: the shared button's page-sized padding is far too wide for a row that

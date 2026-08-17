@@ -32,10 +32,19 @@
       min-height: @field-height;
     }
 
-    // The native select carries no vertical padding by default; give it some when stacked.
+    // The same fixed height the wide row pins, so a field measures identically in every
+    // layout (stacked fields used to size naturally to ~33px). Inputs and selects only:
+    // textareas keep their multi-line height through the min-height above.
+    input.textfield,
+    select.textfield {
+      height: @field-height;
+    }
+
     select.textfield {
       min-width: 0;
-      padding: 6px 28px 6px 8px;
+      // Same horizontal chrome as the wide row's select; the fixed height centers the text,
+      // so no vertical padding is needed.
+      padding: 0 28px 0 8px;
     }
   }
 
@@ -273,9 +282,17 @@
             background-color: var(--color-border-secondary);
           }
           &.active {
-            background-color: var(--color-text-acc); 
+            background-color: var(--color-text-acc);
 
           }
+        }
+
+        // The in-widget variant: segmented unit/mode controls that sit ABOVE a field rather
+        // than being the field. Named once here so every widget's minis match; deliberately
+        // smaller than the field-level group, which IS the input of its row.
+        &.mini button {
+          padding: 3px 8px;
+          font-size: 11px;
         }
       }
 
@@ -339,9 +356,10 @@
       }
 
       // Native <select> needs room for its arrow + a min width so option text isn't clipped.
+      // Left padding matches the stacked select, so the two layouts read as one control.
       select.textfield {
         min-width: 120px;
-        padding: 0 28px 0 5px;
+        padding: 0 28px 0 8px;
       }
 
     }
