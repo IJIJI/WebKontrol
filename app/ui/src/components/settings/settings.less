@@ -274,7 +274,14 @@
 
           background-color: var(--color-background-secondary);
 
-          &:hover, &:focus, &:active {
+          // The group clips at its rounded corners (overflow: hidden above), which swallows
+          // an outline drawn outside the button. Draw keyboard focus inside instead, or these
+          // buttons are the one control with no focus indicator at all.
+          &:focus-visible {
+            outline-offset: -2px;
+          }
+
+          &:hover, &:active {
             background-color: var(--color-border-tertiary);
 
           }
