@@ -12,6 +12,7 @@ export type UpdateStep =
   | { kind: "download"; url: string }
   | { kind: "extract" }
   | { kind: "install-deps" }
+  | { kind: "promote"; version: string } // staging becomes releases/<version> in one rename
   | { kind: "snapshot-db" }
   | { kind: "write-pending"; from: string; to: string }
   | { kind: "activate"; version: string } // repoint the `current` file, temp+rename
@@ -33,6 +34,9 @@ export function planUpdate(input: PlanInput): UpdateStep[] {
         { kind: "download", url: input.to.assetUrl },
         { kind: "extract" },
         { kind: "install-deps" },
+        // The release dir appears fully built or not at all, so a directory's presence
+        // is proof it is a valid downgrade target and boot cleanup stays staging-only.
+        { kind: "promote", version: input.to.version },
       ];
   return [
     ...fetch,

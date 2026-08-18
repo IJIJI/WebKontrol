@@ -24,6 +24,7 @@ assert.deepEqual(kinds(upgrade), [
   "download",
   "extract",
   "install-deps",
+  "promote",
   "snapshot-db",
   "write-pending",
   "activate",
@@ -42,6 +43,7 @@ assert.ok(
 // retention keeps exactly the new and the previous release.
 const byKind = Object.fromEntries(upgrade.map((step) => [step.kind, step]));
 assert.deepEqual(byKind["download"], { kind: "download", url: "https://example.test/v3.1.0.tar.gz" });
+assert.deepEqual(byKind["promote"], { kind: "promote", version: "v3.1.0" });
 assert.deepEqual(byKind["write-pending"], { kind: "write-pending", from: "v3.0.0", to: "v3.1.0" });
 assert.deepEqual(byKind["sweep-releases"], { kind: "sweep-releases", keep: ["v3.1.0", "v3.0.0"] });
 
