@@ -45,6 +45,7 @@ export class CoreDatabase {
   private _logger: Logger;
 
   private _db: BetterSQLite3Database<typeof schema>;
+  private _sqlite: Database.Database;
 
   public static getInstance(): CoreDatabase {
     if (!CoreDatabase._instance) {
@@ -81,8 +82,18 @@ export class CoreDatabase {
     }
 
     this._db = drizzle(sqlite, { schema });
+    this._sqlite = sqlite;
 
     this._logger.info(`Database initialized at:`, dbPath);
+  }
+
+  /**
+   * A consistent point-in-time copy of the live database at `dest`, through SQLite's own
+   * backup API. This is the only sanctioned way to snapshot it: a plain file copy of an
+   * open (WAL) database can capture a torn state.
+   */
+  public async backup(dest: string): Promise<void> {
+    await this._sqlite.backup(dest);
   }
 
   public async updateSetting(
