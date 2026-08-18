@@ -147,7 +147,7 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
     void this._runner
       .run(plan)
       .then(() => {
-        this._logger.important(`Update to ${target.version} staged; restarting to activate.`);
+        this._logger.important(`Update to ${target.version} staged; restarting to activate.`); // TODO: Check if this is exaustive, and has no edgecases.
         this._requestRestart();
       })
       .catch(async (error) => {
