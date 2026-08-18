@@ -15,6 +15,7 @@ import { UiTheme } from "../../../src/ui/schema";
 import { useApi, withToast } from "../context/ApiStateContext";
 import { LoadingPage } from "../components/layout/loading/LoadingPage";
 import { NumberSetting } from "../components/settings/implementations/NumberSetting";
+import { UpdateSettings } from "../components/updates/UpdateSettings";
 
 
 
@@ -157,6 +158,7 @@ export default function SettingsPage(): JSX.Element {
           fillStyle={FillStyle.SKELETON}
         />
       </SettingGroup>
+      <UpdateSettings />
       <SettingGroup title="About">
         <BaseSetting
           title="Status"
@@ -164,12 +166,6 @@ export default function SettingsPage(): JSX.Element {
         >
           <StatusPill status={ConnectionState.ONLINE}/>
         </BaseSetting>
-        <ButtonSetting 
-          title="Firmware"
-          subtitle="v1.0.0"
-          label="Update"
-          onClick={() => { alert("Yeah you wish, this don't exist yet.")}}
-        />
         <BaseSetting
           title="Hardware"
           subtitle="Hardware Type"
