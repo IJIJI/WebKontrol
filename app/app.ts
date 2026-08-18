@@ -58,5 +58,7 @@ if (process.send) {
 }
 
 const lifeCycle = new LifeCycle();
-app = await lifeCycle.construct();
+// The update manager restarts by asking for a clean exit; the supervisor brings the new
+// version up. Same seam as every other shutdown, never a self-signal.
+app = await lifeCycle.construct(() => beginShutdown());
 await app.init();
