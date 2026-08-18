@@ -5,7 +5,7 @@
 
 export interface ParsedVersion {
   core: [number, number, number];
-  /** The part after "-" split on dots ("-beta.2" -> ["beta", "2"]), null for a stable release. */
+  /** The part after "-" split on dots ("-beta.2" becomes ["beta", "2"]), null for a stable release. */
   pre: string[] | null;
 }
 
@@ -19,7 +19,7 @@ export function parseVersion(tag: string): ParsedVersion | null {
   };
 }
 
-/** Standard comparator contract: negative when a < b, zero when equal, positive when a > b. */
+/** Standard comparator contract: negative when a is older, zero when equal, positive when a is newer. */
 export function compareVersions(a: ParsedVersion, b: ParsedVersion): number {
   for (let i = 0; i < 3; i++) {
     if (a.core[i] !== b.core[i]) return a.core[i] - b.core[i];
