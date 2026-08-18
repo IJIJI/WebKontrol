@@ -1,3 +1,5 @@
+import type { UpdateJournalEntry } from "./schema";
+
 /**
  * Model types for the update system: internally created, no validation needed.
  * Follows the puppet model's shape: a state union for the transient activity
@@ -37,4 +39,5 @@ export interface UpdateInfo {
   lastChecked: number | null;
   checkError?: string; // why the last check failed; cleared by a successful one
   activity: UpdateActivity;
+  journal?: UpdateJournalEntry; // the most recent apply's outcome; absent before the first
 }
