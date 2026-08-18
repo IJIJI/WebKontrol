@@ -63,11 +63,10 @@ interface ApiState {
         notify?: boolean,
       ) => Promise<void>;
     };
-    // update: {
-    //   check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
-    //   apply: (ref: string, type: "release" | "branch") => Promise<void>; // TODO: Check arguments
-    //   getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
-    // };
+    update: {
+      check: (notify?: boolean) => Promise<void>;
+      apply: (version: string, notify?: boolean) => Promise<void>;
+    };
     ui: {
       updateRuntime: (
         config: Partial<UiRuntimeInput>,
@@ -360,6 +359,24 @@ export function ApiStateProvider({
     );
   };
 
+  const updateCheck = async (notify = true): Promise<void> => {
+    return withToast(
+      Api.post(`/update/check`, {}),
+      { loading: "Checking for updates…", success: "Check complete" },
+      notify,
+    );
+  };
+
+  // Success here means legitimately started, not done: the rest of the story arrives
+  // through the state's update section, and ends in the server restarting.
+  const updateApply = async (version: string, notify = true): Promise<void> => {
+    return withToast(
+      Api.post(`/update/apply`, { version }),
+      { loading: "Starting update…", success: "Update started" },
+      notify,
+    );
+  };
+
   const viewManagerUpdateRuntime = async (
     config: Partial<ViewManagerRuntimeInput>,
     notify = false,
@@ -414,6 +431,10 @@ export function ApiStateProvider({
         callBacks: {
           system: {
             updateRuntime: systemUpdateRuntime,
+          },
+          update: {
+            check: updateCheck,
+            apply: updateApply,
           },
           ui: {
             updateRuntime: uiUpdateRuntime,
