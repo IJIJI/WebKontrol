@@ -7,6 +7,7 @@ import { jsonReplacer } from "../helpers/json";
 import { asset, IS_PROD } from "../helpers/assets";
 import {
   PuppetPatchSchema,
+  UpdateApplySchema,
   ViewKeyPackageShape,
   WebServerConfigSchema,
   type WebServerConfig,
@@ -512,28 +513,33 @@ export class WebServer implements RouteRegistrar {
       }
     });
 
-    // ? Update
-    // TODO: IMPLEMENT!
-    // this.app.get("/api/update/status", (_req, res) => {
-    //   res.json(this.updateManager.getStatus());
-    // });
+    // ? Update (status rides the SSE state payload; these only trigger)
+    this._app.post("/api/update/check", async (_req, res) => {
+      try {
+        await this._handlers.update.check();
+        res.status(204).send();
+      } catch (e) {
+        this._logger.error("Failed to check for updates:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to check for updates",
+        });
+      }
+    });
 
-    // this.app.post("/api/update/check", async (_req, res) => {
-    //   const status = await this.updateManager.checkForUpdates();
-    //   res.json(status);
-    // });
-
-    // this.app.post("/api/update/apply", (req, res) => {
-    //   const { ref, type } = req.body as { ref: string; type: 'release' | 'branch' };
-    //   if (!ref || !type) {
-    //     res.status(400).json({ error: "ref and type are required" });
-    //     return;
-    //   }
-    //   res.status(204).send();
-    //   this.updateManager.applyUpdate(ref, type).catch((err) => {
-    //     this.logger.error("Update failed:", err);
-    //   });
-    //   this.logger.info(`Update requested: ${type} "${ref}"`);
-    // });
+    this._app.post("/api/update/apply", async (req, res) => {
+      const result = UpdateApplySchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+      }
+      try {
+        await this._handlers.update.apply(result.data.version);
+        res.status(204).send();
+      } catch (e) {
+        this._logger.error("Failed to apply update:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to apply update",
+        });
+      }
+    });
   }
 }

@@ -1,5 +1,6 @@
 import { Logger } from "../logging/Logger";
 import type { SystemManager } from "../system/SystemManager";
+import type { UpdateManager } from "../system/update/UpdateManager";
 import type { UiManager } from "../ui/UiManager";
 import type { WebServerState } from "../webServer/model";
 import type { WebServer } from "../webServer/WebServer";
@@ -9,6 +10,7 @@ import type { ViewServer } from "../views/ViewServer";
 
 export interface AppCoreConfig {
   systemManager: SystemManager;
+  updateManager: UpdateManager;
   puppetOrchestrator: PuppetOrchestrator;
   webServer: WebServer;
   uiManager: UiManager;
@@ -22,6 +24,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
   private _isInit: boolean = false;
 
   private _systemManager: SystemManager;
+  private _updateManager: UpdateManager;
 
   private _puppetOrchestrator: PuppetOrchestrator;
 
@@ -34,6 +37,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
 
   constructor(config: AppCoreConfig) {
     this._systemManager = config.systemManager;
+    this._updateManager = config.updateManager;
     this._puppetOrchestrator = config.puppetOrchestrator;
     this._webServer = config.webServer;
     this._uiManager = config.uiManager;
@@ -52,10 +56,12 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
       info: {
         system: this._systemManager.getInfo(),
         view: this._viewManager.getInfo(),
+        update: this._updateManager.getInfo(),
       }
     });
 
     this._systemManager.on('info_update', (info) => this._updateState({ info: { ...this._webState.info, system: info } }));
+    this._updateManager.on('info_update', (info) => this._updateState({ info: { ...this._webState.info, update: info } }));
     this._viewManager.on('info_update', (info) => this._updateState({ info: { ...this._webState.info, view: info } }));
     this._systemManager.on('runtime_update', (runtime) => this._updateState({runtime: { ...this._webState.runtime, system: runtime }}));
 
@@ -84,6 +90,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     this._logger.important("Starting AppCore...");
 
     await this._systemManager.init();
+    await this._updateManager.init();
 
     // Views before puppets: the orchestrator resolves each puppet's assigned view into a
     // target during its own init, so the ViewManager must already hold the views.
@@ -106,22 +113,7 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
 
     this._webServer.setHandlers({
       system: this._systemManager.getHandlers(),
-      update: { // TODO: UpdateManager
-        check: async (): Promise<void> => {
-          this._logger.important(`update.check() handler called.`);
-        },
-        apply: async (
-          ref: string,
-          type: "release" | "branch",
-        ): Promise<void> => {
-          this._logger.important(
-            `update.apply() handler called with ref: ${ref} of type: ${type}`,
-          );
-        },
-        getStatus: async (): Promise<void> => {
-          this._logger.important(`update.getStatus() handler called.`);
-        },
-      },
+      update: this._updateManager.getHandlers(),
       puppet: this._puppetOrchestrator.getHandlers(),
       ui: this._uiManager.getHandlers(),
       view: this._viewManager.getHandlers(),

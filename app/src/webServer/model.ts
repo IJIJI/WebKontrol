@@ -4,6 +4,7 @@ import type { PuppetKey, PuppetRuntime } from "../puppet/types/schema";
 import type { EntityAppearance } from "../common/entityAppearance/schema";
 import type { SystemInfo } from "../system/model";
 import type { SystemRuntime } from "../system/schema";
+import type { UpdateInfo } from "../system/update/model";
 import type { ViewManagerInfo } from "../views/types/model";
 import type { UiRuntime } from "../ui/schema";
 import type { AnyViewConfig, ViewKey, ViewManagerRuntime } from "../views/types/schema";
@@ -17,6 +18,7 @@ export interface WebServerRuntimeState {// Only Runtime Configs. Standard config
 export interface WebServerInfoState {
   system: SystemInfo;
   view: ViewManagerInfo;
+  update: UpdateInfo;
 }
 
 export interface WebServerState {
@@ -54,9 +56,12 @@ export interface SystemWebhandlers {
   updateRuntime: (config: Partial<SystemRuntime>) => void | Promise<void>;
 }
 export interface UpdateWebhandlers {
-  check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
-  apply: (ref: string, type: "release" | "branch") => Promise<void>; // TODO: Check arguments
-  getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
+  /** Refresh the release list; the result rides the SSE state payload, not the response. */
+  check: () => Promise<void>;
+  /** Start applying a release by version tag. Resolves once the update is legitimate and
+   *  running, not once it is done: a successful apply ends in a restart. */
+  apply: (version: string) => Promise<void>;
+  // TODO: Check if there is a status check needed for during the update.
 }
 export interface UiWebhandlers {
   updateRuntime: (runtime: Partial<UiRuntime>) => void | Promise<void>;
