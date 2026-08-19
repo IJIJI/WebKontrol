@@ -2,6 +2,8 @@
   @border-radius-fields: @border-radius-md;
   @border-width: 1px;
 
+  position: relative; // anchor for the badge below
+
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -119,4 +121,18 @@
       background-color: var(--color-background-info);
     }
   }
+}
+// A "there is something here" dot, hung on the button's corner. Ringed in the page
+// background so it reads as a marker on top of the button rather than part of its edge.
+.buttonComp .buttonBadge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+
+  background: var(--color-text-acc);
+  border: 1.5px solid var(--color-background-primary);
 }
