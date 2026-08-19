@@ -95,6 +95,11 @@ export default function UpdatePage(): JSX.Element {
 
   const busy =
     info.activity.state === UpdateState.APPLYING || info.activity.state === UpdateState.CHECKING;
+  // The journal stays "applying" until the update has proven itself, which is exactly
+  // while the server refuses a replacement. Disable rather than let a click fail. Only
+  // applies are blocked: looking for releases changes nothing.
+  const settling = info.journal?.status === "applying";
+  const canApply = !busy && !settling;
 
   const apply = async (release: Release): Promise<void> => {
     // Written before the request: a fast update can take the server away while it is still
@@ -169,7 +174,7 @@ export default function UpdatePage(): JSX.Element {
         </div>
         {release.version !== info.current && (
           <div className="detailActions">
-            <ApplyButton release={release} current={info.current} busy={busy} onClick={setConfirming} />
+            <ApplyButton release={release} current={info.current} busy={!canApply} onClick={setConfirming} />
           </div>
         )}
         <ApplyConfirm
@@ -201,7 +206,14 @@ export default function UpdatePage(): JSX.Element {
       </div>
 
       {info.checkError !== undefined && <p className="checkError">{info.checkError}</p>}
-      {info.journal && <JournalLine journal={info.journal} now={now} />}
+      {settling ? (
+        <p className="journal">
+          Confirming the update to {info.journal?.to}. Another one can be installed once it
+          has run for a minute without trouble.
+        </p>
+      ) : (
+        info.journal && <JournalLine journal={info.journal} now={now} />
+      )}
 
       <div className="releaseList">
         {info.releases.length === 0 && <div className="empty">No releases found.</div>}
@@ -217,7 +229,7 @@ export default function UpdatePage(): JSX.Element {
               </span>
             </Link>
             {release.version !== info.current && (
-              <ApplyButton release={release} current={info.current} busy={busy} onClick={setConfirming} />
+              <ApplyButton release={release} current={info.current} busy={!canApply} onClick={setConfirming} />
             )}
           </div>
         ))}

@@ -28,6 +28,13 @@ function schemaStep(_version: string): number {
 }
 
 /**
+ * An apply the gate turned down: a normal, expected answer (wrong mode, unknown version,
+ * an update still settling), not a failure. Carried as its own type so the web layer can
+ * answer 409 instead of dressing a house rule up as a server error.
+ */
+export class UpdateRefusedError extends Error {}
+
+/**
  * Whether an apply may start, as a pure decision so the check file can hold it down.
  * Returns the refusal reason, or null when the apply is allowed.
  */
@@ -43,7 +50,8 @@ export function applyGate(input: {
 }): string | null {
   if (!input.managed) return "This deployment is managed by git; update from the checkout.";
   if (input.applying) return "An update is already in progress.";
-  if (input.pendingExists) return "The previous update is not confirmed yet; try again in a minute.";
+  if (input.pendingExists)
+    return "The last update is still being confirmed; it can be replaced once it has proven itself.";
   if (!input.target) return "Unknown release; check for updates first.";
   if (input.target.version === input.current) return "This version is already running.";
   const downgrade = !isNewerVersion(input.target.version, input.current);
@@ -129,7 +137,8 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
       current: this._current,
       target,
     });
-    if (refusal !== null || target === undefined) throw new Error(refusal ?? "Unknown release.");
+    if (refusal !== null || target === undefined)
+      throw new UpdateRefusedError(refusal ?? "Unknown release.");
 
     // APPLYING is set synchronously with the gate: an await between them would let a
     // second concurrent apply through before the first one is visible.

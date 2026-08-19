@@ -18,6 +18,7 @@ import { SystemRuntimeShape } from "../system/schema";
 import { PuppetKeySchema } from "../puppet/types/schema";
 import { AnyViewConfigSchema, ViewKeySchema, ViewManagerRuntimeShape } from "../views/types/schema";
 import { PuppetOrchestratorRuntimeShape } from "../orchestration/puppet/schema";
+import { UpdateRefusedError } from "../system/update/UpdateManager";
 
 export class WebServer implements RouteRegistrar {
   private _app = express();
@@ -535,6 +536,12 @@ export class WebServer implements RouteRegistrar {
         await this._handlers.update.apply(result.data.version);
         res.status(204).send();
       } catch (e) {
+        // A refusal is the gate answering, not a fault: 409 says "not in this state",
+        // which is what the UI shows the operator. Anything else is a real failure.
+        if (e instanceof UpdateRefusedError) {
+          this._logger.warn("Update refused:", e.message);
+          return res.status(409).json({ error: e.message });
+        }
         this._logger.error("Failed to apply update:", e);
         res.status(500).json({
           error: e instanceof Error ? e.message : "Failed to apply update",

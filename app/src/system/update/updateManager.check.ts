@@ -33,7 +33,7 @@ assert.equal(
 // Every refusal, one condition at a time.
 assert.match(String(applyGate({ ...base, managed: false })), /managed by git/);
 assert.match(String(applyGate({ ...base, applying: true })), /already in progress/);
-assert.match(String(applyGate({ ...base, pendingExists: true })), /not confirmed/);
+assert.match(String(applyGate({ ...base, pendingExists: true })), /still being confirmed/);
 assert.match(String(applyGate({ ...base, target: undefined })), /Unknown release/, "the allowlist");
 assert.match(String(applyGate({ ...base, target: release("v3.0.0") })), /already running/);
 

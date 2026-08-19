@@ -15,6 +15,8 @@ import { SettingGroup } from "../settings/SettingGroup";
 // ConnectionState is borrowed for its pill variant only, the NavigationPill precedent.
 function describe(info: UpdateInfo): { status: ConnectionState; label: string } {
   if (!info.managed) return { status: ConnectionState.DISABLED, label: "Managed by git" };
+  if (info.journal?.status === "applying" && info.activity.state !== UpdateState.APPLYING)
+    return { status: ConnectionState.UNKNOWN, label: "Confirming update…" };
   switch (info.activity.state) {
     case UpdateState.IDLE:
       return { status: ConnectionState.ONLINE, label: "Up to date" };
