@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import "./updatePage.less";
 import { timeAgo } from "../common/helpers/relativeTime";
 import { useNow } from "../common/hooks/useNow";
-import { FillStyle, Variant } from "../common/types/variants";
+import { Variant } from "../common/types/variants";
 import { Button } from "../components/button/Button";
 import { LoadingPage } from "../components/layout/loading/LoadingPage";
 import { ConfirmModal } from "../components/modal/ConfirmModal";
@@ -25,8 +25,13 @@ const PENDING_KEY = "wk-update-target";
 // Read ONCE per document: a marker present at load time means the previous document was
 // taken away by an update, so this load is the one that comes after it. A component-level
 // read could not tell that apart from an apply started a second ago.
-const RESTARTED_INTO: string | null =
+//
+// Consumed rather than merely read: it is cleared from storage immediately (a manual
+// reload must not replay a finished update) and cleared here once the outcome has been
+// seen, so navigating away and back does not bring the modal up again.
+let restartedInto: string | null =
   typeof sessionStorage === "undefined" ? null : sessionStorage.getItem(PENDING_KEY);
+if (restartedInto !== null) sessionStorage.removeItem(PENDING_KEY);
 
 /**
  * The Updates page: the release list, per-release notes, and the update lifecycle.
@@ -39,6 +44,7 @@ export default function UpdatePage(): JSX.Element {
   const { setMeta } = usePageContext();
   const now = useNow(30_000); // relative labels only need minute-ish freshness
 
+  const [outcomeTarget, setOutcomeTarget] = useState<string | null>(restartedInto);
   const [applyingTarget, setApplyingTarget] = useState<string | null>(null);
   const [sawRestart, setSawRestart] = useState(false);
   const [confirming, setConfirming] = useState<Release | null>(null);
@@ -67,12 +73,6 @@ export default function UpdatePage(): JSX.Element {
     if (info.current === applyingTarget || (sawRestart && connected)) window.location.reload();
   }, [applyingTarget, sawRestart, connected, activity, info]);
 
-  // An outcome has been read out of the marker, so retire it: reloading again (or opening
-  // the page later) must not replay a story that has already been told.
-  useEffect(() => {
-    if (RESTARTED_INTO !== null) sessionStorage.removeItem(PENDING_KEY);
-  }, []);
-
   useEffect(() => {
     setMeta(
       { title: [{ label: "Settings", path: "/settings/config" }, { label: "updates", path: "/settings/updates" }, ...(version ? [version] : [])] },
@@ -89,7 +89,7 @@ export default function UpdatePage(): JSX.Element {
         connected,
         applyingTarget,
         sawRestart,
-        restartedInto: RESTARTED_INTO,
+        restartedInto: outcomeTarget,
         current: info.current,
       });
 
@@ -117,7 +117,8 @@ export default function UpdatePage(): JSX.Element {
   };
 
   const dismissOutcome = (): void => {
-    sessionStorage.removeItem(PENDING_KEY);
+    restartedInto = null; // the story has been told; a remount must not tell it again
+    setOutcomeTarget(null);
     setApplyingTarget(null);
     setDismissed(true);
   };
@@ -125,7 +126,7 @@ export default function UpdatePage(): JSX.Element {
   const overlay = (
     <UpdateOverlay
       phase={phase}
-      target={applyingTarget ?? RESTARTED_INTO}
+      target={applyingTarget ?? outcomeTarget}
       error={
         info.activity.state === UpdateState.FAILED
           ? info.activity.error
@@ -195,12 +196,7 @@ export default function UpdatePage(): JSX.Element {
         <span className="checked">
           {info.lastChecked === null ? "Not checked yet" : `Last checked ${timeAgo(info.lastChecked, now)}`}
         </span>
-        <Button
-          size={14}
-          fillStyle={FillStyle.SKELETON}
-          disabled={busy}
-          onClick={() => api.callBacks.update.check()}
-        >
+        <Button size={14} disabled={busy} onClick={() => api.callBacks.update.check()}>
           Check for updates
         </Button>
       </div>
@@ -223,7 +219,7 @@ export default function UpdatePage(): JSX.Element {
               <span className="name">
                 {release.name}
                 {release.prerelease && (
-                  <InfoPill variant={Variant.WARNING} fillStyle={FillStyle.SKELETON} size={11}>
+                  <InfoPill variant={Variant.WARNING}>
                     <span>beta</span>
                   </InfoPill>
                 )}
@@ -234,7 +230,7 @@ export default function UpdatePage(): JSX.Element {
             </Link>
             <span className="action">
               {release.version === info.current ? (
-                <InfoPill variant={Variant.SUCCESS} fillStyle={FillStyle.SKELETON} size={11}>
+                <InfoPill variant={Variant.SUCCESS}>
                   <span>current</span>
                 </InfoPill>
               ) : (
@@ -259,12 +255,12 @@ function ReleaseBadges({ release, current }: { release: Release; current: string
   return (
     <>
       {release.prerelease && (
-        <InfoPill variant={Variant.WARNING} fillStyle={FillStyle.SKELETON} size={11}>
+        <InfoPill variant={Variant.WARNING}>
           <span>beta</span>
         </InfoPill>
       )}
       {release.version === current && (
-        <InfoPill variant={Variant.SUCCESS} fillStyle={FillStyle.SKELETON} size={11}>
+        <InfoPill variant={Variant.SUCCESS}>
           <span>current</span>
         </InfoPill>
       )}
@@ -285,12 +281,12 @@ function ApplyButton({
   busy: boolean;
   onClick: (release: Release) => void;
 }): JSX.Element {
+  // One fill for every action here; only the variant says which way the version moves.
   const newer = isNewerVersion(release.version, current);
   return (
     <Button
       size={14}
       variant={newer ? Variant.ACCENT : Variant.DEFAULT}
-      fillStyle={newer ? FillStyle.FILLED : FillStyle.SKELETON}
       disabled={busy}
       onClick={() => onClick(release)}
     >

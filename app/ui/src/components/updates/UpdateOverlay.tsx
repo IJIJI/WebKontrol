@@ -1,4 +1,5 @@
 import { useEffect, type JSX } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
 import "./updateOverlay.less";
@@ -55,18 +56,24 @@ export function UpdateOverlay({
 
     case UpdatePhase.APPLYING:
     case UpdatePhase.RESTARTING:
-      return (
+      // Portaled to <body>: `main.content` has `contain: layout`, which makes it the
+      // containing block for fixed positioning, so an in-place overlay would cover the
+      // content column only and leave the list showing around it.
+      return createPortal(
         <div className="updateOverlay">
-          <Icons.loading size={64} />
+          <span className="badge">
+            <Icons.loading size={40} />
+          </span>
           <span className="title">
             {phase === UpdatePhase.APPLYING ? "Updating WebKontrol" : "Restarting"}
           </span>
           <span className="detail">
             {phase === UpdatePhase.APPLYING
-              ? `Downloading and installing ${target ?? "the update"}. Displays keep showing their current page.`
+              ? `Downloading and installing ${target ?? "the update"}. Puppets keep showing their current page.`
               : "Waiting for the new version to come up. This page reloads itself."}
           </span>
-        </div>
+        </div>,
+        document.body,
       );
 
     case UpdatePhase.DONE:
@@ -82,12 +89,17 @@ export function UpdateOverlay({
                 Stay here
               </Button>
               <Button variant={Variant.ACCENT} onClick={() => void navigate("/puppets")}>
-                Go to displays
+                Go to puppets
               </Button>
             </>
           }
         >
-          <p>Now running {target}.</p>
+          <div className="updateOutcome">
+            <span className="badge success">
+              <Icons.check size={26} />
+            </span>
+            <p>Now running {target}.</p>
+          </div>
         </Modal>
       );
 
@@ -104,10 +116,15 @@ export function UpdateOverlay({
             </Button>
           }
         >
-          <p>
-            {target} would not start, so the previous version was restored automatically,
-            database included. Nothing was lost.
-          </p>
+          <div className="updateOutcome">
+            <span className="badge danger">
+              <Icons.alert size={26} />
+            </span>
+            <p>
+              {target} would not start, so the previous version was restored automatically,
+              database included. Nothing was lost.
+            </p>
+          </div>
           {error !== undefined && <pre className="updateError">{error}</pre>}
         </Modal>
       );
@@ -125,10 +142,15 @@ export function UpdateOverlay({
             </Button>
           }
         >
-          <p>
-            Installing {target} did not finish, so nothing was changed and the current
-            version keeps running.
-          </p>
+          <div className="updateOutcome">
+            <span className="badge danger">
+              <Icons.alert size={26} />
+            </span>
+            <p>
+              Installing {target} did not finish, so nothing was changed and the current
+              version keeps running.
+            </p>
+          </div>
           {error !== undefined && <pre className="updateError">{error}</pre>}
         </Modal>
       );
