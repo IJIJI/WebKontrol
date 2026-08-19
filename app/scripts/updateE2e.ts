@@ -25,6 +25,8 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 
+import { killProcessTree } from "../src/helpers/processTree";
+
 const APP_DIR = path.join(import.meta.dirname, "..");
 const GH_PORT = 8098;
 const WEB_PORT = 8099;
@@ -117,12 +119,34 @@ writeFileSync(
 
 // ---------- the fake GitHub ----------
 
+// Exercises the notes renderer as well as the update itself: headings, lists, code,
+// tables, task lists, links and two GitHub alert kinds.
+const notes = (tag: string): string => `## What's new in ${tag}
+
+Updated the **display pipeline** and the \`UpdateRunner\`.
+
+> [!NOTE]
+> This is an end-to-end test release, served by a fake GitHub.
+
+- A list item with \`inline code\`
+- A [link to somewhere](https://example.test/release)
+- [x] A finished task
+
+| Component | Change |
+| --- | --- |
+| Runner | extracts with relative paths |
+| Supervisor | rolls back on repeated crashes |
+
+> [!WARNING]
+> Downgrading past a database change is refused by the gate.
+`;
+
 const ghRelease = (tag: string): object => ({
   tag_name: tag,
   name: `Release ${tag}`,
   published_at: "2026-08-19T00:00:00Z",
   prerelease: false,
-  body: `e2e release ${tag}`,
+  body: notes(tag),
   assets: [
     {
       name: `webkontrol-${tag}.tar.gz`,
@@ -236,6 +260,11 @@ function stop(): Promise<void> {
     }
   });
 }
+
+// Being killed outright (a stopped task, a closed terminal) skips the graceful stop above,
+// and on Windows the supervisor then survives its parent and keeps the ports. Take the
+// tree down synchronously on the way out; a leaked one blocks the next run.
+process.on("exit", () => void killProcessTree(supervisor));
 
 try {
   await main();
