@@ -103,9 +103,13 @@ export class UpdateRunner {
       case "extract": {
         // The tarball is flat (dist/, package.json, yarn.lock, .yarnrc.yml at its root),
         // a contract with the CI workflow.
-        const dir = join(this._staging, "release");
-        await mkdir(dir, { recursive: true });
-        await this._exec("tar", ["-xzf", join(this._staging, "update.tar.gz"), "-C", dir]);
+        await mkdir(join(this._staging, "release"), { recursive: true });
+        // Relative paths + cwd on purpose: GNU tar reads an absolute "C:\..." archive
+        // path as a remote host ("Cannot connect to C"), and which tar wins the PATH
+        // varies per machine. Relative paths behave the same on every tar.
+        await this._exec("tar", ["-xzf", "update.tar.gz", "-C", "release"], {
+          cwd: this._staging,
+        });
         return;
       }
       case "install-deps": {
