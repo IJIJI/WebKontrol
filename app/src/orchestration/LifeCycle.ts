@@ -45,7 +45,7 @@ export class LifeCycle {
     // The update layout is rooted at the cwd, same as config/db/logs; the db snapshot
     // seam is the database's own backup API, never a file copy.
     const updateManager = new UpdateManager(
-      new GitHubReleases(),
+      new GitHubReleases(appConfig.update.api_base),
       new UpdateRunner(process.cwd(), (dest) => CoreDatabase.getInstance().backup(dest)),
       requestRestart,
     );
