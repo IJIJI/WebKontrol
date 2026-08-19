@@ -10,28 +10,11 @@ import { LoadingPage } from "../components/layout/loading/LoadingPage";
 import { ConfirmModal } from "../components/modal/ConfirmModal";
 import { InfoPill } from "../components/pill/InfoPill";
 import { ReleaseNotes } from "../components/updates/ReleaseNotes";
-import { UpdateOverlay } from "../components/updates/UpdateOverlay";
-import { updatePhase, UpdatePhase } from "../components/updates/updatePhase";
+import { clearApplyMark, markApplyStarted } from "../components/updates/useUpdateLifecycle";
 import { useApi } from "../context/ApiStateContext";
 import { usePageContext } from "../context/PageContext";
-import { ConnectionStatus } from "../context/types";
 import { UpdateState, type Release } from "../../../src/system/update/model";
 import { isNewerVersion } from "../../../src/system/update/version";
-
-// Survives the restart an update ends in, which is the only reason the browser can say
-// anything about the outcome at all.
-const PENDING_KEY = "wk-update-target";
-
-// Read ONCE per document: a marker present at load time means the previous document was
-// taken away by an update, so this load is the one that comes after it. A component-level
-// read could not tell that apart from an apply started a second ago.
-//
-// Consumed rather than merely read: it is cleared from storage immediately (a manual
-// reload must not replay a finished update) and cleared here once the outcome has been
-// seen, so navigating away and back does not bring the modal up again.
-let restartedInto: string | null =
-  typeof sessionStorage === "undefined" ? null : sessionStorage.getItem(PENDING_KEY);
-if (restartedInto !== null) sessionStorage.removeItem(PENDING_KEY);
 
 /**
  * The Updates page: the release list, per-release notes, and the update lifecycle.
@@ -44,34 +27,9 @@ export default function UpdatePage(): JSX.Element {
   const { setMeta } = usePageContext();
   const now = useNow(30_000); // relative labels only need minute-ish freshness
 
-  const [outcomeTarget, setOutcomeTarget] = useState<string | null>(restartedInto);
-  const [applyingTarget, setApplyingTarget] = useState<string | null>(null);
-  const [sawRestart, setSawRestart] = useState(false);
   const [confirming, setConfirming] = useState<Release | null>(null);
-  const [dismissed, setDismissed] = useState(false);
 
   const info = api.state?.info.update;
-  const connected = api.status !== ConnectionStatus.DISCONNECTED;
-  const activity = info?.activity.state;
-
-  // The server going away is how a successful apply ends, so remember it: everything
-  // after it is the aftermath, whether or not the connection has come back yet.
-  useEffect(() => {
-    if (applyingTarget !== null && !connected) setSawRestart(true);
-  }, [applyingTarget, connected]);
-
-  /**
-   * Reload once our own apply has concluded. Two reasons this is not optional: the client
-   * is still running the previous version's bundle against the new server, and the outcome
-   * modal reads a marker that only a fresh document can distinguish from an apply in
-   * flight. Arriving on the target version is proof enough on its own; a rollback shows up
-   * as the connection returning on a version that is not the one asked for.
-   */
-  useEffect(() => {
-    if (applyingTarget === null || info === undefined) return;
-    if (activity === UpdateState.APPLYING || activity === UpdateState.FAILED) return;
-    if (info.current === applyingTarget || (sawRestart && connected)) window.location.reload();
-  }, [applyingTarget, sawRestart, connected, activity, info]);
 
   useEffect(() => {
     setMeta(
@@ -82,17 +40,6 @@ export default function UpdatePage(): JSX.Element {
 
   if (!info) return <LoadingPage />;
 
-  const phase = dismissed
-    ? UpdatePhase.NONE
-    : updatePhase({
-        activity: info.activity.state,
-        connected,
-        applyingTarget,
-        sawRestart,
-        restartedInto: outcomeTarget,
-        current: info.current,
-      });
-
   const busy =
     info.activity.state === UpdateState.APPLYING || info.activity.state === UpdateState.CHECKING;
   // The journal stays "applying" until the update has proven itself, which is exactly
@@ -102,41 +49,16 @@ export default function UpdatePage(): JSX.Element {
   const canApply = !busy && !settling;
 
   const apply = async (release: Release): Promise<void> => {
-    // Written before the request: a fast update can take the server away while it is still
+    // Marked before the request: a fast update can take the server away while it is still
     // in flight, and without the marker the reload afterwards would explain nothing.
-    sessionStorage.setItem(PENDING_KEY, release.version);
-    setApplyingTarget(release.version);
+    markApplyStarted(release.version);
     try {
       await api.callBacks.update.apply(release.version);
       if (version !== undefined) void navigate("/settings/updates"); // watch it from the list
     } catch {
-      // Refused (or never reached the runner): no restart is coming, so drop the marker.
-      sessionStorage.removeItem(PENDING_KEY);
-      setApplyingTarget(null);
+      clearApplyMark(); // refused, so no restart is coming
     }
   };
-
-  const dismissOutcome = (): void => {
-    restartedInto = null; // the story has been told; a remount must not tell it again
-    setOutcomeTarget(null);
-    setApplyingTarget(null);
-    setDismissed(true);
-  };
-
-  const overlay = (
-    <UpdateOverlay
-      phase={phase}
-      target={applyingTarget ?? outcomeTarget}
-      error={
-        info.activity.state === UpdateState.FAILED
-          ? info.activity.error
-          : info.journal?.status === "rolled-back"
-            ? info.journal.error
-            : undefined
-      }
-      onDismiss={dismissOutcome}
-    />
-  );
 
   if (!info.managed) {
     return (
@@ -162,7 +84,6 @@ export default function UpdatePage(): JSX.Element {
       );
     return (
       <div className="updatePage">
-        {overlay}
         <div className="releaseHead">
           <span className="name">{release.name}</span>
           <span className="meta">
@@ -191,7 +112,6 @@ export default function UpdatePage(): JSX.Element {
   // List view.
   return (
     <div className="updatePage">
-      {overlay}
       <div className="listHead">
         <span className="checked">
           {info.lastChecked === null ? "Not checked yet" : `Last checked ${timeAgo(info.lastChecked, now)}`}

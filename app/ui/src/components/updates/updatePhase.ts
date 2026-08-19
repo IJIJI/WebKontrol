@@ -26,15 +26,12 @@ export enum UpdatePhase {
 export function updatePhase(input: {
   activity: UpdateState;
   connected: boolean;
-  /** The version an apply was started for IN THIS DOCUMENT; null once it reloads. */
-  applyingTarget: string | null;
   /**
-   * Whether the connection has already dropped during this apply. The server coming back
-   * does not end the story: EventSource reconnects by itself, so the page can be talking
-   * to the new version while still running the old version's bundle, and it stays covered
-   * until it has reloaded.
+   * Whether an update has been seen running in this document. Everything after that is
+   * the aftermath: the server is going away, and even once it answers again this document
+   * still runs the previous version's bundle, so it stays covered until it has reloaded.
    */
-  sawRestart: boolean;
+  sawApplying: boolean;
   /**
    * The marker found when this document loaded, meaning an update was in flight when the
    * previous one went away: this load is the one after the restart. Deliberately separate
@@ -43,12 +40,15 @@ export function updatePhase(input: {
   restartedInto: string | null;
   current: string;
 }): UpdatePhase {
-  // Activity first: while the server still says APPLYING nothing has been swapped yet.
-  if (input.activity === UpdateState.APPLYING) return UpdatePhase.APPLYING;
-  if (input.applyingTarget !== null) {
+  // While the server still says APPLYING and can say it, nothing has been swapped yet.
+  if (input.activity === UpdateState.APPLYING && input.connected) return UpdatePhase.APPLYING;
+  if (input.sawApplying) {
+    // A failure that never swapped anything leaves the running version untouched, so it
+    // is an outcome rather than a restart.
     if (input.activity === UpdateState.FAILED) return UpdatePhase.FAILED;
-    // The server going away mid-apply is the update working, not an error.
-    if (!input.connected || input.sawRestart) return UpdatePhase.RESTARTING;
+    // Either the server is away, or it is back and this document is about to reload onto
+    // the new version; both are the same thing to look at.
+    return UpdatePhase.RESTARTING;
   }
   if (input.restartedInto === null) return UpdatePhase.NONE;
   return input.current === input.restartedInto ? UpdatePhase.DONE : UpdatePhase.ROLLED_BACK;

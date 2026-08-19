@@ -62,7 +62,13 @@ export function UpdateOverlay({
       return createPortal(
         <div className="updateOverlay">
           <span className="badge">
-            <Icons.loading size={40} />
+            {/* A CSS-animated arc rather than the icon set's SMIL spinner: a transform
+                animation keeps turning on the compositor while React mounts the overlay
+                and the update work floods the main thread. */}
+            <svg className="spinner" viewBox="0 0 32 32" width="34" height="34" aria-hidden="true">
+              <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeOpacity="0.25" strokeWidth="3" />
+              <path d="M16 3a13 13 0 0 1 13 13" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
           </span>
           <span className="title">
             {phase === UpdatePhase.APPLYING ? "Updating WebKontrol" : "Restarting"}
@@ -88,7 +94,13 @@ export function UpdateOverlay({
               <Button fillStyle={FillStyle.SKELETON} onClick={onDismiss}>
                 Stay here
               </Button>
-              <Button variant={Variant.ACCENT} onClick={() => void navigate("/puppets")}>
+              <Button
+                variant={Variant.ACCENT}
+                onClick={() => {
+                  onDismiss(); // leaving is also acknowledging: it must not come back
+                  void navigate("/puppets");
+                }}
+              >
                 Go to puppets
               </Button>
             </>

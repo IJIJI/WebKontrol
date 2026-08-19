@@ -1,0 +1,99 @@
+import { useEffect, useState } from "react";
+
+import { UpdateState } from "../../../../src/system/update/model";
+import { useApi } from "../../context/ApiStateContext";
+import { ConnectionStatus } from "../../context/types";
+import { updatePhase, UpdatePhase } from "./updatePhase";
+
+// Survives the restart an update ends in, which is the only reason a browser can say
+// anything about the outcome afterwards. Only the instance that started the update has
+// it, so only that one gets told how it went.
+const PENDING_KEY = "wk-update-target";
+
+// Read ONCE per document: a marker present at load time means the previous document was
+// taken away by an update, so this load is the one that comes after it. Consumed straight
+// away (a manual reload must not replay a finished update) and cleared from memory when
+// the outcome has been seen, so returning to a page does not replay it either.
+let restartedInto: string | null =
+  typeof sessionStorage === "undefined" ? null : sessionStorage.getItem(PENDING_KEY);
+if (restartedInto !== null) sessionStorage.removeItem(PENDING_KEY);
+
+/** Called just before an apply request, so the reload afterwards can explain itself. */
+export function markApplyStarted(version: string): void {
+  sessionStorage.setItem(PENDING_KEY, version);
+  restartedInto = version;
+}
+
+/** Called if the apply never actually started (the gate refused it). */
+export function clearApplyMark(): void {
+  sessionStorage.removeItem(PENDING_KEY);
+  restartedInto = null;
+}
+
+export interface UpdateLifecycle {
+  phase: UpdatePhase;
+  target: string | null;
+  error?: string;
+  dismiss: () => void;
+}
+
+/**
+ * The update as the whole admin sees it. Driven by the broadcast state rather than by
+ * whoever clicked, so every open admin covers itself while the server is being replaced
+ * instead of quietly failing requests at whoever happens to be looking.
+ */
+export function useUpdateLifecycle(): UpdateLifecycle {
+  const api = useApi();
+  const info = api.state?.info.update;
+  const activity = info?.activity.state ?? UpdateState.IDLE;
+  const connected = api.status !== ConnectionStatus.DISCONNECTED;
+
+  // Once an update has been seen running in this document, everything after it is the
+  // aftermath: the server is going away, and a reload is the only way back to a matching
+  // bundle. Remembered rather than derived, since the server stops answering mid-story.
+  const [sawApplying, setSawApplying] = useState(false);
+  const [outcomeTarget, setOutcomeTarget] = useState<string | null>(restartedInto);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    if (activity === UpdateState.APPLYING) setSawApplying(true);
+  }, [activity]);
+
+  // The client is left running the previous version's bundle, and the outcome modal needs
+  // a fresh document to tell a finished update from one in flight. Reload as soon as the
+  // update has concluded; a failure that never swapped anything stays put.
+  useEffect(() => {
+    if (!sawApplying || !connected) return;
+    if (activity === UpdateState.APPLYING || activity === UpdateState.FAILED) return;
+    window.location.reload();
+  }, [sawApplying, connected, activity]);
+
+  const phase = dismissed
+    ? UpdatePhase.NONE
+    : updatePhase({
+        activity,
+        connected,
+        sawApplying,
+        restartedInto: outcomeTarget,
+        current: info?.current ?? "",
+      });
+
+  const applyingTarget =
+    info?.activity.state === UpdateState.APPLYING ? info.activity.target.version : null;
+
+  return {
+    phase,
+    target: applyingTarget ?? outcomeTarget,
+    error:
+      info?.activity.state === UpdateState.FAILED
+        ? info.activity.error
+        : info?.journal?.status === "rolled-back"
+          ? info.journal.error
+          : undefined,
+    dismiss: () => {
+      restartedInto = null; // the story has been told; a remount must not tell it again
+      setOutcomeTarget(null);
+      setDismissed(true);
+    },
+  };
+}

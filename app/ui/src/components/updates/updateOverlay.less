@@ -94,3 +94,16 @@
     height: 48px;
   }
 }
+
+// Composited rotation: it keeps turning even while the main thread is busy mounting the
+// overlay, which a main-thread (SMIL) animation visibly does not.
+.updateOverlay .spinner {
+  animation: updateSpin 0.9s linear infinite;
+  will-change: transform;
+}
+
+@keyframes updateSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -10,6 +10,8 @@ import { BrandLogo } from "../branding/BrandLogo";
 import { usePageContext } from "../../context/PageContext";
 import { Icons } from "../icons/Icons";
 import { useApi } from "../../context/ApiStateContext";
+import { UpdateOverlay } from "../updates/UpdateOverlay";
+import { useUpdateLifecycle } from "../updates/useUpdateLifecycle";
 
 const MOBILE_BREAKPOINT = 770;
 const TABLET_BREAKPOINT = 1000;
@@ -31,6 +33,9 @@ export default function PageLayout(): JSX.Element {
   const location = useLocation();
   const { title, back } = usePageContext();
   const uiConfig = useApi().state?.runtime.ui;
+  // Mounted here rather than on the updates page: an update takes the whole server away,
+  // so every open admin needs covering, not just the one that pressed the button.
+  const update = useUpdateLifecycle();
 
   const [deviceType, setDeviceType] = useState(() =>
     getDeviceType(window.innerWidth),
@@ -64,6 +69,7 @@ export default function PageLayout(): JSX.Element {
   // TODO: Seperate breadcrumb component
   return (
     <div className="page-base">
+      <UpdateOverlay {...update} onDismiss={update.dismiss} />
       {(uiConfig?.disableBackground == true) ? <></> : <AmbientGlowBackground className="hidden"/>}
       <ContentSection
         variant="glass"
