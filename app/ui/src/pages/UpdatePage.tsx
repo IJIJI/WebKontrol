@@ -10,10 +10,11 @@ import { LoadingPage } from "../components/layout/loading/LoadingPage";
 import { ConfirmModal } from "../components/modal/ConfirmModal";
 import { InfoPill } from "../components/pill/InfoPill";
 import { ReleaseNotes } from "../components/updates/ReleaseNotes";
+import { MessageTone, UpdateMessage } from "../components/updates/UpdateMessage";
 import { clearApplyMark, markApplyStarted } from "../components/updates/useUpdateLifecycle";
 import { useApi } from "../context/ApiStateContext";
 import { usePageContext } from "../context/PageContext";
-import { UpdateState, type Release } from "../../../src/system/update/model";
+import { UpdateState, type Release, type UpdateInfo } from "../../../src/system/update/model";
 import { isNewerVersion } from "../../../src/system/update/version";
 
 /**
@@ -121,15 +122,12 @@ export default function UpdatePage(): JSX.Element {
         </Button>
       </div>
 
-      {info.checkError !== undefined && <p className="checkError">{info.checkError}</p>}
-      {settling ? (
-        <p className="journal">
-          Confirming the update to {info.journal?.to}. Another one can be installed once it
-          has run for a minute without trouble.
-        </p>
-      ) : (
-        info.journal && <JournalLine journal={info.journal} now={now} />
-      )}
+      <UpdateMessages
+        info={info}
+        settling={settling}
+        now={now}
+        onAcknowledge={() => api.callBacks.update.acknowledge()}
+      />
 
       <div className="releaseList">
         {info.releases.length === 0 && <div className="empty">No releases found.</div>}
@@ -247,30 +245,57 @@ function ApplyConfirm({
   );
 }
 
-function JournalLine({
-  journal,
+/**
+ * Everything the update system currently has to say, as bubbles. A live condition (a
+ * failing check, an update still settling) cannot be dismissed, because hiding it would
+ * not make it untrue; a finished outcome can, which is what stops an old rollback from
+ * reading as a live alarm forever.
+ */
+function UpdateMessages({
+  info,
+  settling,
   now,
+  onAcknowledge,
 }: {
-  journal: NonNullable<ReturnType<typeof useApi>["state"]>["info"]["update"]["journal"] & object;
+  info: UpdateInfo;
+  settling: boolean;
   now: number;
-}): JSX.Element | null {
-  const when = timeAgo(journal.moment, now);
-  switch (journal.status) {
-    case "ok":
-      return <p className="journal">Updated {journal.from} to {journal.to} {when}.</p>;
-    case "rolled-back":
-      return (
-        <p className="journal bad">
-          {journal.to} crashed {when} and was rolled back to {journal.from}.
-        </p>
-      );
-    case "failed":
-      return (
-        <p className="journal bad">
-          Updating to {journal.to} failed {when}: {journal.error ?? "unknown error"}
-        </p>
-      );
-    case "applying":
-      return null; // the overlay is already telling this story
-  }
+  onAcknowledge: () => void | Promise<void>;
+}): JSX.Element {
+  const journal = info.journal;
+  const seen = journal?.acknowledged === true;
+  return (
+    <>
+      {info.checkError !== undefined && (
+        <UpdateMessage tone={MessageTone.PROBLEM}>Check failed: {info.checkError}</UpdateMessage>
+      )}
+
+      {settling && (
+        <UpdateMessage tone={MessageTone.INFO}>
+          Confirming the update to {journal?.to}. Another one can be installed once it has
+          run for a minute without trouble.
+        </UpdateMessage>
+      )}
+
+      {journal && !settling && journal.status === "ok" && (
+        <UpdateMessage tone={MessageTone.INFO}>
+          Updated {journal.from} to {journal.to} {timeAgo(journal.moment, now)}.
+        </UpdateMessage>
+      )}
+
+      {journal && journal.status === "rolled-back" && !seen && (
+        <UpdateMessage tone={MessageTone.PROBLEM} onDismiss={onAcknowledge}>
+          {journal.to} crashed {timeAgo(journal.moment, now)} and was rolled back to{" "}
+          {journal.from}. Nothing was lost.
+        </UpdateMessage>
+      )}
+
+      {journal && journal.status === "failed" && !seen && (
+        <UpdateMessage tone={MessageTone.PROBLEM} onDismiss={onAcknowledge}>
+          Updating to {journal.to} failed {timeAgo(journal.moment, now)}
+          {journal.error === undefined ? "" : `: ${journal.error}`}
+        </UpdateMessage>
+      )}
+    </>
+  );
 }

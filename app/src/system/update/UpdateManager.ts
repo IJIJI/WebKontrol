@@ -122,7 +122,20 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
     return {
       check: () => this._check(),
       apply: (version: string) => this.apply(version),
+      acknowledge: () => this.acknowledge(),
     };
+  }
+
+  /**
+   * Mark the last update's outcome as seen. The record stays (it is the answer to "what
+   * happened to this device"), it just stops asking for attention.
+   */
+  public async acknowledge(): Promise<void> {
+    if (this._journal === null || this._journal.acknowledged === true) return;
+    this._journal = { ...this._journal, acknowledged: true };
+    await this._store.saveJournal(this._journal);
+    this._logger.info(`Update outcome (${this._journal.status}) acknowledged.`);
+    this._emitInfo();
   }
 
   /** Gate, journal "applying", then hand the runner its plan in the background: the

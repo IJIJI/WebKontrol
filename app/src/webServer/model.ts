@@ -61,6 +61,8 @@ export interface UpdateWebhandlers {
   /** Start applying a release by version tag. Resolves once the update is legitimate and
    *  running, not once it is done: a successful apply ends in a restart. */
   apply: (version: string) => Promise<void>;
+  /** Mark the last update's outcome as seen, so it stops being reported as a problem. */
+  acknowledge: () => Promise<void>;
   // TODO: Check if there is a status check needed for during the update.
 }
 export interface UiWebhandlers {

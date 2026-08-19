@@ -66,6 +66,7 @@ interface ApiState {
     update: {
       check: (notify?: boolean) => Promise<void>;
       apply: (version: string, notify?: boolean) => Promise<void>;
+      acknowledge: (notify?: boolean) => Promise<void>;
     };
     ui: {
       updateRuntime: (
@@ -377,6 +378,16 @@ export function ApiStateProvider({
     );
   };
 
+  // Silent by default: acknowledging is a click whose result is the message disappearing,
+  // so a toast would only repeat what the screen already shows.
+  const updateAcknowledge = async (notify = false): Promise<void> => {
+    return withToast(
+      Api.post(`/update/acknowledge`, {}),
+      { loading: "Dismissing…", success: "Dismissed" },
+      notify,
+    );
+  };
+
   const viewManagerUpdateRuntime = async (
     config: Partial<ViewManagerRuntimeInput>,
     notify = false,
@@ -435,6 +446,7 @@ export function ApiStateProvider({
           update: {
             check: updateCheck,
             apply: updateApply,
+            acknowledge: updateAcknowledge,
           },
           ui: {
             updateRuntime: uiUpdateRuntime,

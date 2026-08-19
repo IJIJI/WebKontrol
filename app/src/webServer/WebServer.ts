@@ -527,6 +527,18 @@ export class WebServer implements RouteRegistrar {
       }
     });
 
+    this._app.post("/api/update/acknowledge", async (_req, res) => {
+      try {
+        await this._handlers.update.acknowledge();
+        res.status(204).send();
+      } catch (e) {
+        this._logger.error("Failed to acknowledge the update outcome:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to acknowledge the update outcome",
+        });
+      }
+    });
+
     this._app.post("/api/update/apply", async (req, res) => {
       const result = UpdateApplySchema.safeParse(req.body);
       if (!result.success) {

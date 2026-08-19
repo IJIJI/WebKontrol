@@ -36,13 +36,19 @@ function statusLine(info: UpdateInfo, now: number): string {
   }
 }
 
-// Only things that need attention: a failed check, or an update that did not survive.
+/**
+ * Only things that need attention. A bad outcome keeps reporting itself here until it is
+ * acknowledged on the updates page, which is where an operator can actually act on it;
+ * a live condition (a failing check) clears itself when the condition does.
+ */
 function problem(info: UpdateInfo, journal: UpdateJournalEntry | undefined, now: number): string | undefined {
   if (info.activity.state === UpdateState.FAILED) return `Update failed: ${info.activity.error}`;
-  if (journal?.status === "rolled-back")
-    return `${journal.to} crashed ${timeAgo(journal.moment, now)} and was rolled back to ${journal.from}`;
-  if (journal?.status === "failed")
-    return `Updating to ${journal.to} failed ${timeAgo(journal.moment, now)}`;
+  if (journal?.acknowledged !== true) {
+    if (journal?.status === "rolled-back")
+      return `${journal.to} crashed ${timeAgo(journal.moment, now)} and was rolled back to ${journal.from}`;
+    if (journal?.status === "failed")
+      return `Updating to ${journal.to} failed ${timeAgo(journal.moment, now)}`;
+  }
   if (info.checkError !== undefined) return `Check failed: ${info.checkError}`;
   return undefined;
 }
