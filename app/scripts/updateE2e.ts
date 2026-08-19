@@ -22,14 +22,36 @@ import assert from "node:assert/strict";
 import { execFileSync, spawn, type ChildProcess } from "node:child_process";
 import { cpSync, createReadStream, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import http from "node:http";
+import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 
 import { killProcessTree } from "../src/helpers/processTree";
 
 const APP_DIR = path.join(import.meta.dirname, "..");
-const GH_PORT = 8098;
-const WEB_PORT = 8099;
+
+// Preferred ports, so the admin URL is usually the same one twice in a row. A leftover
+// run (or anything else on the port) must not fail the whole harness though, so a busy
+// port falls back to whatever the OS hands out, and the real URL is printed either way.
+async function pickPort(preferred: number): Promise<number> {
+  const free = await new Promise<boolean>((resolve) => {
+    const probe = net
+      .createServer()
+      .once("error", () => resolve(false))
+      .once("listening", () => probe.close(() => resolve(true)))
+      .listen(preferred);
+  });
+  if (free) return preferred;
+  return new Promise((resolve) => {
+    const probe = net.createServer().listen(0, () => {
+      const { port } = probe.address() as net.AddressInfo;
+      probe.close(() => resolve(port));
+    });
+  });
+}
+
+const GH_PORT = await pickPort(8098);
+const WEB_PORT = await pickPort(8099);
 const REAL_TAG = "v9.9.9";
 const BROKEN_TAG = "v9.9.10";
 // All tags sit above the source's floor version; a below-floor base tag gets filtered
@@ -168,7 +190,7 @@ const gh = http.createServer((req, res) => {
   res.end("not found");
 });
 gh.listen(GH_PORT);
-log(`Fake GitHub on :${GH_PORT}`);
+log(`Fake GitHub on :${GH_PORT}${GH_PORT === 8098 ? "" : " (8098 was busy)"}`);
 
 // ---------- probes ----------
 
