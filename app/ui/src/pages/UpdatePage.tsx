@@ -222,15 +222,25 @@ export default function UpdatePage(): JSX.Element {
             <Link className="titles" to={`/settings/updates/${release.version}`}>
               <span className="name">
                 {release.name}
-                <ReleaseBadges release={release} current={info.current} />
+                {release.prerelease && (
+                  <InfoPill variant={Variant.WARNING} fillStyle={FillStyle.SKELETON} size={11}>
+                    <span>beta</span>
+                  </InfoPill>
+                )}
               </span>
               <span className="meta">
                 {release.version} · {new Date(release.publishedAt).toLocaleDateString()}
               </span>
             </Link>
-            {release.version !== info.current && (
-              <ApplyButton release={release} current={info.current} busy={!canApply} onClick={setConfirming} />
-            )}
+            <span className="action">
+              {release.version === info.current ? (
+                <InfoPill variant={Variant.SUCCESS} fillStyle={FillStyle.SKELETON} size={11}>
+                  <span>current</span>
+                </InfoPill>
+              ) : (
+                <ApplyButton release={release} current={info.current} busy={!canApply} onClick={setConfirming} />
+              )}
+            </span>
           </div>
         ))}
       </div>
