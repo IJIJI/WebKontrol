@@ -23,6 +23,7 @@ import EditPuppetPage from "./pages/EditPuppetPage";
 import EditViewPage from "./pages/EditViewPage";
 import ViewPage from "./pages/ViewPage";
 import TestPage from "./pages/TestPage";
+import UpdatePage from "./pages/UpdatePage";
 
 // The data router installs its own per-route error boundary, which would swallow render errors
 // before AppErrorBoundary (mounted above the router) ever sees them. Rethrowing from the root
@@ -141,6 +142,32 @@ const router = createBrowserRouter(
             title={[{ label: "Settings", path: "/settings" }, "config"]}
           >
             <SettingsPage />
+          </PageRoute>
+        }
+      />
+
+      <Route
+        path="settings/updates"
+        element={
+          <PageRoute
+            title={[{ label: "Settings", path: "/settings/config" }, "updates"]}
+          >
+            <UpdatePage />
+          </PageRoute>
+        }
+      />
+      {/* One page, two routes: the version turns the list into that release's notes. */}
+      <Route
+        path="settings/updates/:version"
+        element={
+          <PageRoute
+            title={[
+              { label: "Settings", path: "/settings/config" },
+              { label: "updates", path: "/settings/updates" },
+              "release",
+            ]}
+          >
+            <UpdatePage />
           </PageRoute>
         }
       />

@@ -1,0 +1,47 @@
+// The blocking half of the update overlay (applying / restarting). The outcomes use the
+// normal Modal, so only this full-screen state needs its own styling.
+.updateOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: @z-modal;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 24px;
+
+  background: var(--color-background-primary);
+  color: var(--color-text-acc);
+
+  .title {
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .detail {
+    max-width: 380px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-text-tertiary);
+  }
+}
+
+// The raw failure text, in the outcome modals.
+.updateError {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: @border-radius-sm;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border-tertiary);
+
+  font-family: @font-mono;
+  font-size: 11px;
+  color: var(--color-text-danger);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
