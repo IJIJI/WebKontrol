@@ -13,6 +13,7 @@
   "packageManager": "yarn@4.9.2",
   "scripts": {
     "dev": "tsx app.ts",
+    "e2e:update": "tsx scripts/updateE2e.ts",
     "build": "tsup && vite build && tsx scripts/assembleDist.ts",
     "serve": "node dist/supervisor.js",
     "serve:app": "node dist/app.js",
