@@ -158,7 +158,6 @@ export default function SettingsPage(): JSX.Element {
           fillStyle={FillStyle.SKELETON}
         />
       </SettingGroup>
-      <UpdateSettings />
       <SettingGroup title="About">
         <BaseSetting
           title="Status"
@@ -166,6 +165,7 @@ export default function SettingsPage(): JSX.Element {
         >
           <StatusPill status={ConnectionState.ONLINE}/>
         </BaseSetting>
+        <UpdateSettings />
         <BaseSetting
           title="Hardware"
           subtitle="Hardware Type"

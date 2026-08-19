@@ -1,54 +1,52 @@
 import { type JSX } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { ConnectionState } from "../../../../src/types/CommonTypes";
 import { UpdateState, type UpdateInfo } from "../../../../src/system/update/model";
 import type { UpdateJournalEntry } from "../../../../src/system/update/schema";
 import { timeAgo } from "../../common/helpers/relativeTime";
 import { useNow } from "../../common/hooks/useNow";
 import { useApi } from "../../context/ApiStateContext";
-import { StatusPill } from "../pill/statusPill/StatusPill";
-import { BaseSetting } from "../settings/BaseSetting";
 import { ButtonSetting } from "../settings/implementations/ButtonSetting";
-import { SettingGroup } from "../settings/SettingGroup";
-
-// ConnectionState is borrowed for its pill variant only, the NavigationPill precedent.
-function describe(info: UpdateInfo): { status: ConnectionState; label: string } {
-  if (!info.managed) return { status: ConnectionState.DISABLED, label: "Managed by git" };
-  if (info.journal?.status === "applying" && info.activity.state !== UpdateState.APPLYING)
-    return { status: ConnectionState.UNKNOWN, label: "Confirming update…" };
-  switch (info.activity.state) {
-    case UpdateState.IDLE:
-      return { status: ConnectionState.ONLINE, label: "Up to date" };
-    case UpdateState.CHECKING:
-      return { status: ConnectionState.UNKNOWN, label: "Checking…" };
-    case UpdateState.READY:
-      return { status: ConnectionState.UNKNOWN, label: `${info.activity.latest.version} available` };
-    case UpdateState.APPLYING:
-      return { status: ConnectionState.UNKNOWN, label: `Updating to ${info.activity.target.version}…` };
-    case UpdateState.FAILED:
-      return { status: ConnectionState.FAILED, label: "Update failed" };
-  }
-}
-
-function journalText(journal: UpdateJournalEntry, now: number): string {
-  const when = timeAgo(journal.moment, now);
-  switch (journal.status) {
-    case "applying":
-      return `Updating ${journal.from} to ${journal.to}…`;
-    case "ok":
-      return `Updated ${journal.from} to ${journal.to} ${when}`;
-    case "rolled-back":
-      return `${journal.to} crashed ${when} and was rolled back to ${journal.from}`;
-    case "failed":
-      return `Updating to ${journal.to} failed ${when}: ${journal.error ?? "unknown error"}`;
-  }
-}
 
 /**
- * The Updates section of Settings: whether this system is current, and the way through to
- * the update page, which owns the releases themselves. Everything here rides the SSE state.
+ * The Firmware row of the About section: which version this is, what the update system is
+ * doing, and the way through to the releases. A dot on the button is the only thing that
+ * announces itself; everything else waits until the operator goes looking.
  */
+
+// What the row says under its title. One line, because the row is a summary: the page
+// itself carries the release list, the notes and the journal in full.
+function statusLine(info: UpdateInfo, now: number): string {
+  if (!info.managed) return `${info.current} · managed by git`;
+  if (info.journal?.status === "applying" && info.activity.state !== UpdateState.APPLYING)
+    return `${info.current} · confirming the update`;
+
+  switch (info.activity.state) {
+    case UpdateState.CHECKING:
+      return `${info.current} · checking for updates…`;
+    case UpdateState.APPLYING:
+      return `${info.current} · installing ${info.activity.target.version}…`;
+    case UpdateState.READY:
+      return `${info.current} · ${info.activity.latest.version} available`;
+    case UpdateState.IDLE:
+    case UpdateState.FAILED:
+      return info.lastChecked === null
+        ? `${info.current} · not checked yet`
+        : `${info.current} · checked ${timeAgo(info.lastChecked, now)}`;
+  }
+}
+
+// Only things that need attention: a failed check, or an update that did not survive.
+function problem(info: UpdateInfo, journal: UpdateJournalEntry | undefined, now: number): string | undefined {
+  if (info.activity.state === UpdateState.FAILED) return `Update failed: ${info.activity.error}`;
+  if (journal?.status === "rolled-back")
+    return `${journal.to} crashed ${timeAgo(journal.moment, now)} and was rolled back to ${journal.from}`;
+  if (journal?.status === "failed")
+    return `Updating to ${journal.to} failed ${timeAgo(journal.moment, now)}`;
+  if (info.checkError !== undefined) return `Check failed: ${info.checkError}`;
+  return undefined;
+}
+
 export function UpdateSettings(): JSX.Element | null {
   const api = useApi();
   const navigate = useNavigate();
@@ -57,45 +55,14 @@ export function UpdateSettings(): JSX.Element | null {
 
   if (!info) return null;
 
-  const { status, label } = describe(info);
-  const journalFailed = info.journal?.status === "failed" || info.journal?.status === "rolled-back";
-
   return (
-    <SettingGroup title="Updates">
-      <>
-        <BaseSetting
-          title="Status"
-          subtitle={
-            info.managed
-              ? `Version ${info.current} · ${
-                  info.lastChecked === null ? "not checked yet" : `checked ${timeAgo(info.lastChecked, now)}`
-                }`
-              : `Version ${info.current}`
-          }
-          error={info.checkError === undefined ? undefined : `Check failed: ${info.checkError}`}
-        >
-          <StatusPill status={status} label={label} />
-        </BaseSetting>
-
-        {info.journal && (
-          <BaseSetting
-            title="Last update"
-            subtitle={journalFailed ? undefined : journalText(info.journal, now)}
-            error={journalFailed ? journalText(info.journal, now) : undefined}
-          >
-            <></>
-          </BaseSetting>
-        )}
-
-        {info.managed && (
-          <ButtonSetting
-            title="Releases"
-            subtitle="Check for updates and install a release"
-            label="View releases"
-            onClick={() => void navigate("/settings/updates")}
-          />
-        )}
-      </>
-    </SettingGroup>
+    <ButtonSetting
+      title="Firmware"
+      subtitle={statusLine(info, now)}
+      error={problem(info, info.journal, now)}
+      label={info.managed ? "Update" : "Releases"}
+      badge={info.activity.state === UpdateState.READY}
+      onClick={() => void navigate("/settings/updates")}
+    />
   );
 }
