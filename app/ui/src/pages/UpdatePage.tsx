@@ -89,13 +89,14 @@ export default function UpdatePage(): JSX.Element {
           <span className="name">{release.name}</span>
           <span className="meta">
             {new Date(release.publishedAt).toLocaleDateString()}
+            {lossNote(release)}
             <ReleaseBadges release={release} current={info.current} />
           </span>
         </div>
         <div className="notesCard">
           <ReleaseNotes body={release.notes} />
         </div>
-        {release.version !== info.current && (
+        {release.version !== info.current && (release.crossings?.length ?? 0) === 0 && (
           <div className="detailActions">
             <ApplyButton release={release} current={info.current} busy={!canApply} onClick={setConfirming} />
           </div>
@@ -144,12 +145,20 @@ export default function UpdatePage(): JSX.Element {
               </span>
               <span className="meta">
                 {release.version} · {new Date(release.publishedAt).toLocaleDateString()}
+                {lossNote(release)}
               </span>
             </Link>
             <span className="action">
               {release.version === info.current ? (
                 <InfoPill variant={Variant.SUCCESS}>
                   <span>current</span>
+                </InfoPill>
+              ) : (release.crossings?.length ?? 0) > 0 ? (
+                // A fact, not a withheld action: this version cannot read today's data.
+                // (The consented clear-and-downgrade will turn this slot back into a
+                // button when it lands; the row's geometry already fits it.)
+                <InfoPill variant={Variant.DEFAULT}>
+                  <span>incompatible</span>
                 </InfoPill>
               ) : (
                 <ApplyButton release={release} current={info.current} busy={!canApply} onClick={setConfirming} />
@@ -182,14 +191,23 @@ function ReleaseBadges({ release, current }: { release: Release; current: string
           <span>current</span>
         </InfoPill>
       )}
+      {(release.crossings?.length ?? 0) > 0 && (
+        <InfoPill variant={Variant.DEFAULT}>
+          <span>incompatible</span>
+        </InfoPill>
+      )}
     </>
   );
 }
 
-// An older version is offered as a downgrade rather than hidden. One that crosses a
-// database change is shown disabled with the reason: the gate would refuse it anyway, so
-// a clickable button could only fail. (A consented clear-and-downgrade is a planned
-// follow-up; until then disabled-with-reason is the honest presentation.)
+/** The compressed loss note for meta lines; the full sentence lives in the gate's 409. */
+function lossNote(release: Release): string | null {
+  const crossings = release.crossings ?? [];
+  return crossings.length > 0 ? ` · would lose data from ${crossings.join(", ")}` : null;
+}
+
+// Only rendered for actionable releases: a crossing downgrade shows the "incompatible"
+// fact in this slot instead, since a button that can only fail is not an action.
 function ApplyButton({
   release,
   current,
@@ -203,17 +221,11 @@ function ApplyButton({
 }): JSX.Element {
   // One fill for every action here; only the variant says which way the version moves.
   const newer = isNewerVersion(release.version, current);
-  const crossings = release.crossings ?? [];
   return (
     <Button
       size={14}
       variant={newer ? Variant.ACCENT : Variant.DEFAULT}
-      disabled={busy || crossings.length > 0}
-      title={
-        crossings.length > 0
-          ? `Downgrading would lose the database changes of ${crossings.join(", ")}`
-          : undefined
-      }
+      disabled={busy}
       onClick={() => onClick(release)}
     >
       {newer ? "Update" : "Downgrade"}
