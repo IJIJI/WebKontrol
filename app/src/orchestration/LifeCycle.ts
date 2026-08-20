@@ -48,6 +48,7 @@ export class LifeCycle {
       new GitHubReleases(appConfig.update.api_base),
       new UpdateRunner(process.cwd(), (dest) => CoreDatabase.getInstance().backup(dest)),
       requestRestart,
+      appConfig.update.fake_migration_versions,
     );
 
     const orchestratorConf: AppCoreConfig = {

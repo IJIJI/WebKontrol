@@ -57,6 +57,10 @@ const BROKEN_TAG = "v9.9.10";
 // All tags sit above the source's floor version; a below-floor base tag gets filtered
 // out of the allowlist and every downgrade to it correctly refused (learned live).
 const BASE_TAG = "v9.9.8";
+// Sits below a (config-injected, gate-only) fake migration in BASE_TAG, so a downgrade
+// to it is lossy: the disabled button, the tooltip, and the 409 all become visible in
+// hold mode without a real schema change existing anywhere.
+const ANCIENT_TAG = "v9.9.7";
 
 const log = (line: string): void => console.log(`\x1b[36m[E2E]\x1b[0m ${line}`);
 
@@ -114,6 +118,7 @@ pack(`webkontrol-${REAL_TAG}.tar.gz`, APP_DIR);
 // the current and previous release, so after two updates a downgrade to it has to fetch
 // the tarball like any other. Advertising a release without serving it produced a 404.
 pack(`webkontrol-${BASE_TAG}.tar.gz`, APP_DIR);
+pack(`webkontrol-${ANCIENT_TAG}.tar.gz`, APP_DIR);
 
 // The broken release: installs fine (no deps), throws on boot.
 const brokenSrc = path.join(root, "broken-src");
@@ -140,7 +145,9 @@ cpSync(path.join(APP_DIR, "dist", "supervisor.js"), path.join(root, "supervisor.
 mkdirSync(path.join(root, "config"), { recursive: true });
 writeFileSync(
   path.join(root, "config", "config.yaml"),
-  `puppets: []\nweb:\n  port: ${WEB_PORT}\nupdate:\n  api_base: http://127.0.0.1:${GH_PORT}\n`,
+  // The fake migration at 9.9.8 is GATE-ONLY (see the config schema): it makes the
+  // downgrade to ANCIENT_TAG lossy so the disabled button and the 409 are visible.
+  `puppets: []\nweb:\n  port: ${WEB_PORT}\nupdate:\n  api_base: http://127.0.0.1:${GH_PORT}\n  fake_migration_versions: ["9.9.8"]\n`,
 );
 
 // ---------- the fake GitHub ----------
@@ -184,7 +191,9 @@ const ghRelease = (tag: string): object => ({
 const gh = http.createServer((req, res) => {
   if (req.url === "/repos/ijiji/WebKontrol/releases") {
     res.setHeader("Content-Type", "application/json");
-    return res.end(JSON.stringify([ghRelease(BROKEN_TAG), ghRelease(REAL_TAG), ghRelease(BASE_TAG)]));
+    return res.end(
+      JSON.stringify([ghRelease(BROKEN_TAG), ghRelease(REAL_TAG), ghRelease(BASE_TAG), ghRelease(ANCIENT_TAG)]),
+    );
   }
   if (req.url?.startsWith("/assets/")) {
     const file = path.join(assets, path.basename(req.url));
@@ -235,7 +244,8 @@ async function main(): Promise<void> {
   if (process.argv.includes("--hold")) {
     log(`HOLD MODE: a managed ${BASE_TAG} system is running.`);
     log(`  Admin:        http://127.0.0.1:${WEB_PORT}/settings`);
-    log(`  Releases:     ${REAL_TAG} (real update), ${BROKEN_TAG} (crashes -> live rollback)`);
+    log(`  Releases:     ${REAL_TAG} (real update), ${BROKEN_TAG} (crashes -> live rollback),`);
+    log(`                ${ANCIENT_TAG} (downgrade gated by a fake migration at 9.9.8)`);
     log(`  Scratch root: ${root}`);
     log(`  Ctrl+C stops the supervisor and cleans up.`);
     process.on("SIGINT", () => {
@@ -263,6 +273,15 @@ async function main(): Promise<void> {
   await waitFor("downgraded app serving", appUp, 60_000);
   assert.ok(existsSync(path.join(root, "releases", REAL_TAG)), "the release we left is retained");
   await waitFor("pending cleared again", () => !pendingExists(), 100_000);
+
+  log(`Scenario B2: downgrade to ${ANCIENT_TAG} crosses the fake migration, expect refusal...`);
+  {
+    const response = await post("/update/apply", { version: ANCIENT_TAG });
+    assert.equal(response.status, 409, "a lossy downgrade answers 409");
+    const body = (await response.json()) as { error?: string };
+    assert.match(String(body.error), /database changes of 9\.9\.8/, "the refusal names the migration");
+    log("ok: lossy downgrade refused by name");
+  }
 
   log(`Scenario C: apply the broken ${BROKEN_TAG}, expect rollback...`);
   assert.equal((await post("/update/apply", { version: BROKEN_TAG })).status, 204, "apply accepted");
