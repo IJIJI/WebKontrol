@@ -110,6 +110,10 @@ mkdirSync(assets, { recursive: true });
 const pack = (name: string, sourceDir: string): void =>
   void execFileSync("tar", ["-czf", name, "-C", sourceDir, "dist", "package.json", "yarn.lock", ".yarnrc.yml"], { cwd: assets });
 pack(`webkontrol-${REAL_TAG}.tar.gz`, APP_DIR);
+// The base release is downloadable too, not just present on disk: retention keeps only
+// the current and previous release, so after two updates a downgrade to it has to fetch
+// the tarball like any other. Advertising a release without serving it produced a 404.
+pack(`webkontrol-${BASE_TAG}.tar.gz`, APP_DIR);
 
 // The broken release: installs fine (no deps), throws on boot.
 const brokenSrc = path.join(root, "broken-src");
