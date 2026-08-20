@@ -25,7 +25,7 @@
     "lint": "eslint .",
     "build:view": "tsx src/views/client/buildCli.ts",
     "typecheck": "tsc --noEmit && tsc --noEmit -p ui/tsconfig.json",
-    "check": "tsx ui/src/components/blockTree/model/blockUtils.check.ts && tsx src/puppet/puppeteer/failures.check.ts && tsx src/helpers/assets.check.ts && tsx src/storage/coreDatabase.check.ts && tsx src/system/update/version.check.ts && tsx src/system/update/plan.check.ts && tsx src/system/update/gitHubReleases.check.ts && tsx src/system/update/updateManager.check.ts && tsx ui/src/components/updates/updatePhase.check.ts"
+    "check": "tsx ui/src/components/blockTree/model/blockUtils.check.ts && tsx src/puppet/puppeteer/failures.check.ts && tsx src/helpers/assets.check.ts && tsx src/storage/coreDatabase.check.ts && tsx src/storage/migrations.check.ts && tsx src/system/update/version.check.ts && tsx src/system/update/plan.check.ts && tsx src/system/update/gitHubReleases.check.ts && tsx src/system/update/updateManager.check.ts && tsx ui/src/components/updates/updatePhase.check.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
