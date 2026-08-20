@@ -1,5 +1,3 @@
-import { UpdateState } from "../../../../src/system/update/model";
-
 /**
  * What the update page should be showing, derived from three sources that each only tell
  * part of the story: the live activity over SSE, whether the connection is still there
@@ -24,7 +22,15 @@ export enum UpdatePhase {
 }
 
 export function updatePhase(input: {
-  activity: UpdateState;
+  /**
+   * An update is in flight. Deliberately not "the live activity says APPLYING": a fast
+   * apply (a downgrade from disk, a tiny release) can be staged and gone inside the same
+   * second, so a client that blinks would never see it. The caller derives this from the
+   * persisted journal as well, which stays true for the whole swap.
+   */
+  applying: boolean;
+  /** The last apply failed before swapping anything, so no restart is coming. */
+  failed: boolean;
   connected: boolean;
   /**
    * Whether an update has been seen running in this document. Everything after that is
@@ -40,16 +46,14 @@ export function updatePhase(input: {
   restartedInto: string | null;
   current: string;
 }): UpdatePhase {
-  // While the server still says APPLYING and can say it, nothing has been swapped yet.
-  if (input.activity === UpdateState.APPLYING && input.connected) return UpdatePhase.APPLYING;
-  if (input.sawApplying) {
-    // A failure that never swapped anything leaves the running version untouched, so it
-    // is an outcome rather than a restart.
-    if (input.activity === UpdateState.FAILED) return UpdatePhase.FAILED;
-    // Either the server is away, or it is back and this document is about to reload onto
-    // the new version; both are the same thing to look at.
-    return UpdatePhase.RESTARTING;
-  }
+  // A failure outranks everything: it ends the story where it started, with the running
+  // version untouched, so it must not read as an update still in progress.
+  if (input.sawApplying && input.failed) return UpdatePhase.FAILED;
+  // While the server can still say it is working, nothing has been swapped yet.
+  if (input.applying && input.connected) return UpdatePhase.APPLYING;
+  // Either the server is away, or it is back and this document is about to reload onto
+  // the new version; both are the same thing to look at.
+  if (input.sawApplying) return UpdatePhase.RESTARTING;
   if (input.restartedInto === null) return UpdatePhase.NONE;
   return input.current === input.restartedInto ? UpdatePhase.DONE : UpdatePhase.ROLLED_BACK;
 }

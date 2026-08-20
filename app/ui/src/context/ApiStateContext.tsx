@@ -9,7 +9,7 @@ import {
 } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import type { WebServerState } from "../../../src/webServer/model";
-import { Api } from "./Api";
+import { Api, ApiError } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
 import { ConnectionStatus } from "./types";
 import { type PuppetKey, type PuppetRuntime, type PuppetRuntimeInput } from "../../../src/puppet/types/schema";
@@ -371,8 +371,14 @@ export function ApiStateProvider({
   // Success here means legitimately started, not done: the rest of the story arrives
   // through the state's update section, and ends in the server restarting.
   const updateApply = async (version: string, notify = true): Promise<void> => {
+    const request = Api.post<void>(`/update/apply`, { version }).catch((error: unknown) => {
+      // An answer means the gate spoke (a 409 refusal, say), so the apply never started.
+      if (error instanceof ApiError) throw error;
+      // No answer at all means the server stopped talking mid-request, which for a quick
+      // update is it restarting into the new version: the update working, not failing.
+    });
     return withToast(
-      Api.post(`/update/apply`, { version }),
+      request,
       { loading: "Starting update…", success: "Update started" },
       notify,
     );

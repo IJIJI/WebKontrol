@@ -1,14 +1,14 @@
 // Self-check for the update overlay's phase derivation: the whole lifecycle in order, for
 // the admin that started the update AND for any other admin watching it happen, plus the
-// cases that are easy to get wrong (an update in flight must never read as an outcome,
-// and a failure that swapped nothing must not read as a rollback). Run with `yarn check`.
+// cases that are easy to get wrong (a fast apply nobody saw live, an update in flight
+// reading as an outcome, a failure reading as a rollback). Run with `yarn check`.
 import assert from "node:assert/strict";
 
-import { UpdateState } from "../../../../src/system/update/model";
 import { updatePhase, UpdatePhase } from "./updatePhase";
 
 const base = {
-  activity: UpdateState.IDLE,
+  applying: false,
+  failed: false,
   connected: true,
   sawApplying: false,
   restartedInto: null as string | null,
@@ -18,26 +18,18 @@ const base = {
 // Nothing going on.
 assert.equal(updatePhase(base), UpdatePhase.NONE);
 assert.equal(
-  updatePhase({ ...base, activity: UpdateState.READY }),
-  UpdatePhase.NONE,
-  "an available release is not an overlay",
-);
-assert.equal(
   updatePhase({ ...base, connected: false }),
   UpdatePhase.NONE,
   "a connection blip with no update running is not an update story",
 );
 
 //* One update, in the order it happens. Nothing here is specific to the admin that
-//* started it: every open admin sees the same broadcast state.
-// 1. The runner is working and still able to say so.
-assert.equal(
-  updatePhase({ ...base, activity: UpdateState.APPLYING }),
-  UpdatePhase.APPLYING,
-);
+//* started it: every open admin derives the same phase from the same broadcast state.
+// 1. An update is running and the server can still say so.
+assert.equal(updatePhase({ ...base, applying: true }), UpdatePhase.APPLYING);
 // 2. The server goes away to come back on the new version.
 assert.equal(
-  updatePhase({ ...base, activity: UpdateState.APPLYING, connected: false, sawApplying: true }),
+  updatePhase({ ...base, applying: true, connected: false, sawApplying: true }),
   UpdatePhase.RESTARTING,
 );
 // 3. It answers again, but this document still runs the old bundle: stay covered until
@@ -62,8 +54,14 @@ assert.equal(
 assert.equal(updatePhase({ ...base, current: "v3.1.0" }), UpdatePhase.NONE);
 
 // Failed before any swap: no restart is coming, and the version comparison must not run.
+// The failure wins even while `applying` is still latched from this window's own click,
+// which is what a fast apply that fails looks like from here.
 assert.equal(
-  updatePhase({ ...base, activity: UpdateState.FAILED, sawApplying: true }),
+  updatePhase({ ...base, failed: true, sawApplying: true }),
+  UpdatePhase.FAILED,
+);
+assert.equal(
+  updatePhase({ ...base, applying: true, failed: true, sawApplying: true }),
   UpdatePhase.FAILED,
 );
 
