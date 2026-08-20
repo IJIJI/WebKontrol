@@ -4,6 +4,7 @@ import { readFile, rm } from "node:fs/promises";
 
 import pkg from "../../../package.json" with { type: "json" };
 import { Logger } from "../../logging/Logger";
+import { crossedMigrations, MIGRATIONS } from "../../storage/migrations";
 import { UpdateStore } from "../../storage/stores/UpdateStore";
 import type { UpdateWebhandlers } from "../../webServer/model";
 import type { GitHubReleases } from "./GitHubReleases";
@@ -19,13 +20,6 @@ const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 // supervisor (bare serve:app) it also deletes the file itself: 90s alive is healthy by
 // any definition, and an orphaned pending file would block every future apply.
 const CONFIRM_DELAY_MS = 90 * 1000;
-
-// Every release is schema step 0 until migrations are implemented. The per-release
-// schema-step manifest replaces this, and the gate below starts refusing lossy
-// downgrades for real instead of finding every pair equal.
-function schemaStep(_version: string): number {
-  return 0;
-}
 
 /**
  * An apply the gate turned down: a normal, expected answer (wrong mode, unknown version,
@@ -47,6 +41,10 @@ export function applyGate(input: {
   /** The release found in the LAST CHECK's list, which is the allowlist: an arbitrary
    *  request body version that matched nothing arrives here as undefined. */
   target: Release | undefined;
+  /** The migration versions a downgrade to the target would cross, derived from this
+   *  build's own chain (the downgrading side is always the newer one, so it holds the
+   *  full history). Empty for upgrades by construction. */
+  crossedVersions: string[];
 }): string | null {
   if (!input.managed) return "This deployment is managed by git; update from the checkout.";
   if (input.applying) return "An update is already in progress.";
@@ -54,9 +52,10 @@ export function applyGate(input: {
     return "The last update is still being confirmed; it can be replaced once it has proven itself.";
   if (!input.target) return "Unknown release; check for updates first.";
   if (input.target.version === input.current) return "This version is already running.";
-  const downgrade = !isNewerVersion(input.target.version, input.current);
-  if (downgrade && schemaStep(input.target.version) !== schemaStep(input.current))
-    return "Downgrading past a database change would lose data.";
+  // Crossing a migration means the target would misread today's data: lossy, refused.
+  // Upgrades never cross anything (forward is what the chain itself is for).
+  if (input.crossedVersions.length > 0)
+    return `Downgrading past the database changes of ${input.crossedVersions.join(", ")} would lose data.`;
   return null;
 }
 
@@ -80,14 +79,23 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
   private _activity: UpdateActivity = { state: UpdateState.IDLE };
   private _journal: UpdateJournalEntry | null = null;
 
+  // What the downgrade gate derives from: the real chain, plus the config's gate-only
+  // fakes (a harness/dev seam; empty everywhere real).
+  private readonly _migrationVersions: string[];
+
   constructor(
     private readonly _source: GitHubReleases,
     private readonly _runner: UpdateRunner,
     /** Wired to app.ts's beginShutdown: a clean exit the supervisor restarts. Never a
      *  self-signal, which Windows cannot deliver. */
     private readonly _requestRestart: () => void,
+    fakeMigrationVersions: string[] = [],
   ) {
     super();
+    this._migrationVersions = [
+      ...MIGRATIONS.map((migration) => migration.version),
+      ...fakeMigrationVersions,
+    ];
   }
 
   public async init(): Promise<void> {
@@ -110,7 +118,12 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
     return {
       current: this._current,
       managed: this._managed,
-      releases: this._source.releases,
+      // Each release annotated with what downgrading to it would lose, so the UI can
+      // disable a button that the gate would refuse anyway instead of letting it fail.
+      releases: this._source.releases.map((release) => ({
+        ...release,
+        crossings: crossedMigrations(this._migrationVersions, release.version, this._current),
+      })),
       lastChecked: this._source.lastChecked,
       checkError: this._checkError,
       activity: this._activity,
@@ -149,6 +162,10 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
       pendingExists: existsSync(this._runner.pendingFile),
       current: this._current,
       target,
+      crossedVersions:
+        target === undefined
+          ? []
+          : crossedMigrations(this._migrationVersions, target.version, this._current),
     });
     if (refusal !== null || target === undefined)
       throw new UpdateRefusedError(refusal ?? "Unknown release.");

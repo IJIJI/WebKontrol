@@ -186,8 +186,10 @@ function ReleaseBadges({ release, current }: { release: Release; current: string
   );
 }
 
-// An older version is offered as a downgrade rather than hidden: the server's gate is what
-// decides whether it is allowed, and it explains itself if not.
+// An older version is offered as a downgrade rather than hidden. One that crosses a
+// database change is shown disabled with the reason: the gate would refuse it anyway, so
+// a clickable button could only fail. (A consented clear-and-downgrade is a planned
+// follow-up; until then disabled-with-reason is the honest presentation.)
 function ApplyButton({
   release,
   current,
@@ -201,11 +203,17 @@ function ApplyButton({
 }): JSX.Element {
   // One fill for every action here; only the variant says which way the version moves.
   const newer = isNewerVersion(release.version, current);
+  const crossings = release.crossings ?? [];
   return (
     <Button
       size={14}
       variant={newer ? Variant.ACCENT : Variant.DEFAULT}
-      disabled={busy}
+      disabled={busy || crossings.length > 0}
+      title={
+        crossings.length > 0
+          ? `Downgrading would lose the database changes of ${crossings.join(", ")}`
+          : undefined
+      }
       onClick={() => onClick(release)}
     >
       {newer ? "Update" : "Downgrade"}

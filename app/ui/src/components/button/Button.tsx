@@ -18,6 +18,7 @@ export function Button({
   ariaLabel,
   className,
   badge,
+  title,
 }: {
   onClick: () => void | Promise<void>;
   variant?: Variant;
@@ -31,6 +32,8 @@ export function Button({
   /** A dot in the corner: something is waiting behind this button (an available update,
    *  an unread item). Deliberately just a marker, not a count. */
   badge?: boolean;
+  /** Native tooltip; the place a disabled button explains itself. */
+  title?: string;
 }): JSX.Element {
   const [loading, setLoading] = useState(false);
   const isDisabled = disabled || loading;
@@ -60,6 +63,7 @@ export function Button({
       onClick={() => void handleClick()}
       ref={ref}
       style={{ fontSize: size }}
+      title={title}
       aria-label={ariaLabel}
       aria-busy={loading}
     >

@@ -14,6 +14,12 @@ export interface Release {
   publishedAt: string;
   prerelease: boolean;
   assetUrl: string; // download URL of the update tarball asset
+  /**
+   * The migration versions a downgrade to this release would cross, derived from the
+   * running build's own chain (empty for upgrades by construction). Set by the manager
+   * when it builds the info payload; the source itself knows nothing about migrations.
+   */
+  crossings?: string[];
 }
 
 export enum UpdateState {
