@@ -160,12 +160,20 @@ export class UpdateRunner {
         return;
       }
       case "sweep-releases": {
+        // Best-effort by design, like adopt-supervisor: this runs after the swap, so a
+        // failure here (Windows holding a file open inside an old node_modules) must not
+        // mark a completed update as failed and skip its restart. A dir left behind only
+        // costs disk and is retried by the next update's sweep.
         const releasesDir = join(this._root, "releases");
         for (const entry of await readdir(releasesDir, { withFileTypes: true })) {
           if (!entry.isDirectory() || entry.name === ".staging") continue;
           if (step.keep.includes(entry.name)) continue;
           this._logger.info(`Removing retired release ${entry.name}.`);
-          await rm(join(releasesDir, entry.name), { recursive: true, force: true });
+          try {
+            await rm(join(releasesDir, entry.name), { recursive: true, force: true });
+          } catch (error) {
+            this._logger.warn(`Could not remove ${entry.name}; left for the next sweep:`, error);
+          }
         }
         return;
       }

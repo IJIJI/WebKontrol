@@ -57,4 +57,12 @@ assert.deepEqual(kinds(downgrade), [
   "sweep-releases",
 ]);
 
+// The best-effort steps come after the swap and last: a failure in them must never be
+// able to mark a completed swap as failed, and nothing may be scheduled after them.
+for (const plan of [upgrade, downgrade]) {
+  const order = kinds(plan);
+  assert.ok(order.indexOf("activate") < order.indexOf("adopt-supervisor"), "adopt after activate");
+  assert.equal(order.at(-1), "sweep-releases", "sweep is the final step");
+}
+
 console.log("plan.check: all assertions passed");
