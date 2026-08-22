@@ -1,12 +1,17 @@
-# Builds the update tarball for a version tag and publishes it as a GitHub release.
+# Builds the update tarball for a published GitHub release and attaches it. The release
+# itself is authored on GitHub (tag, notes, the pre-release flag); CI only adds the
+# artifact, so what you set in the release form is what devices see. Until the tarball
+# is attached (a couple of minutes), devices and the installer ignore the release rather
+# than showing something that cannot be installed.
+#
 # The tarball is the update system's whole contract with CI: dist + package.json +
 # yarn.lock + .yarnrc.yml, flat at the tar root (UpdateRunner extracts with -C), and
 # platform-independent because node_modules is excluded; the device installs its own.
 name: Release
 
 on:
-  push:
-    tags: ["v*"]
+  release:
+    types: [published]
 
 defaults:
   run:
@@ -16,7 +21,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # create the release and upload the tarball asset
+      contents: write # upload the tarball asset to the release
     steps:
       - uses: actions/checkout@v4
 
@@ -53,8 +58,7 @@ jobs:
       - name: Pack the update tarball
         run: tar -czf "webkontrol-${GITHUB_REF_NAME}.tar.gz" dist package.json yarn.lock .yarnrc.yml
 
+      # Attaches to the release that triggered the run; flag and notes stay as authored.
       - uses: softprops/action-gh-release@v2
         with:
           files: app/webkontrol-*.tar.gz
-          prerelease: ${{ contains(github.ref_name, '-') }}
-          generate_release_notes: true
