@@ -91,7 +91,7 @@ export default function UpdatePage(): JSX.Element {
           <span className="meta">
             {new Date(release.publishedAt).toLocaleDateString()}
             {lossNote(release)}
-            <ReleaseBadges release={release} current={info.current} />
+            <ReleaseBadges release={release} current={info.current} latest={info.latest} />
           </span>
         </div>
         <div className="notesCard">
@@ -140,7 +140,12 @@ export default function UpdatePage(): JSX.Element {
                 {release.name}
                 {release.prerelease && (
                   <InfoPill variant={Variant.WARNING}>
-                    <span>beta</span>
+                    <span>Beta</span>
+                  </InfoPill>
+                )}
+                {release.version === info.latest && (
+                  <InfoPill variant={Variant.ACCENT}>
+                    <span>Latest Stable</span>
                   </InfoPill>
                 )}
               </span>
@@ -152,14 +157,14 @@ export default function UpdatePage(): JSX.Element {
             <span className="action">
               {release.version === info.current ? (
                 <InfoPill variant={Variant.SUCCESS}>
-                  <span>current</span>
+                  <span>Current</span>
                 </InfoPill>
               ) : (release.crossings?.length ?? 0) > 0 ? (
                 // A fact, not a withheld action: this version cannot read today's data.
                 // (The consented clear-and-downgrade will turn this slot back into a
                 // button when it lands; the row's geometry already fits it.)
                 <InfoPill variant={Variant.DEFAULT}>
-                  <span>incompatible</span>
+                  <span>Incompatible</span>
                 </InfoPill>
               ) : (
                 <ApplyButton release={release} current={info.current} busy={!canApply} onClick={setConfirming} />
@@ -179,22 +184,35 @@ export default function UpdatePage(): JSX.Element {
   );
 }
 
-function ReleaseBadges({ release, current }: { release: Release; current: string }): JSX.Element {
+function ReleaseBadges({
+  release,
+  current,
+  latest,
+}: {
+  release: Release;
+  current: string;
+  latest: string | null;
+}): JSX.Element {
   return (
     <>
       {release.prerelease && (
         <InfoPill variant={Variant.WARNING}>
-          <span>beta</span>
+          <span>Beta</span>
+        </InfoPill>
+      )}
+      {release.version === latest && (
+        <InfoPill variant={Variant.ACCENT}>
+          <span>Latest Stable</span>
         </InfoPill>
       )}
       {release.version === current && (
         <InfoPill variant={Variant.SUCCESS}>
-          <span>current</span>
+          <span>Current</span>
         </InfoPill>
       )}
       {(release.crossings?.length ?? 0) > 0 && (
         <InfoPill variant={Variant.DEFAULT}>
-          <span>incompatible</span>
+          <span>Incompatible</span>
         </InfoPill>
       )}
     </>

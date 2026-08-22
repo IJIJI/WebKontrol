@@ -273,6 +273,7 @@ if (installerExit !== 0) throw new Error("install.mjs failed; the output above s
 // event on the SSE stream, which the server writes on connect.
 interface UpdateSection {
   current: string;
+  latest: string | null;
   activity: { state: string; latest?: { version: string }; error?: string };
   releases: { version: string; prerelease: boolean; crossings?: string[] }[];
 }
@@ -404,6 +405,7 @@ async function main(): Promise<void> {
     const state = await readUpdateState();
     assert.equal(state.current, REAL_TAG);
     assert.equal(state.activity.state, "Idle", "on latest nothing is announced, although a newer stable exists");
+    assert.equal(state.latest, REAL_TAG, "the latest marker is still carried while running it (the list badges it)");
     const quiet = state.releases.find((release) => release.prerelease && release.version !== state.current);
     assert.equal(quiet?.version, DOTTED_TAG, "the newest flagged release is the one for the quiet mention");
     log("ok: latest beats newest; the pre-release is only mentioned");

@@ -140,6 +140,7 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
         ...release,
         crossings: crossedMigrations(this._migrationVersions, release.version, this._current),
       })),
+      latest: this._source.latest,
       lastChecked: this._source.lastChecked,
       checkError: this._checkError,
       activity: this._activity,

@@ -42,6 +42,10 @@ export interface UpdateInfo {
   current: string;
   managed: boolean; // false = plain checkout (dev), checks and applies are off
   releases: Release[];
+  /** The tag GitHub marks as latest (newest stable, or the maintainer's override); null
+   *  while no stable release exists. Carried so the list can badge it regardless of
+   *  whether it is newer than what runs (the READY activity only knows the newer case). */
+  latest: string | null;
   lastChecked: number | null;
   checkError?: string; // why the last check failed; cleared by a successful one
   activity: UpdateActivity;
