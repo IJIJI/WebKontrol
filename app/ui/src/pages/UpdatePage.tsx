@@ -58,7 +58,7 @@ export default function UpdatePage(): JSX.Element {
       await api.callBacks.update.apply(release.version);
       if (version !== undefined) void navigate("/settings/updates"); // watch it from the list
     } catch {
-      clearApplyMark(); // refused, so no restart is coming
+      clearApplyMark(); // refused or never delivered, so no restart is coming
     }
   };
 
