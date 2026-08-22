@@ -120,12 +120,12 @@ export class GitHubReleases {
       headers: { "User-Agent": "WebKontrol", Accept: "application/vnd.github+json" },
       signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
     });
-    let latest: string | null = null;
-    if (latestResponse.status === 404) latest = null;
-    else if (!latestResponse.ok) throw new Error(`GitHub latest-release API error: ${latestResponse.status}`);
-    else {
+    let latest: string | null = null; // 404 stays null: no stable release exists yet
+    if (latestResponse.ok) {
       const latestBody = (await latestResponse.json()) as { tag_name?: unknown };
       latest = typeof latestBody.tag_name === "string" ? latestBody.tag_name : null;
+    } else if (latestResponse.status !== 404) {
+      throw new Error(`GitHub latest-release API error: ${latestResponse.status}`);
     }
 
     // Assigned together, after both requests: a check that failed halfway leaves the
