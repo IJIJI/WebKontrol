@@ -3,14 +3,17 @@
  * layout (built by the real installer) runs the real built app under the real supervisor,
  * and the scenarios run in sequence against real HTTP, real tarballs and the real disk.
  *
- * The fake GitHub publishes seven versions, each there to prove one thing:
+ * The fake GitHub publishes ten versions, each there to prove one thing:
  *   v0.0.1    below the floor: filtered out, never listed
+ *   v9.9.6    an old stable: listed last, proves the list is not truncated
  *   v9.9.7    below a fake migration at 9.9.8: a downgrade to it is gated
  *   v9.9.8    the base install
  *   v9.9.9    GitHub's LATEST: the one and only announced update
  *   v9.9.10   flagged pre-release AND broken: quiet mention, installable, then rolls back
  *   v9.9.11   stable but NOT marked latest (held back): listed, never announced
  *   v9.9.12   no tarball yet (CI still building): filtered out, never listed
+ *   v9.9.13-beta.1  a dotted pre-release identifier: orders above v9.9.12, below v9.9.14
+ *   v9.9.14   advertised with a tarball URL that 404s: the apply fails before the swap
  *
  *   0. What the fresh install sees: exactly the five installable releases, v9.9.9 announced
  *      as READY, the gated downgrade and the flagged pre-release marked as such.
@@ -22,8 +25,12 @@
  *   D. Apply right after a boot (v9.9.8 to v9.9.9 again, fast path, inside the supervisor's
  *      60 s window), then kill the new app twice: the requested exit must not have counted
  *      as a crash, so two real crashes do NOT roll back (three would).
+ *   F. Failed apply: v9.9.14's download 404s, so the apply FAILS before the swap: journal
+ *      "failed" with the error, pointer untouched, no restart, the app keeps answering.
  *   C. Broken update, v9.9.9 to v9.9.10 (an app that throws on boot): three rapid
  *      crashes, supervisor rolls pointer and database back, journal says "rolled-back".
+ *   Retention (only current + previous on disk) and supervisor adoption (supervisor.js
+ *   replaced, .prev kept) are asserted after every swap.
  *
  * Run with `yarn e2e:update` (add --no-build to reuse the existing dist). Takes a few
  * minutes: the healthy/confirmation windows (60s/90s) are real, not mocked. Not part of
@@ -36,7 +43,7 @@
  */
 import assert from "node:assert/strict";
 import { execFileSync, spawn, type ChildProcess } from "node:child_process";
-import { createReadStream, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createReadStream, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import http from "node:http";
 import net from "node:net";
 import os from "node:os";
@@ -73,6 +80,9 @@ const BROKEN_TAG = "v9.9.10"; // flagged pre-release, crashes on boot
 const HELD_TAG = "v9.9.11"; // stable, newer than latest, deliberately not marked latest
 const BUILDING_TAG = "v9.9.12"; // published without its tarball yet
 const FLOORED_TAG = "v0.0.1"; // predates the update system
+const OLD_TAG = "v9.9.6"; // an old stable, at the bottom of the list
+const DOTTED_TAG = "v9.9.13-beta.1"; // dotted pre-release identifier, for the comparator
+const MISSING_TAG = "v9.9.14"; // advertised tarball is never served: download 404s
 // All tags sit above the source's floor version; a below-floor base tag gets filtered
 // out of the allowlist and every downgrade to it correctly refused (learned live).
 const BASE_TAG = "v9.9.8";
@@ -139,6 +149,9 @@ pack(`webkontrol-${REAL_TAG}.tar.gz`, APP_DIR);
 pack(`webkontrol-${BASE_TAG}.tar.gz`, APP_DIR);
 pack(`webkontrol-${ANCIENT_TAG}.tar.gz`, APP_DIR);
 pack(`webkontrol-${HELD_TAG}.tar.gz`, APP_DIR);
+pack(`webkontrol-${OLD_TAG}.tar.gz`, APP_DIR);
+pack(`webkontrol-${DOTTED_TAG}.tar.gz`, APP_DIR);
+// MISSING_TAG is deliberately not packed: its asset URL is advertised and 404s.
 
 // The broken release: installs fine (no deps), throws on boot.
 const brokenSrc = path.join(root, "broken-src");
@@ -179,7 +192,7 @@ const ghRelease = (tag: string): object => ({
   tag_name: tag,
   name: `Release ${tag}`,
   published_at: "2026-08-19T00:00:00Z",
-  prerelease: tag === BROKEN_TAG,
+  prerelease: tag === BROKEN_TAG || tag === DOTTED_TAG,
   body: notes(tag),
   assets:
     tag === BUILDING_TAG
@@ -191,7 +204,7 @@ const ghRelease = (tag: string): object => ({
           },
         ],
 });
-const ALL_TAGS = [BUILDING_TAG, HELD_TAG, BROKEN_TAG, REAL_TAG, BASE_TAG, ANCIENT_TAG, FLOORED_TAG];
+const ALL_TAGS = [MISSING_TAG, DOTTED_TAG, BUILDING_TAG, HELD_TAG, BROKEN_TAG, REAL_TAG, BASE_TAG, ANCIENT_TAG, OLD_TAG, FLOORED_TAG];
 
 const gh = http.createServer((req, res) => {
   const url = new URL(req.url ?? "/", "http://fake-github");
@@ -260,7 +273,7 @@ if (installerExit !== 0) throw new Error("install.mjs failed; the output above s
 // event on the SSE stream, which the server writes on connect.
 interface UpdateSection {
   current: string;
-  activity: { state: string; latest?: { version: string } };
+  activity: { state: string; latest?: { version: string }; error?: string };
   releases: { version: string; prerelease: boolean; crossings?: string[] }[];
 }
 async function readUpdateState(): Promise<UpdateSection> {
@@ -291,6 +304,20 @@ const appPid = (): number | null => {
   return matches.length === 0 ? null : Number(matches[matches.length - 1][1]);
 };
 const pendingExists = (): boolean => existsSync(path.join(root, "releases", "pending.json"));
+// What a swap must leave behind: exactly the new and the previous release on disk
+// (retention), and the root supervisor replaced by the new release's copy with the old
+// one kept as .prev (adoption). Called after every scenario that swapped.
+const assertLayoutAfterSwap = (current: string, previous: string): void => {
+  const onDisk = readdirSync(path.join(root, "releases"), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name !== ".staging")
+    .map((entry) => entry.name)
+    .sort();
+  assert.deepEqual(onDisk, [current, previous].sort(), "retention keeps exactly current + previous");
+  const adopted = readFileSync(path.join(root, "supervisor.js"));
+  const fromRelease = readFileSync(path.join(root, "releases", current, "dist", "supervisor.js"));
+  assert.ok(adopted.equals(fromRelease), "supervisor.js is the current release's copy");
+  assert.ok(existsSync(path.join(root, "supervisor.js.prev")), "the previous supervisor is kept as .prev");
+};
 
 // The journal, read straight from the scratch database (same row the UpdateStore reads).
 async function journalStatus(): Promise<string | null> {
@@ -350,8 +377,8 @@ async function main(): Promise<void> {
     const state = await readUpdateState();
     assert.deepEqual(
       state.releases.map((release) => release.version),
-      [HELD_TAG, BROKEN_TAG, REAL_TAG, BASE_TAG, ANCIENT_TAG],
-      "newest first; the floored and the tarball-less releases are not listed",
+      [MISSING_TAG, DOTTED_TAG, HELD_TAG, BROKEN_TAG, REAL_TAG, BASE_TAG, ANCIENT_TAG, OLD_TAG],
+      "newest first (the dotted pre-release placed by the comparator); floored and tarball-less releases are not listed",
     );
     assert.equal(state.activity.state, "Ready", "an update is announced");
     assert.equal(state.activity.latest?.version, REAL_TAG, "the announced one is GitHub's latest, not the newest");
@@ -370,7 +397,7 @@ async function main(): Promise<void> {
   await waitFor(`pointer flips to ${REAL_TAG}`, () => pointer() === REAL_TAG, 8 * 60_000);
   assert.equal(pendingExists(), true, "pending.json exists right after the swap");
   await waitFor("updated app serving", appUp, 60_000);
-  assert.ok(existsSync(path.join(root, "releases", BASE_TAG)), "previous release retained");
+  assertLayoutAfterSwap(REAL_TAG, BASE_TAG);
   await waitFor("supervisor clears pending (healthy window)", () => !pendingExists(), 100_000);
   await waitFor("journal confirmed ok", async () => (await journalStatus()) === "ok", 120_000);
   {
@@ -378,7 +405,7 @@ async function main(): Promise<void> {
     assert.equal(state.current, REAL_TAG);
     assert.equal(state.activity.state, "Idle", "on latest nothing is announced, although a newer stable exists");
     const quiet = state.releases.find((release) => release.prerelease && release.version !== state.current);
-    assert.equal(quiet?.version, BROKEN_TAG, "the flagged release is there for the quiet mention");
+    assert.equal(quiet?.version, DOTTED_TAG, "the newest flagged release is the one for the quiet mention");
     log("ok: latest beats newest; the pre-release is only mentioned");
   }
 
@@ -386,7 +413,7 @@ async function main(): Promise<void> {
   assert.equal((await post("/update/apply", { version: BASE_TAG })).status, 204, "downgrade accepted");
   await waitFor(`pointer flips back to ${BASE_TAG}`, () => pointer() === BASE_TAG, 60_000);
   await waitFor("downgraded app serving", appUp, 60_000);
-  assert.ok(existsSync(path.join(root, "releases", REAL_TAG)), "the release we left is retained");
+  assertLayoutAfterSwap(BASE_TAG, REAL_TAG);
   await waitFor("pending cleared again", () => !pendingExists(), 100_000);
 
   log(`Scenario B2: downgrade to ${ANCIENT_TAG} crosses the fake migration, expect refusal...`);
@@ -418,6 +445,23 @@ async function main(): Promise<void> {
   assert.equal(pendingExists(), true, "still inside the rollback window");
   await waitFor("pending cleared (healthy window)", () => !pendingExists(), 100_000);
   assert.equal(pointer(), REAL_TAG, "survived the window on the new release");
+  assertLayoutAfterSwap(REAL_TAG, BASE_TAG);
+
+  log(`Scenario F: apply ${MISSING_TAG}, whose tarball 404s, expect a failed apply and no swap...`);
+  {
+    const before = appPid();
+    assert.equal((await post("/update/apply", { version: MISSING_TAG })).status, 204, "apply accepted (the gate cannot know the asset is gone)");
+    await waitFor("journal says failed", async () => (await journalStatus()) === "failed", 60_000);
+    const state = await readUpdateState();
+    assert.equal(state.activity.state, "Failed", "activity is FAILED");
+    assert.match(state.activity.error ?? "", /download/i, "the failure names the download step");
+    assert.equal(pointer(), REAL_TAG, "pointer untouched");
+    assert.equal(pendingExists(), false, "no pending marker was written");
+    assert.equal(appPid(), before, "no restart happened");
+    assert.ok(await appUp(), "the app keeps answering");
+    assertLayoutAfterSwap(REAL_TAG, BASE_TAG);
+    log("ok: a failed download leaves the device exactly as it was");
+  }
 
   log(`Scenario C: apply the broken ${BROKEN_TAG}, expect rollback...`);
   assert.equal((await post("/update/apply", { version: BROKEN_TAG })).status, 204, "apply accepted");
@@ -426,6 +470,7 @@ async function main(): Promise<void> {
   await waitFor("rolled-back app serving", appUp, 60_000);
   assert.equal(pendingExists(), false, "rollback cleared pending");
   await waitFor("journal says rolled-back", async () => (await journalStatus()) === "rolled-back", 60_000);
+  assertLayoutAfterSwap(REAL_TAG, BROKEN_TAG);
 
   log("ALL SCENARIOS PASSED");
 }
