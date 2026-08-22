@@ -17,7 +17,7 @@
  */
 import { execFileSync, spawnSync } from "node:child_process";
 import { createWriteStream, existsSync, mkdirSync, renameSync, rmSync, copyFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
@@ -33,7 +33,9 @@ for (let i = 0; i < args.length; i++) {
   if (args[i].startsWith("--")) flags.set(args[i], args[++i]);
   else positional.push(args[i]);
 }
-const root = positional[0];
+// Absolute from here on: the printed systemd unit needs absolute paths, and a relative
+// target would otherwise be echoed as typed.
+const root = positional[0] === undefined ? undefined : resolve(positional[0]);
 const wantedVersion = flags.get("--version");
 const apiBase = flags.get("--api-base") ?? "https://api.github.com";
 
@@ -53,15 +55,18 @@ const log = (message) => console.log(`[install] ${message}`);
 const major = Number(process.version.slice(1).split(".")[0]);
 if (major < MIN_NODE_MAJOR) fail(`Node ${MIN_NODE_MAJOR}+ is required (this is ${process.version}).`);
 
-const tool = (command, hint) => {
+const tool = (command, hint, cwd = process.cwd()) => {
   const result = spawnSync(command, ["--version"], {
+    cwd,
     shell: process.platform === "win32",
-    stdio: "ignore",
+    encoding: "utf8",
   });
   if (result.status !== 0) fail(`\`${command}\` is not available. ${hint}`);
+  return result.stdout.trim();
 };
 tool("tar", "It ships with Windows 10+ and every Linux; install it via your package manager.");
-tool("yarn", "Run `corepack enable` (corepack ships with Node) to make yarn available.");
+const yarnHint = "Run `corepack enable` (corepack ships with Node) to make the right yarn available.";
+tool("yarn", yarnHint);
 
 // ---------- refuse to install over an installation ----------
 
@@ -76,7 +81,9 @@ const releaseUrl = wantedVersion
   : `${apiBase}/repos/${REPO}/releases/latest`; // GitHub's "latest" = newest stable
 
 log(wantedVersion ? `Fetching release ${wantedVersion}...` : "Fetching the latest stable release...");
-const releaseResponse = await fetch(releaseUrl, { headers: ghHeaders });
+const releaseResponse = await fetch(releaseUrl, { headers: ghHeaders }).catch((error) =>
+  fail(`Could not reach GitHub (${error.cause?.code ?? error.message}). Check the network.`),
+);
 if (releaseResponse.status === 404 && !wantedVersion)
   fail(
     "No stable release exists yet: releases marked pre-release are never installed by default. " +
@@ -107,6 +114,12 @@ log("Extracting...");
 // Relative paths + cwd: GNU tar reads an absolute "C:\..." archive path as a remote host.
 execFileSync("tar", ["-xzf", "update.tar.gz", "-C", "release"], { cwd: staging });
 
+// Checked here, inside the release, because that is where yarn runs: with corepack the
+// release's `packageManager` field selects Yarn 4 there, while a distro-installed Yarn 1.x
+// answers `--version` happily anywhere and then has no `workspaces focus`.
+const yarnVersion = tool("yarn", yarnHint, join(staging, "release"));
+if (Number(yarnVersion.split(".")[0]) < 4) fail(`Yarn 4+ is required (this is ${yarnVersion}). ${yarnHint}`);
+
 log("Installing dependencies (this downloads Chromium once, into the shared cache)...");
 const install = spawnSync("yarn", ["workspaces", "focus", "--production"], {
   cwd: join(staging, "release"),
@@ -127,6 +140,7 @@ const configFile = join(root, "config", "config.yaml");
 if (!existsSync(configFile)) {
   writeFileSync(
     configFile,
+    // Same text as the tracked app/config/config.yaml example, minus its dev note.
     `# WebKontrol configuration. The admin UI manages runtime settings; this file holds\n` +
       `# what must exist before the app starts.\n` +
       `\n` +
@@ -166,7 +180,7 @@ To start on boot under systemd, a unit like this works:
 
     [Service]
     WorkingDirectory=${root}
-    ExecStart=${process.execPath} ${join(root, "supervisor.js")}
+    ExecStart="${process.execPath}" "${join(root, "supervisor.js")}"
     Restart=always
 
     [Install]
