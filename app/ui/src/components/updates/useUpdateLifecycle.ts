@@ -129,7 +129,10 @@ export function useUpdateLifecycle(): UpdateLifecycle {
           ? info.journal.error
           : undefined,
     dismiss: () => {
-      restartedInto = null; // the story has been told; a remount must not tell it again
+      // The story has been told: neither a remount nor a later manual reload may tell it
+      // again (a marker left in sessionStorage after a FAILED outcome read as a rollback).
+      sessionStorage.removeItem(PENDING_KEY);
+      restartedInto = null;
       publishStarted(null);
       setOutcomeTarget(null);
       setDismissed(true);
