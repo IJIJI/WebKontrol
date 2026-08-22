@@ -225,6 +225,11 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
       this._checkError = (error as Error).message;
       this._logger.warn(`Update check failed: ${this._checkError}`);
     }
+    // An apply accepted while the check was on the wire owns the activity now: writing
+    // READY/IDLE over its APPLYING would reopen the gate to a second apply mid-download.
+    // (Read through a method: TS narrowed `_activity` at the guard above and does not
+    // know the awaits let apply() run in between.)
+    if (this.getInfo().activity.state === UpdateState.APPLYING) return;
     const ready = announce({
       releases: this._source.releases,
       latest: this._source.latest,
