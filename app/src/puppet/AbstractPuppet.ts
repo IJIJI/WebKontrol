@@ -156,7 +156,7 @@ export abstract class AbstractPuppet<
         this._logger.debug("Loaded runtime.", loaded);
       }
       else {
-        this._logger.debug("No runtime found in store, using defaults.");
+        this._logger.info("No runtime found in store, using defaults.");
       }
 
       const loadedAppearance = await this._store.loadAppearance();

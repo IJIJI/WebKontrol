@@ -29,7 +29,7 @@ export class UiStore {
       this._logger.debug(`Loading runtime...`);
       const raw = await this._db.getSetting("app", "ui", "runtime");
       if (raw === null) {
-        this._logger.error(`Failed loading runtime! Got null`);
+        this._logger.debug(`No runtime saved yet; using defaults.`);
         return null;
       }
       const object = UiRuntimeSchema.parse(JSON.parse(raw));

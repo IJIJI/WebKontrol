@@ -34,7 +34,7 @@ export class ViewManagerStore {
       this._logger.debug(`Loading runtime...`);
       const raw = await this._db.getSetting("app", "viewmanager", "runtime");
       if (raw === null) {
-        this._logger.info(`Failed loading runtime! Got null`);
+        this._logger.debug(`No runtime saved yet; using defaults.`);
         return null;
       }
       const object = ViewManagerRuntimeSchema.parse(JSON.parse(raw));
@@ -58,7 +58,7 @@ export class ViewManagerStore {
         key,
       );
       if (raw === null) {
-        this._logger.info(`Failed loading view "${key}"! Got null`);
+        this._logger.debug(`No view "${key}" in the store.`);
         return null;
       }
       const config = AnyViewConfigSchema.parse(JSON.parse(raw));

@@ -28,7 +28,7 @@ export class SystemStore {
       this._logger.debug(`Loading runtime...`);
       const raw = await this._db.getSetting("app", "system", "runtime");
       if (raw === null) {
-        this._logger.info(`Failed loading runtime! Got null`);
+        this._logger.debug(`No runtime saved yet; using defaults.`);
         return null;
       }
       const object = SystemRuntimeSchema.parse(JSON.parse(raw));

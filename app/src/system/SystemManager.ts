@@ -33,7 +33,7 @@ export class SystemManager extends EventEmitter<SystemManagerEvents>  {
     if (loaded)
       this._runtime = loaded;
     else
-      this._logger.info("Failed loading runtime from store, using defaults.");
+      this._logger.info("No saved runtime; using defaults.");
     
     await this.updateRuntime(this._runtime); // TODO: Should this save?
   }

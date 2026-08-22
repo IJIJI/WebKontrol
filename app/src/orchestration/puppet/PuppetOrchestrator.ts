@@ -380,7 +380,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
       this.emit('runtime_update', this.getRuntime());
     }
     else {
-      this._logger.debug("No runtime found, using defaults.");
+      this._logger.info("No runtime found, using defaults.");
     }
 
     // Drop assignments for puppets no longer in the config, so removed puppets don't
