@@ -30,6 +30,9 @@ export interface ViewBodyProps {
   // Page-injected placeholder overrides (e.g. the runtime loadTimeout default), same as the
   // generic mapper receives, a body delegating to SchemaSettings passes them through.
   placeholders?: Record<string, string>;
+  // The page's live view-level validation, by dotted field path; a body delegating to
+  // SchemaSettings passes it through so its fields mark errors like the page's own.
+  errors?: Map<string, string>;
 }
 
 // Everything type-specific the ViewEditor needs to edit one view type. Adding a view type is a
@@ -63,7 +66,10 @@ export const VIEW_EDITORS: Record<ViewType, ViewEditorEntry> = {
     emptyDraft: { type: "blocks", name: {} },
     body: BlockViewBody,
     validate: (values) => {
-      const issues = validateBlockTree(values.root as BlockLike | undefined);
+      // skipDisabled: a disabled block is not in the view, so its problems cannot break it, and
+      // switching a half-finished block off to save the rest is the reason to reach for the
+      // toggle. The tree still marks it, so nothing is hidden by saving.
+      const issues = validateBlockTree(values.root as BlockLike | undefined, { skipDisabled: true });
       if (issues.size === 0) return [];
       // The tree marks which blocks and the form marks which fields; the toast only needs to say
       // why the save stopped.

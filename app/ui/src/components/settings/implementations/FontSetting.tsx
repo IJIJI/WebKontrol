@@ -10,11 +10,13 @@ import { CollectionLayout } from "../../collections/types";
 import { Icons } from "../../icons/Icons";
 import { DEFAULT_ENTITY_COLOR } from "../../../common/appearance";
 
-// Fonts the picker offers: web-safe families every display's browser ships, so what it shows is
-// what really renders. Bundled self-hosted fonts join this list when they land (backlog).
+// Fonts the picker offers: web-safe families every display's browser ships, plus the
+// bundled ones the ViewServer serves (@font-face in view.css and font.less), so what it
+// shows is what really renders.
 export const FONT_SUGGESTIONS = [
   "system-ui", "Arial", "Helvetica", "Verdana", "Tahoma", "Trebuchet MS",
   "Times New Roman", "Georgia", "Courier New", "monospace", "serif", "sans-serif",
+  "DSEG7 Classic", "DSEG14 Classic",
 ];
 
 // A font family field: free text (any CSS family list stays expressible) plus a searchable

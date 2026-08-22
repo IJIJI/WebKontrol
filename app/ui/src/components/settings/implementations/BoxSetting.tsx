@@ -114,7 +114,7 @@ export function BoxSetting(props: BoxProps): JSX.Element {
         return (
           <div className="boxEditor">
             <div className="boxHead">
-              <div className="buttonSelect" role="group" aria-label="Unit">
+              <div className="buttonSelect mini" role="group" aria-label="Unit">
                 {BOX_UNITS.map((unit) => (
                   <button
                     key={unit}
@@ -128,7 +128,7 @@ export function BoxSetting(props: BoxProps): JSX.Element {
                   </button>
                 ))}
               </div>
-              <div className="buttonSelect" role="group" aria-label="Link sides">
+              <div className="buttonSelect mini" role="group" aria-label="Link sides">
                 {MODE_LABELS.map((option) => (
                   <button
                     key={option.mode}

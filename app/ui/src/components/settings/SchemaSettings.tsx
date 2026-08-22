@@ -11,6 +11,7 @@ import { TextAreaSetting } from "./implementations/TextAreaSetting";
 import { FontSetting } from "./implementations/FontSetting";
 import { BoxSetting } from "./implementations/BoxSetting";
 import { TrackSetting } from "./implementations/TrackSetting";
+import { SizeSetting, type SizeAxesValue } from "./implementations/SizeSetting";
 import { UrlSetting } from "./implementations/UrlSetting";
 import { NumberSetting } from "./implementations/NumberSetting";
 import { RangeSetting } from "./implementations/RangeSetting";
@@ -230,6 +231,9 @@ function fieldElement(
   if (info.kind === "object" && meta.input === "alignment" && !ctx.readOnly) {
     return alignmentField(key, info, meta, lens, path, ctx);
   }
+  if (info.kind === "object" && meta.input === "size" && !ctx.readOnly) {
+    return sizeField(key, info, meta, lens, path, ctx);
+  }
   if (info.kind === "object") return objectGroup(key, info, meta, lens, path, ctx);
   if (info.kind === "array") return arrayGroup(key, info, meta, lens, path, ctx);
   return renderField(key, info, meta, lens, placeholder, ctx, path);
@@ -288,6 +292,47 @@ function subsection(title: string, fields: JSX.Element[], ctx: RenderCtx): JSX.E
  * A two-axis position pair as a single grid picker. The stored shape is untouched: the widget
  * reads and writes the same `{horizontal, vertical}` object the nested group would have.
  */
+/**
+ * A size pair as one two-axis control. Unlike alignment, the axes here have their own defaults
+ * per block (a text block hugs, a website fills), and those live on the schema rather than in
+ * the stored object, whose fallback is a bare `{}`.
+ */
+function sizeField(
+  key: string,
+  info: FieldInfo,
+  meta: FieldMeta,
+  lens: DraftLens,
+  path: readonly (string | number)[],
+  ctx: RenderCtx,
+): JSX.Element {
+  const defaults = seedFromDefaults(info.core) as unknown as SizeAxesValue;
+  const stored = lens.values[key] as SizeAxesValue | undefined;
+
+  return (
+    <SizeSetting
+      key={key}
+      title={meta.label}
+      subtitle={meta.description}
+      error={errorAt(ctx, path, key)}
+      // Merged per axis, so a config holding only one of the two still shows the other.
+      value={{ ...defaults, ...stored }}
+      // Merged the same way as `value`: a config that never stored the field has nothing saved,
+      // and comparing a defaulted axis against `undefined` would mark every block changed.
+      savedVal={{ ...defaults, ...(lens.saved[key] as SizeAxesValue | undefined) }}
+      // Bounds carry no keywords: "hug your content" is not a minimum anyone can act on.
+      lengthsOnly={key === "minSize" || key === "maxSize"}
+      setValue={(next) =>
+        // Absent means the block's own default applies, the same rule alignment and the enums
+        // follow: picking the default stores nothing rather than pinning it.
+        lens.setField(
+          key,
+          next.x === defaults.x && next.y === defaults.y ? undefined : next,
+        )
+      }
+    />
+  );
+}
+
 function alignmentField(
   key: string,
   info: FieldInfo,
@@ -545,7 +590,13 @@ function renderField(
     case "boolean":
       return (
         <ToggleSetting key={key} title={title} subtitle={subtitle} error={error}
-          value={Boolean(value)} savedVal={saved as boolean | undefined} setValue={set} />
+          // Same contract as the enum case below: absent means "the default applies", shown as
+          // that default, and toggling BACK to the default stores nothing. Without the
+          // collapse, on-then-off wrote an explicit `false` over an absent saved value and the
+          // save bar stayed up for a draft identical to what is stored.
+          value={Boolean(value ?? info.defaultValue)}
+          savedVal={saved as boolean | undefined}
+          setValue={(v) => set(v === (info.defaultValue as boolean | undefined) ? undefined : v)} />
       );
     case "enum": {
       const defaultValue = info.defaultValue as string | undefined;

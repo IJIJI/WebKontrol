@@ -1,8 +1,8 @@
 import { html, render as litRender, type TemplateResult } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
 import { isBroken, type BrokenBlock, type RenderContext, type ResolvedNode } from "./types/model";
-import { blockStyles, slotStyles } from "./styles";
-import { resolveBlock } from "./resolver";
+import { blockStyles, sizeStyles, slotSizeStyles, slotStyles } from "./styles";
+import { isDisabledBlock, resolveBlock } from "./resolver";
 import type { BlockStyle } from "./types/schema";
 import type { BlockTypeRegistry } from "./registry";
 
@@ -31,8 +31,10 @@ import type { BlockTypeRegistry } from "./registry";
  */
 function createRenderContext(): RenderContext {
   const ctx: RenderContext = {
-    renderChild(child: ResolvedNode): TemplateResult {
-      return renderNode(child, ctx);
+    renderChild(child: ResolvedNode | undefined, parentAxis?: "row" | "column"): TemplateResult {
+      // No child (disabled, or an unfilled optional slot): no slot either, so the parent's
+      // layout counts and spaces its children as if the block were not in the config.
+      return child === undefined ? html`` : renderNode(child, ctx, parentAxis);
     },
   };
   return ctx;
@@ -45,7 +47,7 @@ function blockClass(key: string): string {
 }
 
 /** One block: the slot/box skeleton around whatever the block itself renders. */
-function renderNode(node: ResolvedNode, ctx: RenderContext): TemplateResult {
+function renderNode(node: ResolvedNode, ctx: RenderContext, parentAxis?: "row" | "column"): TemplateResult {
   if (isBroken(node)) {
     return html`<div class="wk-slot"
       ><div class="wk-block wk-broken">${brokenContent(node)}</div
@@ -55,23 +57,17 @@ function renderNode(node: ResolvedNode, ctx: RenderContext): TemplateResult {
   // Every block's schema carries the injected `style` (see blockStyleSchema); the cast is the
   // one place that knows the convention, so blocks and the resolver stay unaware of it.
   const style = (node.config as { style?: BlockStyle }).style ?? {};
-  const hug = style.sizing === "content";
-  // Separate from `hug`, which is about size: a hugging box is the one thing that can outgrow
-  // its slot, so the slot clips it, unless the block asked for visible overflow. That keeps
-  // `overflow` meaning the same thing whichever way a block is sized (it decides what may paint
-  // outside the block) while sizing only decides how big the block is.
-  const spill = hug && style.overflow === "visible";
 
-  // The tag breaks hang (`\n    >`) rather than sitting on their own lines: any newline or
+  // The tag breaks hang rather than sitting on their own lines: any newline or
   // indent between these tags becomes a real text node inside the block, and a text block
   // renders with `white-space: pre-line`, so the template's own formatting would show up as
   // blank lines in the rendered text. The framework must contribute no content of its own.
   return html`<div
-    class="wk-slot${hug ? " wk-hug" : ""}${spill ? " wk-spill" : ""}"
-    style=${styleMap({ ...slotStyles(style.alignment), ...node.def.slotStyles(node.config) })}
+    class="wk-slot"
+    style=${styleMap({ ...slotSizeStyles(style, parentAxis), ...slotStyles(style.alignment), ...node.def.slotStyles(node.config) })}
     ><div
       class="wk-block ${blockClass(node.def.key)}"
-      style=${styleMap({ ...blockStyles(style), ...node.def.boxStyles(node.config) })}
+      style=${styleMap({ ...sizeStyles(style), ...blockStyles(style), ...node.def.boxStyles(node.config) })}
       >${node.def.render(node.config, ctx)}</div
   ></div>`;
 }
@@ -108,6 +104,13 @@ export function renderBlockView(
   registry: BlockTypeRegistry,
   container: HTMLElement | DocumentFragment,
 ): void {
+  // An empty view (no root yet, or a root switched off) paints a blank page rather than a
+  // broken block: nothing is wrong with it, it simply has no content.
+  if (raw === null || raw === undefined || isDisabledBlock(raw)) {
+    litRender(html``, container);
+    return;
+  }
+
   const root = resolveBlock(raw, registry);
   litRender(renderResolvedBlock(root), container);
 }

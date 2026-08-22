@@ -20,7 +20,11 @@ export function ViewConfigSummary({ view }: { view: UiViewState }): JSX.Element 
     case "blocks":
       return (
         <SettingGroup title="Blocks">
-          <BlockExplorer root={config.root} />
+          {/* An empty view is a valid, savable state, not a broken one: say so rather than
+              rendering an explorer with nothing to explore. */}
+          {config.root === undefined
+            ? <div className="empty">No blocks yet.</div>
+            : <BlockExplorer root={config.root} />}
         </SettingGroup>
       );
     default:

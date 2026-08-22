@@ -1,24 +1,49 @@
-// TODO: Rewrite?
+import type { UpdateJournalEntry } from "./schema";
 
-export interface GitHubRelease {
-  tag: string;
+/**
+ * Model types for the update system: internally created, no validation needed.
+ * Follows the puppet model's shape: a state union for the transient activity
+ * (impossible combinations don't compile), wrapped with the common fields.
+ */
+
+/** A published release carrying an update tarball, as reported by the source. */
+export interface Release {
+  version: string; // the tag as published, "v3.1.0" or "3.1.0-beta.2"
   name: string;
+  notes: string; // release body, markdown
   publishedAt: string;
   prerelease: boolean;
-  body: string;
+  assetUrl: string; // download URL of the update tarball asset
+  /**
+   * The migration versions a downgrade to this release would cross, derived from the
+   * running build's own chain (empty for upgrades by construction). Set by the manager
+   * when it builds the info payload; the source itself knows nothing about migrations.
+   */
+  crossings?: string[];
 }
 
-export interface GitHubBranch {
-  name: string;
+export enum UpdateState {
+  IDLE = "Idle",         // nothing newer known, nothing running
+  CHECKING = "Checking",
+  READY = "Ready",       // a newer release is known, waiting for a manual apply
+  APPLYING = "Applying",
+  FAILED = "Failed",     // the last apply failed; superseded by the next check or apply
 }
 
-// TODO: Split into get available updates and system status? There is a checkupdates and getstatus function anyways.
-export interface UpdateStatus {
+export type UpdateActivity =
+  | { state: UpdateState.IDLE }
+  | { state: UpdateState.CHECKING }
+  | { state: UpdateState.READY; latest: Release }
+  | { state: UpdateState.APPLYING; target: Release }
+  | { state: UpdateState.FAILED; target: Release; error: string };
+
+/** The update section of the SSE state payload. */
+export interface UpdateInfo {
   current: string;
-  releases: GitHubRelease[];
-  branches: GitHubBranch[];
+  managed: boolean; // false = plain checkout (dev), checks and applies are off
+  releases: Release[];
   lastChecked: number | null;
-  updating: boolean;
-  updateError: string | null;
-  hasUpdate: boolean;
+  checkError?: string; // why the last check failed; cleared by a successful one
+  activity: UpdateActivity;
+  journal?: UpdateJournalEntry; // the most recent apply's outcome; absent before the first
 }

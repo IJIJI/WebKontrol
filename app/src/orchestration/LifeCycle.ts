@@ -7,6 +7,10 @@ import { AppCore, type AppCoreConfig } from "./AppCore";
 import { PuppetFactory } from "./puppet/PuppetFactory";
 import { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
 import { SystemManager } from "../system/SystemManager";
+import { CoreDatabase } from "../storage/CoreDatabase";
+import { GitHubReleases } from "../system/update/GitHubReleases";
+import { UpdateManager } from "../system/update/UpdateManager";
+import { UpdateRunner } from "../system/update/UpdateRunner";
 import { ViewManager } from "../views/ViewManager";
 import { ViewServer } from "../views/ViewServer";
 
@@ -21,7 +25,7 @@ export class LifeCycle {
     this._configManager = new ConfigManager();
   }
 
-  public async construct(): Promise<AppCore> {
+  public async construct(requestRestart: () => void): Promise<AppCore> {
     this._logger.important("Initiating app from config...");
 
     await this._configManager.init();
@@ -38,11 +42,21 @@ export class LifeCycle {
 
     const viewManager = new ViewManager(appConfig.views);
 
+    // The update layout is rooted at the cwd, same as config/db/logs; the db snapshot
+    // seam is the database's own backup API, never a file copy.
+    const updateManager = new UpdateManager(
+      new GitHubReleases(appConfig.update.api_base),
+      new UpdateRunner(process.cwd(), (dest) => CoreDatabase.getInstance().backup(dest)),
+      requestRestart,
+      appConfig.update.fake_migration_versions,
+    );
+
     const orchestratorConf: AppCoreConfig = {
       puppetOrchestrator: puppetOrchestrator,
       webServer: new WebServer(appConfig.web),
       uiManager: new UiManager(),
       systemManager: new SystemManager(),
+      updateManager: updateManager,
       viewManager: viewManager,
       viewServer: new ViewServer(viewManager), // transport for the views; reacts to the manager's events
     }

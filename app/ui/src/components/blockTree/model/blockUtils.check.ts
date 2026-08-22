@@ -8,6 +8,7 @@ import { describeField } from "../../settings/zodField";
 import { boxMode, formatBox, parseBox, slotCount, slotTargets, type BoxValue } from "../../settings/implementations/cssBox";
 import { formatHexAlpha, parseHexAlpha } from "../../settings/implementations/cssColor";
 import { formatTracks, parseTracks, type Track } from "../../settings/implementations/cssTracks";
+import { formatSize, parseSize } from "../../settings/implementations/cssSize";
 
 import {
   ContainerBlock,
@@ -30,6 +31,16 @@ import { BackgroundStyleShape, BlockStyleShape, blockStyleSchema, GridConfigSche
 import type { FieldMeta } from "../../../../../src/views/types/schema";
 import { isBroken, type ResolvedNode } from "../../../../../src/views/blocks/types/model";
 import { arrayMove } from "../../../common/helpers/arrayMove";
+import { timeAgo } from "../../../common/helpers/relativeTime";
+import { puppetStatus } from "../../puppets/puppetStatus";
+import { ConnectionState } from "../../../../../src/types/CommonTypes";
+import { BLANK_NAVIGATION_REQUEST } from "../../../../../src/puppet/types/schema";
+import {
+  NavigationFailure,
+  NavigationState,
+  type NavigationInfo,
+  type PuppetInfo,
+} from "../../../../../src/puppet/types/model";
 import { fieldErrors, validateBlockTree } from "./validate";
 import {
   childBlocks,
@@ -259,13 +270,13 @@ assert.equal(fieldErrors(nested, []).size, 0);
 
 {
   const hugStyle = blockStyleSchema("content");
-  const css = blockStyles(hugStyle.parse({ fontSize: 100, letterSpacing: 2, lineHeight: 1.2, opacity: 0.5 }) as BlockStyle);
+  const css = blockStyles(hugStyle.parse({ fontSize: 100, letterSpacing: 2, lineHeight: 1.2, opacity: 0.5 }));
   assert.equal(css.fontSize, "100px", "set font size, in px");
   assert.equal(css.letterSpacing, "2px");
   assert.equal(css.lineHeight, 1.2, "line height stays unitless");
   assert.equal(css.opacity, 0.5);
 
-  const empty = blockStyles(hugStyle.parse({}) as BlockStyle);
+  const empty = blockStyles(hugStyle.parse({}));
   assert.equal(empty.fontSize, undefined, "unset font size emits nothing and inherits (page default in view.css)");
   assert.equal(empty.letterSpacing, undefined, "unset fields stay undefined so styleMap skips them");
   assert.equal(empty.overflow, undefined, "the overflow default lives in the stylesheet, not the config");
@@ -274,7 +285,8 @@ assert.equal(fieldErrors(nested, []).size, 0);
   assert.equal(empty.textAlign, undefined, "alignment is not a box style");
   assert.equal(empty.justifyContent, undefined, "alignment is not a box style");
 
-  assert.equal((hugStyle.parse({}) as BlockStyle).sizing, "content", "text chips hug by default");
+  assert.equal((hugStyle.parse({}) as BlockStyle).size?.x, "content", "text chips hug by default");
+  assert.equal((hugStyle.parse({}) as BlockStyle).size?.y, "content", "on both axes");
 
   // Slot placement, and the text-only echo of the same alignment inside the box.
   const alignment = (hugStyle.parse({}) as BlockStyle).alignment;
@@ -294,17 +306,19 @@ assert.equal(fieldErrors(nested, []).size, 0);
   // Old saved configs keep their exact meaning through the injection.
   const oldText = TextBlock.configSchema.parse({
     type: TextBlock.key, text: "hi",
-    style: { fontSize: 100, sizing: "container", alignment: { horizontal: "left" }, background: "#000" },
+    style: { fontSize: 100, size: { x: "container" }, alignment: { horizontal: "left" }, background: "#000" },
   }) as { style: BlockStyle };
   assert.equal(oldText.style.fontSize, 100);
-  assert.equal(oldText.style.sizing, "container");
+  assert.equal(oldText.style.size?.x, "container");
+  assert.equal(oldText.style.size?.y, "content", "an unset axis still takes the block default");
   assert.equal(oldText.style.alignment?.horizontal, "left");
   assert.equal(oldText.style.background, "#000");
 
-  // Fill-only blocks: style exists (injected), sizing/alignment do not.
+  // Fill-only blocks: same universal box, defaulting to container on both axes. Size is not
+  // gated per block, a length is meaningful everywhere and gating would be a list to curate.
   const site = WebsiteBlock.configSchema.parse({ type: WebsiteBlock.key, url: "https://example.com" }) as { style: BlockStyle };
   assert.notEqual(site.style, undefined, "every block gets a style");
-  assert.equal("sizing" in site.style, false, "fill-only blocks have no sizing field");
+  assert.deepEqual(site.style.size, { x: "container", y: "container" }, "fill-only blocks default to container");
 
   // A previously style-less block accepts styling now.
   const styledGrid = GridBlock.configSchema.safeParse({ type: GridBlock.key, style: { background: "#123" } });
@@ -449,5 +463,183 @@ assert.deepEqual(arrayMove(["a", "b"], 0, 9), ["a", "b"], "out of range is a no-
 // yields one visible step: down lands after the target, up lands before it.
 assert.deepEqual(arrayMove(["a", "junk", "b"], 0, 2), ["junk", "b", "a"], "down past junk");
 assert.deepEqual(arrayMove(["a", "junk", "b"], 2, 0), ["b", "a", "junk"], "up past junk");
+
+//* puppetStatus: one status from two axes, connection first
+
+{
+  const at = 1_786_840_876_709;
+  const info = (state: ConnectionState, navigation: NavigationInfo): PuppetInfo =>
+    ({ state, navigation, moment: at });
+  const loaded: NavigationInfo = { state: NavigationState.LOADED, request: BLANK_NAVIGATION_REQUEST, moment: at };
+  const failed = (failure: NavigationFailure, status?: number): NavigationInfo =>
+    ({ state: NavigationState.FAILED, request: BLANK_NAVIGATION_REQUEST, failure, error: "boom", status, moment: at });
+
+  // Healthy on both axes reports the connection's own word.
+  assert.deepEqual(puppetStatus(info(ConnectionState.ONLINE, loaded)), { status: ConnectionState.ONLINE });
+
+  // Online browser, dead page: the page is the interesting axis, named by its kind.
+  assert.deepEqual(
+    puppetStatus(info(ConnectionState.ONLINE, failed(NavigationFailure.NETWORK))),
+    { status: ConnectionState.FAILED, label: "Network" },
+  );
+  assert.equal(
+    puppetStatus(info(ConnectionState.ONLINE, failed(NavigationFailure.STATUS, 404))).label,
+    "Status 404",
+    "an HTTP code is the whole story for a STATUS failure",
+  );
+
+  // The case the pair got wrong: nothing clears the navigation record, so a browser that died
+  // while showing a page still reports LOADED. The connection has to win, or a dead puppet
+  // reads as a cheerful "Online".
+  assert.deepEqual(
+    puppetStatus(info(ConnectionState.OFFLINE, loaded)),
+    { status: ConnectionState.OFFLINE },
+    "a dead browser outranks its own stale navigation record",
+  );
+  assert.deepEqual(puppetStatus(info(ConnectionState.ERROR, loaded)), { status: ConnectionState.ERROR });
+}
+
+//* timeAgo: the largest unit that fits, and never the future
+
+{
+  const now = 1_786_840_876_709; // a fixed "now" so the assertions do not depend on the clock
+  assert.equal(timeAgo(now, now), "just now");
+  assert.equal(timeAgo(now - 5_000, now), "5 seconds ago");
+  assert.equal(timeAgo(now - 4 * 60_000, now), "4 minutes ago");
+  assert.equal(timeAgo(now - 90 * 60_000, now), "1 hour ago", "the unit that fits, not the nearest");
+  assert.equal(timeAgo(now - 2 * 86_400_000, now), "2 days ago");
+  // A display without a real-time clock stamps against a wrong clock and then jumps on NTP sync.
+  assert.equal(timeAgo(now + 3 * 3_600_000, now), "just now", "a clock jump never reads as the future");
+}
+
+// ── Box sizing v2 ─────────────────────────────────────────────────────
+// Size is a per-axis {x, y} pair, defaulting from the block itself, with bounds and ratio
+// beside it. These pin the defaults and the value space; the render mapping is verified by
+// browser measurement, not here.
+{
+  // Each block's own default reaches both axes.
+  const textDefault = TextBlock.configSchema.parse({ type: TextBlock.key, text: "x" });
+  assert.deepEqual(textDefault.style.size, { x: "content", y: "content" }, "text hugs by default");
+
+  const containerDefault = ContainerBlock.configSchema.parse({
+    type: ContainerBlock.key,
+    block: { type: TextBlock.key, text: "x" },
+  });
+  assert.deepEqual(containerDefault.style.size, { x: "container", y: "container" });
+
+  // One axis set leaves the other on the block default, which is the point of the pair.
+  const half = TextBlock.configSchema.parse({ type: TextBlock.key, text: "x", style: { size: { x: "50%" } } });
+  assert.equal(half.style.size?.x, "50%");
+  assert.equal(half.style.size?.y, "content", "the untouched axis keeps the block default");
+
+  // Lengths and keywords are both accepted, and stored verbatim (no unit normalising).
+  const sized = TextBlock.configSchema.parse({
+    type: TextBlock.key, text: "x",
+    style: { size: { x: "12px", y: "container" }, minSize: { x: "50%" }, maxSize: { y: "10vh" }, aspectRatio: "16/9" },
+  });
+  assert.deepEqual(sized.style.size, { x: "12px", y: "container" });
+  assert.equal(sized.style.minSize?.x, "50%");
+  assert.equal(sized.style.maxSize?.y, "10vh");
+  assert.equal(sized.style.aspectRatio, "16/9");
+
+  // Bounds and ratio have no defaults: unset must stay unset, or every block would pin itself.
+  const bare = DividerBlock.configSchema.parse({ type: DividerBlock.key });
+  assert.deepEqual(bare.style.minSize, {}, "no default minimum");
+  assert.deepEqual(bare.style.maxSize, {}, "no default maximum");
+  assert.equal(bare.style.aspectRatio, undefined);
+
+  // Alignment is universal now: any block can be smaller than its slot, so all can place it.
+  assert.deepEqual(bare.style.alignment, { horizontal: "center", vertical: "middle" });
+}
+
+// ── cssSize: one axis round-trips, and says so when it cannot ───────────────────
+{
+  assert.deepEqual(parseSize(undefined), { unit: "px" }, "unset is an empty px value");
+  assert.deepEqual(parseSize(""), { unit: "px" });
+  assert.deepEqual(parseSize("content"), { keyword: "content", unit: "px" });
+  assert.deepEqual(parseSize("container"), { keyword: "container", unit: "px" });
+  assert.deepEqual(parseSize("12px"), { value: 12, unit: "px" });
+  assert.deepEqual(parseSize("50%"), { value: 50, unit: "%" });
+  assert.deepEqual(parseSize("10vh"), { value: 10, unit: "vh" });
+  assert.deepEqual(parseSize(" 8 "), { value: 8, unit: "px" }, "a bare number is px");
+
+  // Anything CSS-valid but not representable falls back to raw text rather than being rewritten.
+  assert.equal(parseSize("calc(100% - 10px)"), null);
+  assert.equal(parseSize("fit-content"), null);
+  assert.equal(parseSize("auto"), null);
+
+  // Round-trip, including the two values that must not gain noise.
+  for (const raw of ["12px", "50%", "content", "container", "1.5rem"])
+    assert.equal(formatSize(parseSize(raw)!), raw, `${raw} round-trips`);
+  assert.equal(formatSize({ unit: "px" }), undefined, "no value means unset");
+  assert.equal(formatSize({ value: 0, unit: "%" }), "0", "zero carries no unit");
+}
+
+// ── A spacer is the empty styled box ───────────────────────────────────
+{
+  // Its size field is gone: the universal box owns both axes now, so a margin has somewhere to
+  // inset instead of fighting a slot the field had pinned. What is left is a block that renders
+  // nothing and carries the box, which is how a plain shape (a dot, a swatch) is expressed.
+  const spacer = SpacerBlock.configSchema.parse({ type: SpacerBlock.key, size: 12 });
+  assert.equal("size" in spacer, false, "the legacy size field is stripped, not honoured");
+  assert.deepEqual(spacer.style.size, { x: "container", y: "container" });
+
+  // The container keeps its required child, so it stays distinguishable from the spacer and the
+  // editor keeps a slot to hang its add button on.
+  const childless = ContainerBlock.configSchema.safeParse({ type: ContainerBlock.key });
+  assert.equal(childless.success, false, "a container still needs its child");
+}
+
+// ── A disabled block leaves the tree, rather than rendering invisibly ──
+{
+  const registry = new BlockTypeRegistry();
+  ns.register(registry, WEBKONTROL_BLOCKS);
+
+  // Universal and defaulted, so every block answers the question and none starts off.
+  for (const block of WEBKONTROL_BLOCKS) {
+    // The extras cover every block's required fields; the rest strip them as unknown keys.
+    const bare = block.configSchema.parse({ type: block.key, url: "https://example.com", block: text, text: "x" });
+    assert.equal((bare as { disabled: boolean }).disabled, false, `${block.key} defaults to enabled`);
+  }
+
+  const children = (node: ResolvedNode): unknown[] =>
+    isBroken(node) ? [] : (node.config as { blocks: unknown[] }).blocks;
+
+  // A slot in a list resolves to nothing, and the render core emits no element for it, so the
+  // parent's DOM child count drops: what spaces a stack and what view.css reads to arrange a
+  // grid. The list keeps its length (nothing renumbers), which is why nothing may read it.
+  // Measured in a browser: 4 blocks with one disabled arrange as 3 columns, not 2x2 with a hole.
+  const arranged = resolveBlock({ type: GridBlock.key, blocks: [text, { ...clock, disabled: true }, text] }, registry);
+  assert.deepEqual(children(arranged).map((child) => child === undefined), [false, true, false],
+    "the disabled child resolved to nothing");
+
+  // A single slot empties instead; the render core paints the parent's box with nothing in it.
+  const emptied = resolveBlock({ type: ContainerBlock.key, block: { ...goodSite, disabled: true } }, registry);
+  assert.equal(isBroken(emptied), false, "the parent still resolves");
+  if (!isBroken(emptied)) assert.equal((emptied.config as { block: unknown }).block, undefined, "its slot is empty");
+
+  // Read before validating: parking a half-finished block is the point, so a disabled block
+  // with a missing required field resolves away instead of resolving to a broken node.
+  const parked = resolveBlock({ type: GridBlock.key, blocks: [{ ...badSite, disabled: true }] }, registry);
+  assert.deepEqual(children(parked), [undefined], "a disabled invalid block never reaches its schema");
+  // Enabled, the same block is the loud red placeholder it should be.
+  const unparked = resolveBlock({ type: GridBlock.key, blocks: [badSite] }, registry);
+  assert.equal(isBroken(children(unparked)[0] as ResolvedNode), true, "enabling it brings the breakage back");
+}
+
+// ── A parked block is reported, but does not gate the save ─────────────
+{
+  // Both are the same broken block; one is switched off. The editor sees both (nothing is
+  // hidden by saving), the save gate sees only the one that will actually render.
+  const mixed = { type: GridBlock.key, blocks: [{ ...badSite, disabled: true }, badSite] };
+  assert.deepEqual([...validateBlockTree(mixed).keys()], ["blocks.0", "blocks.1"], "the tree marks both");
+  assert.deepEqual([...validateBlockTree(mixed, { skipDisabled: true }).keys()], ["blocks.1"],
+    "only the live one blocks the save");
+
+  // A disabled block takes its subtree out of the view, so nothing below it gates either.
+  const parkedParent = { type: ContainerBlock.key, disabled: true, block: badSite };
+  assert.deepEqual([...validateBlockTree(parkedParent).keys()], ["block"], "the child is still reported");
+  assert.equal(validateBlockTree(parkedParent, { skipDisabled: true }).size, 0, "and still does not gate");
+}
 
 console.log("blockUtils.check: all assertions passed");

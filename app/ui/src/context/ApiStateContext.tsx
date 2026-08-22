@@ -9,7 +9,7 @@ import {
 } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import type { WebServerState } from "../../../src/webServer/model";
-import { Api } from "./Api";
+import { Api, ApiError } from "./Api";
 import useConnectionToast from "../components/toast/useConnectionToast";
 import { ConnectionStatus } from "./types";
 import { type PuppetKey, type PuppetRuntime, type PuppetRuntimeInput } from "../../../src/puppet/types/schema";
@@ -29,6 +29,8 @@ export interface UiPuppetState extends PuppetDataBundle {
   updateAppearance: (appearance: EntityAppearance) => Promise<void>;
   assignView: (view: ViewKey) => Promise<void>;
   unassignView: () => Promise<void>;
+  /** Re-navigate to the assigned view now, rather than waiting out a pending automatic retry. */
+  reload: () => Promise<void>;
 }
 
 // A view enriched with mutations bound to its key (like UiPuppetState). The wire ships a
@@ -61,11 +63,11 @@ interface ApiState {
         notify?: boolean,
       ) => Promise<void>;
     };
-    // update: {
-    //   check: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
-    //   apply: (ref: string, type: "release" | "branch") => Promise<void>; // TODO: Check arguments
-    //   getStatus: () => Promise<void>; // (return type was UpdateStatus) // TODO: Split update status into current and available or smt
-    // };
+    update: {
+      check: (notify?: boolean) => Promise<void>;
+      apply: (version: string, notify?: boolean) => Promise<void>;
+      acknowledge: (notify?: boolean) => Promise<void>;
+    };
     ui: {
       updateRuntime: (
         config: Partial<UiRuntimeInput>,
@@ -93,6 +95,10 @@ interface ApiState {
         notify?: boolean,
       ) => Promise<void>;
       unassignView: (
+        puppet: PuppetKey,
+        notify?: boolean,
+      ) => Promise<void>;
+      reload: (
         puppet: PuppetKey,
         notify?: boolean,
       ) => Promise<void>;
@@ -197,6 +203,7 @@ export function ApiStateProvider({
             updateAppearance: async (appearance: EntityAppearance): Promise<void> => puppetUpdateAppearance(key, appearance),
             assignView: async (view: ViewKey): Promise<void> => puppetAssignView(key, view),
             unassignView: async (): Promise<void> => puppetUnassignView(key),
+            reload: async (): Promise<void> => puppetReload(key),
           };
           puppets.set(key, full);
         }
@@ -309,6 +316,17 @@ export function ApiStateProvider({
     );
   };
 
+  const puppetReload = async (
+    puppet: PuppetKey,
+    notify = true,
+  ): Promise<void> => {
+    return withToast(
+      Api.post(`/puppets/${puppet}/reload`, {}),
+      { loading: "Reloading page...", success: "Page reloaded" },
+      notify,
+    );
+  };
+
   const systemUpdateRuntime = async (
     config: Partial<SystemRuntimeInput>,
     notify = false,
@@ -338,6 +356,45 @@ export function ApiStateProvider({
     return withToast(
       Api.patch(`/config/ui`, config),
       { loading: "Saving ui settings…", success: "Saved" },
+      notify,
+    );
+  };
+
+  const updateCheck = async (notify = true): Promise<void> => {
+    return withToast(
+      Api.post(`/update/check`, {}),
+      { loading: "Checking for updates…", success: "Check complete" },
+      notify,
+    );
+  };
+
+  // Success here means legitimately started, not done: the rest of the story arrives
+  // through the state's update section, and ends in the server restarting.
+  const updateApply = async (version: string, notify = true): Promise<void> => {
+    const request = Api.post<void>(`/update/apply`, { version }).catch(async (error: unknown) => {
+      // An answer means the gate spoke (a 409 refusal, say), so the apply never started.
+      if (error instanceof ApiError) throw error;
+      // No answer at all is either the server restarting into the new version (the update
+      // working) or a plain network blip (nothing started). A restart takes seconds, so a
+      // server that still answers right away is the same one: the request never landed.
+      const alive = await fetch("/", { method: "HEAD", signal: AbortSignal.timeout(1_000) })
+        .then((response) => response.ok)
+        .catch(() => false);
+      if (alive) throw error;
+    });
+    return withToast(
+      request,
+      { loading: "Starting update…", success: "Update started" },
+      notify,
+    );
+  };
+
+  // Silent by default: acknowledging is a click whose result is the message disappearing,
+  // so a toast would only repeat what the screen already shows.
+  const updateAcknowledge = async (notify = false): Promise<void> => {
+    return withToast(
+      Api.post(`/update/acknowledge`, {}),
+      { loading: "Dismissing…", success: "Dismissed" },
       notify,
     );
   };
@@ -397,6 +454,11 @@ export function ApiStateProvider({
           system: {
             updateRuntime: systemUpdateRuntime,
           },
+          update: {
+            check: updateCheck,
+            apply: updateApply,
+            acknowledge: updateAcknowledge,
+          },
           ui: {
             updateRuntime: uiUpdateRuntime,
           },
@@ -406,6 +468,7 @@ export function ApiStateProvider({
             updateAppearance: puppetUpdateAppearance,
             assignView: puppetAssignView,
             unassignView: puppetUnassignView,
+            reload: puppetReload,
           },
           view: {
             create: viewCreate,

@@ -14,6 +14,10 @@ export function Toggle({
   ref?: React.RefObject<HTMLDivElement | null>;
   className?: string
 }): JSX.Element {
+  const toggle = (): void => {
+    if (!disabled) setChecked(!checked);
+  };
+
   return (
     <div
       className={
@@ -21,7 +25,16 @@ export function Toggle({
       }
       role="switch"
       aria-checked={checked}
-      onClick={() => !disabled && setChecked(!checked)}
+      aria-disabled={disabled || undefined}
+      // A switch must be reachable and usable by keyboard; a disabled one drops out of the
+      // tab order entirely, like a disabled native control.
+      tabIndex={disabled ? -1 : 0}
+      onClick={toggle}
+      onKeyDown={(event) => {
+        if (event.key !== " " && event.key !== "Enter") return;
+        event.preventDefault(); // Space would scroll the page
+        toggle();
+      }}
       ref={ref}
     >
       <span className="knob"></span>

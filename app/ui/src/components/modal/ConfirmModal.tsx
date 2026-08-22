@@ -13,6 +13,7 @@ export function ConfirmModal({
   title,
   children,
   confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
   confirmVariant = Variant.ACCENT,
   size = ModalSize.SM,
   onConfirm,
@@ -22,6 +23,7 @@ export function ConfirmModal({
   title?: ReactNode;
   children: ReactNode;
   confirmLabel?: string;
+  cancelLabel?: string;
   confirmVariant?: Variant;
   size?: ModalSize;
   onConfirm: () => void | Promise<void>;
@@ -35,7 +37,7 @@ export function ConfirmModal({
       footer={
         <>
           <Button fillStyle={FillStyle.SKELETON} onClick={onClose}>
-            Cancel
+            {cancelLabel}
           </Button>
           <Button
             variant={confirmVariant}

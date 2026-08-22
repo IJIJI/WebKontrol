@@ -11,6 +11,8 @@ type ButtonSettingProps = BaseSettingNonValProps & {
   variant?: Variant;
   fillStyle?: FillStyle;
   label: string;
+  /** Marks the button with a dot: something is waiting behind it. */
+  badge?: boolean;
 };
 
 
@@ -27,6 +29,7 @@ export function ButtonSetting(props: ButtonSettingProps): JSX.Element {
         ref={inputRef}
         variant={props.variant}
         fillStyle={props.fillStyle}
+        badge={props.badge}
       >
         {props.label}
       </Button>

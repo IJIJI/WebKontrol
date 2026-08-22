@@ -4,8 +4,10 @@ import type http from "http";
 import { Logger } from "../logging/Logger";
 import { WebServerStatus, type AppInfo, type RouteHandler, type RouteMethod, type RouteRegistrar, type SseConnection, type SseHandler, type WebServerMutationHandlers, type WebServerState } from "./model";
 import { jsonReplacer } from "../helpers/json";
+import { asset, IS_PROD } from "../helpers/assets";
 import {
   PuppetPatchSchema,
+  UpdateApplySchema,
   ViewKeyPackageShape,
   WebServerConfigSchema,
   type WebServerConfig,
@@ -16,6 +18,7 @@ import { SystemRuntimeShape } from "../system/schema";
 import { PuppetKeySchema } from "../puppet/types/schema";
 import { AnyViewConfigSchema, ViewKeySchema, ViewManagerRuntimeShape } from "../views/types/schema";
 import { PuppetOrchestratorRuntimeShape } from "../orchestration/puppet/schema";
+import { UpdateRefusedError } from "../system/update/UpdateManager";
 
 export class WebServer implements RouteRegistrar {
   private _app = express();
@@ -177,11 +180,21 @@ export class WebServer implements RouteRegistrar {
       });
     });
 
-    // TODO: Check if (when implemented) production is loaded correctly.
+    // The artifact decides the mode, not the environment (see IS_PROD): a bare
+    // `node dist/app.js` must never come up in development mode, where vite-express would
+    // try to spin up Vite dev middleware that deployments do not install.
+    //
+    // In production the Vite config file must not be resolved at all. It imports our
+    // Logger (needing vite's TS loader), and vite-express's fallback regex-parses the
+    // file, which would silently depend on shipping vite.config.ts. The built admin's
+    // location is stated inline instead: dist/ui, beside the bundle, wherever that is
+    // (deliberately not cwd: the launcher will run the artifact from its own cwd).
+    // Static serving and the SPA index fallback are mounted by listen() AFTER our
+    // routes, so /api and /view keep priority.
     ViteExpress.config({
       verbosity: ViteExpress.Verbosity.Silent,
-      mode:
-        process.env.NODE_ENV === "production" ? "production" : "development",
+      mode: IS_PROD ? "production" : "development",
+      ...(IS_PROD && { inlineViteConfig: { root: asset("ui"), build: { outDir: "." } } }),
     });
 
     this._registerRoutes();
@@ -395,6 +408,27 @@ export class WebServer implements RouteRegistrar {
       }
     });
 
+    this._app.post("/api/puppets/:id/reload", async (req, res) => {
+      const resultId = PuppetKeySchema.safeParse(req.params.id);
+
+      if (!resultId.success) {
+        return res.status(400).json({ errors: resultId.error.format() });
+      }
+
+      try {
+        // Fire and forget, like assign: the reload's outcome is the puppet's broadcast
+        // navigation state, not this request's, and a page load can take load_timeout.
+        await this._handlers.puppet.reload(resultId.data);
+        res.status(204).send();
+        this._logger.info(`Reloaded puppet ${resultId.data}`);
+      } catch (e) {
+        this._logger.error("Failed to reload puppet:", resultId.data, e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to reload puppet",
+        });
+      }
+    });
+
     this._app.post("/api/views", async (req, res) => {
       const result = AnyViewConfigSchema.safeParse(req.body);
       if (!result.success) {
@@ -480,28 +514,51 @@ export class WebServer implements RouteRegistrar {
       }
     });
 
-    // ? Update
-    // TODO: IMPLEMENT!
-    // this.app.get("/api/update/status", (_req, res) => {
-    //   res.json(this.updateManager.getStatus());
-    // });
+    // ? Update (status rides the SSE state payload; these only trigger)
+    this._app.post("/api/update/check", async (_req, res) => {
+      try {
+        await this._handlers.update.check();
+        res.status(204).send();
+      } catch (e) {
+        this._logger.error("Failed to check for updates:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to check for updates",
+        });
+      }
+    });
 
-    // this.app.post("/api/update/check", async (_req, res) => {
-    //   const status = await this.updateManager.checkForUpdates();
-    //   res.json(status);
-    // });
+    this._app.post("/api/update/acknowledge", async (_req, res) => {
+      try {
+        await this._handlers.update.acknowledge();
+        res.status(204).send();
+      } catch (e) {
+        this._logger.error("Failed to acknowledge the update outcome:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to acknowledge the update outcome",
+        });
+      }
+    });
 
-    // this.app.post("/api/update/apply", (req, res) => {
-    //   const { ref, type } = req.body as { ref: string; type: 'release' | 'branch' };
-    //   if (!ref || !type) {
-    //     res.status(400).json({ error: "ref and type are required" });
-    //     return;
-    //   }
-    //   res.status(204).send();
-    //   this.updateManager.applyUpdate(ref, type).catch((err) => {
-    //     this.logger.error("Update failed:", err);
-    //   });
-    //   this.logger.info(`Update requested: ${type} "${ref}"`);
-    // });
+    this._app.post("/api/update/apply", async (req, res) => {
+      const result = UpdateApplySchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+      }
+      try {
+        await this._handlers.update.apply(result.data.version);
+        res.status(204).send();
+      } catch (e) {
+        // A refusal is the gate answering, not a fault: 409 says "not in this state",
+        // which is what the UI shows the operator. Anything else is a real failure.
+        if (e instanceof UpdateRefusedError) {
+          this._logger.warn("Update refused:", e.message);
+          return res.status(409).json({ error: e.message });
+        }
+        this._logger.error("Failed to apply update:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to apply update",
+        });
+      }
+    });
   }
 }

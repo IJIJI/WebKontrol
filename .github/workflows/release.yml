@@ -1,0 +1,64 @@
+# Builds the update tarball for a published GitHub release and attaches it. The release
+# itself is authored on GitHub (tag, notes, the pre-release flag); CI only adds the
+# artifact, so what you set in the release form is what devices see. Until the tarball
+# is attached (a couple of minutes), devices and the installer ignore the release rather
+# than showing something that cannot be installed.
+#
+# The tarball is the update system's whole contract with CI: dist + package.json +
+# yarn.lock + .yarnrc.yml, flat at the tar root (UpdateRunner extracts with -C), and
+# platform-independent because node_modules is excluded; the device installs its own.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+defaults:
+  run:
+    working-directory: app
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # upload the tarball asset to the release
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+          cache-dependency-path: app/yarn.lock
+
+      - run: corepack enable
+
+      # A release must report the version it was built as: the device baked-in version,
+      # the tag and the release dir name all derive from these two agreeing.
+      - name: Version must match the tag
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match package.json version ${PKG}." >&2
+            exit 1
+          fi
+
+      - run: yarn install --immutable
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true" # building needs no browser
+
+      - run: yarn typecheck
+      - run: yarn check
+      - run: yarn lint
+        continue-on-error: true # informational until the lint baseline is clean
+
+      - run: yarn build
+
+      - name: Pack the update tarball
+        run: tar -czf "webkontrol-${GITHUB_REF_NAME}.tar.gz" dist package.json yarn.lock .yarnrc.yml
+
+      # Attaches to the release that triggered the run; flag and notes stay as authored.
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: app/webkontrol-*.tar.gz

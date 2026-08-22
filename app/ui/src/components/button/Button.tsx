@@ -17,6 +17,7 @@ export function Button({
   size,
   ariaLabel,
   className,
+  badge,
 }: {
   onClick: () => void | Promise<void>;
   variant?: Variant;
@@ -27,6 +28,9 @@ export function Button({
   size?: number;
   ariaLabel?: string;
   className?: string;
+  /** A dot in the corner: something is waiting behind this button (an available update,
+   *  an unread item). Deliberately just a marker, not a count. */
+  badge?: boolean;
 }): JSX.Element {
   const [loading, setLoading] = useState(false);
   const isDisabled = disabled || loading;
@@ -60,6 +64,7 @@ export function Button({
       aria-busy={loading}
     >
       {loading ? <Icons.loading /> : children}
+      {badge && !loading && <span className="buttonBadge" aria-hidden="true" />}
     </button>
   );
 }

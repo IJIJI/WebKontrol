@@ -1,14 +1,17 @@
 import path from "node:path";
-import { build, stop } from "esbuild";
 
 // Bundles the browser view-client (client/main.ts + the block system + lit + zod) into a
-// single ESM string. Called by the backend at startup (ViewManager.init, wrapped in try/
-// catch) and by the `build:view` script for a standalone/CI check — one config, two callers.
-// No dev/prod split: build once, restart the app to pick up changes (no watcher).
+// single ESM string. Called by the dev backend at startup (ViewManager.init, wrapped in
+// try/catch) and at build time by assembleDist and the `build:view` check — one config for
+// all callers. Prod reads the prebuilt result instead (see BlockViewClient).
 
 const ENTRY = path.join(process.cwd(), "src", "views", "client", "main.ts");
 
 export async function buildViewClient(): Promise<string> {
+  // Imported here, not at module top: a static import gets hoisted into dist/app.js when
+  // this file is bundled (splitting is off), which would make esbuild a hard runtime
+  // dependency of production for a function production never calls.
+  const { build, stop } = await import("esbuild");
   try {
     const result = await build({
       entryPoints: [ENTRY],

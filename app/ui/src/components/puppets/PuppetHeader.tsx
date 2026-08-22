@@ -9,7 +9,7 @@ import { Button } from "../button/Button";
 import { FillStyle } from "../../common/types/variants";
 import { Dropdown, type DropdownItem } from "../dropdown/Dropdown";
 import { EntityHeader } from "../entityHeader/EntityHeader";
-import { StatusPill } from "../pill/statusPill/StatusPill";
+import { PuppetStatusPill } from "./PuppetStatusPill";
 import { AssignToPuppetModal } from "./AssignToPuppetModal";
 import { resolvePuppetAppearance } from "../../common/appearance";
 
@@ -21,8 +21,11 @@ export function PuppetHeader({ puppet }: { puppet: UiPuppetState }): JSX.Element
 
   const menu: DropdownItem[] = [
     { id: "edit", label: "Edit", icon: <Icons.edit />, onClick: () => void navigate(`/puppets/${puppet.config.id}/edit`) },
+    // A failed load already retries on its own; this is for the operator who just fixed the
+    // target and would rather not wait out the backoff.
+    { id: "reload", label: "Reload page", icon: <Icons.refresh />, onClick: () => void puppet.reload() },
     ...(puppet.assignedView
-      ? [{ id: "unassign", label: "Unassign view", onClick: () => void puppet.unassignView() }] // TODO: Should this be here?
+      ? [{ id: "unassign", label: "Unassign view", icon: <Icons.close />, onClick: () => void puppet.unassignView() }] // TODO: Should this be here?
       : []),
   ];
 
@@ -33,7 +36,7 @@ export function PuppetHeader({ puppet }: { puppet: UiPuppetState }): JSX.Element
         color={appearance.color}
         title={puppet.config.name.long}
         subtitle={puppet.config.name.short}
-        chips={<StatusPill status={puppet.info.state} />}
+        chips={<PuppetStatusPill info={puppet.info} />}
         actions={
           <>
             <Button onClick={() => setAssignOpen(true)} fillStyle={FillStyle.FILLED}>

@@ -1,5 +1,5 @@
 import z from "zod";
-import { LoadTimeoutSchema, LoadTimeoutSchemaDefault } from "../../puppet/types/schema";
+import { LoadTimeoutSchema } from "../../puppet/types/schema";
 import { DisplayNameSchema } from "../../types/CommonTypes";
 import { blockSlot } from "../blocks/types/schema";
 import { EntityAppearanceField } from "../../common/entityAppearance/schema";
@@ -48,7 +48,9 @@ export interface FieldMeta {
   // shows a short enum as a button group instead of a dropdown; "alignment" renders a
   // {horizontal, vertical} object as one nine-cell grid rather than a nested group; "tracks"
   // edits a CSS grid track list as one row per track.
-  input?: "color" | "textarea" | "font" | "range" | "box" | "corners" | "buttons" | "alignment" | "tracks";
+  // ... "size" renders an {x, y} pair as one two-axis control, each axis a length-with-unit or
+  // one of the sizing keywords.
+  input?: "color" | "textarea" | "font" | "range" | "box" | "corners" | "buttons" | "alignment" | "tracks" | "size";
   // Readable labels for an enum's raw values, where the stored value has to stay machine-shaped
   // (a CSS keyword, a numeric weight). The "" key relabels the unset entry of an optional enum,
   // which is worth doing for inheriting properties: there "unset" means inherit, not default.
@@ -78,7 +80,10 @@ export function extendViewConfig<const B extends ViewType, T extends z.ZodRawSha
 //* Concrete view configs:
 // BlockView: renders a block tree (its single root block) as a page.
 export const BlockViewConfigSchema = extendViewConfig("blocks", {
-  root: blockSlot({ label: "Root block" } satisfies FieldMeta),
+  // Optional: a view has to be savable before anything is placed in it, and clearing the tree
+  // to start over must not require deleting the view. An empty view serves a blank page, which
+  // is a legitimate thing to point a display at.
+  root: blockSlot({ label: "Root block" } satisfies FieldMeta).optional(),
 });
 export type BlockViewConfig = z.infer<typeof BlockViewConfigSchema>;
 
@@ -118,7 +123,7 @@ export const ViewManagerRuntimeShape = z.object({
 });
 
 export const ViewManagerRuntimeSchema = ViewManagerRuntimeShape.extend({
-  default_load_timeout: LoadTimeoutSchemaDefault.default(20_000),
+  default_load_timeout: LoadTimeoutSchema.default(20_000),
 });
 
 export type ViewManagerRuntime = z.infer<typeof ViewManagerRuntimeSchema>;

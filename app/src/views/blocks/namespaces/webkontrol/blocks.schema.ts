@@ -48,6 +48,10 @@ export const TextBlock = ns.defineBlock("text", {
 });
 
 // ContainerBlock: wrap another block to give it styling it does not have itself.
+// The child stays required: a container without one would be indistinguishable from a spacer,
+// which is already a block that renders nothing and carries the universal box. An empty slot
+// also has nowhere for the editor to hang its add button, since childBlocks reports slots by
+// what fills them.
 export const ContainerBlock = ns.defineBlock("container", {
   block: blockSlot({ label: "Content" }),
 }, {
@@ -135,18 +139,26 @@ export const ImageBlock = ns.defineBlock("image", {
 }, {
   info: { label: "Image", description: "Display an image", icon: "image" },
   box: { sizing: "container" },
-  // object-fit belongs to the <img>, not the box around it.
-  render: (config) => html`<img src=${config.url} alt="" style=${styleMap({ objectFit: config.fit })} />`,
+  // object-fit belongs to the <img>, not the box around it. So does the per-axis fill: an axis
+  // the box fills wants the image to fill it too (so `fit` can crop or letterbox), while an
+  // axis the box hugs must leave the image free, or the percentage is circular and the box
+  // ends up at the image's intrinsic size. Leaving one axis auto is also what lets a
+  // constrained height derive the width from the intrinsic ratio.
+  render: (config) => html`<img src=${config.url} alt="" style=${styleMap({
+    objectFit: config.fit,
+    width: config.style.size?.x === "container" ? "100%" : "auto",
+    height: config.style.size?.y === "container" ? "100%" : "auto",
+  })} />`,
 });
 
 // SpacerBlock: an empty block, e.g. to leave a grid cell open or push stack siblings apart.
-export const SpacerBlock = ns.defineBlock("spacer", {
-  size: z.number().min(1).max(2000).optional().meta({ label: "Size", description: "Fixed size along a stack's direction, in px. Unset shares the space" } satisfies FieldMeta),
-}, {
+// It carries no fields of its own: the universal box's per-axis size says everything its old
+// `size` did and says it on both axes, and having two owners for one dimension meant a margin
+// had nowhere to inset (the field pinned the slot while the margin insets the box inside it).
+// What is left is discoverability: "Spacer" in the picker names an intent nobody would go
+// looking for a container to satisfy.
+export const SpacerBlock = ns.defineBlock("spacer", {}, {
   info: { label: "Spacer", description: "Empty space", icon: "spaceBar" },
-  // The size pins the *slot*, since that is what a stack distributes: fixed, no grow/shrink.
-  // Unset keeps the default (share the space). Inert outside a flex parent.
-  slotStyles: (config) => (config.size === undefined ? {} : { flex: `0 0 ${config.size}px` }),
   render: () => html``,
 });
 
@@ -191,7 +203,7 @@ export const StackBlock = ns.defineBlock("stack", {
     gap: config.gap === undefined ? undefined : `${config.gap}px`,
     flexWrap: config.wrap ? "wrap" : undefined,
   }),
-  render: (config, ctx) => html`${config.blocks.map((block) => ctx.renderChild(block))}`,
+  render: (config, ctx) => html`${config.blocks.map((block) => ctx.renderChild(block, config.direction))}`,
 });
 
 // Every block this namespace ships; index.ts registers from this single list.

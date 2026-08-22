@@ -13,5 +13,6 @@ export interface ViewManagerInfo {
  */
 // TODO: Check if the base path should be configurable somehow
 export type ServeResult =
-  | { kind: "blocks"; root: AnyBlockConfig }
+  // `root` absent = an empty view: it serves and streams fine, it simply paints nothing.
+  | { kind: "blocks"; root?: AnyBlockConfig }
   | { kind: "redirect"; url: string };

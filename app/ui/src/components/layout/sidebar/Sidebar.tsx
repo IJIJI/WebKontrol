@@ -47,19 +47,25 @@ export default function Sidebar({
         .filter(Boolean)
         .join(" ")}
     >
-      <SidebarItem
-        collapsed={collapsed}
-        to="/"
-        label="Home"
-        icon={<Icons.home />}
-      />
-      <SidebarSection collapsed={collapsed} label="Overview">
+      {/* Dev-only pages hide their links along with their routes (App.tsx gates those):
+          a link to a route that does not exist reads as broken, not as coming soon. */}
+      {import.meta.env.DEV && (
         <SidebarItem
           collapsed={collapsed}
-          to="/dashboard"
-          label="Dashboard"
-          icon={<Icons.grid />}
+          to="/"
+          label="Home"
+          icon={<Icons.home />}
         />
+      )}
+      <SidebarSection collapsed={collapsed} label="Overview">
+        {import.meta.env.DEV && (
+          <SidebarItem
+            collapsed={collapsed}
+            to="/dashboard"
+            label="Dashboard"
+            icon={<Icons.grid />}
+          />
+        )}
         <SidebarItem
           collapsed={collapsed}
           to="/views"
@@ -88,12 +94,14 @@ export default function Sidebar({
         }
       </SidebarSection> */}
       <SidebarSection collapsed={collapsed} label="Settings">
-        <SidebarItem
-          collapsed={collapsed}
-          to="/settings/plugins"
-          label="Plugins"
-          icon={<Icons.connection />}
-        />
+        {import.meta.env.DEV && (
+          <SidebarItem
+            collapsed={collapsed}
+            to="/settings/plugins"
+            label="Plugins"
+            icon={<Icons.connection />}
+          />
+        )}
         <SidebarItem
           collapsed={collapsed}
           to="/settings/config"

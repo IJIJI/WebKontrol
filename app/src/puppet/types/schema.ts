@@ -30,27 +30,37 @@ export function extendPuppetConfig<
   });
 }
 
-// TODO: Move to view?
-export const PuppetTargetSchema = z.url();
-export type PuppetTarget = z.infer<typeof PuppetTargetSchema>;
-
-export const LoadTimeoutSchema = z.number().min(500).or(z.literal(0));
-
-const LOAD_TIMEOUT_SCHEMA_DEFAULT_VAL = 20_000;
-
-export const LoadTimeoutSchemaDefault = LoadTimeoutSchema.default(LOAD_TIMEOUT_SCHEMA_DEFAULT_VAL);
-
 // Puppet Runtime
 export const PuppetRuntimeShape = z.object({
-  target: PuppetTargetSchema, // TODO should this be a view? Or should the viewmanager supply the target? Should it have a target field with the url and timeout + etc?
-  load_timeout: LoadTimeoutSchema, // 0 disables the timeout
+  rotation: z.number().min(0).max(270).multipleOf(90),
+  scale: z.number().min(0.25).max(4),
+  reload_interval: z.number().min(60_000).max(7 * 24 * 60 * 60 * 1000).optional(),
 });
 
 export const PuppetRuntimeSchema = PuppetRuntimeShape.extend({
-  load_timeout: PuppetRuntimeShape.shape.load_timeout.default(LOAD_TIMEOUT_SCHEMA_DEFAULT_VAL),
+  rotation: PuppetRuntimeShape.shape.rotation.default(0),
+  scale: PuppetRuntimeShape.shape.scale.default(1),
 });
 
 export type PuppetRuntime = z.infer<typeof PuppetRuntimeSchema>;
 export type PuppetRuntimeInput = z.input<typeof PuppetRuntimeSchema>;
 
-export const BLANK_PUPPET_TARGET = PuppetRuntimeSchema.parse({ target: "about:blank" })
+
+// Puppet Navigation
+export const PuppetTargetSchema = z.url();
+export type PuppetTarget = z.infer<typeof PuppetTargetSchema>;
+
+export const LoadTimeoutSchema = z.number().min(500).or(z.literal(0));
+
+
+export const NavigationRequestShape = z.object({
+  target: PuppetTargetSchema,
+  load_timeout: LoadTimeoutSchema, // 0 disables the timeout
+});
+
+export const NavigationRequestSchema = NavigationRequestShape;
+
+export const BLANK_NAVIGATION_REQUEST = NavigationRequestSchema.parse({ target: "about:blank", load_timeout: 0 });
+
+export type NavigationRequest = z.infer<typeof NavigationRequestSchema>;
+export type NavigationRequestInput = z.input<typeof NavigationRequestSchema>;

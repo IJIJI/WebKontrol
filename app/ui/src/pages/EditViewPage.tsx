@@ -19,6 +19,10 @@ import { useDraft } from "../common/hooks/DraftSave";
 import { useApi } from "../context/ApiStateContext";
 import { type ViewType, type AnyViewConfig } from "../../../src/views/types/schema";
 import { usePageContext } from "../context/PageContext";
+import { Button } from "../components/button/Button";
+import { Icons } from "../components/icons/Icons";
+import { FillStyle } from "../common/types/variants";
+import { AssignToViewModal } from "../components/views/AssignToViewModal";
 
 const DEFAULT_TYPE: ViewType = "url";
 
@@ -28,11 +32,17 @@ export default function EditViewPage(): JSX.Element {
   const { viewKey } = useParams();
   const { state, callBacks } = useApi();
   const navigate = useNavigate();
+  // Set by a successful create, consumed by the effect below.
+  const [createdKey, setCreatedKey] = useState<string | undefined>(undefined);
   const { setMeta } = usePageContext();
   const [title, setTitle] = useState<string>(viewKey ?? "New View");
 
+  const [assignOpen, setAssignOpen] = useState(false);
+
   // Edit => the saved config; new => the default type's empty draft.
-  const savedConfig = viewKey ? state?.views.get(viewKey)?.config : undefined;
+  const view = viewKey ? state?.views.get(viewKey) : undefined;
+  const savedConfig = view?.config;
+  const puppets = state ? [...state.puppets.values()] : [];
   const initial = useMemo<ViewEditorValues>(
     () => ({ ...(savedConfig ?? VIEW_EDITORS[DEFAULT_TYPE].emptyDraft) }),
     [savedConfig],
@@ -41,6 +51,7 @@ export default function EditViewPage(): JSX.Element {
   useEffect(() => {
     setTitle(savedConfig?.name.long ?? viewKey ?? "New View");
   }, [savedConfig])
+
 
   useEffect(() => {
     // if (puppet) setMeta({ title: ["Puppet", puppet.displayName] }, true);
@@ -52,20 +63,46 @@ export default function EditViewPage(): JSX.Element {
   const type = draft.values.type ?? DEFAULT_TYPE;
   const entry = VIEW_EDITORS[type] ?? VIEW_EDITORS[DEFAULT_TYPE];
   const Body = entry.body;
+
+  // Live, like the block tree: derived from the current draft on every edit, so there is no
+  // stale error state to clear and no "first save attempt" bookkeeping. Keyed by dotted field
+  // path; the first issue per field wins, matching the block form's fieldErrors.
+  const viewIssues = useMemo(() => {
+    const parsed = entry.schema.safeParse(draft.values);
+    const issues = new Map<string, string>();
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        const path = issue.path.map(String).join(".");
+        if (!issues.has(path)) issues.set(path, issue.message);
+      }
+    }
+    return issues;
+  }, [entry.schema, draft.values]);
   // The ViewManager's configured default, shown as the loadTimeout placeholder when unset.
   const defaultLoadTimeout = state?.runtime.view.default_load_timeout;
   const placeholders: Record<string, string> =
     defaultLoadTimeout != null ? { loadTimeout: String(defaultLoadTimeout) } : {};
 
+
+  // Creating differs from editing only in not having a key yet, so once it has one the page
+  // becomes the editor for it: same screen, no interruption. Deferred to an effect rather than
+  // done inline after save(): the unsaved-changes guard reads the draft as last rendered, and
+  // navigating in the same tick as the save still sees it dirty. Waiting for the clean render
+  // is what silences the warning.
+  // TODO: Check for cleaner solution
+  useEffect(() => {
+    if (createdKey === undefined || draft.anyChanged) return;
+    void navigate(`/views/${createdKey}/edit`, { replace: true });
+  }, [createdKey, draft.anyChanged, navigate]);
+
   const onSave = async (): Promise<void> => {
     // Validate against the current type's real schema (strips stale fields from a type switch).
     const parsed = entry.schema.safeParse(draft.values);
     if (!parsed.success) {
-      // List each failing field until inline per-field errors land (task #12).
-      const details = parsed.error.issues
-        .map((issue) => `${issue.path.join(".") || "value"}: ${issue.message}`)
-        .join("\n");
-      toast.error(details || "Invalid view configuration");
+      // The fields say what is wrong inline (viewIssues renders live); the toast only explains
+      // why the save button appeared to do nothing, since the SaveBar sits at the bottom and
+      // the failing field can be scrolled out of view.
+      toast.error("Fix the marked fields first.");
       return;
     }
     // Checks the member schema can't express (e.g. per-block configs behind a loose `root`).
@@ -81,15 +118,24 @@ export default function EditViewPage(): JSX.Element {
       if (viewKey) {
         await callBacks.view.update(viewKey, config);
       } else {
-        const key = await callBacks.view.create(config);
-        void navigate(`/views/${key}`);
+        setCreatedKey(await callBacks.view.create(config));
       }
     });
   };
 
   return (
     <>
-      <h1 style={{ marginBottom: "20px" }}>{`${viewKey ? "Edit " : ""}${title}`}</h1>
+      <div style={{ marginBottom: "20px", width: "100%", display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}> {/* Add styling in stylesheet? Some generic header? */}
+        <h1 >{`${viewKey ? "Edit " : ""}${title}`}</h1>
+        {/* Only once the view exists: a view being created has nothing to put on a display yet,
+            and the modal would open onto nothing. It appears by itself after the first save. */}
+        {view && (
+          <Button onClick={() => setAssignOpen(true)} fillStyle={FillStyle.FILLED}>
+            <Icons.installDesktop />
+            <span>Assign</span>
+          </Button>
+        )}
+      </div>
 
       <SaveBar visible={draft.anyChanged} onSave={onSave} onDiscard={draft.revertAll} />
 
@@ -100,6 +146,8 @@ export default function EditViewPage(): JSX.Element {
           value={draft.values.name ?? {}}
           savedVal={draft.saved.name}
           setValue={(v) => draft.setField("name", v)}
+          // One row renders both halves, so it shows whichever half fails first.
+          error={viewIssues.get("name.long") ?? viewIssues.get("name.short") ?? viewIssues.get("name")}
         />
         <SelectSetting
           title="Type"
@@ -118,6 +166,7 @@ export default function EditViewPage(): JSX.Element {
           value={draft.values.appearance?.color}
           savedVal={draft.saved.appearance?.color}
           setValue={(color) => draft.setField("appearance", { ...draft.values.appearance, color })}
+          error={viewIssues.get("appearance.color")}
         />
         <IconSetting
           title="Icon"
@@ -128,10 +177,19 @@ export default function EditViewPage(): JSX.Element {
         />
       </SettingGroup>
         {Body ? (
-          <Body draft={draft} placeholders={placeholders} />
+          <Body draft={draft} placeholders={placeholders} errors={viewIssues} />
         ) : (
-          <SchemaSettings schema={entry.schema} draft={draft} exclude={["name"]} placeholders={placeholders} />
+          <SchemaSettings schema={entry.schema} draft={draft} exclude={["name"]} placeholders={placeholders} errors={viewIssues} />
         )}
+
+      {/* Assigns the SAVED view: a display shows what the server has, not the draft on screen.
+          The SaveBar is right there when the two differ. */}
+      <AssignToViewModal
+        open={assignOpen}
+        onClose={() => setAssignOpen(false)}
+        view={view}
+        puppets={puppets}
+      />
     </>
   );
 }

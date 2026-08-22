@@ -23,6 +23,7 @@ import EditPuppetPage from "./pages/EditPuppetPage";
 import EditViewPage from "./pages/EditViewPage";
 import ViewPage from "./pages/ViewPage";
 import TestPage from "./pages/TestPage";
+import UpdatePage from "./pages/UpdatePage";
 
 // The data router installs its own per-route error boundary, which would swallow render errors
 // before AppErrorBoundary (mounted above the router) ever sees them. Rethrowing from the root
@@ -36,6 +37,7 @@ function BubbleRouteError(): never {
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route element={<PageLayout />} errorElement={<BubbleRouteError />}>
+      {import.meta.env.DEV ? (
       <Route
         index
         element={
@@ -44,6 +46,12 @@ const router = createBrowserRouter(
           </PageRoute>
         }
       />
+      ) : (
+      // The overview is a dev page for now, and a front door must lead somewhere: land an
+      // operator on the displays. The catch-all below funnels unknown paths here too.
+      <Route index element={<Navigate to="/puppets" replace />} />
+      )}
+      {import.meta.env.DEV && (
       <Route
         path="dashboard"
         element={
@@ -52,6 +60,7 @@ const router = createBrowserRouter(
           </PageRoute>
         }
       />
+      )}
       <Route
         path="views"
         element={
@@ -116,6 +125,7 @@ const router = createBrowserRouter(
         }
       />
 
+      {import.meta.env.DEV && (
       <Route
         path="settings/plugins"
         element={
@@ -124,6 +134,7 @@ const router = createBrowserRouter(
           </PageRoute>
         }
       />
+      )}
       <Route
         path="settings/config"
         element={
@@ -131,6 +142,32 @@ const router = createBrowserRouter(
             title={[{ label: "Settings", path: "/settings" }, "config"]}
           >
             <SettingsPage />
+          </PageRoute>
+        }
+      />
+
+      <Route
+        path="settings/updates"
+        element={
+          <PageRoute
+            title={[{ label: "Settings", path: "/settings/config" }, "updates"]}
+          >
+            <UpdatePage />
+          </PageRoute>
+        }
+      />
+      {/* One page, two routes: the version turns the list into that release's notes. */}
+      <Route
+        path="settings/updates/:version"
+        element={
+          <PageRoute
+            title={[
+              { label: "Settings", path: "/settings/config" },
+              { label: "updates", path: "/settings/updates" },
+              "release",
+            ]}
+          >
+            <UpdatePage />
           </PageRoute>
         }
       />

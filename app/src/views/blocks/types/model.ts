@@ -17,8 +17,9 @@ import type { BlockKey, BlockSlot, DataSourceKey } from "./schema";
 export type Resolved<T> =
   // ResolvedNode, not ResolvedBlock: a child that fails to resolve sits in the config as a
   // BrokenBlock, so a render fn must go through ctx.renderChild rather than touching child.def.
-  [T] extends [BlockSlot]             ? ResolvedNode :
-  [T] extends [BlockSlot | undefined] ? ResolvedNode | undefined :  // optional slot
+  // Always `| undefined`, required slot or not: a disabled child resolves to nothing, and
+  // ctx.renderChild takes that as an empty slot, so a render fn needs no branch of its own.
+  [T] extends [BlockSlot | undefined] ? ResolvedNode | undefined :
   // TODO: add a `| null` mirror branch here if nullable slots are ever needed.
   T extends readonly (infer E)[]      ? ReadonlyArray<Resolved<E>> :
   T extends object                    ? { [K in keyof T]: Resolved<T[K]> } :
@@ -61,7 +62,14 @@ export function isBroken(node: ResolvedNode): node is BrokenBlock {
  * Live-data access (bindable value) is backed by a subscription and a lit live directive.
  */
 export interface RenderContext {
-  renderChild(child: ResolvedNode): TemplateResult;
+  /**
+   * @param child - The resolved child, or nothing when the slot is empty (a disabled block, an
+   *   optional slot nobody filled). Renders as an absent child, contributing no element at all.
+   * @param parentAxis - Pass the direction when this block flows its children (a stack), so the
+   *   child's slot knows which of its axes the parent's main axis is. Omit otherwise: a grid
+   *   cell, a freeform item and a container slot are sized by the parent instead.
+   */
+  renderChild(child: ResolvedNode | undefined, parentAxis?: "row" | "column"): TemplateResult;
 }
 
 /**

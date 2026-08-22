@@ -18,6 +18,7 @@ export enum ConnectionState {
   DISABLED = "Disabled",
   OFFLINE = "Offline",
   ONLINE = "Online",
+  CLOSING = "Closing",
   ERROR = "Error",
   FAILED = "Failed",
   UNKNOWN = "Unknown",

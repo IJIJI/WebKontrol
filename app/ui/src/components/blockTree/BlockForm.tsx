@@ -2,7 +2,7 @@ import { type JSX } from "react/jsx-runtime";
 import type { ZodObject, ZodRawShape, ZodType } from "zod";
 
 import { isBlockSlot } from "../../../../src/views/blocks/types/schema";
-import { unwrap } from "../../../../src/views/blocks/resolver";
+import { isDisabledBlock, unwrap } from "../../../../src/views/blocks/resolver";
 import { SchemaSettings, type CustomFieldRenderer, type DraftLens } from "../settings/SchemaSettings";
 import {
   Caret,
@@ -77,7 +77,7 @@ export function BlockForm({
         return (
           <DetailRow key={key} label={label}>
             {child ? (
-              <BlockChip type={child.type} onClick={() => onOpen(childBase)} />
+              <BlockChip type={child.type} disabled={isDisabledBlock(child)} onClick={() => onOpen(childBase)} />
             ) : (
               <span className="scalar muted">empty</span>
             )}
@@ -203,7 +203,7 @@ function ArrayDetail({
         if (isBlock(item)) {
           return (
             <div className="sub" key={index}>
-              <BlockChip type={item.type} onClick={() => onOpenAt([index])} />
+              <BlockChip type={item.type} disabled={isDisabledBlock(item)} onClick={() => onOpenAt([index])} />
             </div>
           );
         }
@@ -254,7 +254,7 @@ function WrapperItem({
     <div className="wrapItem">
       <div className="wrapHead">
         {mainBlock !== null && mainEntry !== null && (
-          <BlockChip type={mainBlock.type} onClick={() => onOpenBlock(mainEntry[0])} />
+          <BlockChip type={mainBlock.type} disabled={isDisabledBlock(mainBlock)} onClick={() => onOpenBlock(mainEntry[0])} />
         )}
         {expandable && (
           <button

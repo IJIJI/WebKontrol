@@ -38,6 +38,10 @@ function resolveValue(
   const core = unwrap(schema);
 
   if (isBlockSlot(core)) {
+    // A disabled block leaves the tree rather than rendering invisibly: it must contribute no
+    // dependencies and no DOM, so its parent lays out as if the slot were empty.
+    if (isDisabledBlock(value)) return undefined;
+
     const child = resolveBlock(value, registry);
     // A broken child contributes no dependencies; it renders a placeholder instead.
     if (!isBroken(child)) for (const dep of child.dependencies) deps.add(dep);
@@ -77,11 +81,25 @@ function resolveValue(
 }
 
 /**
+ * Whether a raw block config was switched off (the framework-injected `disabled` field, see
+ * defineBlock). Read off the raw config, before its type's schema: parking a block that is
+ * half-finished is the point, so a disabled block must not have to be valid to stay out of
+ * the way. The editor keeps validating it regardless, so re-enabling holds no surprises.
+ */
+export function isDisabledBlock(raw: unknown): boolean {
+  return (raw as { disabled?: unknown } | null | undefined)?.disabled === true;
+}
+
+/**
  * Resolve a raw block config into a {@link ResolvedNode}: validate it against its registered
  * type, resolve its child slots recursively, and collect the data sources its subtree depends on.
  *
  * Never throws for bad content. An unknown type or a config its schema rejects resolves to a
  * BrokenBlock, so the failure stays local to that block and the rest of the view still renders.
+ *
+ * Does NOT consider `disabled` on the block handed to it: a slot drops its disabled child (see
+ * resolveValue), but what an empty *root* means belongs to the caller, so renderBlockView is
+ * where a disabled root becomes a blank page.
  *
  * @param raw - The stored/authored block config (an envelope with a `type` key).
  * @param registry - The registry to resolve block types and children against.

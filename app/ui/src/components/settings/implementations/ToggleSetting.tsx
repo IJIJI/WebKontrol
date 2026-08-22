@@ -5,8 +5,9 @@ import "../settings.less";
 import { type BaseSettingProps } from "../BaseSetting";
 import { ValueSetting } from "../ValueSetting";
 
-// No inputRef: the row's focus-on-click is an opt-in for controls that take focus, and Toggle's
-// switch isn't focusable (no tabIndex), so attaching one would be a silent no-op.
+// No inputRef, deliberately: the row's focus-on-click is an opt-in, and Toggle opts out (a
+// row-click focusing the switch would make the next Space keypress flip it by surprise).
+// The switch itself is keyboard-focusable since the a11y pass; only the row assist is declined.
 export function ToggleSetting(props: BaseSettingProps<boolean>): JSX.Element {
   return (
     <ValueSetting {...props}>

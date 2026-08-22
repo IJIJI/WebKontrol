@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import { asset } from "../helpers/assets";
 import type { RouteRegistrar, RouteRequest, RouteResponse, SseConnection } from "../webServer/model";
 import type { ViewKey } from "./types/schema";
 import type { ViewManager } from "./ViewManager";
@@ -9,6 +11,16 @@ import { Logger } from "../logging/Logger";
 // TODO: Sync paths between ViewServer and BlockViewClient
 const VIEW_CLIENT_BUNDLE_PATH = "/viewclient/main.js";
 const VIEW_CLIENT_STYLE_PATH = "/viewclient/view.css";
+const VIEW_CLIENT_FONTS_PATH = "/viewclient/fonts";
+
+// The bundled display fonts (SIL OFL, licence beside the files), served to views and
+// the admin alike. Filename → disk path: an allowlist, so the route can never be walked
+// outside the assets directory. view.css and the admin's font.less declare the matching
+// @font-face rules, and FONT_SUGGESTIONS offers the families in the editor.
+const BUNDLED_FONTS: Record<string, string> = {
+  "DSEG7Classic-Regular.woff2": asset("assets/fonts/DSEG/DSEG7Classic-Regular.woff2"),
+  "DSEG14Classic-Regular.woff2": asset("assets/fonts/DSEG/DSEG14Classic-Regular.woff2"),
+};
 
 /**
  * Serves views over HTTP/SSE. The transport half of the views feature: it registers the
@@ -48,7 +60,8 @@ export class ViewServer {
       body: this._client.getStylesheet(),
       headers: { "Cache-Control": "no-cache" },
     }));
-    this._logger.info(`Registered view routes "${base}/:key(/stream)" + client bundle and stylesheet.`);
+    registrar.registerRoute("get", `${VIEW_CLIENT_FONTS_PATH}/:file`, (req) => this._serveFont(req));
+    this._logger.info(`Registered view routes "${base}/:key(/stream)" + client bundle, stylesheet and fonts.`);
   }
 
   private _serveView(req: RouteRequest): RouteResponse {
@@ -63,6 +76,31 @@ export class ViewServer {
     return { body: this._client.getHostHtml(), contentType: "text/html" };
   }
 
+  // Font bytes never change within a run, so read once and let clients cache for a day.
+  private _fontCache: Map<string, Buffer> = new Map();
+
+  private _serveFont(req: RouteRequest): RouteResponse {
+    const diskPath = BUNDLED_FONTS[req.params.file];
+    if (!diskPath) return { status: 404 };
+
+    let data = this._fontCache.get(req.params.file);
+    if (!data) {
+      try {
+        data = fs.readFileSync(diskPath);
+      } catch (error) {
+        this._logger.error(`Bundled font "${req.params.file}" is missing from disk.`, error);
+        return { status: 404 };
+      }
+      this._fontCache.set(req.params.file, data);
+    }
+
+    return {
+      body: data,
+      contentType: "font/woff2",
+      headers: { "Cache-Control": "public, max-age=86400" },
+    };
+  }
+
   private _serveBundle(): RouteResponse {
     const bundle = this._client.getBundle();
     if (bundle === null) {
@@ -75,7 +113,10 @@ export class ViewServer {
   /** The config payload a stream sends for a view, or null if it isn't a (renderable) block view. */
   private _blockConfigJson(key: ViewKey): string | null {
     const result = this._views.getView(key)?.serve();
-    return result?.kind === "blocks" ? JSON.stringify(result.root) : null;
+    // `null` here means "no stream to give" (not a block view, or no such view) and closes the
+    // connection. An empty block view is different: it streams the JSON literal null, which the
+    // client paints as a blank page and can later replace when a root is added.
+    return result?.kind === "blocks" ? JSON.stringify(result.root ?? null) : null;
   }
 
   /** A client opened a view's config stream: seed with the current config, then subscribe. */

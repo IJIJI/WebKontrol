@@ -45,6 +45,12 @@
     padding-left: @indent;
   }
 
+  // A disabled block takes its subtree out of the view with it: dim the descendants, guides
+  // included. The block's own chip dims itself (BlockChip), so it is not faded twice.
+  .treeNode.disabled > .children {
+    opacity: 0.45;
+  }
+
   // Rounded elbow (::before) + continuation trunk (::after) for each child. The root row lives
   // directly under .blockTree, so it gets no connector.
   .children > .treeNode {

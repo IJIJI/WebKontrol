@@ -24,3 +24,8 @@ export const ViewKeyPackageShape = z.object({
 export const PuppetPatchSchema = PuppetRuntimeShape.partial().extend({
   appearance: EntityAppearanceSchema.optional(),
 });
+
+// Body of POST /api/update/apply — the version tag of a release from the last check.
+export const UpdateApplySchema = z.object({
+  version: z.string(),
+});

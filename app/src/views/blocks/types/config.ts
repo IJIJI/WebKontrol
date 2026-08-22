@@ -4,9 +4,10 @@ import type { StyleInfo } from "lit/directives/style-map.js";
 import { AbstractBlockType, type BlockInfo, type RenderContext, type Resolved } from "./model";
 import { blockStyleSchema, type BlockKey, type BlockKeyOf, type BlockStyle, type BlockType, type DataField, type DataKeyOf, type DataSourceKey, type NamespaceId } from "./schema";
 import type { BlockTypeRegistry } from "../registry";
+import type { FieldMeta } from "../../types/schema";
 
-/** The parsed config of a block: the exact `type` key, the injected box `style`, plus its shape fields. */
-type BlockConfigOf<K extends BlockKey, S extends z.ZodRawShape> = { type: K; style: BlockStyle } & z.infer<z.ZodObject<S>>;
+/** The parsed config of a block: the exact `type` key, the injected `disabled` and box `style`, plus its shape fields. */
+type BlockConfigOf<K extends BlockKey, S extends z.ZodRawShape> = { type: K; disabled: boolean; style: BlockStyle } & z.infer<z.ZodObject<S>>;
 
 /**
  * The render function and metadata a block supplies to {@link NamespaceKit.defineBlock}.
@@ -16,9 +17,14 @@ export interface BlockImpl<K extends BlockKey, S extends z.ZodRawShape> {
   info: BlockInfo;
   render: (config: Resolved<BlockConfigOf<K, S>>, ctx: RenderContext) => TemplateResult;
   /**
-   * Hug capability: present = the block has an intrinsic content size, so its box offers
-   * `sizing`/`alignment`; the value is the default sizing. Absent = fill-only (a website or
-   * grid has no content size; content sizing would collapse it), and the fields don't exist.
+   * How this block sizes when nothing is set, on both axes. Present = it has an intrinsic
+   * content size worth hugging (text, an image); absent = it has none, so it fills (a website
+   * or a grid would collapse to nothing if it hugged).
+   *
+   * A default, not a capability: every block gets the full size group either way, since a
+   * length is meaningful on all of them and gating would only be a list to curate.
+   * TODO: per-axis defaults, the mixed cases (fill one, hug the other) are often what is
+   * wanted and this single value cannot say them. See the backlog.
    */
   box?: { sizing: "container" | "content" };
   /** Config-driven styles for this block's own box. See {@link AbstractBlockType.boxStyles}. */
@@ -75,8 +81,16 @@ export function createNamespace<const N extends NamespaceId>(namespace: N): Name
     // styleable without declaring anything. Last in the object so the editor shows a block's
     // own fields first, the style section after (schema order drives the form).
     if ("style" in shape) throw new Error(`Block "${key}" declares a "style" field; the framework injects it (use BlockImpl.box to configure).`);
+    if ("disabled" in shape) throw new Error(`Block "${key}" declares a "disabled" field; the framework injects it.`);
     const configSchema = z.object({
       type: z.literal(key).default(key),
+      // Also framework-injected, and first in the form: it decides whether the fields under it
+      // matter at all. Defaulted rather than optional so every block answers the question.
+      // The resolver leaves a disabled block out of the tree entirely (see isDisabledBlock).
+      disabled: z.boolean().default(false).meta({
+        label: "Disabled",
+        description: "Keep the block in the view's config, but leave it out of the view",
+      } satisfies FieldMeta),
       ...shape,
       style: blockStyleSchema(impl.box?.sizing),
     }) as z.ZodType<Config>;
