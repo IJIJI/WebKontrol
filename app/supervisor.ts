@@ -72,11 +72,14 @@ function rollBack(): void {
   try {
     const pending = JSON.parse(readFileSync(PENDING, "utf8")) as PendingUpdate;
     logger.error(`Update to ${pending.to} is crash-looping; rolling back to ${pending.from}.`);
-    writeFileSync(`${POINTER}.tmp`, pending.from);
-    renameSync(`${POINTER}.tmp`, POINTER);
+    // Database first, pointer second: if the snapshot copy fails, the pointer still names
+    // the new release and pending.json stays, so the next crash retries instead of
+    // booting the old code on the new release's data.
     rmSync(`${LIVE_DB}-wal`, { force: true });
     rmSync(`${LIVE_DB}-shm`, { force: true });
     copyFileSync(pending.dbBackup, LIVE_DB);
+    writeFileSync(`${POINTER}.tmp`, pending.from);
+    renameSync(`${POINTER}.tmp`, POINTER);
     rmSync(PENDING, { force: true });
     logger.error(`Rolled back to ${pending.from}; database restored from the snapshot.`);
   } catch (error) {
