@@ -21,8 +21,45 @@ const icon =
     </svg>
   );
 
+// One icon per capital letter and digit, plain and on a filled disc, generated rather than
+// drawn: an SVG <text> in the admin's own font matches the labels beside it and costs no
+// font-to-path tooling. Plain draws in currentColor; circled inverts, text in the page
+// background so it reads on the disc in both themes.
+const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const glyphText = (char: string, fill: string): JSX.Element => (
+  <text
+    x="10"
+    y="10"
+    textAnchor="middle"
+    dominantBaseline="central"
+    fontSize="13"
+    fontWeight="600"
+    fontFamily="inherit"
+    fill={fill}
+  >
+    {char}
+  </text>
+);
+const glyphIcons = (): Record<`glyph${string}` | `circled${string}`, Icon> =>
+  Object.fromEntries(
+    [...GLYPHS].flatMap((char) => [
+      [`glyph${char}`, icon("0 0 20 20", glyphText(char, "currentColor"))],
+      [
+        `circled${char}`,
+        icon(
+          "0 0 20 20",
+          <>
+            <circle cx="10" cy="10" r="10" fill="currentColor" />
+            {glyphText(char, "var(--color-background-primary)")}
+          </>,
+        ),
+      ],
+    ]),
+  );
+
 export const Icons = {
   //TODO: Add more icons or use a standard library.
+  ...glyphIcons(),
   warning: icon(
     "0 0 13 13",
     <>
