@@ -77,6 +77,11 @@ const releaseUrl = wantedVersion
 
 log(wantedVersion ? `Fetching release ${wantedVersion}...` : "Fetching the latest stable release...");
 const releaseResponse = await fetch(releaseUrl, { headers: ghHeaders });
+if (releaseResponse.status === 404 && !wantedVersion)
+  fail(
+    "No stable release exists yet: releases marked pre-release are never installed by default. " +
+      "Pass --version <tag> to install one deliberately.",
+  );
 if (!releaseResponse.ok)
   fail(`Could not fetch the release (${releaseResponse.status}). Wrong --version, or GitHub is unreachable.`);
 const release = await releaseResponse.json();
