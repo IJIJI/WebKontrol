@@ -1,6 +1,6 @@
 {
   "name": "@ijiji/WebKontrol",
-  "version": "3.0.0-beta",
+  "version": "3.0.0",
   "description": "WebKontrol - An intuitive browser puppet with a web-based admin panel.",
   "author": "IJssel Koster <ijssel@synapt.nl>, Synapt Technologies <contact@synapt.nl>",
   "repository": {
