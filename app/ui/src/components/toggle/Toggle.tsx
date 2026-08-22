@@ -1,3 +1,4 @@
+import { type RefObject } from "react";
 import { type JSX } from "react/jsx-runtime";
 import "./toggle.less";
 
@@ -11,7 +12,7 @@ export function Toggle({
   checked: boolean;
   setChecked: (value: boolean) => void;
   disabled?: boolean;
-  ref?: React.RefObject<HTMLDivElement | null>;
+  ref?: RefObject<HTMLDivElement | null>;
   className?: string
 }): JSX.Element {
   const toggle = (): void => {

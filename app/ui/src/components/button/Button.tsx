@@ -6,7 +6,7 @@ import { Icons } from "../icons/Icons";
 import { Variant, FillStyle } from "../../common/types/variants";
 import { classNames } from "../../common/helpers/classNames";
 
-// TODO: Add the possiblility for th euser to define loading children
+// TODO: Add the possibility for the user to define loading children
 export function Button({
   onClick,
   variant = Variant.DEFAULT,
