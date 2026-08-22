@@ -5,11 +5,12 @@ import YAML from "yaml";
 import { Logger } from "../../logging/Logger";
 
 export class ConfigManager {
-  private static readonly CONFIG_PATH = path.join(
-    process.cwd(),
-    `config`,
-    `config.yaml`,
-  );  
+  private static readonly CONFIG_DIR = path.join(process.cwd(), "config");
+  // A local file replaces the tracked one outright (never merged): the tracked
+  // config.yaml is the committed example, config.local.yaml (gitignored) is a dev's own.
+  private static readonly CONFIG_PATHS = ["config.local.yaml", "config.yaml"].map((name) =>
+    path.join(ConfigManager.CONFIG_DIR, name),
+  );
 
   protected _logger: Logger;
   protected _config!: AppConfig;
@@ -24,7 +25,7 @@ export class ConfigManager {
 
   public async init(): Promise<void> {
     
-    const path = ConfigManager.CONFIG_PATH; // TODO: Env override?
+    const path = ConfigManager.CONFIG_PATHS.find((candidate) => fs.existsSync(candidate)) ?? ConfigManager.CONFIG_PATHS[1]; // TODO: Env override?
     this._logger.debug("Loading config from config file: ", path);
 
     try {
