@@ -20,7 +20,7 @@
  */
 import assert from "node:assert/strict";
 import { execFileSync, spawn, type ChildProcess } from "node:child_process";
-import { cpSync, createReadStream, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { createReadStream, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import http from "node:http";
 import net from "node:net";
 import os from "node:os";
@@ -129,27 +129,6 @@ writeFileSync(path.join(brokenSrc, "yarn.lock"), "");
 writeFileSync(path.join(brokenSrc, ".yarnrc.yml"), "nodeLinker: node-modules\nenableTelemetry: false\n");
 pack(`webkontrol-${BROKEN_TAG}.tar.gz`, brokenSrc);
 
-// ---------- the managed layout (what the installer will do) ----------
-
-const release = path.join(root, "releases", BASE_TAG);
-mkdirSync(release, { recursive: true });
-cpSync(path.join(APP_DIR, "dist"), path.join(release, "dist"), { recursive: true });
-for (const file of ["package.json", "yarn.lock", ".yarnrc.yml"]) {
-  cpSync(path.join(APP_DIR, file), path.join(release, file));
-}
-// Shortcut for the BASE release only: link the checkout's node_modules instead of a real
-// install. The update's own install step (scenario A) does the real focus install.
-symlinkSync(path.join(APP_DIR, "node_modules"), path.join(release, "node_modules"), "junction");
-writeFileSync(path.join(root, "current"), `${BASE_TAG}\n`);
-cpSync(path.join(APP_DIR, "dist", "supervisor.js"), path.join(root, "supervisor.js"));
-mkdirSync(path.join(root, "config"), { recursive: true });
-writeFileSync(
-  path.join(root, "config", "config.yaml"),
-  // The fake migration at 9.9.8 is GATE-ONLY (see the config schema): it makes the
-  // downgrade to ANCIENT_TAG lossy so the disabled button and the 409 are visible.
-  `puppets: []\nweb:\n  port: ${WEB_PORT}\nupdate:\n  api_base: http://127.0.0.1:${GH_PORT}\n  fake_migration_versions: ["9.9.8"]\n`,
-);
-
 // ---------- the fake GitHub ----------
 
 // Exercises the notes renderer as well as the update itself: headings, lists, code,
@@ -189,6 +168,12 @@ const ghRelease = (tag: string): object => ({
 });
 
 const gh = http.createServer((req, res) => {
+  // The installer asks for one release by tag; the app asks for the whole list.
+  const tagMatch = /^\/repos\/ijiji\/WebKontrol\/releases\/tags\/([^/?]+)$/.exec(req.url ?? "");
+  if (tagMatch) {
+    res.setHeader("Content-Type", "application/json");
+    return res.end(JSON.stringify(ghRelease(decodeURIComponent(tagMatch[1]))));
+  }
   if (req.url === "/repos/ijiji/WebKontrol/releases") {
     res.setHeader("Content-Type", "application/json");
     return res.end(
@@ -204,6 +189,39 @@ const gh = http.createServer((req, res) => {
 });
 gh.listen(GH_PORT);
 log(`Fake GitHub on :${GH_PORT}${GH_PORT === 8098 ? "" : " (8098 was busy)"}`);
+
+// ---------- the managed layout, built by the REAL installer ----------
+// The harness used to assemble this by hand; running install.mjs instead means every
+// e2e run also proves the installer against the same fake GitHub. The config is written
+// first: the installer only writes its starter when none exists, and this root needs
+// the harness port, the api_base seam and the gate-only fake migration.
+mkdirSync(path.join(root, "config"), { recursive: true });
+writeFileSync(
+  path.join(root, "config", "config.yaml"),
+  // The fake migration at 9.9.8 is GATE-ONLY (see the config schema): it makes the
+  // downgrade to ANCIENT_TAG lossy so the disabled state and the 409 are visible.
+  `puppets: []
+web:
+  port: ${WEB_PORT}
+update:
+  api_base: http://127.0.0.1:${GH_PORT}
+  fake_migration_versions: ["9.9.8"]
+`,
+);
+log(`Installing ${BASE_TAG} with the real installer...`);
+// Async on purpose: the fake GitHub lives in THIS process, so a spawnSync here blocks
+// the event loop and deadlocks the installer against a server that can never answer.
+const installerExit = await new Promise<number | null>((resolve, reject) => {
+  const child = spawn(
+    process.execPath,
+    [path.join(APP_DIR, "..", "install.mjs"), root, "--version", BASE_TAG, "--api-base", `http://127.0.0.1:${GH_PORT}`],
+    { stdio: "inherit", env: { ...process.env, PUPPETEER_SKIP_DOWNLOAD: "true" } },
+  );
+  child.once("exit", resolve);
+  child.once("error", reject);
+});
+if (installerExit !== 0) throw new Error("install.mjs failed; the output above says why.");
+
 
 // ---------- probes ----------
 

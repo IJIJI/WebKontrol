@@ -90,6 +90,14 @@ function start(): void {
   // second signal would trip the app's force-on-repeat guard (see app.ts).
   const proc = spawn(process.execPath, [resolveEntry()], {
     stdio: ["inherit", "inherit", "inherit", "ipc"],
+    // Managed installs put Chromium in the shared root cache (the update runner and the
+    // installer both pin it there so releases do not each download their own browser),
+    // and the app must be told to look in the same place: without this pin, puppeteer
+    // falls back to its per-user default cache and every launch after an update fails
+    // with a missing browser. A plain checkout keeps the default cache untouched.
+    env: existsSync(POINTER)
+      ? { ...process.env, PUPPETEER_CACHE_DIR: path.join(ROOT, "puppeteer") }
+      : process.env,
   });
   child = proc;
   // IMPORTANT, like the app's "Admin server running": under systemd/Docker the console is
