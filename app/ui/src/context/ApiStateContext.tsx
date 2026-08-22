@@ -371,11 +371,16 @@ export function ApiStateProvider({
   // Success here means legitimately started, not done: the rest of the story arrives
   // through the state's update section, and ends in the server restarting.
   const updateApply = async (version: string, notify = true): Promise<void> => {
-    const request = Api.post<void>(`/update/apply`, { version }).catch((error: unknown) => {
+    const request = Api.post<void>(`/update/apply`, { version }).catch(async (error: unknown) => {
       // An answer means the gate spoke (a 409 refusal, say), so the apply never started.
       if (error instanceof ApiError) throw error;
-      // No answer at all means the server stopped talking mid-request, which for a quick
-      // update is it restarting into the new version: the update working, not failing.
+      // No answer at all is either the server restarting into the new version (the update
+      // working) or a plain network blip (nothing started). A restart takes seconds, so a
+      // server that still answers right away is the same one: the request never landed.
+      const alive = await fetch("/", { method: "HEAD", signal: AbortSignal.timeout(1_000) })
+        .then((response) => response.ok)
+        .catch(() => false);
+      if (alive) throw error;
     });
     return withToast(
       request,
