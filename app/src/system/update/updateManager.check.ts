@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 
 import type { Release } from "./model";
-import { applyGate } from "./UpdateManager";
+import { announce, applyGate } from "./UpdateManager";
 
 const release = (version: string): Release => ({
   version,
@@ -47,5 +47,22 @@ assert.match(String(applyGate({ ...base, applying: true })), /already in progres
 assert.match(String(applyGate({ ...base, pendingExists: true })), /still being confirmed/);
 assert.match(String(applyGate({ ...base, target: undefined })), /Unknown release/, "the allowlist");
 assert.match(String(applyGate({ ...base, target: release("v3.0.0") })), /already running/);
+
+//* The announcement: GitHub's latest decides, nothing else ever does.
+{
+  const beta = (version: string): Release => ({ ...release(version), prerelease: true });
+  const list = [release("v3.2.0"), beta("v3.1.5-beta.1"), release("v3.1.0"), release("v3.0.0")];
+
+  assert.equal(announce({ releases: list, latest: "v3.1.0", current: "v3.0.0" }), list[2], "latest newer than current");
+  assert.equal(
+    announce({ releases: list, latest: "v3.1.0", current: "v3.0.0" })?.version,
+    "v3.1.0",
+    "a newer stable that is NOT marked latest (held back by the maintainer) is not announced",
+  );
+  assert.equal(announce({ releases: list, latest: "v3.1.0", current: "v3.1.0" }), undefined, "on latest: nothing");
+  assert.equal(announce({ releases: list, latest: null, current: "v3.0.0" }), undefined, "no stable release yet: nothing");
+  assert.equal(announce({ releases: list, latest: "v3.0.0", current: "v3.1.0" }), undefined, "latest older than current: nothing");
+  assert.equal(announce({ releases: list, latest: "v3.1.5-beta.1", current: "v3.0.0" }), list[1], "whatever GitHub marks latest is what announces");
+}
 
 console.log("updateManager.check: all assertions passed");

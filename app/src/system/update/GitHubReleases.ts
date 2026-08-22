@@ -60,6 +60,10 @@ export function mapReleases(raw: unknown): Release[] {
 export class GitHubReleases {
   private _logger = new Logger(["UPDATE", "SOURCE"]);
   private _releases: Release[] = [];
+  // The tag GitHub itself marks as latest: newest stable by default, and whatever the
+  // maintainer sets it to by hand. The single source of truth for "is there an update",
+  // shared with the installer's default; prereleases are never latest, by GitHub's rules.
+  private _latest: string | null = null; // TODO: This can be cleaner
   private _lastChecked: number | null = null;
   private _inflight: Promise<Release[]> | null = null;
 
@@ -70,6 +74,9 @@ export class GitHubReleases {
   }
   get lastChecked(): number | null {
     return this._lastChecked;
+  }
+  get latest(): string | null {
+    return this._latest;
   }
 
   /**
@@ -102,7 +109,25 @@ export class GitHubReleases {
     if (!response.ok) throw new Error(`GitHub releases API error: ${response.status}`);
 
     this._releases = mapReleases(await response.json());
-    this._logger.info(`Found ${this._releases.length} installable release(s).`);
+
+    // 404 here is a state, not a failure: no stable release exists (yet), so nothing is
+    // announced. Any OTHER failure is a failed check, exactly like the list failing: a
+    // rate limit read as "no update" would silence announcements until the next daily
+    // check, invisibly, whereas a failed check is shown and can be retried.
+    const latestResponse = await fetch(`${this._baseUrl}/repos/${repo}/releases/latest`, {
+      headers: { "User-Agent": "WebKontrol", Accept: "application/vnd.github+json" },
+      signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
+    });
+    if (latestResponse.status === 404) this._latest = null;
+    else if (!latestResponse.ok) throw new Error(`GitHub latest-release API error: ${latestResponse.status}`);
+    else {
+      const latestBody = (await latestResponse.json()) as { tag_name?: unknown };
+      this._latest = typeof latestBody.tag_name === "string" ? latestBody.tag_name : null;
+    }
+
+    this._logger.info(
+      `Found ${this._releases.length} installable release(s); latest stable is ${this._latest ?? "none"}.`,
+    );
     return this._releases;
   }
 }

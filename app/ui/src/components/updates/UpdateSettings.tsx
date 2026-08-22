@@ -7,6 +7,7 @@ import { timeAgo } from "../../common/helpers/relativeTime";
 import { useNow } from "../../common/hooks/useNow";
 import { useApi } from "../../context/ApiStateContext";
 import { ButtonSetting } from "../settings/implementations/ButtonSetting";
+import { newestPrerelease } from "./releases";
 
 /**
  * The Firmware row of the About section: which version this is, what the update system is
@@ -29,10 +30,15 @@ function statusLine(info: UpdateInfo, now: number): string {
     case UpdateState.READY:
       return `${info.current} · ${info.activity.latest.version} available`;
     case UpdateState.IDLE:
-    case UpdateState.FAILED:
+    case UpdateState.FAILED: {
+      // A newer flagged release is mentioned, not announced: it asks for testers, so it
+      // gets the status line but never the badge.
+      const beta = newestPrerelease(info);
+      if (beta) return `${info.current} · beta ${beta.version} available`;
       return info.lastChecked === null
         ? `${info.current} · not checked yet`
         : `${info.current} · checked ${timeAgo(info.lastChecked, now)}`;
+    }
   }
 }
 

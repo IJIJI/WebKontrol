@@ -59,6 +59,22 @@ export function applyGate(input: {
   return null;
 }
 
+/**
+ * The update to announce after a check, as a pure decision so the check file can hold it
+ * down: GitHub's latest, when it is newer than what runs. Nothing else is ever announced.
+ * A flagged pre-release is never GitHub's latest (their rule), so it never gets the badge;
+ * the UI mentions it quietly from the list, where the flag already sits on the release.
+ */
+export function announce(input: {
+  releases: Release[];
+  latest: string | null;
+  current: string;
+}): Release | undefined {
+  return input.releases.find(
+    (release) => release.version === input.latest && isNewerVersion(release.version, input.current),
+  );
+}
+
 export type UpdateManagerEvents = {
   info_update: [info: UpdateInfo];
 };
@@ -209,11 +225,13 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
       this._checkError = (error as Error).message;
       this._logger.warn(`Update check failed: ${this._checkError}`);
     }
-    const latest = this._source.releases[0]; // the source sorts newest first
+    const ready = announce({
+      releases: this._source.releases,
+      latest: this._source.latest,
+      current: this._current,
+    });
     this._setActivity(
-      latest !== undefined && isNewerVersion(latest.version, this._current)
-        ? { state: UpdateState.READY, latest }
-        : { state: UpdateState.IDLE },
+      ready !== undefined ? { state: UpdateState.READY, latest: ready } : { state: UpdateState.IDLE },
     );
   }
 

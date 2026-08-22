@@ -1,11 +1,24 @@
 /**
  * End-to-end test of the update system against a LOCAL fake GitHub: a scratch managed
- * layout runs the real built app under the real supervisor, and three scenarios run in
- * sequence against real HTTP, real tarballs and the real disk:
+ * layout (built by the real installer) runs the real built app under the real supervisor,
+ * and the scenarios run in sequence against real HTTP, real tarballs and the real disk.
  *
+ * The fake GitHub publishes seven versions, each there to prove one thing:
+ *   v0.0.1    below the floor: filtered out, never listed
+ *   v9.9.7    below a fake migration at 9.9.8: a downgrade to it is gated
+ *   v9.9.8    the base install
+ *   v9.9.9    GitHub's LATEST: the one and only announced update
+ *   v9.9.10   flagged pre-release AND broken: quiet mention, installable, then rolls back
+ *   v9.9.11   stable but NOT marked latest (held back): listed, never announced
+ *   v9.9.12   no tarball yet (CI still building): filtered out, never listed
+ *
+ *   0. What the fresh install sees: exactly the five installable releases, v9.9.9 announced
+ *      as READY, the gated downgrade and the flagged pre-release marked as such.
  *   A. Clean update, v9.9.8 to v9.9.9 (the real build): download, focus install, swap,
- *      restart, pending cleared by the supervisor, journal confirmed "ok".
+ *      restart, pending cleared by the supervisor, journal confirmed "ok"; then on latest
+ *      nothing is announced even though v9.9.11 is newer.
  *   B. Lossless downgrade, v9.9.9 to v9.9.8: fast path (release still on disk), swap back.
+ *   B2. Downgrade to v9.9.7 crosses the fake migration: refused by name (409).
  *   C. Broken update, v9.9.8 to v9.9.10 (an app that throws on boot): three rapid
  *      crashes, supervisor rolls pointer and database back, journal says "rolled-back".
  *
@@ -52,8 +65,11 @@ async function pickPort(preferred: number): Promise<number> {
 
 const GH_PORT = await pickPort(8098);
 const WEB_PORT = await pickPort(8099);
-const REAL_TAG = "v9.9.9";
-const BROKEN_TAG = "v9.9.10";
+const REAL_TAG = "v9.9.9"; // GitHub's latest
+const BROKEN_TAG = "v9.9.10"; // flagged pre-release, crashes on boot
+const HELD_TAG = "v9.9.11"; // stable, newer than latest, deliberately not marked latest
+const BUILDING_TAG = "v9.9.12"; // published without its tarball yet
+const FLOORED_TAG = "v0.0.1"; // predates the update system
 // All tags sit above the source's floor version; a below-floor base tag gets filtered
 // out of the allowlist and every downgrade to it correctly refused (learned live).
 const BASE_TAG = "v9.9.8";
@@ -119,6 +135,7 @@ pack(`webkontrol-${REAL_TAG}.tar.gz`, APP_DIR);
 // the tarball like any other. Advertising a release without serving it produced a 404.
 pack(`webkontrol-${BASE_TAG}.tar.gz`, APP_DIR);
 pack(`webkontrol-${ANCIENT_TAG}.tar.gz`, APP_DIR);
+pack(`webkontrol-${HELD_TAG}.tar.gz`, APP_DIR);
 
 // The broken release: installs fine (no deps), throws on boot.
 const brokenSrc = path.join(root, "broken-src");
@@ -153,21 +170,33 @@ Updated the **display pipeline** and the \`UpdateRunner\`.
 > Downgrading past a database change is refused by the gate.
 `;
 
+// The broken release is flagged pre-release: exactly how a test build would be
+// published, and it keeps GitHub's "latest" on the real update rather than on it.
 const ghRelease = (tag: string): object => ({
   tag_name: tag,
   name: `Release ${tag}`,
   published_at: "2026-08-19T00:00:00Z",
-  prerelease: false,
+  prerelease: tag === BROKEN_TAG,
   body: notes(tag),
-  assets: [
-    {
-      name: `webkontrol-${tag}.tar.gz`,
-      browser_download_url: `http://127.0.0.1:${GH_PORT}/assets/webkontrol-${tag}.tar.gz`,
-    },
-  ],
+  assets:
+    tag === BUILDING_TAG
+      ? [] // CI has not attached the tarball yet
+      : [
+          {
+            name: `webkontrol-${tag}.tar.gz`,
+            browser_download_url: `http://127.0.0.1:${GH_PORT}/assets/webkontrol-${tag}.tar.gz`,
+          },
+        ],
 });
+const ALL_TAGS = [BUILDING_TAG, HELD_TAG, BROKEN_TAG, REAL_TAG, BASE_TAG, ANCIENT_TAG, FLOORED_TAG];
 
 const gh = http.createServer((req, res) => {
+  // GitHub's own "latest": the newest stable, which is what the app announces and what
+  // the installer installs by default.
+  if (req.url === "/repos/ijiji/WebKontrol/releases/latest") {
+    res.setHeader("Content-Type", "application/json");
+    return res.end(JSON.stringify(ghRelease(REAL_TAG)));
+  }
   // The installer asks for one release by tag; the app asks for the whole list.
   const tagMatch = /^\/repos\/ijiji\/WebKontrol\/releases\/tags\/([^/?]+)$/.exec(req.url ?? "");
   if (tagMatch) {
@@ -176,9 +205,7 @@ const gh = http.createServer((req, res) => {
   }
   if (req.url === "/repos/ijiji/WebKontrol/releases") {
     res.setHeader("Content-Type", "application/json");
-    return res.end(
-      JSON.stringify([ghRelease(BROKEN_TAG), ghRelease(REAL_TAG), ghRelease(BASE_TAG), ghRelease(ANCIENT_TAG)]),
-    );
+    return res.end(JSON.stringify(ALL_TAGS.map(ghRelease)));
   }
   if (req.url?.startsWith("/assets/")) {
     const file = path.join(assets, path.basename(req.url));
@@ -225,6 +252,33 @@ if (installerExit !== 0) throw new Error("install.mjs failed; the output above s
 
 // ---------- probes ----------
 
+// The update section of the state, exactly as the admin UI receives it: the first data
+// event on the SSE stream, which the server writes on connect.
+interface UpdateSection {
+  current: string;
+  activity: { state: string; latest?: { version: string } };
+  releases: { version: string; prerelease: boolean; crossings?: string[] }[];
+}
+async function readUpdateState(): Promise<UpdateSection> {
+  const controller = new AbortController();
+  const response = await fetch(`http://127.0.0.1:${WEB_PORT}/api/state`, { signal: controller.signal });
+  const reader = response.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  try {
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const match = /event: data\ndata: (.*)\n\n/.exec(buffer);
+      if (match) return (JSON.parse(match[1]) as { info: { update: UpdateSection } }).info.update;
+    }
+  } finally {
+    controller.abort();
+  }
+  throw new Error("No state event arrived on /api/state");
+}
+
 const pointer = (): string => readFileSync(path.join(root, "current"), "utf8").trim();
 const pendingExists = (): boolean => existsSync(path.join(root, "releases", "pending.json"));
 
@@ -262,7 +316,8 @@ async function main(): Promise<void> {
   if (process.argv.includes("--hold")) {
     log(`HOLD MODE: a managed ${BASE_TAG} system is running.`);
     log(`  Admin:        http://127.0.0.1:${WEB_PORT}/settings`);
-    log(`  Releases:     ${REAL_TAG} (real update), ${BROKEN_TAG} (crashes -> live rollback),`);
+    log(`  Releases:     ${REAL_TAG} (latest: the announced update), ${HELD_TAG} (newer but held back),`);
+    log(`                ${BROKEN_TAG} (pre-release, crashes -> live rollback),`);
     log(`                ${ANCIENT_TAG} (downgrade gated by a fake migration at 9.9.8)`);
     log(`  Scratch root: ${root}`);
     log(`  Ctrl+C stops the supervisor and cleans up.`);
@@ -275,6 +330,26 @@ async function main(): Promise<void> {
     return new Promise(() => {}); // parked until Ctrl+C
   }
 
+  log("Scenario 0: what the fresh install sees...");
+  await waitFor("boot check landed", async () => (await readUpdateState()).releases.length > 0, 30_000);
+  {
+    const state = await readUpdateState();
+    assert.deepEqual(
+      state.releases.map((release) => release.version),
+      [HELD_TAG, BROKEN_TAG, REAL_TAG, BASE_TAG, ANCIENT_TAG],
+      "newest first; the floored and the tarball-less releases are not listed",
+    );
+    assert.equal(state.activity.state, "Ready", "an update is announced");
+    assert.equal(state.activity.latest?.version, REAL_TAG, "the announced one is GitHub's latest, not the newest");
+    assert.equal(state.releases.find((release) => release.version === BROKEN_TAG)?.prerelease, true);
+    assert.deepEqual(
+      state.releases.find((release) => release.version === ANCIENT_TAG)?.crossings,
+      ["9.9.8"],
+      "the gated downgrade carries what it would lose",
+    );
+    log("ok: list, announcement, flags and crossings as designed");
+  }
+
   log(`Scenario A: apply ${REAL_TAG} (real tarball, real install)...`);
   assert.equal((await post("/update/check")).status, 204, "check returns 204");
   assert.equal((await post("/update/apply", { version: REAL_TAG })).status, 204, "apply accepted");
@@ -284,6 +359,14 @@ async function main(): Promise<void> {
   assert.ok(existsSync(path.join(root, "releases", BASE_TAG)), "previous release retained");
   await waitFor("supervisor clears pending (healthy window)", () => !pendingExists(), 100_000);
   await waitFor("journal confirmed ok", async () => (await journalStatus()) === "ok", 120_000);
+  {
+    const state = await readUpdateState();
+    assert.equal(state.current, REAL_TAG);
+    assert.equal(state.activity.state, "Idle", "on latest nothing is announced, although a newer stable exists");
+    const quiet = state.releases.find((release) => release.prerelease && release.version !== state.current);
+    assert.equal(quiet?.version, BROKEN_TAG, "the flagged release is there for the quiet mention");
+    log("ok: latest beats newest; the pre-release is only mentioned");
+  }
 
   log(`Scenario B: lossless downgrade to ${BASE_TAG} (already on disk)...`);
   assert.equal((await post("/update/apply", { version: BASE_TAG })).status, 204, "downgrade accepted");

@@ -11,6 +11,7 @@ import { ConfirmModal } from "../components/modal/ConfirmModal";
 import { InfoPill } from "../components/pill/InfoPill";
 import { ReleaseNotes } from "../components/updates/ReleaseNotes";
 import { MessageTone, UpdateMessage } from "../components/updates/UpdateMessage";
+import { newestPrerelease } from "../components/updates/releases";
 import { clearApplyMark, markApplyStarted } from "../components/updates/useUpdateLifecycle";
 import { useApi } from "../context/ApiStateContext";
 import { usePageContext } from "../context/PageContext";
@@ -284,6 +285,7 @@ function UpdateMessages({
 }): JSX.Element {
   const journal = info.journal;
   const seen = journal?.acknowledged === true;
+  const beta = newestPrerelease(info);
   return (
     <>
       {info.checkError !== undefined && (
@@ -294,6 +296,13 @@ function UpdateMessages({
         <UpdateMessage tone={MessageTone.INFO}>
           Confirming the update to {journal?.to}. Another one can be installed once it has
           run for a minute without trouble.
+        </UpdateMessage>
+      )}
+
+      {beta && (
+        <UpdateMessage tone={MessageTone.INFO}>
+          {beta.version} is available as a pre-release, for testing ahead of the next stable
+          update.
         </UpdateMessage>
       )}
 
