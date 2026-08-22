@@ -19,7 +19,10 @@
  *      nothing is announced even though v9.9.11 is newer.
  *   B. Lossless downgrade, v9.9.9 to v9.9.8: fast path (release still on disk), swap back.
  *   B2. Downgrade to v9.9.7 crosses the fake migration: refused by name (409).
- *   C. Broken update, v9.9.8 to v9.9.10 (an app that throws on boot): three rapid
+ *   D. Apply right after a boot (v9.9.8 to v9.9.9 again, fast path, inside the supervisor's
+ *      60 s window), then kill the new app twice: the requested exit must not have counted
+ *      as a crash, so two real crashes do NOT roll back (three would).
+ *   C. Broken update, v9.9.9 to v9.9.10 (an app that throws on boot): three rapid
  *      crashes, supervisor rolls pointer and database back, journal says "rolled-back".
  *
  * Run with `yarn e2e:update` (add --no-build to reuse the existing dist). Takes a few
@@ -191,24 +194,25 @@ const ghRelease = (tag: string): object => ({
 const ALL_TAGS = [BUILDING_TAG, HELD_TAG, BROKEN_TAG, REAL_TAG, BASE_TAG, ANCIENT_TAG, FLOORED_TAG];
 
 const gh = http.createServer((req, res) => {
+  const url = new URL(req.url ?? "/", "http://fake-github");
   // GitHub's own "latest": the newest stable, which is what the app announces and what
   // the installer installs by default.
-  if (req.url === "/repos/ijiji/WebKontrol/releases/latest") {
+  if (url.pathname === "/repos/ijiji/WebKontrol/releases/latest") {
     res.setHeader("Content-Type", "application/json");
     return res.end(JSON.stringify(ghRelease(REAL_TAG)));
   }
   // The installer asks for one release by tag; the app asks for the whole list.
-  const tagMatch = /^\/repos\/ijiji\/WebKontrol\/releases\/tags\/([^/?]+)$/.exec(req.url ?? "");
+  const tagMatch = /^\/repos\/ijiji\/WebKontrol\/releases\/tags\/([^/]+)$/.exec(url.pathname);
   if (tagMatch) {
     res.setHeader("Content-Type", "application/json");
     return res.end(JSON.stringify(ghRelease(decodeURIComponent(tagMatch[1]))));
   }
-  if (req.url === "/repos/ijiji/WebKontrol/releases") {
+  if (url.pathname === "/repos/ijiji/WebKontrol/releases") { // the app adds ?per_page
     res.setHeader("Content-Type", "application/json");
     return res.end(JSON.stringify(ALL_TAGS.map(ghRelease)));
   }
-  if (req.url?.startsWith("/assets/")) {
-    const file = path.join(assets, path.basename(req.url));
+  if (url.pathname.startsWith("/assets/")) {
+    const file = path.join(assets, path.basename(url.pathname));
     if (existsSync(file)) return void createReadStream(file).pipe(res);
   }
   res.statusCode = 404;
@@ -280,6 +284,12 @@ async function readUpdateState(): Promise<UpdateSection> {
 }
 
 const pointer = (): string => readFileSync(path.join(root, "current"), "utf8").trim();
+// The supervisor logs every app it starts into the shared log; the last line is the
+// live one. The harness has no other handle on the app (only the supervisor is its child).
+const appPid = (): number | null => {
+  const matches = [...readFileSync(path.join(root, "logs", "webkontrol.log"), "utf8").matchAll(/Started app \(pid (\d+)\)/g)];
+  return matches.length === 0 ? null : Number(matches[matches.length - 1][1]);
+};
 const pendingExists = (): boolean => existsSync(path.join(root, "releases", "pending.json"));
 
 // The journal, read straight from the scratch database (same row the UpdateStore reads).
@@ -304,12 +314,16 @@ async function journalStatus(): Promise<string | null> {
 
 let supervisor: ChildProcess | null = null;
 
-async function main(): Promise<void> {
+function startSupervisor(): void {
   supervisor = spawn(process.execPath, [path.join(root, "supervisor.js")], {
     cwd: root,
     stdio: ["inherit", "inherit", "inherit", "ipc"],
     env: { ...process.env, PUPPETEER_SKIP_DOWNLOAD: "true" }, // installs need no browser here
   });
+}
+
+async function main(): Promise<void> {
+  startSupervisor();
   await waitFor("base app serving", appUp, 60_000);
   assert.equal(pointer(), BASE_TAG);
 
@@ -384,10 +398,31 @@ async function main(): Promise<void> {
     log("ok: lossy downgrade refused by name");
   }
 
+  log(`Scenario D: apply ${REAL_TAG} inside the supervisor's healthy window, then crash twice...`);
+  // A fresh supervisor start, so the apply lands within 60 s of the app's spawn (under a
+  // running supervisor the pending gate makes that impossible except right after a boot,
+  // which is exactly a device that was power-cycled and updated straight away).
+  await stop();
+  startSupervisor();
+  await waitFor("rebooted app serving", appUp, 60_000);
+  assert.equal((await post("/update/apply", { version: REAL_TAG })).status, 204, "apply accepted");
+  await waitFor(`pointer flips to ${REAL_TAG}`, () => pointer() === REAL_TAG, 60_000);
+  await waitFor("updated app serving", appUp, 60_000);
+  for (const crash of [1, 2]) {
+    const pid = appPid();
+    assert.ok(pid !== null, "the supervisor logged the app pid");
+    process.kill(pid);
+    await waitFor(`app back after crash ${crash}`, async () => appPid() !== pid && (await appUp()), 60_000);
+  }
+  assert.equal(pointer(), REAL_TAG, "two real crashes after a requested restart do not roll back");
+  assert.equal(pendingExists(), true, "still inside the rollback window");
+  await waitFor("pending cleared (healthy window)", () => !pendingExists(), 100_000);
+  assert.equal(pointer(), REAL_TAG, "survived the window on the new release");
+
   log(`Scenario C: apply the broken ${BROKEN_TAG}, expect rollback...`);
   assert.equal((await post("/update/apply", { version: BROKEN_TAG })).status, 204, "apply accepted");
   await waitFor(`pointer flips to ${BROKEN_TAG}`, () => pointer() === BROKEN_TAG, 4 * 60_000);
-  await waitFor(`rollback flips pointer back to ${BASE_TAG}`, () => pointer() === BASE_TAG, 90_000);
+  await waitFor(`rollback flips pointer back to ${REAL_TAG}`, () => pointer() === REAL_TAG, 90_000);
   await waitFor("rolled-back app serving", appUp, 60_000);
   assert.equal(pendingExists(), false, "rollback cleared pending");
   await waitFor("journal says rolled-back", async () => (await journalStatus()) === "rolled-back", 60_000);

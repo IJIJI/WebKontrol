@@ -118,13 +118,18 @@ function start(): void {
 
   // exit and error can both fire for one child (a failed spawn errors, then exits).
   let settled = false;
-  const onDown = (what: string): void => {
+  // `requested`: the app exited 0, which only its own beginShutdown produces (an update
+  // restarting into the new release, a stop). A crash never exits 0 (Node exits 1 on an
+  // uncaught throw, a kill is a signal), so a requested exit is treated as healthy: it
+  // must neither escalate the backoff nor count toward rolling back a release that has
+  // not even run yet.
+  const onDown = (what: string, requested = false): void => {
     if (settled) return;
     settled = true;
     child = null;
     clearTimeout(confirm);
     if (shuttingDown) return; // the shutdown path owns this exit
-    const healthy = Date.now() - spawnedAt > HEALTHY_MS;
+    const healthy = requested || Date.now() - spawnedAt > HEALTHY_MS;
     if (healthy) retry.reset();
     rapidCrashes = healthy ? 0 : rapidCrashes + 1;
     if (!healthy && rapidCrashes >= ROLLBACK_AFTER_CRASHES && existsSync(PENDING)) {
@@ -135,7 +140,7 @@ function start(): void {
     const delay = retry.schedule(start);
     logger.warn(`App ${what}; restarting in ${delay}ms.`);
   };
-  proc.on("exit", (code, signal) => onDown(`exited (code=${code}, signal=${signal})`));
+  proc.on("exit", (code, signal) => onDown(`exited (code=${code}, signal=${signal})`, code === 0));
   proc.on("error", (error) => onDown(`failed to start (${String(error)})`));
 }
 
