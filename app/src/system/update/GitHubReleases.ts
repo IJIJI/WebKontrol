@@ -102,13 +102,15 @@ export class GitHubReleases {
     if (!repo) throw new Error("No GitHub repository URL in package.json");
 
     this._logger.info("Checking for updates...");
-    const response = await fetch(`${this._baseUrl}/repos/${repo}/releases`, {
+    // One page of 100: GitHub pages at 30 by default, and a latest that fell off the
+    // page would never be announced (it must be in the list).
+    const response = await fetch(`${this._baseUrl}/repos/${repo}/releases?per_page=100`, {
       headers: { "User-Agent": "WebKontrol", Accept: "application/vnd.github+json" },
       signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
     });
     if (!response.ok) throw new Error(`GitHub releases API error: ${response.status}`);
 
-    this._releases = mapReleases(await response.json());
+    const releases = mapReleases(await response.json());
 
     // 404 here is a state, not a failure: no stable release exists (yet), so nothing is
     // announced. Any OTHER failure is a failed check, exactly like the list failing: a
@@ -118,12 +120,18 @@ export class GitHubReleases {
       headers: { "User-Agent": "WebKontrol", Accept: "application/vnd.github+json" },
       signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
     });
-    if (latestResponse.status === 404) this._latest = null;
+    let latest: string | null = null;
+    if (latestResponse.status === 404) latest = null;
     else if (!latestResponse.ok) throw new Error(`GitHub latest-release API error: ${latestResponse.status}`);
     else {
       const latestBody = (await latestResponse.json()) as { tag_name?: unknown };
-      this._latest = typeof latestBody.tag_name === "string" ? latestBody.tag_name : null;
+      latest = typeof latestBody.tag_name === "string" ? latestBody.tag_name : null;
     }
+
+    // Assigned together, after both requests: a check that failed halfway leaves the
+    // previous consistent pair in place instead of a new list beside a stale latest.
+    this._releases = releases;
+    this._latest = latest;
 
     this._logger.info(
       `Found ${this._releases.length} installable release(s); latest stable is ${this._latest ?? "none"}.`,
