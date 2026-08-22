@@ -25,13 +25,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Before setup-node: its yarn cache step asks `yarn --version`, and only with corepack
+      # enabled does that answer the Yarn 4 pinned by package.json (else the runner's Yarn 1
+      # answers and a cache directory Yarn 4 never reads gets cached).
+      - run: corepack enable
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: yarn
           cache-dependency-path: app/yarn.lock
-
-      - run: corepack enable
 
       # A release must report the version it was built as: the device baked-in version,
       # the tag and the release dir name all derive from these two agreeing.
