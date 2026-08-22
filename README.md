@@ -19,47 +19,37 @@ I am planning to sell pre-configured boxes with SDI outputs in my store. If you 
 
 WebKontrol is Node-based, which means it can run on a lot of operating systems. It is tested on **Windows 11** and **Raspberry Pi OS Full** on the Raspberry Pi 2 and 4.
 
-## Debian
+Installed systems update themselves from the admin UI (Settings → Firmware → Update), including an automatic rollback when a new version fails to start. You never need git on a device; a git checkout is the developer setup and updates itself with `git pull` instead.
 
-### Update OS
+## Prerequisites
 
-```shell
-sudo apt-get update &&
-sudo apt-get upgrade -y
-```
+- **Node 22 or newer**, with yarn available through corepack: `corepack enable`
+- **tar** (ships with Windows 10+ and every Linux)
+- On Linux, the libraries Chromium needs (Raspberry Pi OS Full has them; on a minimal Debian, `sudo apt install chromium` pulls them in)
 
-### Dependencies
+The installer checks these and tells you what is missing; it never installs anything itself.
 
-```shell
-sudo apt install git -y &&
-sudo apt install nodejs -y &&
-sudo apt install npm -y &&
-sudo apt install chromium-browser -y &&
-sudo npm install --global tsx -y &&
-sudo npm install --global yarn -y
-```
+## Install
 
-### Code
-
-Make a directory:
+Pick a directory; it becomes the data home (configuration, database, logs) and must stay where it is.
 
 ```shell
-sudo mkdir /opt/WebKontrol
+curl -fsSL https://raw.githubusercontent.com/ijiji/WebKontrol/main/install.mjs -o install.mjs
+node install.mjs /opt/webkontrol
 ```
-Clone and install the code:
+
+This installs the latest stable release. Releases marked **pre-release** on GitHub are never installed by default: to install one deliberately, pass its tag, e.g. `node install.mjs /opt/webkontrol --version v3.0.0`.
+
+The installer writes a commented starter `config/config.yaml`; edit it to add your displays (or prepare the file beforehand, the installer keeps an existing one).
+
+## Run
 
 ```shell
-sudo git clone https://github.com/IJIJI/WebKontrol.git /opt/WebKontrol --branch V0.5.0 &&
-cd /opt/WebKontrol/src &&
-sudo yarn
+cd /opt/webkontrol
+node supervisor.js
 ```
 
-To start WebKontrol you can run this:
-```shell
-sudo yarn start
-```
-
-You can now access WebKontrol from your browser! When connected to a display, it will initially list its IP Address(es).
+The admin UI serves on the configured port (default 80). To start on boot, the installer prints a ready-to-paste systemd unit at the end of the install.
 
 ## Raspberry Pi OS (Full)
 The above config still works on Raspberry Pi OS but requires a few more steps. These steps are tested for Raspberry Pi OS. A different OS may still require extra steps.
