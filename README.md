@@ -7,13 +7,13 @@ WebKontrol turns any machine into a remote controlled display. It can drive mult
 <img src="img/admin_interface_2.png" width="400"/> <img src="img/clock_interface.png" width="400"/>
 
 > [!WARNING]
-> **We are currently in the midst of a full rewrite to version 3, but its in the early stages.** It works, but we cannot gaurantee complete stability yet. Use **[v2](#v2-the-stable-release)** in live production scenarios for now, as it has been thoroughly tested.
+> **We are currently in the midst of a full rewrite to version 3, but its in the early stages.** It works, but we cannot gaurantee complete stability yet. Use **[v2](#v2-Stable)** in live production scenarios for now, as it has been thoroughly tested.
 
 ## Backstory
 
 I originally built WebKontrol for the live-streaming industry. It allows me to display a clock or use something like [stagetimer.io](https://stagetimer.io/). It turned out to work for information displays and touch kiosks just as well, offering more remote control than most existing solutions I have tried. 
 
-The first two versions only supported a single screen displaying an url. In the latest version this has been expanded to offer an expansive view builder, plugin support and a usefull web interface. We are currently implementing plugin support, which would enable data sources from different platforms and conditional rendering.
+The first two versions only supported a single screen displaying an url. In the latest version this has been expanded to offer multiple outputs, an expansive view builder, plugin support and a usefull web interface. We are currently implementing the plugin support, which would enable data sources from different platforms and conditional rendering.
 
 I am planning to sell pre-configured boxes with SDI outputs in my store. If you are interested, [contact me](mailto:shop@synapt.nl).
 
@@ -166,7 +166,7 @@ If the page that is requested fails, WebKontrol will retry every 30 seconds. Whi
 <img src="img/no_connect_interface.png" width="400"/> -->
 
 
-# v2: Stable
+# v2 Stable
 
 v2 is the previous generation: one browser, one URL, a small web panel with a clock. It has run in production for a long time and is the recommended choice when you need something proven today.
 
