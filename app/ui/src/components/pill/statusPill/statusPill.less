@@ -1,0 +1,18 @@
+.statusPill {
+  transition: gap @button-animation-time ease;
+
+  .infoLabel {
+    margin: 0;
+    overflow: hidden;
+    opacity: 1;
+    transition: opacity @button-animation-time*2 ease, width @button-animation-time ease;
+  }
+
+  &.collapsed {
+    gap: 0;
+    .infoLabel {
+      width: 0;
+      opacity: 0;
+    }
+  }
+}

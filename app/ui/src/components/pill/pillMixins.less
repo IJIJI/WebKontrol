@@ -1,0 +1,11 @@
+// Shared pill colour helpers: a translucent fill / border of a colour, plus a soft glow. Used by
+// both the ChipPill base (arbitrary --chip-color) and InfoPill (semantic role colours).
+.transBgColor(@color, @transparency) {
+  background-color: rgba(from @color r g b / @transparency);
+}
+.transBrdrColor(@color, @transparency) {
+  border: 1px solid rgba(from @color r g b / @transparency);
+}
+.boxShadow(@color) {
+  box-shadow: 0 0 8px -3px @color;
+}

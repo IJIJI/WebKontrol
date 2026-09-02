@@ -1,0 +1,165 @@
+// The inspection presentation of a schema (SchemaSettings in readOnly): a compact property list
+// rather than form rows. Same walk and labels, but nothing to type into.
+@indent: 18px; // one nesting step for a group body
+
+.schemaDetails {
+  display: flex;
+  flex-direction: column;
+
+  .empty {
+    font-size: 13px;
+    color: var(--color-text-tertiary);
+    padding: 6px 0;
+  }
+
+  // Top-level fields are sections, divided by a line.
+  > .section {
+    padding: 7px 0;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--color-border-tertiary);
+    }
+  }
+
+  // The disclosure caret, shared by every collapsible head.
+  .caret {
+    flex: none;
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+  }
+
+  // An inline field: key left, value right.
+  .fieldRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 24px;
+
+    .fieldKey {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      flex-shrink: 0;
+    }
+
+    .fieldVal {
+      margin-left: auto;
+      font-size: 13px;
+      color: var(--color-text-primary);
+      text-align: right;
+      min-width: 0;
+      word-break: break-word;
+
+      .scalar {
+        font-family: monospace;
+        font-size: 12px;
+      }
+
+      .muted {
+        color: var(--color-text-tertiary);
+      }
+    }
+  }
+
+  // A collapsible group head (object / array), keyed by its field name.
+  .group .groupHead {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    min-height: 24px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: inherit;
+
+    .fieldKey {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    .groupCount {
+      margin-left: auto;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--color-text-tertiary);
+    }
+
+    &:hover .fieldKey,
+    &:focus-visible .fieldKey,
+    &:hover .caret,
+    &:focus-visible .caret {
+      color: var(--color-text-primary);
+    }
+  }
+
+  // A wrapper item's head: the main block as a headline, plus a toggle carrying the summary.
+  .wrapItem .wrapHead {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 24px;
+  }
+
+  .wrapItem .wrapToggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: inherit;
+
+    .wrapSummary {
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+    }
+
+    &:hover .wrapSummary,
+    &:focus-visible .wrapSummary,
+    &:hover .caret,
+    &:focus-visible .caret {
+      color: var(--color-text-primary);
+    }
+  }
+
+  .wrapItem .wrapBody {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0 2px @indent;
+
+    .fieldRow {
+      min-height: 22px;
+    }
+  }
+
+  // Nested bodies: object fields indent one step; array items sit flat at the array's level.
+  .groupBody {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0 2px @indent;
+
+    .fieldRow {
+      min-height: 22px;
+    }
+  }
+
+  .groupBody.flat {
+    padding-left: 0;
+  }
+
+  // An array element that is a block ref or a plain scalar.
+  .groupBody .sub {
+    display: flex;
+
+    .scalar {
+      font-family: monospace;
+      font-size: 12px;
+    }
+  }
+}

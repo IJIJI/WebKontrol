@@ -1,0 +1,71 @@
+/* Zero values and define base */
+
+@import "./font/font.less";
+@import "./variables/themes.less";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  font-family: @font-base;
+  font-size: 14px;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+/* width */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.15);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: var(--color-text-info);
+  text-decoration: none;
+}
+
+input,
+select {
+  font-family: inherit;
+}
+
+// The one keyboard-focus convention: a ring for keyboard/assistive focus only, never for
+// clicks (a click's own feedback suffices, and a lingering post-click ring reads as leftover
+// chrome). Components style :hover/:active for pointer feedback and leave bare :focus alone,
+// so this stays the single focus indicator. Note browsers treat text inputs as always
+// focus-visible while focused, so textfields show the ring on click too, by design.
+// Grey and hugging the element, not accent-with-offset: the accent is the *changed* marker's
+// colour, and an outline is deliberately not a border so the two never fight over one box.
+:focus-visible {
+  outline: 2px solid var(--color-text-tertiary);
+  outline-offset: 0;
+}

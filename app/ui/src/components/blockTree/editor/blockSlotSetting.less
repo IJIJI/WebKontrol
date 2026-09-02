@@ -1,0 +1,58 @@
+// A single block slot's control: the chip plus its actions on one line.
+.blockSlot {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+// A slot list: a column of entry rows (chip left, remove right), like the read-only detail view
+// lists child blocks. The add button sits under them as its own row.
+.blockSlotList {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+
+  .slotEntry {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+
+    .slotBlock {
+      flex: 1;
+      justify-content: flex-start;
+    }
+  }
+
+  > .buttonComp {
+    align-self: flex-start;
+  }
+}
+
+// The block itself: a chip that opens it. Radius is concentric with the badge inside
+// (badge md + the padding around it).
+.slotBlock {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+
+  background: none;
+  border: 0;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: calc(@border-radius-md + 4px);
+  transition: background-color @button-animation-time ease;
+
+  &:hover {
+    background-color: var(--color-border-tertiary);
+  }
+}
+
+// The block description shown beside a block's name while picking one.
+.blockPickerHint {
+  color: var(--color-text-tertiary);
+  font-size: 0.85em;
+}

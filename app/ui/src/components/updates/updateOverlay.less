@@ -1,0 +1,109 @@
+// The blocking half of the update overlay (applying / restarting). The outcomes use the
+// normal Modal, so only this full-screen state needs its own styling.
+.updateOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: @z-modal;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 24px;
+
+  // Opaque on purpose: the page behind is about to stop being true.
+  background: var(--color-background-primary);
+  color: var(--color-text-acc);
+
+  .title {
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .detail {
+    max-width: 380px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-text-tertiary);
+  }
+}
+
+// The raw failure text, in the outcome modals.
+.updateError {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: @border-radius-sm;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border-tertiary);
+
+  font-family: @font-mono;
+  font-size: 11px;
+  color: var(--color-text-danger);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+// The circled icon shared by the blocking overlay and the outcome modals: a tinted disc
+// with the icon in the matching colour, so an outcome reads before the text does.
+.updateOverlay .badge,
+.updateOutcome .badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+
+  color: var(--color-text-acc);
+  background: color-mix(in srgb, var(--color-text-acc) 15%, transparent);
+
+  &.success {
+    color: var(--color-text-success);
+    background: color-mix(in srgb, var(--color-text-success) 15%, transparent);
+  }
+  &.danger {
+    color: var(--color-text-danger);
+    background: color-mix(in srgb, var(--color-text-danger) 15%, transparent);
+  }
+}
+
+// The outcome body: icon above the sentence, centred, like the overlay it replaces.
+.updateOutcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  padding: 6px 0 2px;
+  text-align: center;
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+
+  .badge {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+// Composited rotation: it keeps turning even while the main thread is busy mounting the
+// overlay, which a main-thread (SMIL) animation visibly does not.
+.updateOverlay .spinner {
+  animation: updateSpin 0.9s linear infinite;
+  will-change: transform;
+}
+
+@keyframes updateSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

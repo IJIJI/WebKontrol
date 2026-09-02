@@ -1,0 +1,47 @@
+// The full icon grid, shown inside the picker's modal (the inline strip is styled by
+// inlinePickerSetting.less).
+.iconModal {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 280px;
+
+  .textfield {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 7px 10px;
+    color: var(--color-text-primary);
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border-tertiary);
+    border-radius: @border-radius-md;
+  }
+
+  // Fixed height (not max-height) so filtering the grid never resizes the modal.
+  .iconGrid {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 4px;
+    height: 320px;
+    overflow-y: auto;
+
+    .iconOption {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+
+      color: var(--color-text-primary);
+      background-color: var(--color-background-secondary);
+      border: 1px solid var(--color-border-tertiary);
+      border-radius: @border-radius-sm;
+
+      &.selected {
+        border-color: var(--color-text-acc);
+        background-color: var(--color-background-acc);
+      }
+    }
+  }
+}

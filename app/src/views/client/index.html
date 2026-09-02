@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>WebKontrol View</title>
+    <!-- The default view stylesheet (page base + block classes), served from view.css next to
+         this file at this fixed path (VIEW_CLIENT_STYLE_PATH); keep the two in sync. -->
+    <link rel="stylesheet" href="/viewclient/view.css" />
+  </head>
+  <body>
+    <div id="view-root"></div>
+    <!-- Served by the backend (viewHostPage). The bundle is built by buildViewClient()
+         and served at this fixed path (VIEW_CLIENT_BUNDLE_PATH) — keep the two in sync. -->
+    <script type="module" src="/viewclient/main.js"></script>
+  </body>
+</html>

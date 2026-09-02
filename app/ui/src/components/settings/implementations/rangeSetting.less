@@ -1,0 +1,76 @@
+// The slider's own look, deliberately unscoped: it is also used outside a setting row (the
+// colour picker's alpha slider lives in a modal), and every slider in the app should match.
+@track-height: 6px;
+@thumb-size: 14px;
+
+// The filled section runs between `--fill-start` and `--fill-end` (set inline per value), not
+// from the left edge, so a range straddling zero fills out from its middle. Painting the track
+// ourselves is what makes that possible: a native range always fills from its start.
+.track-fill() {
+  height: @track-height;
+  border-radius: 3px; // half the track height
+  background: linear-gradient(
+    to right,
+    var(--color-border-tertiary) 0 var(--fill-start, 0%),
+    var(--color-text-acc) var(--fill-start, 0%) var(--fill-end, 0%),
+    var(--color-border-tertiary) var(--fill-end, 0%) 100%
+  );
+}
+
+.slider-thumb() {
+  width: @thumb-size;
+  height: @thumb-size;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-text-acc);
+  box-shadow: 0 0 0 1px var(--color-background-primary);
+  cursor: pointer;
+}
+
+.rangeSlider {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent; // the visible track is drawn on the track pseudo-elements
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    .track-fill();
+  }
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    .slider-thumb();
+    margin-top: -4px; // half the track height minus half the thumb, to centre it
+  }
+
+  &::-moz-range-track {
+    .track-fill();
+  }
+  // Firefox fills this from the left on its own, which is exactly what the gradient replaces.
+  &::-moz-range-progress {
+    background: transparent;
+  }
+  &::-moz-range-thumb {
+    .slider-thumb();
+  }
+
+  // Unset: the thumb sits at the value that would apply, so it must not read as a value the
+  // field actually holds. Faded, matching the empty number box beside it.
+  &.unset {
+    opacity: 0.5;
+  }
+}
+
+// Row layout: the slider takes the slack so the number box keeps a stable, readable width
+// instead of stretching with the row.
+.setting.field .input {
+  .rangeSlider {
+    flex: 1 1 auto;
+    min-width: 60px;
+    align-self: center;
+  }
+
+  .rangeNumber {
+    flex: 0 0 auto;
+    width: 72px;
+  }
+}

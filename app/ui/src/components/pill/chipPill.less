@@ -1,0 +1,31 @@
+@import "./pillMixins.less";
+
+.chipPill {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  height: 22px;
+  border-radius: 22px;
+  overflow: hidden;
+  padding: 2px 10px;
+  font-size: 12px;
+
+  // Default look.
+  color: var(--color-text-primary);
+  .transBgColor(var(--color-background-tertiary), 70%);
+  .transBrdrColor(var(--color-background-tertiary), 50%);
+  .boxShadow(var(--color-background-tertiary));
+
+  // User set color
+  // TODO: More styling options?
+  // TODO: Revise style
+  &.colored {
+    color: var(--chip-color);
+    .transBgColor(var(--chip-color), 15%);
+    .transBrdrColor(var(--chip-color), 50%);
+    .boxShadow(var(--chip-color));
+  }
+}

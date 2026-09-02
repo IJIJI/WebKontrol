@@ -1,0 +1,64 @@
+// Both axes side by side with a caption under each, the same shape as the box shorthand editor
+// so a size and a padding read alike. Nested deeply enough to outrank the stacked-input mixin's
+// blanket `width: 100%` on .textfield, the same collision the track editor hit.
+.setting.field .input {
+  .sizeAxes {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+  }
+
+  // Both axes share the width evenly, so the control keeps one footprint.
+  .sizeAxis {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+  }
+
+  .sizeControls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+
+    .textfield {
+      flex: 1 1 0;
+      min-width: 0;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      // The spinners cost more width than they earn at this size.
+      appearance: textfield;
+      -moz-appearance: textfield;
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        margin: 0;
+        appearance: none;
+      }
+    }
+
+    // The unit list is the narrow half: it only ever shows one short token.
+    select.textfield {
+      flex: 0 1 auto;
+      width: auto;
+      min-width: 62px;
+      text-align: left;
+    }
+  }
+
+  .sizeCaption {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

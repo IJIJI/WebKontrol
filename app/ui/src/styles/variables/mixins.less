@@ -1,0 +1,12 @@
+// Shared style mixins, auto-available everywhere via the variables.less injection.
+
+// The surface chrome of a floating overlay panel (dropdown menu, popover reveal).
+// Panel radius (lg), panel padding (4px) ≈ row radius (md), so item rows inside
+// should use @border-radius-md to stay concentric.
+.floatingPanel() {
+  background-color: var(--color-background-secondary);
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: @border-radius-lg;
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.4);
+  padding: 4px;
+}

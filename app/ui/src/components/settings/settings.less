@@ -1,0 +1,426 @@
+
+.setting {
+
+  @border-width: 1px;
+  @border-config: @border-width solid var(--color-border-tertiary);
+  @border-radius-container: @border-radius-lg;
+  @border-radius-fields: @border-radius-md;
+
+  @setting-gap: 6px;
+  @setting-group-gap: 20px;
+
+  @field-height: 30px;
+  // Below this field width, AUTO switches to the stacked (COMPACT) layout.
+  @field-stack-width: 400px;
+
+  // The inner column layout shared by COMPACT and AUTO-when-narrow: each input full-width under
+  // its label, with real height so selects aren't cramped.
+  .stacked-input() {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    height: auto;
+    gap: 6px;
+
+    & > * {
+      height: auto;
+    }
+
+    .textfield {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: @field-height;
+    }
+
+    // The same fixed height the wide row pins, so a field measures identically in every
+    // layout (stacked fields used to size naturally to ~33px). Inputs and selects only:
+    // textareas keep their multi-line height through the min-height above.
+    input.textfield,
+    select.textfield {
+      height: @field-height;
+    }
+
+    select.textfield {
+      min-width: 0;
+      // Same horizontal chrome as the wide row's select; the fixed height centers the text,
+      // so no vertical padding is needed.
+      padding: 0 28px 0 8px;
+    }
+  }
+
+  &.group {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+
+    width: 100%;
+
+    margin: 0 0 @setting-group-gap 0;
+
+    .label {
+      font-size: 11px; // TODO: Central font-size def
+      font-weight: 500;
+      color: var(--color-text-tertiary);
+      text-transform: uppercase;
+      margin: 0 0 3px 2px;
+    }
+
+    &.collapsible {
+      // Child combinators throughout: groups nest, and a descendant selector would let an open
+      // outer group rotate every chevron inside it, including those of folded inner groups.
+      > .toggle {
+        background: none;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+
+        svg {
+          transition: transform @button-animation-time ease;
+        }
+      }
+      &.open > .toggle svg {
+        transform: rotate(90deg);
+      }
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      width: 100%;
+
+      border-radius: @border-radius-container;
+
+      gap: @setting-gap;
+
+      .field {
+        margin: 0 !important;
+      }
+    }
+
+    // An array-of-objects field: items listed inside the group, each with a small header row
+    // (index label + remove) above its fields, and a trailing add button.
+    .arrayItem {
+      display: flex;
+      flex-direction: column;
+      gap: @setting-gap;
+
+      .arrayItemHead {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        .label {
+          margin: 0;
+        }
+
+        .arrayItemActions {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 4px;
+        }
+      }
+    }
+
+    // Joined: the group's rows share one card with dividers (like the read-only DetailList)
+    // instead of an island per field. For dense contexts, e.g. the block editor pane.
+    &.joined > .content {
+      background-color: var(--color-background-primary);
+      border: @border-config;
+      border-radius: @border-radius-container;
+      box-shadow: 2px 4px 10px 0 rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      gap: 0;
+
+      // Descendant (not child) so fields inside array items flatten too; nested joined groups
+      // re-apply their own card, so the double match is harmless. No row-level changed marker:
+      // the card's glow would be clipped by overflow:hidden, and the original input-level glow
+      // (.textfield.changed) plus the restore button already carry the signal.
+      .field {
+        background: none;
+        box-shadow: none;
+        border-radius: 0;
+        padding: 8px 14px;
+      }
+
+      > .field:not(:last-child),
+      > .arrayItem:not(:last-child) {
+        border-bottom: @border-config;
+      }
+
+      > .arrayItem {
+        gap: 0;
+
+        .arrayItemHead {
+          padding: 8px 14px 0;
+        }
+      }
+
+      > .arrayAdd {
+        display: flex;
+        padding: 8px 14px;
+      }
+
+      // Nested groups are cards themselves: inset them from the parent card's edges (matching
+      // the fields' side padding) instead of sharing its borders full-bleed.
+      .setting.group {
+        width: auto;
+        margin: 8px 14px;
+      }
+    }
+  }
+
+  &.field {
+    background-color: var(--color-background-primary);
+
+    width: 100%;
+    border-radius: @border-radius-container;
+    
+    transition: box-shadow @button-animation-time ease;
+    box-shadow: 0 0 6px 0 var(--color-border-tertiary);
+
+    &.changed {
+      box-shadow: 0 0 6px 0 var(--color-text-acc);
+    }
+
+    // height: 60px;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    margin: 0 0 @setting-group-gap 0;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    .titletext {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      height: 37px;
+      .title {
+        font-size: 14px;
+        color: var(--color-text-primary);
+      }
+      .subtitle {
+        font-size: 11px;
+        color: var(--color-text-tertiary);
+      }
+      // Replaces the subtitle while the field is invalid, so the row keeps its height.
+      .errortext {
+        font-size: 11px;
+        color: var(--color-text-danger);
+      }
+    }
+    .input {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+
+      height: @field-height;
+
+      gap: 4px;
+      & > * {
+        height: 100%;
+      }
+
+      .restore {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: @field-height;
+        width: @field-height;
+
+        padding: 4px;
+        color: var(--color-text-primary);
+        background-color: var(--color-background-secondary);
+
+        border: @border-config;
+        border-radius: @border-radius-fields;
+        
+      }
+
+      .buttonSelect {
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+
+        // height: 26px;
+
+        border: @border-config;
+        border-radius: @border-radius-fields;
+        overflow: hidden;
+
+        background-color: var(--color-border-tertiary);
+        gap: 2px;
+
+        button {
+          box-sizing: border-box;
+          border: 0;
+          padding: 4px 13px;
+          color: var(--color-text-primary);
+          transition: background-color @button-animation-time ease;
+
+          background-color: var(--color-background-secondary);
+
+          // The group clips at its rounded corners (overflow: hidden above), which swallows
+          // an outline drawn outside the button. Draw keyboard focus inside instead, or these
+          // buttons are the one control with no focus indicator at all.
+          &:focus-visible {
+            outline-offset: -2px;
+          }
+
+          &:hover, &:active {
+            background-color: var(--color-border-tertiary);
+
+          }
+          &.previous {
+            background-color: var(--color-border-secondary);
+          }
+          &.active {
+            background-color: var(--color-text-acc);
+
+          }
+        }
+
+        // The in-widget variant: segmented unit/mode controls that sit ABOVE a field rather
+        // than being the field. Named once here so every widget's minis match; deliberately
+        // smaller than the field-level group, which IS the input of its row.
+        &.mini button {
+          padding: 3px 8px;
+          font-size: 11px;
+        }
+      }
+
+      .textfield {
+        color: var(--color-text-primary);
+        background-color: var(--color-background-secondary);
+
+        border: @border-config;
+        border-radius: @border-radius-fields;
+        padding: 7px 10px;
+        box-sizing: border-box;
+
+        &.changed {
+          border-color: var(--color-text-acc);
+        }
+      }
+
+      textarea.textfield {
+        resize: vertical;
+        min-height: 60px;
+        font-family: inherit;
+      }
+
+      // The palette-opening swatch beside a colour text field (ColorTextSetting). Its own
+      // background is the current value, so a checker pattern shows through when it's empty.
+      .swatchButton {
+        flex: none;
+        width: @field-height;
+        height: @field-height;
+        padding: 0;
+        cursor: pointer;
+        border: @border-config;
+        border-radius: @border-radius-fields;
+        background-color: transparent;
+        background-image:
+          linear-gradient(45deg, var(--color-border-tertiary) 25%, transparent 25%),
+          linear-gradient(-45deg, var(--color-border-tertiary) 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, var(--color-border-tertiary) 75%),
+          linear-gradient(-45deg, transparent 75%, var(--color-border-tertiary) 75%);
+        background-size: 8px 8px;
+        background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+      }
+
+      // Inline caption for a sub-input (e.g. the long/short DisplayName fields).
+      .inputLabel {
+        // align-self: flex-start; // TODO: Better styling
+        display: flex;
+        align-items: center;
+        font-size: 11px;
+        color: var(--color-text-tertiary);
+        // writing-mode: vertical-rl;
+        // text-orientation: sideways-right;
+      }
+
+      // Read-only value shown for fields that have no editable widget yet.
+      .readonlyValue {
+        display: flex;
+        align-items: center;
+        font-size: 13px;
+        color: var(--color-text-tertiary);
+      }
+
+      // Native <select> needs room for its arrow + a min width so option text isn't clipped.
+      // Left padding matches the stacked select, so the two layouts read as one control.
+      select.textfield {
+        min-width: 120px;
+        padding: 0 28px 0 8px;
+      }
+
+    }
+
+    // An invalid field outranks the changed marker: its input border turns danger. Matches the
+    // changed rule's depth (.input .textfield) so equal specificity + later source order wins.
+    &.invalid .input .textfield {
+      border-color: var(--color-text-danger);
+    }
+
+    // COMPACT: always stacked (title/subtitle, then each labelled input full-width).
+    &.compact {
+      position: relative;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+
+      .titletext {
+        height: auto;
+        // Reserve the corner restore button's box so title/subtitle never slide under it,
+        // with or without a subtitle.
+        min-height: @field-height;
+        padding-right: @field-height + 8px;
+      }
+
+      .input {
+        .stacked-input();
+      }
+
+      // Restore pinned to the field's top-right corner, out of the stacked input flow.
+      .restore {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+      }
+    }
+
+    // AUTO: WIDE by default, stacking once the field is narrower than @field-stack-width. The
+    // field is its own container; the query restyles its children (a container can't query itself),
+    // so flex-wrap + full-basis children do the row→column switch.
+    &.auto {
+      container-type: inline-size;
+      flex-wrap: wrap;
+
+      @container (max-width: @field-stack-width) {
+        & > .titletext {
+          flex-basis: 100%;
+          height: auto;
+        }
+        & > .input {
+          flex-basis: 100%;
+          .stacked-input();
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+// TODO: Load colors from theme?
+.brandLogo {
+  @width-animation-time: @sidebar-animation-time; //TODO: Make general for the whole sidebar?
+  @opacity-animation-time: @width-animation-time * 0.8;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: min-content;
+
+  .projectName {
+    color: var(--color-text-primary);
+    font-family: @font-brand;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+
+    .web {
+      color: @color-acc;
+    }
+    .kontrol {
+      color: inherit;
+    }
+    .word {
+      display: flex;
+      flex-direction: row;
+
+      .trail {
+        display: inline-block;
+        overflow: hidden;
+        max-width: 6em;
+        opacity: 1;
+        transition:
+          max-width @width-animation-time ease,
+          opacity @opacity-animation-time ease;
+        margin: 0;
+        padding: 0;
+
+        &.collapsed {
+          max-width: 0;
+          opacity: 0;
+        }
+      }
+    }
+  }
+
+  .subtext {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    width: 90%;
+    justify-content: space-between;
+
+    font-family: @font-mono;
+    color: var(--color-text-secondary);
+
+    .version {
+      color: @color-acc;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    .divider {
+      height: 2px;
+      background-color: var(--color-text-tertiary);
+      flex-grow: 1;
+      opacity: 1;
+      transition:
+        flex-grow @width-animation-time * 0.5 ease,
+        opacity @opacity-animation-time * 0.5 ease;
+
+      &.collapsed {
+        flex-grow: 0;
+        opacity: 0;
+      }
+    }
+    .producer {
+      color: inherit;
+      display: inline-block;
+      overflow: hidden;
+      max-width: 5em;
+      opacity: 1;
+      transition:
+        max-width @width-animation-time ease,
+        opacity @opacity-animation-time ease;
+      font-weight: bold;
+
+      &.collapsed {
+        max-width: 0;
+        opacity: 0;
+      }
+    }
+  }
+}

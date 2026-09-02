@@ -1,0 +1,45 @@
+// A block's icon + badge as one unit. Geometry (the icon is what the tree's guide lines meet) is
+// owned by the tree; this only handles the icon↔badge spacing and the icon colour.
+.blockChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+
+  .blockIcon {
+    flex: none;
+    color: var(--color-text-secondary);
+  }
+
+  &.unsaved {
+    gap: 6px;
+
+    .blockBadge {
+      outline: 2px solid var(--color-text-acc);
+      outline-offset: 2px;
+    }
+  }
+
+  // Switched off: dimmed, so a glance down the tree separates what renders from what does not.
+  // The markers stay at full strength; they are what explains the dimming.
+  &.disabled {
+    .blockIcon,
+    .blockBadge {
+      opacity: 0.45;
+    }
+  }
+
+  // The markers after the badge (disabled, invalid, ...). One row, so a block can carry several.
+  .blockMarker {
+    display: inline-flex;
+    flex: none;
+
+    &.warning {
+      color: var(--color-text-danger);
+    }
+
+    &.off {
+      color: var(--color-text-tertiary);
+    }
+  }
+}

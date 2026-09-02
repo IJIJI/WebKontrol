@@ -1,0 +1,96 @@
+// The box shorthand editor: a row of controls (unit, link mode, raw toggle) over a row of
+// values with a caption under each. Modelled on the dimension controls in Elementor/Webflow,
+// where the captions are what make four anonymous boxes readable.
+.setting.field .input {
+  .boxEditor {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .boxHead {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    // The segmented unit/mode controls are the shared .buttonSelect.mini (settings.less).
+  }
+
+  // Pushes the controls right while giving the raw-mode notice somewhere to sit.
+  .boxHint {
+    flex: 1 1 auto;
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+  }
+
+  .boxSides {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  // Every input shares the width evenly, so the control keeps one footprint whether it shows
+  // one value or four and only the subdivision changes.
+  .boxSide {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+
+    .textfield {
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      // The spinners cost more width than they earn at this size.
+      appearance: textfield;
+      -moz-appearance: textfield;
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+  }
+
+  .boxCaption {
+    font-size: 10px;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .boxToggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 26px;
+    height: 24px;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    background-color: var(--color-background-secondary);
+    border: 1px solid var(--color-border-tertiary);
+    border-radius: @border-radius-md;
+    transition: color @button-animation-time ease, border-color @button-animation-time ease;
+
+    &.active {
+      color: var(--color-text-acc);
+      border-color: var(--color-text-acc);
+    }
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}

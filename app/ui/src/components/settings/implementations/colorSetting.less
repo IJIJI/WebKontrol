@@ -1,0 +1,111 @@
+// The full palette + custom swatch, shown inside the colour picker's modal (the inline strip is
+// styled by inlinePickerSetting.less).
+.colorModal {
+  min-width: 240px;
+  // Gap between a swatch and its selected ring.
+
+  .colorSwatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .swatch {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: @border-radius-md;
+
+      &.selected {
+        outline: 2px solid var(--color-text-acc);
+      }
+    }
+
+    // The native custom picker, styled like a swatch (colour fills edge-to-edge), with a pencil.
+    .swatch.custom {
+      overflow: hidden;
+      border-color: var(--color-border-secondary);
+
+      input[type="color"] {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        border: none;
+        background: none;
+        cursor: pointer;
+
+        &::-webkit-color-swatch-wrapper {
+          padding: 0;
+        }
+        &::-webkit-color-swatch {
+          border: none;
+          border-radius: 0;
+        }
+        &::-moz-color-swatch {
+          border: none;
+        }
+      }
+
+      .swatchPencil {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+      }
+    }
+  }
+
+  // Alpha, shown only for hex values (nothing else carries a channel to drive). The track is
+  // the colour fading out over a checkerboard, so it reads as transparency rather than a number.
+  .colorAlpha {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+
+    .alphaLabel {
+      font-size: 11px;
+      color: var(--color-text-tertiary);
+    }
+
+    .alphaSlider {
+      flex: 1 1 auto;
+      min-width: 80px;
+
+      // Both engines need the track painted on their own pseudo-element.
+      &::-webkit-slider-runnable-track {
+        .alpha-track();
+      }
+      &::-moz-range-track {
+        .alpha-track();
+      }
+    }
+
+    .alphaValue {
+      flex: 0 0 auto;
+      width: 36px;
+      text-align: right;
+      font-size: 11px;
+      color: var(--color-text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+// Transparent-to-opaque over the usual checkerboard, the standard way to show an alpha ramp.
+.alpha-track() {
+  background:
+    linear-gradient(to right, transparent, var(--alpha-color, #fff)),
+    conic-gradient(
+        var(--color-border-tertiary) 0deg 90deg,
+        transparent 90deg 180deg,
+        var(--color-border-tertiary) 180deg 270deg,
+        transparent 270deg 360deg
+      )
+      0 0 / 8px 8px;
+}
