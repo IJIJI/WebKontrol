@@ -2,18 +2,18 @@
 
 [![License](https://img.shields.io/github/license/IJIJI/WebKontrol)](https://github.com/IJIJI/WebKontrol/blob/main/LICENSE) [![Version](https://img.shields.io/github/v/release/IJIJI/WebKontrol?display_name=tag&include_prereleases)](https://github.com/IJIJI/WebKontrol/releases) ![Last Commit](https://img.shields.io/github/last-commit/IJIJI/WebKontrol)
 
-WebKontrol turns any machine into a remote controlled display. It can drive multiple displays and show websites and views built in the blockbuilder. WebKontrol features a webinterface and remote control through platforms like Bitfocus Companion.
+WebKontrol turns any machine into a remote-controlled display. It can drive multiple displays and show websites and views built in the blockbuilder. WebKontrol features a web interface and remote control through platforms like Bitfocus Companion.
 
 <img src="img/admin_interface_2.png" width="400"/> <img src="img/clock_interface.png" width="400"/>
 
 > [!WARNING]
-> **We are currently in the midst of a full rewrite to version 3, but its in the early stages.** It works, but we cannot gaurantee complete stability yet. Use **[v2](#v2-stable)** in live production scenarios for now, as it has been thoroughly tested.
+> **We are currently in the midst of a full rewrite to version 3, but it's in the early stages.** It works, but we cannot guarantee complete stability yet. Use **[v2](#v2-stable)** in live production scenarios for now, as it has been thoroughly tested.
 
 ## Backstory
 
 I originally built WebKontrol for the live-streaming industry. It allows me to display a clock or use something like [stagetimer.io](https://stagetimer.io/). It turned out to work for information displays and touch kiosks just as well, offering more remote control than most existing solutions I have tried. 
 
-The first two versions only supported a single screen displaying an url. In the latest version this has been expanded to offer multiple outputs, an expansive view builder, plugin support and a usefull web interface. We are currently implementing the plugin support, which would enable data sources from different platforms and conditional rendering.
+The first two versions only supported a single screen displaying a URL. In the latest version, this has been expanded to offer multiple outputs, an expansive view builder, plugin support, and a useful web interface. We are currently implementing the plugin support, which would enable data sources from different platforms and conditional rendering.
 
 I am planning to sell pre-configured boxes with SDI outputs. If you are interested, [contact me](mailto:shop@synapt.nl).
 
@@ -21,11 +21,11 @@ I am planning to sell pre-configured boxes with SDI outputs. If you are interest
 
 **Puppets**: Each display that is launched. A puppet handles crashes and failed page loads. All information is displayed in the web interface.
 
-**Views**: A view is a page assignable to a *puppet*. Currently there are two types: A website view, which is just an url and a block view, which can be built out. The block view can also display websites.
+**Views**: A view is a page assignable to a *puppet*. Currently there are two types: A website view, which is just a URL and a block view, which can be built out. The block view can also display websites.
 
 # Getting Started
 
-WebKontrol is Node-based and runs wherever Node runs. It is tested on **Windows 11** and **Raspberry Pi OS Full** on the Raspberry Pi 4. We are currently working on pre-build Raspberry Pi binaries, a Docker image and a Windows installer.
+WebKontrol is Node-based and runs wherever Node runs. It is tested on **Windows 11** and **Raspberry Pi OS Full** on the Raspberry Pi 4. We are currently working on pre-built Raspberry Pi binaries, a Docker image, and a Windows installer.
 
 Installed systems can be updated from the admin UI, under settings.
 
@@ -38,7 +38,7 @@ Installed systems can be updated from the admin UI, under settings.
 The installer checks these and tells you what is missing; it never installs anything itself.
 
 ## Install
-Pick an install directory. In the following example `/opt/webkontrol` is used/
+Pick an install directory. In the following example, `/opt/webkontrol` is used
 
 ```shell
 curl -fsSL https://raw.githubusercontent.com/ijiji/WebKontrol/main/install.mjs -o install.mjs
