@@ -7,7 +7,7 @@ WebKontrol turns any machine into a remote controlled display. It can drive mult
 <img src="img/admin_interface_2.png" width="400"/> <img src="img/clock_interface.png" width="400"/>
 
 > [!WARNING]
-> **We are currently in the midst of a full rewrite to version 3, but its in the early stages.** It works, but we cannot gaurantee complete stability yet. Use **[v2](#v2-Stable)** in live production scenarios for now, as it has been thoroughly tested.
+> **We are currently in the midst of a full rewrite to version 3, but its in the early stages.** It works, but we cannot gaurantee complete stability yet. Use **[v2](#v2-stable)** in live production scenarios for now, as it has been thoroughly tested.
 
 ## Backstory
 
@@ -15,7 +15,7 @@ I originally built WebKontrol for the live-streaming industry. It allows me to d
 
 The first two versions only supported a single screen displaying an url. In the latest version this has been expanded to offer multiple outputs, an expansive view builder, plugin support and a usefull web interface. We are currently implementing the plugin support, which would enable data sources from different platforms and conditional rendering.
 
-I am planning to sell pre-configured boxes with SDI outputs in my store. If you are interested, [contact me](mailto:shop@synapt.nl).
+I am planning to sell pre-configured boxes with SDI outputs. If you are interested, [contact me](mailto:shop@synapt.nl).
 
 ## Terminology
 
