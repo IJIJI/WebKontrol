@@ -1,4 +1,5 @@
 import { type JSX } from "react/jsx-runtime";
+import { type ReactNode } from "react";
 
 import "./settings.less";
 import { classNames } from "../../common/helpers/classNames";
@@ -10,7 +11,7 @@ export function SettingGroup({
   title,
   joined,
 }: {
-  children: JSX.Element | JSX.Element[];
+  children: ReactNode;
   title: string;
   joined?: boolean;
 }): JSX.Element {

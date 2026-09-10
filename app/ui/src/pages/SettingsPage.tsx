@@ -134,6 +134,10 @@ export default function SettingsPage(): JSX.Element {
             setValue={(value) => viewManagerDraft.setField("default_load_timeout", value === undefined ? undefined : value * 1000)}
         />
       </SettingGroup>
+      {/* Placeholders hide in prod, like the dev-only sidebar links: a control that does
+          nothing, or a status that is hard-coded, reads as broken rather than coming soon. */}
+      {import.meta.env.DEV && (
+      <>
       <SettingGroup title="Configuration">
         <ButtonSetting 
           title="Export Config"
@@ -158,14 +162,19 @@ export default function SettingsPage(): JSX.Element {
           fillStyle={FillStyle.SKELETON}
         />
       </SettingGroup>
+      </>
+      )}
       <SettingGroup title="About">
+        {import.meta.env.DEV && (
         <BaseSetting
           title="Status"
           subtitle="SystemStatus"
         >
           <StatusPill status={ConnectionState.ONLINE}/>
         </BaseSetting>
+        )}
         <UpdateSettings />
+        {import.meta.env.DEV && (
         <BaseSetting
           title="Hardware"
           subtitle="Hardware Type"
@@ -174,6 +183,7 @@ export default function SettingsPage(): JSX.Element {
             <span>WebKontrol v3</span>
           </InfoPill>
         </BaseSetting>
+        )}
       </SettingGroup>
     </>
   );
