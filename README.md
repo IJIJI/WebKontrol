@@ -42,17 +42,10 @@ Pick an install directory. In the following example, `/opt/webkontrol` is used
 
 ```shell
 curl -fsSL https://raw.githubusercontent.com/ijiji/WebKontrol/main/install.mjs -o install.mjs
-node install.mjs /opt/webkontrol
-```
-
-This installs the latest stable release. Releases marked **pre-release** on GitHub are never installed by default: to install one deliberately, pass its tag:
-
-```shell
 node install.mjs /opt/webkontrol --version v3.0.0
 ```
 
-> [!NOTE]
-> While v3 is in early access, v3.0.0 is published as a pre-release, so the `--version` form above is the one to use.
+v3.0.0 is published as a pre-release, and the installer never installs pre-releases on its own, so the tag is passed explicitly. Once a stable v3 release exists, drop `--version` and the installer picks the latest stable release by itself.
 
 The installer writes a commented starter `config/config.yaml`; edit it to add your displays (or prepare the file beforehand, the installer keeps an existing one). A minimal config with one display:
 
@@ -170,12 +163,16 @@ If the page that is requested fails, WebKontrol will retry every 30 seconds. Whi
 
 v2 is the previous generation: one browser, one URL, a small web panel with a clock. It has run in production for a long time and is the recommended choice when you need something proven today.
 
-- Download: the source archive of the [v2.0.0 release](https://github.com/IJIJI/WebKontrol/releases/tag/v2.0.0).
-- Install and Raspberry Pi guide: the [README at v2.0.0](https://github.com/IJIJI/WebKontrol/blob/v2.0.0/README.md).
+Clone the [v2.0.0 release](https://github.com/IJIJI/WebKontrol/releases/tag/v2.0.0) by its tag:
+
+```shell
+sudo git clone https://github.com/IJIJI/WebKontrol.git /opt/WebKontrol --branch v2.0.0
+```
+
+Dependencies, the Raspberry Pi steps and autostart are in the [README at v2.0.0](https://github.com/IJIJI/WebKontrol/blob/v2.0.0/README.md). Its own clone line pins an older tag; use the command above instead.
 
 v2 and v3 do not share a config or database; moving a display from v2 to v3 is a fresh install of v3.
 
-<!-- 
 # Develop
 
 The repository is the developer setup; end users install with the installer above and never need it.
@@ -194,4 +191,4 @@ yarn dev
 - `yarn e2e:update` runs the update system end to end against a local fake GitHub (real installer, real supervisor, real tarballs; about 15 minutes). `--hold` keeps the managed system running for clicking through the Updates UI by hand.
 - `yarn build` produces `dist/`; `yarn serve` runs it under the supervisor, the way an installed system runs.
 
-Releases are made on GitHub (tag `vX.Y.Z` matching `app/package.json`, notes, the pre-release flag); the workflow builds the update tarball and attaches it, and installed systems see it on their next check. -->
+Releases are made on GitHub (tag `vX.Y.Z` matching `app/package.json`, notes, the pre-release flag); the workflow builds the update tarball and attaches it, and installed systems see it on their next check.
