@@ -1,0 +1,63 @@
+@share-gap: 12px; // one value for every grid gap so the QR + two tiles read as a single grid
+
+.shareBody {
+  display: flex;
+  flex-direction: column;
+  gap: @share-gap;
+}
+
+// Two columns: the QR block and the stacked actions.
+.shareMain {
+  display: flex;
+  gap: @share-gap;
+}
+
+// White so the QR scans in any theme; padding gives it a quiet zone inside the card.
+.shareQr {
+  flex-shrink: 0;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: @border-radius-md;
+  line-height: 0; // drop the inline-svg descender gap
+}
+
+.shareActions {
+  flex: 1; // fill the width beside the QR
+  display: flex;
+  flex-direction: column;
+  gap: @share-gap;
+
+  // Two rows split the QR's height evenly, so the pair reads as one tiled block with the QR.
+  // Centre each tile's icon+label (Button defaults to space-between, which looks stranded when wide).
+  .buttonComp {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+// The link as a field with the copy button tucked inside its right edge.
+.shareUrlRow {
+  position: relative;
+}
+
+.shareUrlField {
+  width: 100%;
+  padding: 7px 36px 7px 10px; // right padding clears the copy button
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: @border-radius-md;
+  background-color: transparent;
+  color: var(--color-text-secondary);
+
+  font-family: monospace;
+  font-size: 0.8em;
+  box-sizing: border-box;
+  text-overflow: ellipsis; // clip a long URL tidily when unfocused
+  user-select: all;
+}
+
+.shareUrlRow .copyButton {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}

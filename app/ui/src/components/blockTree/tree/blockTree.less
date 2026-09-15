@@ -1,0 +1,85 @@
+// A compact block tree with rounded CSS guide lines (file-explorer style), in the detail card.
+
+// Guide geometry. @connect is the distance from a row's top down to the badge's vertical centre,
+// so the elbow always meets a badge in the middle of its side. The first child reuses the same
+// value to reach *up* to the parent badge, connecting both ends at matching mid-height.
+@guide-color: var(--color-text-tertiary);
+@guide-w: 2.5px;
+@guide-radius: 2.5px;
+@elbow-x: 10px; // trunk sits this far left of the badge; also the horizontal tick's length
+@row-pad-v: 4px; // must match .nodeRow vertical padding
+@row-pad-l: 4px; // must match .nodeRow left padding
+@badge-h: 21.6px; // BlockBadge box: 12px * 1.3 line-height + 2*2 padding + 2*1 border
+@half: (@badge-h / 2);
+@connect: (@row-pad-v + @half); // row top -> badge vertical centre (tick meets child badge here)
+// Indent each level so the trunk falls half a badge-height right of the parent badge's left edge.
+@indent: (@elbow-x + @half);
+
+.blockTree {
+  display: flex;
+  flex-direction: column;
+  min-height: 20rem;
+
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: @border-radius-lg;
+  box-shadow: 2px 4px 10px 0 rgba(0, 0, 0, 0.3);
+  padding: 10px 14px;
+  overflow-x: auto;
+
+  font-size: 13px;
+
+  .treeNode {
+    position: relative;
+  }
+
+  .nodeRow {
+    display: flex;
+    align-items: center;
+    padding: @row-pad-v 0 @row-pad-v @row-pad-l;
+    // The block's icon + badge are a BlockChip; the icon is what the guide lines meet.
+  }
+
+  // Each nested level is indented; the guides are drawn into that indent.
+  .children {
+    padding-left: @indent;
+  }
+
+  // A disabled block takes its subtree out of the view with it: dim the descendants, guides
+  // included. The block's own chip dims itself (BlockChip), so it is not faded twice.
+  .treeNode.disabled > .children {
+    opacity: 0.45;
+  }
+
+  // Rounded elbow (::before) + continuation trunk (::after) for each child. The root row lives
+  // directly under .blockTree, so it gets no connector.
+  .children > .treeNode {
+    // Elbow: vertical drop to the badge's mid-height, then a rounded corner into the tick.
+    &::before {
+      content: "";
+      position: absolute;
+      left: -@elbow-x;
+      top: 0;
+      width: @elbow-x;
+      height: @connect;
+      border-left: @guide-w solid @guide-color;
+      border-bottom: @guide-w solid @guide-color;
+      border-bottom-left-radius: @guide-radius; // slightly rounded, chunky corner
+    }
+
+    // Continuation trunk down to the next sibling.
+    &::after {
+      content: "";
+      position: absolute;
+      left: -@elbow-x;
+      top: 0;
+      height: 100%;
+      border-left: @guide-w solid @guide-color;
+    }
+
+    // Last child: the trunk stops at the elbow (no continuation below it).
+    &:last-child::after {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,25 @@
+.statusDotContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+
+  .statusDot {
+    @dot-size: 9px;
+    --dot-color: var(--color-text-primary);
+
+    &.accent { --dot-color: var(--color-text-acc); }
+    &.success { --dot-color: var(--color-text-success); }
+    &.danger { --dot-color: var(--color-text-danger); }
+    &.warning { --dot-color: var(--color-text-warning); }
+    &.info { --dot-color: var(--color-text-info); }
+
+    display: block;
+    height: @dot-size;
+    width: @dot-size;
+    border-radius: @dot-size;
+    background-color: var(--dot-color);
+    box-shadow: 0 0 8px 2px var(--dot-color);
+  }
+}

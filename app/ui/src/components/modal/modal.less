@@ -1,0 +1,98 @@
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: @z-modal;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modalPanel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+
+  background-color: var(--color-background-secondary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: @border-radius-lg;
+  box-shadow: 0 12px 48px -8px rgba(0, 0, 0, 0.5);
+
+  &.sm {
+    max-width: 400px;
+  }
+  &.md {
+    max-width: 560px;
+  }
+  &.lg {
+    max-width: 840px;
+  }
+
+  .modalHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border-tertiary);
+
+    .modalTitle {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .modalClose {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: 0;
+      padding: 4px;
+      cursor: pointer;
+      color: var(--color-text-tertiary);
+      border-radius: @border-radius-md;
+
+      &:hover,
+      &:focus-visible {
+        color: var(--color-text-primary);
+        background-color: var(--color-background-tertiary);
+      }
+    }
+  }
+
+  .modalBody {
+    padding: 16px;
+    overflow-y: auto;
+
+    // Stack body content (text, setting fields, …) with breathing room between pieces.
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    p {
+      margin: 0;
+    }
+
+    .setting.field {
+      margin: 0;
+    }
+  }
+
+  .modalFoot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+
+    padding: 12px 16px;
+    border-top: 1px solid var(--color-border-tertiary);
+  }
+}

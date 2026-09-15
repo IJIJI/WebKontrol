@@ -1,0 +1,109 @@
+.page-base {
+  position: relative;
+  height: 100vh; // TODO: Allow scroll/bigger height -> min-heigt instead of height on mobile.
+  padding: 40px 0;
+  background-color: var(
+    --color-background-primary
+  ); // TODO: Also defined in app base. Remove?
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .page-layout,
+  .page-layout * {
+    z-index: @z-content;
+  }
+
+  .page-layout {
+    width: min(80%, 1400px);
+    flex-grow: 1;
+
+    display: grid;
+    grid-template-areas:
+      "header-logo header-title"
+      "sidebar content";
+    grid-template-columns: min-content auto;
+    grid-template-rows: min-content 1fr;
+    // .content (content.less) sets align-items: flex-start for its flex layout;
+    // that leaks into this grid and stops header cells from stretching to equal height.
+    align-items: stretch;
+
+    border-radius: @border-radius-xl;
+    // gap: @gap-m @gap-l;
+
+    .page-header.logo {
+      padding: @gap-m;
+      grid-area: header-logo;
+
+      box-sizing: border-box !important;
+
+      border-right: 1px solid var(--color-background-primary) !important;
+      border-bottom: 1px solid var(--color-background-primary) !important;
+    }
+    .page-header.title {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: @gap-m;
+      grid-area: header-title;
+
+      border-bottom: 1px solid var(--color-background-primary) !important;
+      .title-text {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+
+        text-transform: capitalize;
+
+        .label {
+          color: var(--color-text-tertiary);
+          transition: @button-animation-time color ease;
+
+          &.link:hover,
+          &.link:active {
+            color: var(--color-text-acc);
+          }
+
+          &:last-child {
+            color: var(--color-text-primary);
+          }
+        }
+      }
+      .back {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 6px;
+
+        color: var(--color-text-secondary);
+        transition: @button-animation-time color ease;
+        text-transform: capitalize;
+        font-size: 18px;
+
+        &:hover {
+          color: var(--color-text-primary);
+        }
+      }
+    }
+    .page-sidebar {
+      grid-area: sidebar;
+      border-right: 1px solid var(--color-background-primary) !important;
+    }
+    .page-content {
+      grid-area: content;
+
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      section.content:has(.bottomBar) {
+        padding-bottom: 80px !important;
+      }
+    }
+  }
+}

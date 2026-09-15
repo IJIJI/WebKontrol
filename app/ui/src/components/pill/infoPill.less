@@ -1,0 +1,85 @@
+@import "./pillMixins.less";
+
+// Shape comes from ChipPill (InfoPill renders one); this only layers the semantic role colour on
+// top, per type and filled/skeleton style.
+.infoPill {
+  @filled: 70%;
+  @skeleton: 20%;
+  @border: 50%;
+
+  &,
+  &.default {
+    color: var(--color-text-primary);
+    .transBrdrColor(var(--color-background-tertiary), @border);
+    .boxShadow(var(--color-background-tertiary));
+
+    &.filled {
+      .transBgColor(var(--color-background-tertiary), @filled);
+    }
+    &.skeleton {
+      .transBgColor(var(--color-background-tertiary), @skeleton);
+      .transBrdrColor(var(--color-background-secondary), @border);
+    }
+  }
+  &.accent {
+    color: var(--color-text-acc);
+    .transBrdrColor(var(--color-background-acc), @border);
+    .boxShadow(var(--color-background-acc));
+
+    &.filled {
+      color: white;
+      .transBgColor(var(--color-background-acc), @filled);
+    }
+    &.skeleton {
+      .transBgColor(var(--color-background-acc), @skeleton);
+    }
+  }
+  &.success {
+    color: var(--color-text-success);
+    .transBrdrColor(var(--color-background-success), @border);
+    .boxShadow(var(--color-background-success));
+
+    &.filled {
+      .transBgColor(var(--color-background-success), @filled);
+    }
+    &.skeleton {
+      .transBgColor(var(--color-background-success), @skeleton);
+    }
+  }
+  &.danger {
+    color: var(--color-text-danger);
+    .transBrdrColor(var(--color-background-danger), @border);
+    .boxShadow(var(--color-background-danger));
+
+    &.filled {
+      .transBgColor(var(--color-background-danger), @filled);
+    }
+    &.skeleton {
+      .transBgColor(var(--color-background-danger), @skeleton);
+    }
+  }
+  &.warning {
+    color: var(--color-text-warning);
+    .transBrdrColor(var(--color-background-warning), @border);
+    .boxShadow(var(--color-background-warning));
+
+    &.filled {
+      .transBgColor(var(--color-background-warning), @filled);
+    }
+    &.skeleton {
+      .transBgColor(var(--color-background-warning), @skeleton);
+    }
+  }
+  &.info {
+    color: var(--color-text-info);
+    .transBrdrColor(var(--color-background-info), @border);
+    .boxShadow(var(--color-background-info));
+
+    &.filled {
+      .transBgColor(var(--color-background-info), @filled);
+    }
+    &.skeleton {
+      .transBgColor(var(--color-background-info), @skeleton);
+    }
+  }
+}

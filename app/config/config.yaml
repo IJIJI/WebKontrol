@@ -1,0 +1,16 @@
+# WebKontrol configuration. The admin UI manages runtime settings; this file holds
+# what must exist before the app starts.
+#
+# For development, copy this file to config.local.yaml (gitignored): when that file
+# exists it is loaded INSTEAD of this one, never merged with it.
+
+# Displays this system drives. Example:
+# puppets:
+#   - id: hall-1
+#     name:
+#       long: Hallway display
+#       short: HALL1
+puppets: []
+
+web:
+  port: 80

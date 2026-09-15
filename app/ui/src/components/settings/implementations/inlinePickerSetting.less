@@ -1,0 +1,75 @@
+.inlineStrip {
+  @chip-size: 28px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+
+  .pickerChip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: @chip-size;
+    height: @chip-size;
+    padding: 0;
+    cursor: pointer;
+
+    color: var(--color-text-primary);
+    background-color: var(--color-background-secondary);
+    border: 2px solid transparent;
+    border-radius: @border-radius-md;
+
+    // Current / new value: an accent ring set off the chip, so it reads on top of a colour swatch
+    // (a plain border blends into the swatch colour).
+    &.selected {
+      background-color: var(--color-background-acc);
+      outline: 2px solid var(--color-text-acc);
+    }
+    // Saved value (when it isn't the current one): the ButtonSelect `.previous` grey fill for icon
+    // chips, plus a grey ring so it also reads on a colour swatch.
+    &.saved {
+      background-color: var(--color-border-secondary);
+      outline: 2px solid var(--color-text-tertiary);
+    }
+
+    // Keep the neutral grey boundary even when selected — the accent outline ring (from `.selected`)
+    // is the sole selection cue, so it doesn't read as a double line.
+    &.clear {
+      color: var(--color-text-danger);
+      background: transparent;
+      border: 2px solid var(--color-border-secondary);
+    }
+
+    &.more {
+      color: var(--color-text-secondary);
+      background: transparent;
+    }
+
+    // A colour swatch fills its chip; an icon just centres. Its radius is the chip's minus the
+    // border so the two curves stay concentric. Centres a custom-colour pencil marker.
+    .swatchFill {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      border-radius: calc(@border-radius-md - 2px);
+    }
+  }
+}
+
+// Pencil marker overlaid on a custom (out-of-palette) colour swatch, inline and in the modal.
+.swatchPencil {
+  color: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.7));
+  pointer-events: none;
+}
+
+// COMPACT: the chips stretch to fill the full width (still one row, no wrap).
+.setting.field.compact .inlineStrip .pickerChip {
+  flex: 1 1 0;
+  min-width: 28px;
+}

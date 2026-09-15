@@ -1,0 +1,143 @@
+import type { PuppetOrchestratorRuntime } from "../orchestration/puppet/schema";
+import type { PuppetDataBundle } from "../puppet/types/model";
+import type { PuppetKey, PuppetRuntime } from "../puppet/types/schema";
+import type { EntityAppearance } from "../common/entityAppearance/schema";
+import type { SystemInfo } from "../system/model";
+import type { SystemRuntime } from "../system/schema";
+import type { UpdateInfo } from "../system/update/model";
+import type { ViewManagerInfo } from "../views/types/model";
+import type { UiRuntime } from "../ui/schema";
+import type { AnyViewConfig, ViewKey, ViewManagerRuntime } from "../views/types/schema";
+
+export interface WebServerRuntimeState {// Only Runtime Configs. Standard configs are done from the config file.
+  system: SystemRuntime;
+  puppetOrchestrator: PuppetOrchestratorRuntime;
+  ui:  UiRuntime;
+  view: ViewManagerRuntime;
+}
+export interface WebServerInfoState {
+  system: SystemInfo;
+  view: ViewManagerInfo;
+  update: UpdateInfo;
+}
+
+export interface WebServerState {
+  puppets: PuppetDataBundle[];
+  views: Record<ViewKey, AnyViewConfig>;
+  runtime: WebServerRuntimeState; // TODO: Rename to runtime?
+  info: WebServerInfoState;
+}
+
+export interface PuppetWebhandlers {
+  updateOrchestratorRuntime: (
+    runtime: Partial<PuppetOrchestratorRuntime>,
+  ) => Promise<void>;
+  updateRuntime: (
+    id: PuppetKey,
+    runtime: Partial<PuppetRuntime>,
+  ) => Promise<void>;
+  updateAppearance: (
+    id: PuppetKey,
+    appearance: EntityAppearance,
+  ) => Promise<void>;
+  assignView: (
+    puppet: PuppetKey,
+    view: ViewKey,
+  ) => Promise<void>;
+  unassignView: (
+    puppet: PuppetKey,
+  ) => Promise<void>;
+  /** Re-navigate to the current assignment now, instead of waiting out a pending retry. */
+  reload: (
+    puppet: PuppetKey,
+  ) => Promise<void>;
+}
+export interface SystemWebhandlers {
+  updateRuntime: (config: Partial<SystemRuntime>) => void | Promise<void>;
+}
+export interface UpdateWebhandlers {
+  /** Refresh the release list; the result rides the SSE state payload, not the response. */
+  check: () => Promise<void>;
+  /** Start applying a release by version tag. Resolves once the update is legitimate and
+   *  running, not once it is done: a successful apply ends in a restart. */
+  apply: (version: string) => Promise<void>;
+  /** Mark the last update's outcome as seen, so it stops being reported as a problem. */
+  acknowledge: () => Promise<void>;
+  // TODO: Check if there is a status check needed for during the update.
+}
+export interface UiWebhandlers {
+  updateRuntime: (runtime: Partial<UiRuntime>) => void | Promise<void>;
+}
+export interface ViewWebhandlers {
+  create: (config: AnyViewConfig) => Promise<ViewKey>;
+  update: (key: ViewKey, config: AnyViewConfig) => Promise<void>;
+  delete: (key: ViewKey) => Promise<void>;
+  updateRuntime: (runtime: Partial<ViewManagerRuntime>) => Promise<void>;
+}
+
+export interface WebServerMutationHandlers { // TODO: UiManager to manage ui settings?
+  system: SystemWebhandlers;
+  update: UpdateWebhandlers;
+  ui: UiWebhandlers;
+  puppet: PuppetWebhandlers;
+  view: ViewWebhandlers;
+}
+
+//* Route registration (the seed of plugin HTTP endpoints):
+export type RouteMethod = "get" | "post" | "put" | "patch" | "delete";
+
+export interface RouteRequest {
+  params: Record<string, string>;
+  query: Record<string, unknown>;
+  body: unknown; // untrusted; a handler that reads it must validate (e.g. with zod) first
+}
+
+// A framework-agnostic response a route handler returns; WebServer maps it to express.
+export interface RouteResponse {
+  status?: number;
+  redirect?: string; // if set, redirect here (status defaults to 302)
+  body?: string | Buffer; // Buffer for binary assets (fonts); express res.send handles both
+  contentType?: string; // for body, e.g. "text/html"
+  headers?: Record<string, string>; // extra response headers, e.g. Cache-Control
+  // If set, the handler declines to respond and the request continues down the
+  // middleware chain (e.g. a route that conditionally falls through to the SPA/Vite
+  // HTML middleware). No current consumer, but kept as an extension point for plugin
+  // routes that want to hand off. Mutually exclusive with a body/redirect.
+  // TODO: Check if this can be done cleaner? E.g. an union type of different responses?
+  passthrough?: boolean;
+}
+
+export type RouteHandler = (req: RouteRequest) => RouteResponse | Promise<RouteResponse>;
+
+// A live Server-Sent-Events connection, framework-agnostic; WebServer maps it to express.
+export interface SseConnection {
+  /** Send a named SSE event with a string (usually JSON) payload. */
+  send(event: string, data: string): void;
+  /** End the stream. */
+  close(): void;
+  /** Register a callback for when the client disconnects. */
+  onClose(callback: () => void): void;
+}
+
+export type SseHandler = (req: RouteRequest, connection: SseConnection) => void;
+
+// What WebServer exposes so components (views now, plugins later) register their own routes.
+export interface RouteRegistrar {
+  registerRoute(method: RouteMethod, path: string, handler: RouteHandler): void;
+  /** Register a long-lived Server-Sent-Events stream (keep-alive is handled by the server). */
+  registerSse(path: string, handler: SseHandler): void;
+}
+
+export enum WebServerStatus {
+  SETTING_UP = "Setting up...",
+  ONLINE = "Online",
+  FAILED = "Failed",
+};
+
+export interface AppInfo {
+  status: {
+    key: keyof typeof WebServerStatus;
+    message: WebServerStatus;
+  }
+  system?: SystemInfo;
+}

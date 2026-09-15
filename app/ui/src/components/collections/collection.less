@@ -1,0 +1,52 @@
+section.collection {
+  @gap-items: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+
+  width: 100%;
+  height: 100%;
+  gap: calc(@gap-items * 2);
+
+  .toolbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+
+    .title {
+      font-size: 2rem;
+    }
+    .actions {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: stretch;
+    }
+  }
+
+  .empty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 50%;
+    color: var(--color-text-tertiary);
+  }
+
+  // The shared item card frame. Both layouts build on this; each arranges its own contents
+  // (list rows → listItem.less, grid cards → gridItem.less).
+  .item {
+    border-radius: @border-radius-xl;
+    box-shadow: 2px 4px 10px 0px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--color-border-secondary);
+    background: rgba(from var(--color-background-secondary) r g b / @glass-transparency);
+    backdrop-filter: blur(@glass-blur);
+    -webkit-backdrop-filter: blur(@glass-blur);
+    padding: 10px;
+    height: min-content;
+  }
+}

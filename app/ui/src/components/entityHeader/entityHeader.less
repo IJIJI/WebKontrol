@@ -1,0 +1,86 @@
+.entityHeader {
+  position: relative;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 24px;
+  padding: 20px;
+
+  // Glass card, matching the collection items, plus a soft glow in the entity colour so it
+  // reads as intentional even on a plain background (and frosts when content sits behind it).
+  border-radius: @border-radius-xl;
+  border: 1px solid var(--color-border-secondary);
+  background:
+    radial-gradient(
+      circle at 10% -50%,
+      rgba(from var(--entity-color, @color-neutral) r g b / 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 90% 140%,
+      rgba(from var(--entity-color, @color-neutral) r g b / 0.15) 0%,
+      transparent 50%
+    ),
+    rgba(from var(--color-background-secondary) r g b / @glass-transparency);
+  backdrop-filter: blur(@glass-blur);
+  -webkit-backdrop-filter: blur(@glass-blur);
+  box-shadow: 2px 4px 10px 0 rgba(0, 0, 0, 0.3);
+
+  .icon {
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 5.5rem;
+    font-size: 2.75rem; // glyph size (svg is 1em)
+    flex-shrink: 0;
+
+    svg {
+      width: 1em;
+      height: 1em;
+    }
+  }
+
+  .titleBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+
+    .title {
+      font-size: 1.75rem;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--color-text-tertiary);
+    }
+
+    .chips {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+  }
+
+  .actions {
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+}

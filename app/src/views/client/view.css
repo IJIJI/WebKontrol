@@ -1,0 +1,276 @@
+/* The default stylesheet for served block views (/viewclient/view.css).
+   Generic, reusable classes the blocks build on; blocks only carry config-driven values
+   (colors, grid templates, positions) as inline styles. User-supplied CSS will layer on
+   top of this later, so keep selectors shallow and class names stable (wk- prefix). */
+
+/* Bundled display fonts (SIL OFL), served by the ViewServer next to this stylesheet.
+   The admin declares the same faces in ui/src/styles/font/font.less so pickers preview
+   truthfully; keep the two in sync with FONT_SUGGESTIONS. */
+@font-face {
+  font-family: "DSEG7 Classic";
+  src: url("/viewclient/fonts/DSEG7Classic-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DSEG14 Classic";
+  src: url("/viewclient/fonts/DSEG14Classic-Regular.woff2") format("woff2");
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  /* A display never scrolls as a page; blocks manage their own overflow. */
+  overflow: hidden;
+}
+
+/* Slim dark scrollbars for any same-origin scroll area a block opts into. (A cross-origin
+   iframe's scrollbar cannot be styled from here, only hidden via its scrollbar config.) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#view-root {
+  height: 100%;
+  /* The root block's slot is a flex child of this, so it fills the viewport. */
+  display: flex;
+  /* The page default for the inheriting text properties: an unset font field on a block emits
+     nothing inline, so values cascade from the nearest ancestor block that set one, ending
+     here. Root-level on purpose: a per-block rule would reset the cascade at every level. */
+  font-size: 48px;
+}
+
+/* ── The block skeleton ────────────────────────────────────────────────────────
+   The render core paints every block as a slot (the space its parent gave it) wrapping a box
+   (the block's own styled element). Two rules cover every block and every parent, so blocks
+   and plugins need no layout CSS of their own. */
+
+/* The slot takes the space its parent's layout hands it: a grid cell, a flex share, an
+   absolutely positioned freeform item. It is a flex container purely to place the box. */
+.wk-slot {
+  display: flex;
+  box-sizing: border-box;
+  /* Fill when the parent is flex (stack, container, the root). Grid/absolute parents size the
+     slot themselves. No align-self here: the parent's align-items must stay in control, which
+     is what lets a stack's `align` setting reach its children. */
+  flex: 1 1 auto;
+  /* Oversized content (iframes, long text) must never blow up the parent's tracks or lines. */
+  min-width: 0;
+  min-height: 0;
+}
+
+/* The box carries the block's styling and, by default, fills its slot. */
+.wk-block {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+  /* Clip rather than spill: on a wall display, accidental overflow looks worse than a visible
+     cut. A block's overflow config overrides this inline. */
+  overflow: hidden;
+}
+
+/* Sizing is per axis and config-driven, so it arrives inline from the render core
+   (see styles.ts: sizeStyles for the box, slotSizeStyles for the slot). Only the resting
+   state lives here: a box fills its slot, and clipping stays on the slot because a box's own
+   max-* percentage resolves only against a definite slot, and a slot sized by flex (a stack
+   that ran out of room) is not definite. A block asking for visible overflow opts out, so the
+   setting means the same thing for a hugging block as for a filling one. */
+
+/* ── Per-block structure ───────────────────────────────────────────────────────
+   Structural constants only; every config-driven value arrives inline via boxStyles. */
+
+.wk-grid {
+  display: grid;
+  /* Rows beyond whatever the config asks for share the height evenly, so a grid that only
+     states its columns still fills its space. */
+  grid-auto-rows: 1fr;
+  /* The catch-all past the table below: as many columns as fit at a readable width. */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+/* Automatic arrangement, for a grid whose columns nobody has set. The count comes from the DOM
+   (`:nth-child(n):last-child` matches only when the nth child is the last one), so nothing has
+   to be stored or kept in step, and any entry here can be overridden by user CSS later. A
+   configured grid sets grid-template-columns inline, which beats all of this.
+   Landscape is the unqualified case since displays usually are; the portrait table follows. */
+.wk-grid:has(> :nth-child(1):last-child) {
+  grid-template-columns: 1fr;
+}
+.wk-grid:has(> :nth-child(2):last-child) {
+  grid-template-columns: repeat(2, 1fr);
+}
+.wk-grid:has(> :nth-child(3):last-child) {
+  grid-template-columns: repeat(3, 1fr);
+}
+.wk-grid:has(> :nth-child(4):last-child) {
+  grid-template-columns: repeat(2, 1fr); /* 2x2 beats a row of four thin slivers */
+}
+.wk-grid:has(> :nth-child(5):last-child),
+.wk-grid:has(> :nth-child(6):last-child) {
+  grid-template-columns: repeat(3, 1fr);
+}
+.wk-grid:has(> :nth-child(7):last-child),
+.wk-grid:has(> :nth-child(8):last-child) {
+  grid-template-columns: repeat(4, 1fr);
+}
+.wk-grid:has(> :nth-child(9):last-child) {
+  grid-template-columns: repeat(3, 1fr); /* square counts want a square */
+}
+.wk-grid:has(> :nth-child(10):last-child) {
+  grid-template-columns: repeat(5, 1fr);
+}
+.wk-grid:has(> :nth-child(11):last-child),
+.wk-grid:has(> :nth-child(12):last-child) {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Portrait wants the same blocks stacked deeper rather than spread wide. Orientation is read
+   from the viewport, not the grid's own box: an element cannot container-query itself, and
+   making every slot a size container would break blocks that size to their content. */
+@media (orientation: portrait) {
+  .wk-grid:has(> :nth-child(2):last-child),
+  .wk-grid:has(> :nth-child(3):last-child) {
+    grid-template-columns: 1fr;
+  }
+  .wk-grid:has(> :nth-child(4):last-child),
+  .wk-grid:has(> :nth-child(5):last-child),
+  .wk-grid:has(> :nth-child(6):last-child),
+  .wk-grid:has(> :nth-child(7):last-child),
+  .wk-grid:has(> :nth-child(8):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .wk-grid:has(> :nth-child(9):last-child),
+  .wk-grid:has(> :nth-child(10):last-child),
+  .wk-grid:has(> :nth-child(11):last-child),
+  .wk-grid:has(> :nth-child(12):last-child) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.wk-stack {
+  display: flex;
+}
+
+/* A container's single child slot fills its box. */
+.wk-container {
+  display: flex;
+}
+
+/* Text-like boxes lay their content out as a column, so the block's alignment can distribute
+   it vertically (justify-content) while text-align handles the horizontal. */
+.wk-text,
+.wk-datetime {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Text keeps its authored line breaks (multi-line text fields). */
+.wk-text {
+  white-space: pre-line;
+}
+
+/* Freeform positions its items in % of its own box; each item holds one slot. The item is a
+   flex container rather than sizing its slot with percentages, so an item whose width or
+   height is left unset shrink-wraps its block on that axis instead of collapsing. */
+.wk-freeform {
+  position: relative;
+}
+.wk-freeform-item {
+  position: absolute;
+  display: flex;
+}
+
+/* The iframe fills its box. Out of flow (absolute) so it can never contribute to that box's
+   content size: fitScale derives the iframe's height FROM the box, so an in-flow iframe in
+   any content-sized container feeds back into itself and grows without bound. */
+.wk-website {
+  position: relative;
+}
+.wk-website > iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+}
+
+.wk-image > img {
+  display: block;
+  /* Whether each axis is 100% or auto is per axis and config-driven, so it arrives inline from
+     the block (a percentage against a content-sized box is circular, and the image would drag
+     the box out to its intrinsic size). These maxes are the safety clamp under both. */
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* The divider's line is centered in its box. Colour and thickness default here rather than in
+   the schema, so an unset value stays overridable by user CSS instead of being pinned inline
+   on every divider. */
+.wk-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wk-divider-line {
+  background: rgba(255, 255, 255, 0.25);
+}
+/* The long axis is a percentage, which is circular inside a parent sized by its own content:
+   there is genuinely no length to span there, and no CSS keyword conjures one (measured:
+   100%, stretch, fill-available and fit-content all resolve to zero). Give such a divider a
+   Min size instead, which does participate in intrinsic sizing. */
+.wk-divider-line.horizontal {
+  width: 100%;
+  height: 2px;
+}
+.wk-divider-line.vertical {
+  width: 2px;
+  height: 100%;
+}
+
+/* A block that failed to resolve: loud, not a silent gap on a wall display. The text
+   properties are reset rather than inherited: the surrounding config is the config that just
+   failed, so an ancestor's 200px uppercase font must not render the error unreadable. */
+.wk-broken {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid #e93838;
+  border-radius: 8px;
+  background: rgba(233, 56, 56, 0.08);
+  color: #e93838;
+  font: normal normal 400 14px/1.3 system-ui, sans-serif;
+  letter-spacing: normal;
+  text-transform: none;
+  text-align: left;
+  text-shadow: none;
+  white-space: normal;
+}
+.wk-broken .text {
+  flex: 1;
+  min-width: 0;
+}
+.wk-broken .type {
+  font-weight: 600;
+}
+.wk-broken .message {
+  opacity: 0.85;
+}
+.wk-broken svg {
+  flex: none;
+}

@@ -1,0 +1,108 @@
+@import "./z-index.less";
+@import "./sections.less";
+@import "./mixins.less";
+
+// Base vars:
+// Beacon brand. // TODO: Different WebKontrol branding?
+@color-acc: #e85d30;
+
+// Tally!
+@color-program: #e93838;
+@color-preview: #16b658;
+@color-danger: #e57373;
+@color-warning: #d4930a;
+@color-info: #185fa5;
+@color-neutral: #a3a0a8;
+@color-light: #eeeeea;
+
+@font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+  sans-serif;
+@font-mono: "SF Mono", "Fira Code", "Fira Mono", monospace;
+@font-brand: "Zen Dots", sans-serif;
+
+@border-radius-sm: 4px;
+@border-radius-md: 8px;
+@border-radius-lg: 12px;
+@border-radius-xl: 16px;
+
+// Gaps:
+@gap-s: 10px;
+@gap-m: 20px;
+@gap-l: 30px;
+
+// Animation times
+@sidebar-animation-time: 0.2s;
+@button-animation-time: 0.15s;
+// For the glass Ui elements:
+@glass-blur: 5px;
+@glass-transparency: 0.6;
+@glass-background: rgb(50, 50, 50);
+@glass-border: rgb(100, 100, 100, 0.75);
+
+// Breakpoints:
+@breakpoint-mobile: 480;
+@breakpoint-ipad: 850;
+@breakpoint-small-pc: 1050;
+// @breakpoint-large-pc: 2600; // TODO: Add breakpoint for widescreen
+
+// TODO: Add default paddings?
+
+// TODO: Split background and foreground.
+// TODO: Also add a border color to the above. Maybe dynamic from the selected bg color?
+// TODO: Also add a shadow color to the above?
+// color-mix(in srgb, var(--color-background-secondary) 85%, black 15%);
+// Light mode:
+.light_mode() {
+  --color-background-primary: rgb(255, 255, 255);
+  --color-background-secondary: rgb(241, 241, 238);
+  --color-background-tertiary: rgb(238, 236, 234);
+
+  --color-background-acc: rgba(
+    from @color-acc r g b / 50%
+  ); // TODO: Template these colors from the actual colors?
+  --color-background-success: #d1e9d2;
+  --color-background-danger: #fadbdb;
+  --color-background-warning: #ffd98e;
+  --color-background-info: #d3e4f3;
+
+  --color-text-primary: #1a1a18;
+  --color-text-secondary: #5f5e5a;
+  --color-text-tertiary: #888780;
+
+  --color-text-acc: @color-acc;
+  --color-text-success: #0f6e56;
+  --color-text-danger: #e93838;
+  --color-text-warning: #c96400;
+  --color-text-info: #185fa5;
+
+  --color-border-tertiary: rgba(0, 0, 0, 0.1);
+  --color-border-secondary: rgba(0, 0, 0, 0.18);
+  --color-border-primary: rgba(0, 0, 0, 0.28);
+}
+
+// Dark Mode:
+.dark_mode() {
+  --color-background-primary: rgb(28, 28, 28);
+  --color-background-secondary: rgb(39, 39, 39);
+  --color-background-tertiary: rgb(17, 17, 17);
+
+  --color-background-acc: rgba(from @color-acc r g b / 20%);
+  --color-background-success: #0f5306;
+  --color-background-danger: #501313;
+  --color-background-warning: #412402;
+  --color-background-info: #042c53;
+
+  --color-text-primary: #e8e6de;
+  --color-text-secondary: #b4b2a9;
+  --color-text-tertiary: #6b6a64;
+
+  --color-text-acc: @color-acc;
+  --color-text-success: #1d9e3d;
+  --color-text-danger: #e93838;
+  --color-text-warning: #d4930a;
+  --color-text-info: #2674c7;
+
+  --color-border-tertiary: #3d3d3d;
+  --color-border-secondary: rgba(255, 255, 255, 0.16);
+  --color-border-primary: rgba(255, 255, 255, 0.24);
+}
