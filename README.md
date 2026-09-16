@@ -135,6 +135,12 @@ puppets:
 
 All four fields are optional. This only works on an X11 session (`sudo raspi-config`, Advanced Options, Wayland, X11); the Wayland default of Pi OS does not let a window choose its own place.
 
+The same `window` works on Windows. Screens left of or above the primary one have negative coordinates there; list them with:
+
+```powershell
+Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::AllScreens | ForEach-Object { "$($_.DeviceName) primary=$($_.Primary) $($_.Bounds)" }
+```
+
 
 ### Start on boot
 
