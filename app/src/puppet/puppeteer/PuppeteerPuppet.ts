@@ -8,6 +8,14 @@ import { BLANK_NAVIGATION_REQUEST, type NavigationRequest } from "../types/schem
 import { ConnectionState } from "../../types/CommonTypes";
 import { classifyNavigationFailure } from "./failures";
 
+/** Chromium placement flags for a configured window. A lone x or y means 0 for the other; size needs both. */
+function windowArgs(w: NonNullable<PuppeteerPuppetConfig["window"]>): Array<string> {
+  const args: Array<string> = [];
+  if (w.x !== undefined || w.y !== undefined) args.push(`--window-position=${w.x ?? 0},${w.y ?? 0}`);
+  if (w.width !== undefined && w.height !== undefined) args.push(`--window-size=${w.width},${w.height}`);
+  return args;
+}
+
 export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
   protected override _getLogLabelExtensions(): Array<string> {
     return ["Puppeteer"];
@@ -46,7 +54,11 @@ export class PuppeteerPuppet extends AbstractPuppet<PuppeteerPuppetConfig> {
         "--start-maximized",
         "--start-fullscreen",
         "--force-dark-mode",
-        "--kiosk",
+        // Hides the "unsupported command-line flag --no-sandbox" infobar that kiosk mode
+        // used to cover. Kiosk ignores --window-position and fullscreens on the primary
+        // output, so a positioned window runs without it (fullscreen still, via the flag above).
+        "--test-type",
+        ...(this._config.window ? windowArgs(this._config.window) : ["--kiosk"]),
       ],
       // timeout: 0 // Time to wait for browser start
     };

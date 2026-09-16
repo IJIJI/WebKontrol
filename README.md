@@ -90,7 +90,7 @@ sudo setcap 'cap_net_bind_service=+ep' `which node`
 
 ### Chromium
 
-Puppeteer downloads its own Chromium during install, which is not built for the Pi's ARM CPU. Point each puppet at the system browser instead (find it with `which chromium-browser` or `which chromium`):
+Puppeteer downloads its own Chromium during install, but the build it fetches on a Pi is x86-64 and cannot run there (the install still succeeds; a puppet using it fails with "Syntax error: newline unexpected"). Point each puppet at the system browser instead (find it with `which chromium` or `which chromium-browser`):
 
 ```yaml
 puppets:
@@ -98,15 +98,53 @@ puppets:
     name:
       long: Hallway display
       short: HALL1
-    chromiumExecutablePath: /usr/bin/chromium-browser
+    chromiumExecutablePath: /usr/bin/chromium
 ```
 
-<!-- TODO: verify on a Pi that a plain `yarn workspaces focus --production` with the shared puppeteer cache does not fail on the ARM Chromium download; if it does, document PUPPETEER_SKIP_DOWNLOAD for the install. -->
+To skip the useless download, run the installer with `PUPPETEER_SKIP_DOWNLOAD=true` in front of the `node install.mjs` command.
+
+### Window position
+
+With more than one screen, a puppet opens on the primary one. To put it elsewhere, give it a `window`. List the screens with their size and offset in the combined desktop (works over SSH too):
+
+```bash
+DISPLAY=:0 xrandr --listmonitors
+```
+
+```
+Monitors: 2
+ 0: +*HDMI-1 1920/521x1080/293+0+0  HDMI-1
+ 1: +DSI-1 800/154x480/86+1920+0  DSI-1
+```
+
+Each line reads `width/mm x height/mm + x + y`, so `800/154x480/86+1920+0` is an 800x480 panel at `x: 1920`, `y: 0`:
+
+```yaml
+puppets:
+  - id: touch-1
+    name:
+      long: Touch panel
+      short: TOUCH
+    chromiumExecutablePath: /usr/bin/chromium
+    window:
+      x: 1920
+      y: 0
+      width: 800
+      height: 480
+```
+
+All four fields are optional. This only works on an X11 session (`sudo raspi-config`, Advanced Options, Wayland, X11); the Wayland default of Pi OS does not let a window choose its own place.
+
+The same `window` works on Windows. Screens left of or above the primary one have negative coordinates there; list them with:
+
+```powershell
+Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::AllScreens | ForEach-Object { "$($_.DeviceName) primary=$($_.Primary) $($_.Bounds)" }
+```
 
 
 ### Start on boot
 
-The browsers need the desktop, so the supervisor must start inside the desktop session, not as a bare system service. Add it to the LXDE autostart:
+The browsers need the desktop, so the supervisor must start inside the desktop session, not as a bare system service. The systemd unit the installer prints is for machines without a display and does not apply here. Add the supervisor to the LXDE autostart instead:
 
 ```bash
 sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
@@ -117,9 +155,13 @@ sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 ```
 
 > [!NOTE]
-> This autostart file is read by the X11 desktop. Check which one runs with `echo $XDG_SESSION_TYPE`; to switch to X11 run `sudo raspi-config`, option 6, then A6 "Wayland toggle".
+> This autostart file is read by the X11 desktop, and current Raspberry Pi OS boots a Wayland desktop by default. Switch to X11 with `sudo raspi-config`, option 6, then A6 "Wayland toggle", and reboot. Check which one runs with `echo $XDG_SESSION_TYPE` from a terminal on the desktop.
 
-<!-- TODO: the systemd unit the installer prints has no DISPLAY; either document a user unit with Environment=DISPLAY=:0 here or make the installer print that variant on Linux. -->
+To start the supervisor by hand over SSH, give it the desktop's display, or the browsers fail with "Missing X server":
+
+```bash
+cd /opt/webkontrol && DISPLAY=:0 node supervisor.js
+```
 
 ### Auto-hide the cursor
 
