@@ -1,0 +1,4 @@
+# Everything here runs on Linux (build host and the image): never let Windows checkouts
+# turn the scripts, units and YAML into CRLF.
+* text eol=lf
+*.tga binary

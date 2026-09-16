@@ -1,0 +1,10 @@
+[Unit]
+Description=Start SSH if a trigger file is present on the boot partition
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/ssh-trigger.sh
+
+[Install]
+WantedBy=multi-user.target
