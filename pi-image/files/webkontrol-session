@@ -1,0 +1,7 @@
+#!/bin/sh
+# WebKontrol X session, run by xinit from webkontrol.service. Black root, no blanking,
+# then the supervisor owns the display: puppets pop up as fullscreen Chromium windows.
+xsetroot -solid black
+xset s off -dpms
+cd /opt/webkontrol || exit 1
+exec /usr/local/bin/node supervisor.js
