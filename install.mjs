@@ -75,7 +75,13 @@ if (existsSync(join(root, "current")))
 
 // ---------- pick the release ----------
 
-const ghHeaders = { "User-Agent": "WebKontrol-installer", Accept: "application/vnd.github+json" };
+// Optional token: unauthenticated GitHub API calls are rate-limited per IP, which bites on
+// CI runners (the Pi image build installs through this script).
+const ghHeaders = {
+  "User-Agent": "WebKontrol-installer",
+  Accept: "application/vnd.github+json",
+  ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
+};
 const releaseUrl = wantedVersion
   ? `${apiBase}/repos/${REPO}/releases/tags/${encodeURIComponent(wantedVersion)}`
   : `${apiBase}/repos/${REPO}/releases/latest`; // GitHub's "latest" = newest stable
@@ -126,8 +132,14 @@ const install = spawnSync("yarn", ["workspaces", "focus", "--production"], {
   shell: process.platform === "win32",
   stdio: "inherit",
   // The same pin the update runner and the supervisor use: one Chromium for every
-  // release, in the root, instead of one per release in a per-user cache.
-  env: { ...process.env, PUPPETEER_CACHE_DIR: join(root, "puppeteer") },
+  // release, in the root, instead of one per release in a per-user cache. On ARM the
+  // download is skipped: puppeteer fetches an x86-64 build there that cannot run, and
+  // a puppet points at the system browser via chromiumExecutablePath instead.
+  env: {
+    ...process.env,
+    PUPPETEER_CACHE_DIR: join(root, "puppeteer"),
+    ...(process.arch.startsWith("arm") ? { PUPPETEER_SKIP_DOWNLOAD: "true" } : {}),
+  },
 });
 if (install.status !== 0) fail("Dependency installation failed; the messages above say why.");
 

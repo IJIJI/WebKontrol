@@ -116,9 +116,15 @@ export class UpdateRunner {
         // Verified 2026-08-18 (yarn 4.9.2): focus --production works on a plain
         // non-workspace root and skips devDependencies. The pinned cache keeps
         // Chromium downloaded once for all releases instead of once per release.
+        // On ARM the download is skipped: puppeteer fetches an x86-64 build there that
+        // cannot run, and puppets point at the system browser via chromiumExecutablePath.
         await this._exec("yarn", ["workspaces", "focus", "--production"], {
           cwd: join(this._staging, "release"),
-          env: { ...process.env, PUPPETEER_CACHE_DIR: join(this._root, "puppeteer") },
+          env: {
+            ...process.env,
+            PUPPETEER_CACHE_DIR: join(this._root, "puppeteer"),
+            ...(process.arch.startsWith("arm") ? { PUPPETEER_SKIP_DOWNLOAD: "true" } : {}),
+          },
           timeout: INSTALL_TIMEOUT_MS,
         });
         return;
