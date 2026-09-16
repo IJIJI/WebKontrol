@@ -42,10 +42,10 @@ Pick an install directory. In the following example, `/opt/webkontrol` is used
 
 ```shell
 curl -fsSL https://raw.githubusercontent.com/ijiji/WebKontrol/main/install.mjs -o install.mjs
-node install.mjs /opt/webkontrol --version v3.0.0
+node install.mjs /opt/webkontrol --version v3.1.0
 ```
 
-v3.0.0 is published as a pre-release, and the installer never installs pre-releases on its own, so the tag is passed explicitly. Once a stable v3 release exists, drop `--version` and the installer picks the latest stable release by itself.
+v3.1.0 is published as a pre-release, and the installer never installs pre-releases on its own, so the tag is passed explicitly. Once a stable v3 release exists, drop `--version` and the installer picks the latest stable release by itself.
 
 The installer writes a commented starter `config/config.yaml`; edit it to add your displays (or prepare the file beforehand, the installer keeps an existing one). A minimal config with one display:
 
@@ -133,7 +133,7 @@ puppets:
       height: 480
 ```
 
-All four fields are optional. This only works on an X11 session (`sudo raspi-config`, Advanced Options, Wayland, X11); the Wayland default of Pi OS does not let a window choose its own place.
+All four fields are optional. The puppet is always fullscreen; `x`/`y` decide the screen and `width`/`height` are a tie-breaker: Chromium fullscreens on the screen holding most of the initial window, so give the screen's own size when a default-sized window at that position would spill onto a neighbour. This only works on an X11 session (`sudo raspi-config`, Advanced Options, Wayland, X11); the Wayland default of Pi OS does not let a window choose its own place.
 
 The same `window` works on Windows. Screens left of or above the primary one have negative coordinates there; list them with:
 
