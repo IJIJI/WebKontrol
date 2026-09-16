@@ -103,6 +103,38 @@ puppets:
 
 To skip the useless download, run the installer with `PUPPETEER_SKIP_DOWNLOAD=true` in front of the `node install.mjs` command.
 
+### Window position
+
+With more than one screen, a puppet opens on the primary one. To put it elsewhere, give it a `window`. List the screens with their size and offset in the combined desktop (works over SSH too):
+
+```bash
+DISPLAY=:0 xrandr --listmonitors
+```
+
+```
+Monitors: 2
+ 0: +*HDMI-1 1920/521x1080/293+0+0  HDMI-1
+ 1: +DSI-1 800/154x480/86+1920+0  DSI-1
+```
+
+Each line reads `width/mm x height/mm + x + y`, so `800/154x480/86+1920+0` is an 800x480 panel at `x: 1920`, `y: 0`:
+
+```yaml
+puppets:
+  - id: touch-1
+    name:
+      long: Touch panel
+      short: TOUCH
+    chromiumExecutablePath: /usr/bin/chromium
+    window:
+      x: 1920
+      y: 0
+      width: 800
+      height: 480
+```
+
+All four fields are optional. This only works on an X11 session (`sudo raspi-config`, Advanced Options, Wayland, X11); the Wayland default of Pi OS does not let a window choose its own place.
+
 
 ### Start on boot
 
