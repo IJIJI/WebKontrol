@@ -100,15 +100,19 @@ jobs:
       - name: Build the image
         run: bash build.sh "$TAG"
 
+      # build.sh leaves a symlink; the uploaders want the real file.
+      - name: Collect the image
+        run: cp -L /tmp/webkontrol-image/WebKontrol_Pi.img.zst /tmp/WebKontrol_Pi.img.zst
+
       - name: Attach to the release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: /tmp/webkontrol-image/work/image-WebKontrol_Pi/WebKontrol_Pi.img.xz
+          files: /tmp/WebKontrol_Pi.img.zst
 
       - name: Upload as artifact (manual run)
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: WebKontrol_Pi
-          path: /tmp/webkontrol-image/work/image-WebKontrol_Pi/WebKontrol_Pi.img.xz
+          path: /tmp/WebKontrol_Pi.img.zst
