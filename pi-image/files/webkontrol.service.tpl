@@ -1,14 +1,18 @@
 [Unit]
 Description=WebKontrol display session (X11, no desktop)
-Wants=network-online.target
-After=network-online.target systemd-time-wait-sync.service
+# Deliberately no wait for network-online or time sync: a display with the cable out must
+# still show its screen, and the app retries page loads on its own once the network is up.
+After=network.target
 # tty1 belongs to this session, not to a login prompt.
 Conflicts=getty@tty1.service
 After=getty@tty1.service
 
 [Service]
 User=$WEBKONTROL_USER
-PAMName=login
+# No PAMName=login: the account's password is expired until the first SSH login (chage -d 0
+# in the layer), and a PAM login session for an expired account is refused, which kept
+# this unit in a restart loop on a fresh box (2026-09-17). X gets its device access from
+# the setuid wrapper, so no logind session is needed.
 TTYPath=/dev/tty1
 StandardInput=tty
 StandardOutput=journal
