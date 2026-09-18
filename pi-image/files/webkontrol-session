@@ -1,7 +1,43 @@
 #!/bin/sh
 # WebKontrol X session, run by xinit from webkontrol.service. Black root, no blanking,
-# then the supervisor owns the display: puppets pop up as fullscreen Chromium windows.
+# screens arranged, the logo on every screen, then the supervisor owns the display:
+# puppets pop up as fullscreen Chromium windows over the logo.
 xsetroot -solid black
 xset s off -dpms
+
+# Screen layout. An override file wins: it can rotate, mirror or arrange screens any way
+# xrandr allows (the config builder will write it later). Without one, screens go side by
+# side, left to right: HDMI outputs first (the first is primary, where a puppet without a
+# `window` lands), then the rest (DSI touch display, composite). A screen that does not
+# fit to the right goes below instead: a Pi 3 and older cap the X screen at 2048 pixels
+# per side, so 1080p HDMI plus the 800 pixel touch display only fits stacked.
+# Plain X stacks every screen at 0,0; the desktop used to arrange them. Screens plugged in
+# after boot are not arranged: restart the service (sudo systemctl restart webkontrol).
+if [ -f /opt/webkontrol/config/display.sh ]; then
+  sh /opt/webkontrol/config/display.sh
+else
+  outputs=$(xrandr --query | awk '$2 == "connected" {print $1}')
+  prev=
+  for out in $(printf '%s\n' $outputs | grep '^HDMI' | sort -V) $(printf '%s\n' $outputs | grep -v '^HDMI' | sort -V); do
+    if [ -z "$prev" ]; then
+      xrandr --output "$out" --auto --pos 0x0 --primary
+    else
+      xrandr --output "$out" --auto --right-of "$prev" 2>/dev/null ||
+        xrandr --output "$out" --auto --below "$prev"
+    fi
+    prev=$out
+  done
+fi
+
+# A window manager, no desktop: Chromium's kiosk and fullscreen modes ask the window
+# manager to size the window to its screen, and without one the window keeps Chromium's
+# default size (a part of the screen). openbox is the manager the Pi OS X11 desktop runs,
+# which is where puppets were first tested.
+openbox &
+
+# The logo on every screen, scaled to fit each: it bridges the gap until the puppets'
+# windows cover it, stays on a screen no puppet uses, and shows the box is on.
+[ -f /usr/share/webkontrol/splash.png ] && feh --no-fehbg --bg-max /usr/share/webkontrol/splash.png
+
 cd /opt/webkontrol || exit 1
 exec /usr/local/bin/node supervisor.js
