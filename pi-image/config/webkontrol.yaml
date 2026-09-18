@@ -17,6 +17,15 @@ locale:
 
 image:
   name: WebKontrol_Pi
+  # Like Pi OS: a 512 MiB FAT32 boot partition. The builder's default (about 100 MB FAT16)
+  # got no drive letter on Windows, where users drop the ssh file.
+  boot_part_size: 512M
+  # The contents plus headroom: the first boot grows it to fill the card (webkontrol-growfs),
+  # so a bigger build only makes flashing slower.
+  root_part_size: 150%
+
+fs:
+  vfat_mkfs_args: "-F 32"
 
 layer:
   app: webkontrol
