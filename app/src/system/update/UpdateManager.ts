@@ -4,6 +4,7 @@ import { readFile, rm } from "node:fs/promises";
 
 import pkg from "../../../package.json" with { type: "json" };
 import { Logger } from "../../logging/Logger";
+import { RetryHandler } from "../../puppet/pacing";
 import { crossedMigrations, MIGRATIONS } from "../../storage/migrations";
 import { UpdateStore } from "../../storage/stores/UpdateStore";
 import type { UpdateWebhandlers } from "../../webServer/model";
@@ -15,6 +16,10 @@ import type { UpdateRunner } from "./UpdateRunner";
 import { isNewerVersion } from "./version";
 
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
+// After a failed check (an offline boot, GitHub down): retry at 30 min, 1 h, 2, 4, 8, 16 h,
+// then every 16 h while it keeps failing. Slow on purpose: nobody watches this page, and a
+// network that is down for days should not be probed often. A success returns to daily.
+export const RETRY_PACING = { baseMs: 30 * 60 * 1000, capMs: 16 * 60 * 60 * 1000 };
 // The supervisor deletes pending.json after its 60s healthy-uptime window; this fires
 // after that with margin, so normally it only records the confirmation. Without a
 // supervisor (bare serve:app) it also deletes the file itself: 90s alive is healthy by
@@ -94,6 +99,7 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
   private _checkError?: string;
   private _activity: UpdateActivity = { state: UpdateState.IDLE };
   private _journal: UpdateJournalEntry | null = null;
+  private _retry = new RetryHandler(RETRY_PACING);
 
   // What the downgrade gate derives from: the real chain, plus the config's gate-only
   // fakes (a harness/dev seam; empty everywhere real).
@@ -222,9 +228,12 @@ export class UpdateManager extends EventEmitter<UpdateManagerEvents> {
     try {
       await this._source.check();
       this._checkError = undefined;
+      this._retry.reset(); // back to the daily schedule
     } catch (error) {
       this._checkError = (error as Error).message;
       this._logger.warn(`Update check failed: ${this._checkError}`);
+      // One retry pending at a time: a manual check failing meanwhile is absorbed.
+      this._retry.schedule(() => void this._check());
     }
     // An apply accepted while the check was on the wire owns the activity now: writing
     // READY/IDLE over its APPLYING would reopen the gate to a second apply mid-download.

@@ -2,8 +2,9 @@
 // (upgrade, lossless downgrade) pass. Run with `yarn check`.
 import assert from "node:assert/strict";
 
+import { backoffDelay } from "../../puppet/pacing";
 import type { Release } from "./model";
-import { announce, applyGate } from "./UpdateManager";
+import { announce, applyGate, RETRY_PACING } from "./UpdateManager";
 
 const release = (version: string): Release => ({
   version,
@@ -63,6 +64,12 @@ assert.match(String(applyGate({ ...base, target: release("v3.0.0") })), /already
   assert.equal(announce({ releases: list, latest: null, current: "v3.0.0" }), undefined, "no stable release yet: nothing");
   assert.equal(announce({ releases: list, latest: "v3.0.0", current: "v3.1.0" }), undefined, "latest older than current: nothing");
   assert.equal(announce({ releases: list, latest: "v3.1.5-beta.1", current: "v3.0.0" }), list[1], "whatever GitHub marks latest is what announces");
+}
+
+//* Retry after a failed check: 30 min doubling to 16 h, then every 16 h for as long as it fails.
+{
+  const hours = [1, 2, 3, 4, 5, 6, 7, 8].map((attempt) => backoffDelay(attempt, RETRY_PACING) / 3_600_000);
+  assert.deepEqual(hours, [0.5, 1, 2, 4, 8, 16, 16, 16]);
 }
 
 console.log("updateManager.check: all assertions passed");
