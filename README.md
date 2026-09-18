@@ -133,6 +133,9 @@ puppets:
 
 The puppet is always fullscreen on the screen at that position; `x` and `y` are all it needs. `window` also accepts `width` and `height`, which are not needed and can be left out. This only works on an X11 session (`sudo raspi-config`, Advanced Options, Wayland, X11); the Wayland default of Pi OS does not let a window choose its own place.
 
+> [!NOTE]
+> Chromium goes fullscreen on the screen that holds most of its starting window, which opens at `x`, `y` with Chromium's default size. If a small screen has a larger one to its right or below it, that window can spill over more onto the neighbour than onto its own screen, and the puppet lands on the neighbour. Setting `width` and `height` to the screen's own size prevents that.
+
 The same `window` works on Windows. Screens left of or above the primary one have negative coordinates there; list them with:
 
 ```powershell
