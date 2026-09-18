@@ -37,6 +37,10 @@ mmdebstrap:
     - xinit
     - x11-xserver-utils
     - chromium
+    # The logo on every screen once X runs (per-screen background, scaled to fit).
+    - feh
+    # Window manager, no desktop: Chromium's fullscreen needs one to size its window.
+    - openbox
     # The box announces itself as webkontrol.local.
     - avahi-daemon
     - openssh-server
@@ -81,6 +85,7 @@ mmdebstrap:
       # the root black and execs the supervisor. Xwrapper lets a non-console user start X.
       printf 'allowed_users=anybody\nneeds_root_rights=yes\n' > "$1/etc/X11/Xwrapper.config"
       install -m 755 "${SRCROOT:-.}/files/webkontrol-session" "$1/usr/local/bin/webkontrol-session"
+      install -D -m 644 "${SRCROOT:-.}/../splash.png" "$1/usr/share/webkontrol/splash.png"
       export WEBKONTROL_USER="${IGconf_device_user1}"
       envsubst < "${SRCROOT:-.}/files/webkontrol.service.tpl" > "$1/etc/systemd/system/webkontrol.service"
       chroot $1 systemctl enable webkontrol.service
@@ -90,6 +95,13 @@ mmdebstrap:
       install -m 755 "${SRCROOT:-.}/files/ssh-trigger.sh" "$1/usr/local/bin/ssh-trigger.sh"
       install -m 644 "${SRCROOT:-.}/files/ssh-trigger.service" "$1/etc/systemd/system/ssh-trigger.service"
       chroot $1 systemctl enable ssh-trigger.service
+
+    - |-
+      # No rainbow test screen from the firmware: it cannot show a custom image, so black
+      # until the kernel draws the logo is the closest to "our splash from power on".
+      # config.txt comes from the device layer, which runs before this one.
+      grep -q '^disable_splash=1' "$1/boot/firmware/config.txt" ||
+        printf '\n# WebKontrol: no rainbow screen at power on\ndisable_splash=1\n' >> "$1/boot/firmware/config.txt"
 
     - |-
       # The default password is public (it is in this repo): force a change at first login.
