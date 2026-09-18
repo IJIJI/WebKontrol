@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag to bake into the image, e.g. v3.1.0
+        description: Release tag to bake into the image, e.g. v3.2.0
         required: true
 
 defaults:
@@ -95,6 +95,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # A build holds the chroot, the raw image, sparse copies and the compressed result at
+      # once, which crowds the runner's disk. The preinstalled Android, .NET, Haskell and
+      # CodeQL toolchains are never used here and free about 25 GB.
+      - name: Free disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
+
       # build.sh installs the rest (rpi-image-gen's own dependency script, QEMU, binfmt);
       # it is the same script a developer runs from WSL2, so CI and local builds agree.
       - name: Build the image
@@ -102,17 +111,17 @@ jobs:
 
       # build.sh leaves a symlink; the uploaders want the real file.
       - name: Collect the image
-        run: cp -L /tmp/webkontrol-image/WebKontrol_Pi.img.zst /tmp/WebKontrol_Pi.img.zst
+        run: cp -L "$WORK_DIR/WebKontrol_Pi_$TAG.img.zst" "/tmp/WebKontrol_Pi_$TAG.img.zst"
 
       - name: Attach to the release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: /tmp/WebKontrol_Pi.img.zst
+          files: /tmp/WebKontrol_Pi_${{ env.TAG }}.img.zst
 
       - name: Upload as artifact (manual run)
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: WebKontrol_Pi
-          path: /tmp/WebKontrol_Pi.img.zst
+          name: WebKontrol_Pi_${{ env.TAG }}
+          path: /tmp/WebKontrol_Pi_${{ env.TAG }}.img.zst
