@@ -1,0 +1,108 @@
+# METABEGIN
+# X-Env-Layer-Name: webkontrol
+# X-Env-Layer-Category: application
+# X-Env-Layer-Desc: WebKontrol display appliance: an X11 session with no desktop, Node 22,
+#  and a managed WebKontrol install that updates itself from the admin UI.
+# X-Env-Layer-Version: 1.0.0
+# X-Env-Layer-Requires: device-user-admin,systemd-net-min,systemd-timesyncd,locale-config
+#
+# X-Env-VarPrefix: webkontrol
+#
+# X-Env-Var-version: v3.1.0
+# X-Env-Var-version-Desc: WebKontrol release tag to install. Must carry an update tarball.
+# X-Env-Var-version-Required: n
+# X-Env-Var-version-Valid: regex:^v[0-9]+\.[0-9]+\.[0-9]+.*$
+# X-Env-Var-version-Set: y
+#
+# X-Env-Var-node: v22.23.2
+# X-Env-Var-node-Desc: Node.js release unpacked into /usr/local (arm64 tarball from nodejs.org).
+# X-Env-Var-node-Required: n
+# X-Env-Var-node-Valid: regex:^v22\.[0-9]+\.[0-9]+$
+# X-Env-Var-node-Set: y
+#
+# X-Env-Var-github_token:
+# X-Env-Var-github_token-Desc: Optional GitHub token for the installer's API call (CI runners
+#  are rate-limited without one). Used during the build only, never written into the image.
+# X-Env-Var-github_token-Required: n
+# X-Env-Var-github_token-Valid: string-or-empty
+# X-Env-Var-github_token-Set: y
+# METAEND
+---
+mmdebstrap:
+  packages:
+    # The display session: Xorg with the setuid wrapper so it runs from a service as the
+    # app user (Wayland cannot place windows on a chosen screen, X11 can).
+    - xserver-xorg
+    - xserver-xorg-legacy
+    - xinit
+    - x11-xserver-utils
+    - chromium
+    # The logo on every screen once X runs (per-screen background, scaled to fit).
+    - feh
+    # Window manager, no desktop: Chromium's fullscreen needs one to size its window.
+    - openbox
+    # The box announces itself as webkontrol.local.
+    - avahi-daemon
+    - openssh-server
+    # setcap, so Node may bind port 80 as the app user.
+    - libcap2-bin
+    - curl
+    - ca-certificates
+    # Fallback toolchain for native modules without an arm64 prebuilt.
+    - build-essential
+    - python3
+
+  customize-hooks:
+    - |-
+      # SSH stays off until an empty file named "ssh" sits on the boot partition; the
+      # ssh-trigger service checks for it on every boot.
+      chroot $1 systemctl disable ssh
+
+    - |-
+      # Node: the official arm64 tarball, unpacked straight into the rootfs (no chroot
+      # execution needed for this step). Corepack then pins the Yarn the release wants.
+      echo "==> Installing Node ${IGconf_webkontrol_node}..." >&2
+      curl -fsSL "https://nodejs.org/dist/${IGconf_webkontrol_node}/node-${IGconf_webkontrol_node}-linux-arm64.tar.xz" \
+        | tar -xJ -C "$1/usr/local" --strip-components=1 --no-same-owner
+      chroot $1 bash -c "corepack enable && COREPACK_YES=1 corepack prepare yarn@4.9.2 --activate"
+
+    - |-
+      # The same install every other platform gets: install.mjs from this checkout builds the
+      # managed layout under /opt/webkontrol, so the box updates itself later through the
+      # admin. Puppeteer's Chromium download is skipped (x86-64 on ARM); the baked config
+      # points at the apt chromium instead.
+      echo "==> Installing WebKontrol ${IGconf_webkontrol_version}..." >&2
+      install -m 755 "${SRCROOT:-.}/../install.mjs" "$1/tmp/install.mjs"
+      chroot $1 env PUPPETEER_SKIP_DOWNLOAD=true COREPACK_YES=1 GITHUB_TOKEN="${IGconf_webkontrol_github_token}" \
+        node /tmp/install.mjs /opt/webkontrol --version "${IGconf_webkontrol_version}"
+      rm -f "$1/tmp/install.mjs"
+      install -m 644 "${SRCROOT:-.}/files/config.yaml" "$1/opt/webkontrol/config/config.yaml"
+      chroot $1 chown -R "${IGconf_device_user1}:${IGconf_device_user1}" /opt/webkontrol
+      chroot $1 setcap cap_net_bind_service=+ep /usr/local/bin/node
+
+    - |-
+      # The session: one unit runs xinit as the app user on tty1; the session script paints
+      # the root black and execs the supervisor. Xwrapper lets a non-console user start X.
+      printf 'allowed_users=anybody\nneeds_root_rights=yes\n' > "$1/etc/X11/Xwrapper.config"
+      install -m 755 "${SRCROOT:-.}/files/webkontrol-session" "$1/usr/local/bin/webkontrol-session"
+      install -D -m 644 "${SRCROOT:-.}/../splash.png" "$1/usr/share/webkontrol/splash.png"
+      export WEBKONTROL_USER="${IGconf_device_user1}"
+      envsubst < "${SRCROOT:-.}/files/webkontrol.service.tpl" > "$1/etc/systemd/system/webkontrol.service"
+      chroot $1 systemctl enable webkontrol.service
+
+    - |-
+      # SSH trigger: starts sshd when /boot/firmware/ssh exists at boot.
+      install -m 755 "${SRCROOT:-.}/files/ssh-trigger.sh" "$1/usr/local/bin/ssh-trigger.sh"
+      install -m 644 "${SRCROOT:-.}/files/ssh-trigger.service" "$1/etc/systemd/system/ssh-trigger.service"
+      chroot $1 systemctl enable ssh-trigger.service
+
+    - |-
+      # No rainbow test screen from the firmware: it cannot show a custom image, so black
+      # until the kernel draws the logo is the closest to "our splash from power on".
+      # config.txt comes from the device layer, which runs before this one.
+      grep -q '^disable_splash=1' "$1/boot/firmware/config.txt" ||
+        printf '\n# WebKontrol: no rainbow screen at power on\ndisable_splash=1\n' >> "$1/boot/firmware/config.txt"
+
+    - |-
+      # The default password is public (it is in this repo): force a change at first login.
+      chroot $1 chage -d 0 "${IGconf_device_user1}"
