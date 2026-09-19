@@ -142,7 +142,7 @@ node supervisor.js
 
 The admin serves on the configured port (default 80). Open `http://<the machine's address>/` from any browser on the network.
 
-To start on boot, the installer prints a ready-to-paste systemd unit at the end of the install.
+To start on boot, run the supervisor from the desktop session's autostart, not as a system service: the browsers need the desktop. See [Start on boot](#start-on-boot) for Raspberry Pi OS; the [Raspberry Pi image](#raspberry-pi-image) does this for you.
 
 
 ## Install on an existing Raspberry Pi OS
@@ -214,7 +214,7 @@ Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::AllS
 
 ### Start on boot
 
-The browsers need the desktop, so the supervisor must start inside the desktop session, not as a bare system service. The systemd unit the installer prints is for machines without a display and does not apply here. Add the supervisor to the LXDE autostart instead:
+The browsers need the desktop, so the supervisor must start inside the desktop session, not as a bare system service. Add the supervisor to the LXDE autostart instead:
 
 ```bash
 sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
