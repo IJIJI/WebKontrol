@@ -1,0 +1,41 @@
+#!/bin/sh
+# First boot: grow the root partition and filesystem to fill the card. The image ships a
+# small root partition; this runs once (stamp), online (ext4 grows while mounted).
+# Adapted from rpi-image-gen's contrib/src/cm5-programming-jig growfs script.
+set -eu
+stamp=/var/lib/webkontrol/growfs-done
+[ -e "$stamp" ] && exit 0
+
+root_src=$(findmnt -no SOURCE / 2>/dev/null || true)
+case "$root_src" in
+  /dev/*) : ;;
+  *) echo "webkontrol-growfs: root source '$root_src' is not a block device; skipping" >&2; exit 0 ;;
+esac
+# The image mounts root by symlink (/dev/disk/by-slot/...): resolve it before deriving names.
+root_dev=$(readlink -f "$root_src" 2>/dev/null || true)
+case "$root_dev" in
+  /dev/*) : ;;
+  *) echo "webkontrol-growfs: cannot resolve '$root_src' to a device node; skipping" >&2; exit 0 ;;
+esac
+name=$(basename "$root_dev")
+disk=$(lsblk -no PKNAME "$root_dev" 2>/dev/null | head -n1 || true)
+[ -n "$disk" ] || disk=$(printf '%s' "$name" | sed -E 's/p?[0-9]+$//')
+part=$(cat "/sys/class/block/$name/partition" 2>/dev/null || true)
+[ -n "$part" ] || part=$(printf '%s' "$name" | sed -E 's/.*[^0-9]([0-9]+)$/\1/')
+case "$part" in
+  ''|*[!0-9]*) echo "webkontrol-growfs: '$part' is not a partition number for $root_dev; skipping" >&2; exit 0 ;;
+esac
+[ -n "$disk" ] || { echo "webkontrol-growfs: no parent disk for $root_dev; skipping" >&2; exit 0; }
+
+# growpart: 0 = resized, 1 = nothing to do, anything else = a real error. Only the first two
+# may be stamped, so a failure retries next boot. `|| rc=$?` keeps set -e from aborting on 1.
+rc=0
+growpart "/dev/$disk" "$part" || rc=$?
+case "$rc" in
+  0|1) : ;;
+  *) echo "webkontrol-growfs: growpart /dev/$disk $part failed (exit $rc); retrying next boot" >&2; exit 1 ;;
+esac
+resize2fs "$root_src"
+mkdir -p "$(dirname "$stamp")"
+: > "$stamp"
+echo "webkontrol-growfs: root filesystem now fills /dev/$disk" >&2

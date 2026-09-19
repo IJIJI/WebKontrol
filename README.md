@@ -25,9 +25,78 @@ I am planning to sell pre-configured boxes with SDI outputs. If you are interest
 
 # Getting Started
 
-WebKontrol is Node-based and runs wherever Node runs. It is tested on **Windows 11** and **Raspberry Pi OS Full** on the Raspberry Pi 4. We are currently working on pre-built Raspberry Pi binaries, a Docker image, and a Windows installer.
+WebKontrol is Node-based and runs wherever Node runs. It is tested on **Windows 11** and **Raspberry Pi OS Full** on the Raspberry Pi 4. For a Raspberry Pi there is a ready-made image; we are currently working on a Docker image and a Windows installer.
 
 Installed systems can be updated from the admin UI, under settings.
+
+## Raspberry Pi image
+
+The easiest way to run WebKontrol on a Raspberry Pi: an SD card image that boots straight into the displays. There is no desktop; the screens show the WebKontrol logo until the displays come up. Tested on the Raspberry Pi 4; the Pi 3 and Pi 5 are expected to work but are not tested yet.
+
+### Flash
+
+1. Download `WebKontrol_Pi_<version>.img.zst` from the [releases page](https://github.com/IJIJI/WebKontrol/releases).
+2. Open [Raspberry Pi Imager](https://www.raspberrypi.com/software/), choose your Pi, then *Choose OS*, *Use custom*, and select the downloaded file. Any card of 8 GB or more works.
+3. When Imager offers OS customisation, choose **No**: the image does not use it.
+
+### First boot
+
+Connect the screens and a network cable (the image uses wired networking only), then power on. The first boot grows the system to fill the card, and the first screen shows a display within a minute or so.
+
+Open the admin from any browser on the same network: `http://webkontrol.local/`. If that name does not resolve on your network, find the Pi's address in your router's list of devices.
+
+### Log in over SSH
+
+SSH is off by default. To turn it on, create an empty file named `ssh` (no extension) on the card's boot partition, the one a Windows or Mac computer can open, and boot the Pi with it. Remove the file to turn SSH off again. If Windows shows no drive for the card, see [Open the boot partition on Windows](#open-the-boot-partition-on-windows).
+
+```bash
+ssh webkontrol@webkontrol.local
+```
+
+The default password is `Welcome@WebKontrol1`. The first login asks for it once more as the current password, then for a new one.
+
+### Open the boot partition on Windows
+
+The card holds two partitions: a small `BOOT` partition that Windows can read, and a larger one it cannot. Windows does not always give `BOOT` a drive letter. To give it one:
+
+1. Right-click the Start button and open *Disk Management*.
+2. Find the card (a removable disk the size of your card) and right-click its 512 MB `BOOT` partition.
+3. Choose *Change Drive Letter and Paths*, then *Add*, pick a letter and confirm.
+
+Or, in PowerShell run as administrator:
+
+```powershell
+Get-Volume -FileSystemLabel BOOT | Get-Partition | Add-PartitionAccessPath -AssignDriveLetter
+```
+
+The drive now opens in Explorer. If Windows offers to format a partition on the card, always choose *Cancel*: formatting erases the Pi's system. Eject the card before removing it.
+
+### Screens and displays
+
+The displays are set up in `/opt/webkontrol/config/config.yaml`; the image starts with one display on the first screen. Screens are laid out side by side from left to right, HDMI screens first, then the official touch display. To use a second screen, add a display with its position (see [Window position](#window-position) for finding it) and restart:
+
+```yaml
+  - id: display-2
+    name:
+      long: Display 2
+      short: DISP2
+    chromiumExecutablePath: /usr/bin/chromium
+    window:
+      x: 1920
+      y: 0
+```
+
+```bash
+sudo systemctl restart webkontrol
+```
+
+A screen without a display keeps showing the logo, so you can see the Pi is on. Screens connected while the Pi runs are picked up after a restart of the service. For a different layout, such as a rotated screen, put your own `xrandr` commands in `/opt/webkontrol/config/display.sh`; the image then runs that instead of its own layout.
+
+The clock uses the Europe/Amsterdam timezone; change it with `sudo timedatectl set-timezone <Area/City>`.
+
+### Updates
+
+The image installs updates like any other WebKontrol install: from the admin UI, under settings. There is no need to flash a newer image.
 
 ## Prerequisites
 
@@ -42,10 +111,10 @@ Pick an install directory. In the following example, `/opt/webkontrol` is used
 
 ```shell
 curl -fsSL https://raw.githubusercontent.com/ijiji/WebKontrol/main/install.mjs -o install.mjs
-node install.mjs /opt/webkontrol --version v3.2.0
+node install.mjs /opt/webkontrol --version v3.2.1
 ```
 
-v3.2.0 is published as a pre-release, and the installer never installs pre-releases on its own, so the tag is passed explicitly. Once a stable v3 release exists, drop `--version` and the installer picks the latest stable release by itself.
+v3.2.1 is published as a pre-release, and the installer never installs pre-releases on its own, so the tag is passed explicitly. Once a stable v3 release exists, drop `--version` and the installer picks the latest stable release by itself.
 
 The installer writes a commented starter `config/config.yaml`; edit it to add your displays (or prepare the file beforehand, the installer keeps an existing one). A minimal config with one display:
 
@@ -76,9 +145,9 @@ The admin serves on the configured port (default 80). Open `http://<the machine'
 To start on boot, the installer prints a ready-to-paste systemd unit at the end of the install.
 
 
-## Raspberry Pi OS
+## Install on an existing Raspberry Pi OS
 
-The generic install works on Raspberry Pi OS with a few extra steps.
+For a Pi that already runs Raspberry Pi OS with its desktop. On a spare card, the [Raspberry Pi image](#raspberry-pi-image) is simpler. The generic install works on Raspberry Pi OS with a few extra steps; other Debian-based desktops probably work the same way, but they are not tested.
 
 ### Port 80
 

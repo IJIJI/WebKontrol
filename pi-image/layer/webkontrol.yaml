@@ -46,6 +46,9 @@ mmdebstrap:
     - openssh-server
     # setcap, so Node may bind port 80 as the app user.
     - libcap2-bin
+    # growpart (and the sfdisk it drives), for filling the card on first boot.
+    - cloud-guest-utils
+    - fdisk
     - curl
     - ca-certificates
     # Fallback toolchain for native modules without an arm64 prebuilt.
@@ -89,6 +92,12 @@ mmdebstrap:
       export WEBKONTROL_USER="${IGconf_device_user1}"
       envsubst < "${SRCROOT:-.}/files/webkontrol.service.tpl" > "$1/etc/systemd/system/webkontrol.service"
       chroot $1 systemctl enable webkontrol.service
+
+    - |-
+      # First boot grows the root partition to fill the card; the image itself stays small.
+      install -m 755 "${SRCROOT:-.}/files/webkontrol-growfs" "$1/usr/local/sbin/webkontrol-growfs"
+      install -m 644 "${SRCROOT:-.}/files/webkontrol-growfs.service" "$1/etc/systemd/system/webkontrol-growfs.service"
+      chroot $1 systemctl enable webkontrol-growfs.service
 
     - |-
       # SSH trigger: starts sshd when /boot/firmware/ssh exists at boot.

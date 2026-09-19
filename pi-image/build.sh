@@ -4,17 +4,17 @@
 # (https://github.com/raspberrypi/rpi-image-gen).
 #
 # Run from WSL2 or any Debian/Ubuntu host (the repo may stay on the Windows filesystem):
-#   bash /mnt/c/path/to/WebKontrol/pi-image/build.sh v3.1.0
+#   bash /mnt/c/path/to/WebKontrol/pi-image/build.sh v3.2.0
 #
 # The argument is the WebKontrol release tag baked into the image; it must carry an
 # update tarball. An optional GITHUB_TOKEN in the environment is handed to the installer
 # for its API call (CI runners are rate-limited without one).
 #
-# Output: ${WORK_DIR}/WebKontrol_Pi.img.zst (a link to the engine's deploy directory)
+# Output: ${WORK_DIR}/WebKontrol_Pi_<tag>.img.zst (a link into the engine's deploy directory)
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
-VERSION="${1:?usage: build.sh <release tag, e.g. v3.1.0>}"
+VERSION="${1:?usage: build.sh <release tag, e.g. v3.2.0>}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORK_DIR="${WORK_DIR:-${HOME}/webkontrol-image-work}"
 RIG_DIR="${WORK_DIR}/.rpi-image-gen"
@@ -65,11 +65,13 @@ echo "==> Building WebKontrol ${VERSION} image..."
 # ---------------------------------------------------------------------------
 # The engine already compresses the image into its deploy directory (zstd, which
 # Raspberry Pi Imager flashes directly); the raw .img beside it in image-WebKontrol_Pi/
-# is the uncompressed original. One stable path for CI and for hand-flashing:
+# is the uncompressed original. One path for CI and for hand-flashing, named with the
+# release so downloads stay distinguishable:
 # ---------------------------------------------------------------------------
 IMG="$(ls -t "${WORK_DIR}"/work/deploy-*/WebKontrol_Pi.img.zst 2>/dev/null | head -1 || true)"
 [ -n "${IMG}" ] || { echo "ERROR: no WebKontrol_Pi.img.zst under ${WORK_DIR}/work/deploy-*" >&2; exit 1; }
-ln -sf "${IMG}" "${WORK_DIR}/WebKontrol_Pi.img.zst"
+OUT="${WORK_DIR}/WebKontrol_Pi_${VERSION}.img.zst"
+ln -sf "${IMG}" "${OUT}"
 
 echo ""
-echo "==> Done: ${WORK_DIR}/WebKontrol_Pi.img.zst  ->  ${IMG}"
+echo "==> Done: ${OUT}  ->  ${IMG}"
