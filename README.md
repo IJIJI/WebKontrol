@@ -42,10 +42,10 @@ Pick an install directory. In the following example, `/opt/webkontrol` is used
 
 ```shell
 curl -fsSL https://raw.githubusercontent.com/ijiji/WebKontrol/main/install.mjs -o install.mjs
-node install.mjs /opt/webkontrol --version v3.1.0
+node install.mjs /opt/webkontrol --version v3.2.0
 ```
 
-v3.1.0 is published as a pre-release, and the installer never installs pre-releases on its own, so the tag is passed explicitly. Once a stable v3 release exists, drop `--version` and the installer picks the latest stable release by itself.
+v3.2.0 is published as a pre-release, and the installer never installs pre-releases on its own, so the tag is passed explicitly. Once a stable v3 release exists, drop `--version` and the installer picks the latest stable release by itself.
 
 The installer writes a commented starter `config/config.yaml`; edit it to add your displays (or prepare the file beforehand, the installer keeps an existing one). A minimal config with one display:
 
@@ -129,11 +129,12 @@ puppets:
     window:
       x: 1920
       y: 0
-      width: 800
-      height: 480
 ```
 
-All four fields are optional. The puppet is always fullscreen; `x`/`y` decide the screen and `width`/`height` are a tie-breaker: Chromium fullscreens on the screen holding most of the initial window, so give the screen's own size when a default-sized window at that position would spill onto a neighbour. This only works on an X11 session (`sudo raspi-config`, Advanced Options, Wayland, X11); the Wayland default of Pi OS does not let a window choose its own place.
+The puppet is always fullscreen on the screen at that position; `x` and `y` are all it needs. `window` also accepts `width` and `height`, which are not needed and can be left out. This only works on an X11 session (`sudo raspi-config`, Advanced Options, Wayland, X11); the Wayland default of Pi OS does not let a window choose its own place.
+
+> [!NOTE]
+> Chromium goes fullscreen on the screen that holds most of its starting window, which opens at `x`, `y` with Chromium's default size. If a small screen has a larger one to its right or below it, that window can spill over more onto the neighbour than onto its own screen, and the puppet lands on the neighbour. Setting `width` and `height` to the screen's own size prevents that.
 
 The same `window` works on Windows. Screens left of or above the primary one have negative coordinates there; list them with:
 

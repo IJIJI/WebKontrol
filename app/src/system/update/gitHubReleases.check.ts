@@ -2,8 +2,10 @@
 // releases (tarball required, floor enforced, garbage dropped, newest first), and the
 // repository URL forms package.json can carry all parse. Run with `yarn check`.
 import assert from "node:assert/strict";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 
-import { mapReleases, parseGitHubRepo } from "./GitHubReleases";
+import { GitHubReleases, mapReleases, parseGitHubRepo } from "./GitHubReleases";
 
 const raw = (tag: string, extra: Record<string, unknown> = {}): Record<string, unknown> => ({
   tag_name: tag,
@@ -56,5 +58,34 @@ assert.equal(parseGitHubRepo("git+https://github.com/ijiji/WebKontrol.git"), "ij
 assert.equal(parseGitHubRepo("https://github.com/owner/repo"), "owner/repo");
 assert.equal(parseGitHubRepo("git@github.com:owner/repo.git"), "owner/repo");
 assert.equal(parseGitHubRepo("https://gitlab.com/owner/repo"), null);
+
+// The cooldown counts from the last SUCCESS. A failed check (an offline boot) must stay
+// retryable at once: returning its cached empty list as an answer hid the failure and left
+// the check button dead for the whole cooldown (found on the Pi image, 2026-09-18).
+{
+  let fail = true;
+  let hits = 0;
+  const server = createServer((request, response) => {
+    hits += 1;
+    if (fail) return response.writeHead(500).end();
+    if (request.url?.endsWith("/releases/latest")) return response.writeHead(404).end(); // no stable yet
+    response.writeHead(200, { "Content-Type": "application/json" }).end(JSON.stringify([raw("v3.1.0")]));
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const source = new GitHubReleases(`http://127.0.0.1:${(server.address() as AddressInfo).port}`);
+
+  await assert.rejects(source.check(), /500/);
+  assert.notEqual(source.lastChecked, null, "a failed attempt is still recorded as checked");
+  await assert.rejects(source.check(), /500/, "a failure starts no cooldown: the retry really asks again");
+  assert.equal(hits, 2);
+
+  fail = false;
+  assert.deepEqual((await source.check()).map((release) => release.version), ["v3.1.0"]);
+  assert.equal(hits, 4, "a success asks for the list and for latest");
+  await source.check();
+  assert.equal(hits, 4, "inside the cooldown after a success, the cached list answers");
+
+  server.close();
+}
 
 console.log("gitHubReleases.check: all assertions passed");

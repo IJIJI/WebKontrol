@@ -1,0 +1,23 @@
+# WebKontrol configuration. The admin UI manages runtime settings; this file holds
+# what must exist before the app starts. Edit over SSH, then: sudo systemctl restart webkontrol
+
+# Displays this box drives. One per screen.
+puppets:
+  - id: display-1
+    name:
+      long: Display 1
+      short: DISP1
+    chromiumExecutablePath: /usr/bin/chromium
+  # A second screen, for example the official 7" touch display beside a 1080p HDMI screen.
+  # Find each screen's offset with: DISPLAY=:0 xrandr --listmonitors
+  # - id: display-2
+  #   name:
+  #     long: Display 2
+  #     short: DISP2
+  #   chromiumExecutablePath: /usr/bin/chromium
+  #   window:
+  #     x: 1920
+  #     y: 0
+
+web:
+  port: 80

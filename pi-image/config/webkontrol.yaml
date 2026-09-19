@@ -1,0 +1,31 @@
+# WebKontrol Raspberry Pi image. Built with rpi-image-gen (see build.sh); the result boots
+# straight into the WebKontrol display session, no desktop.
+
+include:
+  file: trixie-minbase.yaml
+
+device:
+  layer: rpi4 # generic 64-bit kernel and firmware: boots Pi 3, 4 and 5
+  hostname: webkontrol
+  user1: webkontrol
+  # Forced change at first login. Policy: 8+ chars, upper, lower, digit, one of @$!%*?&
+  user1pass: Welcome@WebKontrol1
+  user1sudo: passwd
+
+locale:
+  timezone: Europe/Amsterdam # clock views show the box's local time
+
+image:
+  name: WebKontrol_Pi
+
+layer:
+  app: webkontrol
+  extra: rpi-splash-screen
+
+splash:
+  image_path: ${@SRCROOT}/splash.tga # 24-bit TGA, under 224 colours, made from ../splash.png
+
+webkontrol:
+  # The release to bake in. build.sh and CI override it:
+  #   rpi-image-gen build ... -- IGconf_webkontrol_version=vX.Y.Z
+  version: v3.1.0

@@ -7,11 +7,22 @@
 # The tarball is the update system's whole contract with CI: dist + package.json +
 # yarn.lock + .yarnrc.yml, flat at the tar root (UpdateRunner extracts with -C), and
 # platform-independent because node_modules is excluded; the device installs its own.
+#
+# After the tarball, the Raspberry Pi image is built (pi-image/) and attached too. It
+# installs that same tarball through install.mjs, so it can only run once the tarball
+# exists: a separate publish-triggered workflow would race the upload.
 name: Release
 
 on:
   release:
     types: [published]
+  # Build an image by hand for an existing release (the tarball must already be attached);
+  # it lands as a workflow artifact, not on the release.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to bake into the image, e.g. v3.1.0
+        required: true
 
 defaults:
   run:
@@ -19,6 +30,7 @@ defaults:
 
 jobs:
   release:
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     permissions:
       contents: write # upload the tarball asset to the release
@@ -65,3 +77,42 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: app/webkontrol-*.tar.gz
+
+  image:
+    needs: release
+    # Runs after a successful tarball upload, or alone on a manual dispatch (release skipped).
+    if: ${{ !cancelled() && (needs.release.result == 'success' || needs.release.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # upload the image asset to the release
+    defaults:
+      run:
+        working-directory: pi-image
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+      WORK_DIR: /tmp/webkontrol-image
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # for install.mjs inside the chroot
+    steps:
+      - uses: actions/checkout@v4
+
+      # build.sh installs the rest (rpi-image-gen's own dependency script, QEMU, binfmt);
+      # it is the same script a developer runs from WSL2, so CI and local builds agree.
+      - name: Build the image
+        run: bash build.sh "$TAG"
+
+      # build.sh leaves a symlink; the uploaders want the real file.
+      - name: Collect the image
+        run: cp -L /tmp/webkontrol-image/WebKontrol_Pi.img.zst /tmp/WebKontrol_Pi.img.zst
+
+      - name: Attach to the release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: /tmp/WebKontrol_Pi.img.zst
+
+      - name: Upload as artifact (manual run)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: WebKontrol_Pi
+          path: /tmp/WebKontrol_Pi.img.zst

@@ -64,7 +64,8 @@ export class GitHubReleases {
   // maintainer sets it to by hand. The single source of truth for "is there an update",
   // shared with the installer's default; prereleases are never latest, by GitHub's rules.
   private _latest: string | null = null; // TODO: This can be cleaner
-  private _lastChecked: number | null = null;
+  private _lastChecked: number | null = null; // the last attempt, failed or not (shown in the UI)
+  private _lastSuccess: number | null = null; // what the cooldown counts from
   private _inflight: Promise<Release[]> | null = null;
 
   constructor(private readonly _baseUrl = "https://api.github.com") {}
@@ -81,19 +82,27 @@ export class GitHubReleases {
 
   /**
    * Fetch what is published. Throws on failure (the manager records the message).
-   * Concurrent callers share one request, and inside the cooldown the cached list is
-   * returned, failures included: a down network is not hammered by the check button.
+   * Concurrent callers share one request, and inside the cooldown after a SUCCESSFUL check
+   * the cached list is returned. A failed check starts no cooldown: its cached list is
+   * whatever was there before (empty after an offline boot), and handing that back as an
+   * answer would hide the failure and leave the check button dead until the cooldown ends.
+   * A failing check fails fast, so retrying it straight away costs nothing.
    */
   async check(): Promise<Release[]> {
     if (this._inflight) return this._inflight;
-    if (this._lastChecked !== null && Date.now() < this._lastChecked + MIN_CHECK_INTERVAL_MS) {
+    if (this._lastSuccess !== null && Date.now() < this._lastSuccess + MIN_CHECK_INTERVAL_MS) {
       this._logger.debug("Checked recently, returning the cached release list.");
       return this._releases;
     }
-    this._inflight = this._fetch().finally(() => {
-      this._lastChecked = Date.now();
-      this._inflight = null;
-    });
+    this._inflight = this._fetch()
+      .then((releases) => {
+        this._lastSuccess = Date.now();
+        return releases;
+      })
+      .finally(() => {
+        this._lastChecked = Date.now();
+        this._inflight = null;
+      });
     return this._inflight;
   }
 
