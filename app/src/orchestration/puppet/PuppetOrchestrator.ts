@@ -278,7 +278,12 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
     } catch (error) {
       // Recorded failures reach _onNavigationFailed via the broadcast edge; a throw
       // without a record (puppet not initialized, closing) is relaunch territory.
-      this._logger.error(`Navigation failed for puppet "${id}".`, error);
+      // Not initialized is an expected state while a browser fails to launch or closes.
+      if (error instanceof Error && error.message === "Puppet not initialized") {
+        this._logger.warn(`Navigation skipped for puppet "${id}": puppet not initialized.`);
+      } else {
+        this._logger.error(`Navigation failed for puppet "${id}".`, error);
+      }
     }
   }
 
