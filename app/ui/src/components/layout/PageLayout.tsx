@@ -76,7 +76,7 @@ export default function PageLayout(): JSX.Element {
         className={["page-layout", "pad-none"].filter(Boolean).join(" ")}
       >
         <div className="page-header logo">
-          <BrandLogo size={20} version="v1.0" collapsed={isCollapsed} />
+          <BrandLogo size={20} version="v3" collapsed={isCollapsed} />
         </div>
         <div className="page-header title">
           <h1 className="title-text">
