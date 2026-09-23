@@ -17,6 +17,8 @@ export const FONT_SUGGESTIONS = [
   "system-ui", "Arial", "Helvetica", "Verdana", "Tahoma", "Trebuchet MS",
   "Times New Roman", "Georgia", "Courier New", "monospace", "serif", "sans-serif",
   "DSEG7 Classic", "DSEG14 Classic",
+  // Same fonts, rendered with their unlit segments behind the text (blocks/dualTone.ts).
+  "DSEG7 Classic Dual", "DSEG14 Classic Dual",
 ];
 
 // A font family field: free text (any CSS family list stays expressible) plus a searchable

@@ -14,6 +14,17 @@
   font-family: "DSEG14 Classic";
   src: url("/viewclient/fonts/DSEG14Classic-Regular.woff2") format("woff2");
 }
+/* The same two files under a second name: picking one asks the block for the dual tone
+   rendering below (blocks/dualTone.ts), the way a real display leaves its unlit segments
+   visible. The font itself is untouched; only the family name differs. */
+@font-face {
+  font-family: "DSEG7 Classic Dual";
+  src: url("/viewclient/fonts/DSEG7Classic-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "DSEG14 Classic Dual";
+  src: url("/viewclient/fonts/DSEG14Classic-Regular.woff2") format("woff2");
+}
 
 html,
 body {
@@ -179,6 +190,19 @@ body {
 /* Text keeps its authored line breaks (multi-line text fields). */
 .wk-text {
   white-space: pre-line;
+}
+
+/* Dual tone (blocks/dualTone.ts): the all-segments copy sits in the same grid cell as the live
+   text, so both get the same width and the same line breaks without leaving the flow. */
+.wk-dual {
+  display: inline-grid;
+}
+.wk-dual > * {
+  grid-area: 1 / 1;
+}
+.wk-dual-ghost {
+  opacity: 0.12;
+  user-select: none;
 }
 
 /* Freeform positions its items in % of its own box; each item holds one slot. The item is a

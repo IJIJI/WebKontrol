@@ -5,6 +5,7 @@ import { fitScale } from "../../fitScale";
 import { alignmentSchema, blockSlot, CoordinateSchema, DimensionSchema, GridConfigSchema } from "../../types/schema";
 import { textBoxStyles } from "../../styles";
 import { clock } from "../../clock";
+import { dualTone } from "../../dualTone";
 import { PHP_DATE_TOKENS } from "../../phpDate";
 import { createNamespace } from "../../types/config";
 import type { FieldMeta } from "../../../types/schema";
@@ -44,7 +45,7 @@ export const TextBlock = ns.defineBlock("text", {
   box: { sizing: "content" },
   // The one alignment both places the box and lays the text out inside it.
   boxStyles: (config) => textBoxStyles(config.style.alignment),
-  render: (config) => html`${config.text}`,
+  render: (config) => html`${dualTone(config.text)}`,
 });
 
 // ContainerBlock: wrap another block to give it styling it does not have itself.

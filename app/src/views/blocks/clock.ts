@@ -1,4 +1,6 @@
+import { html, type TemplateResult } from "lit";
 import { AsyncDirective, directive } from "lit/async-directive.js";
+import { dualTone } from "./dualTone";
 import { formatPhpDate } from "./phpDate";
 
 // A self-updating clock value for the datetime block. A directive keeps the tick local to the
@@ -9,10 +11,16 @@ class ClockDirective extends AsyncDirective {
   private _format = "";
   private _timer: ReturnType<typeof setTimeout> | undefined;
 
-  render(format: string): string {
+  render(format: string): TemplateResult {
     this._format = format;
     this._schedule();
-    return formatPhpDate(format, new Date());
+    return this._value();
+  }
+
+  // The value is a template rather than a string so the dual tone layers tick with it: lit
+  // keeps the template instance and updates only its text nodes.
+  private _value(): TemplateResult {
+    return html`${dualTone(formatPhpDate(this._format, new Date()))}`;
   }
 
   // Align each tick to the next wall-clock second, so seconds never visibly skip or stall the
@@ -23,7 +31,7 @@ class ClockDirective extends AsyncDirective {
       // A queued callback can outlive disconnected() (clearTimeout can't cancel an already
       // queued task); without this guard it would re-arm the timer forever.
       if (!this.isConnected) return;
-      this.setValue(formatPhpDate(this._format, new Date()));
+      this.setValue(this._value());
       this._schedule();
     }, 1000 - (Date.now() % 1000));
   }
