@@ -17,6 +17,7 @@ const { CoreDatabase } = await import("./CoreDatabase");
 
 const db = CoreDatabase.getInstance();
 assert.equal(fs.existsSync(path.join(scratch, "db", "database.db")), true, "db file created");
+assert.equal(db.isFresh, true, "a database this process created reports fresh (first-run work hangs off it)");
 
 // The full write path exercises the derived DDL: composite PK (the upsert's conflict
 // target), NOT NULL, and the row surviving a round trip.

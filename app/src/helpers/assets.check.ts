@@ -16,6 +16,7 @@ const SHIPPED = [
   "views/client/view.css",
   "assets/fonts/DSEG/DSEG7Classic-Regular.woff2",
   "assets/fonts/DSEG/DSEG14Classic-Regular.woff2",
+  "assets/fonts/ZenDots/ZenDots-Regular.ttf",
 ];
 for (const rel of SHIPPED) {
   assert.equal(existsSync(asset(rel)), true, `asset "${rel}" resolves to a real file in dev`);

@@ -25,6 +25,11 @@
   font-family: "DSEG14 Classic Dual";
   src: url("/viewclient/fonts/DSEG14Classic-Regular.woff2") format("woff2");
 }
+/* The brand font (SIL OFL), for the logo on the seeded default view. */
+@font-face {
+  font-family: "Zen Dots";
+  src: url("/viewclient/fonts/ZenDots-Regular.ttf") format("truetype");
+}
 
 html,
 body {

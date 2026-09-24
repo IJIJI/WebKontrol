@@ -104,6 +104,8 @@ export const AnyViewConfigSchema = z.discriminatedUnion("type", [
   UrlViewConfigSchema,
 ]);
 export type AnyViewConfig = z.infer<typeof AnyViewConfigSchema>;
+/** The authored form: defaults and optional fields may be absent (the schema fills them). */
+export type AnyViewConfigInput = z.input<typeof AnyViewConfigSchema>;
 
 // The base config type (name + loadTimeout), used as the AbstractView generic constraint.
 export type ViewConfig = z.infer<typeof BaseViewConfigSchema>;

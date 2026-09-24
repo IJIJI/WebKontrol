@@ -19,6 +19,7 @@ export const FONT_SUGGESTIONS = [
   "DSEG7 Classic", "DSEG14 Classic",
   // Same fonts, rendered with their unlit segments behind the text (blocks/dualTone.ts).
   "DSEG7 Classic Dual", "DSEG14 Classic Dual",
+  "Zen Dots", // the brand font, served alongside
 ];
 
 // A font family field: free text (any CSS family list stays expressible) plus a searchable
