@@ -15,6 +15,8 @@ const CLOCK_COLOR = "#cc0033"; // the failure page's red, so a display speaks wi
 const DATE_COLOR = "#8b8b8b";
 const BRAND_COLOR = "#e85d30"; // "Web"; "Kontrol" takes the admin's light text colour
 const BRAND_TEXT_COLOR = "#e8e6de";
+const SUBLINE_COLOR = "#b4b2a9"; // the admin's secondary text, dark theme
+const DIVIDER_COLOR = "#6b6a64"; // its tertiary text, which the nav's divider uses
 
 /** The seeded view's config. Exported for the check file, which parses it against the schemas. */
 export const DEFAULT_VIEW_CONFIG: AnyViewConfigInput = {
@@ -53,14 +55,38 @@ export const DEFAULT_VIEW_CONFIG: AnyViewConfigInput = {
         position: { x: 97.1, y: 96.3 },
         size: {},
         alignment: { horizontal: "right", vertical: "bottom" },
+        // The admin's BrandLogo at size 40 (the nav shows it at 20): the wordmark, and under it
+        // the subline at half the size, with the nav's 2px divider scaled to 4px. The subline
+        // is 264px wide, 90% of the 293px wordmark, in px because a percentage inside a
+        // content-sized parent resolves to nothing (see .wk-divider-line in view.css).
         block: {
           type: "webkontrol::block::stack",
-          direction: "row",
-          // Two blocks because the wordmark is two colours, as in the admin's own logo.
-          style: { fontFamily: "Zen Dots", fontSize: 40, color: BRAND_TEXT_COLOR },
+          direction: "column",
+          align: "center",
           blocks: [
-            { type: "webkontrol::block::text", text: "Web", style: { color: BRAND_COLOR } },
-            { type: "webkontrol::block::text", text: "Kontrol" },
+            {
+              type: "webkontrol::block::stack",
+              direction: "row",
+              // Two blocks because the wordmark is two colours, as in the admin's own logo.
+              style: { fontFamily: "Zen Dots", fontSize: 40, color: BRAND_TEXT_COLOR },
+              blocks: [
+                { type: "webkontrol::block::text", text: "Web", style: { color: BRAND_COLOR } },
+                { type: "webkontrol::block::text", text: "Kontrol" },
+              ],
+            },
+            {
+              type: "webkontrol::block::stack",
+              direction: "row",
+              align: "center",
+              gap: 14,
+              style: { fontFamily: "monospace", fontSize: 20, fontWeight: "700", color: SUBLINE_COLOR, size: { x: "264px" } },
+              blocks: [
+                // Major version only, like the splash: the box outgrows any full version baked in.
+                { type: "webkontrol::block::text", text: "V3", style: { color: BRAND_COLOR } },
+                { type: "webkontrol::block::divider", thickness: 4, color: DIVIDER_COLOR, style: { size: { x: "container" } } },
+                { type: "webkontrol::block::text", text: "Synapt" },
+              ],
+            },
           ],
         },
       },
