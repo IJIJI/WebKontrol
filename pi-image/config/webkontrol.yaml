@@ -34,7 +34,7 @@ layer:
 splash:
   image_path: ${@SRCROOT}/splash.tga # 24-bit TGA, under 224 colours, made from ../splash.png
 
-webkontrol:
-  # The release to bake in. build.sh and CI override it:
-  #   rpi-image-gen build ... -- IGconf_webkontrol_version=vX.Y.Z
-  version: v3.1.0
+# The release to bake in has no default on purpose: build.sh derives it from app/package.json
+# (or its argument) and CI passes the release tag, both as
+#   rpi-image-gen build ... -- IGconf_webkontrol_version=vX.Y.Z
+# so nothing can silently build an old release.

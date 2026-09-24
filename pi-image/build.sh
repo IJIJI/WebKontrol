@@ -4,18 +4,22 @@
 # (https://github.com/raspberrypi/rpi-image-gen).
 #
 # Run from WSL2 or any Debian/Ubuntu host (the repo may stay on the Windows filesystem):
-#   bash /mnt/c/path/to/WebKontrol/pi-image/build.sh v3.2.0
+#   bash /mnt/c/path/to/WebKontrol/pi-image/build.sh [v3.2.0]
 #
 # The argument is the WebKontrol release tag baked into the image; it must carry an
-# update tarball. An optional GITHUB_TOKEN in the environment is handed to the installer
-# for its API call (CI runners are rate-limited without one).
+# update tarball. Without one, the version in app/package.json is used, so a checkout
+# builds the image of its own release. An optional GITHUB_TOKEN in the environment is
+# handed to the installer for its API call (CI runners are rate-limited without one).
 #
 # Output: ${WORK_DIR}/WebKontrol_Pi_<tag>.img.zst (a link into the engine's deploy directory)
 # ---------------------------------------------------------------------------
 set -euo pipefail
 
-VERSION="${1:?usage: build.sh <release tag, e.g. v3.2.0>}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# The argument, else app/package.json's version: the only place a version is typed by hand.
+# CI always passes the release tag.
+VERSION="${1:-v$(sed -n 's/^  "version": "\([^"]*\)".*/\1/p' "${SCRIPT_DIR}/../app/package.json")}"
+[ "${VERSION}" != "v" ] || { echo "build.sh: no release tag given and none found in app/package.json" >&2; exit 1; }
 WORK_DIR="${WORK_DIR:-${HOME}/webkontrol-image-work}"
 RIG_DIR="${WORK_DIR}/.rpi-image-gen"
 RIG_REPO="https://github.com/raspberrypi/rpi-image-gen.git"

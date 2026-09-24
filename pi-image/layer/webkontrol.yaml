@@ -8,9 +8,9 @@
 #
 # X-Env-VarPrefix: webkontrol
 #
-# X-Env-Var-version: v3.1.0
-# X-Env-Var-version-Desc: WebKontrol release tag to install. Must carry an update tarball.
-# X-Env-Var-version-Required: n
+# X-Env-Var-version:
+# X-Env-Var-version-Desc: WebKontrol release tag to install. Must carry an update tarball. No default: build.sh and CI always pass it.
+# X-Env-Var-version-Required: y
 # X-Env-Var-version-Valid: regex:^v[0-9]+\.[0-9]+\.[0-9]+.*$
 # X-Env-Var-version-Set: y
 #

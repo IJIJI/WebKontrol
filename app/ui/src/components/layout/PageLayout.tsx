@@ -32,7 +32,11 @@ const getDeviceType = (width: number): DeviceType => {
 export default function PageLayout(): JSX.Element {
   const location = useLocation();
   const { title, back } = usePageContext();
-  const uiConfig = useApi().state?.runtime.ui;
+  const apiState = useApi().state;
+  const uiConfig = apiState?.runtime.ui;
+  // The version of the box being looked at, not of this bundle: after an update the page
+  // reloads into the new bundle, so the two agree again.
+  const version = apiState?.info.update.current;
   // Mounted here rather than on the updates page: an update takes the whole server away,
   // so every open admin needs covering, not just the one that pressed the button.
   const update = useUpdateLifecycle();
@@ -76,7 +80,7 @@ export default function PageLayout(): JSX.Element {
         className={["page-layout", "pad-none"].filter(Boolean).join(" ")}
       >
         <div className="page-header logo">
-          <BrandLogo size={20} version="v3" collapsed={isCollapsed} />
+          <BrandLogo size={20} version={version ? `v${version}` : "v3"} collapsed={isCollapsed} />
         </div>
         <div className="page-header title">
           <h1 className="title-text">
