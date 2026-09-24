@@ -165,93 +165,126 @@ export function ApiStateProvider({
     localStorage.setItem('ui-theme', theme);
   }, []);
 
-  useEffect(() => {
-    const eventSource = new EventSource("/api/state");
+  // The bundle does not know which version built it, so the first state received stands in:
+  // a later one that differs means the server was updated (or rebooted into a new release)
+  // under a page still running the old bundle.
+  const seenVersionRef = useRef<string | null>(null);
 
-    eventSource.addEventListener("open", (): void => {
-      console.log("SSE connection to /api/state opened, awaiting initial state...");
-    });
+  useEffect(() => {
+    // A flat delay, retried forever: one tab on a LAN needs no backoff, and a display's admin
+    // must come back after any outage.
+    const RECONNECT_DELAY_MS = 2_000;
+    let eventSource: EventSource | null = null;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const clearPingTimeout = (): void => {
+      if (pingTimeoutRef.current) clearTimeout(pingTimeoutRef.current);
+      pingTimeoutRef.current = null;
+    };
+
+    // Both ways of losing the stream end here. The source is closed rather than left to the
+    // browser's own retry: that retry is invisible from here, never fires on a half-open
+    // socket (a rebooted box, a pulled cable, a laptop back from sleep), and stops for good
+    // after one non-stream answer. Reopening it ourselves covers all three.
+    const dropConnection = (reason: string): void => {
+      setStatus(ConnectionStatus.DISCONNECTED);
+      setError(reason);
+      eventSource?.close();
+      eventSource = null;
+      clearPingTimeout();
+      retryTimer = setTimeout(connect, RECONNECT_DELAY_MS);
+    };
 
     const resetPingTimeout = (): void => {
-      if (pingTimeoutRef.current) clearTimeout(pingTimeoutRef.current);
-      pingTimeoutRef.current = setTimeout(() => {
-        setStatus(ConnectionStatus.DISCONNECTED);
-        setError("Lost connection to the server (ping timeout)!");
-      }, pingTimeoutMs);
+      clearPingTimeout();
+      pingTimeoutRef.current = setTimeout(
+        () => dropConnection("Lost connection to the server (ping timeout)!"),
+        pingTimeoutMs,
+      );
     };
 
-    eventSource.addEventListener(
-      "ping",
-      (_payload: MessageEvent<string>): void => {
-        resetPingTimeout();
-      },
-    );
+    function connect(): void {
+      retryTimer = null;
+      eventSource = new EventSource("/api/state");
+      // Armed before anything arrives: an attempt that neither opens nor errors would
+      // otherwise sit here forever. The server pings from the moment it accepts the stream,
+      // before it has any state to send.
+      resetPingTimeout();
 
-    eventSource.addEventListener(
-      "data",
-      (payload: MessageEvent<string>): void => {
-        const data = JSON.parse(payload.data) as WebServerState;
+      eventSource.addEventListener("open", (): void => {
+        console.log("SSE connection to /api/state opened, awaiting initial state...");
+      });
+      eventSource.addEventListener("ping", (): void => resetPingTimeout());
+      eventSource.addEventListener("data", onData);
+      eventSource.onerror = (): void => dropConnection("Lost connection to the server!");
+    }
 
-        const puppets = new Map<PuppetKey, UiPuppetState>();
+    const onData = (payload: MessageEvent<string>): void => {
+      const data = JSON.parse(payload.data) as WebServerState;
 
-        for (const pup of data.puppets) {
-          const key: PuppetKey = pup.config.id;
-          const full: UiPuppetState = {
-            ...pup,
-            assignedView: (data.runtime.puppetOrchestrator.assignments as Partial<Record<PuppetKey, ViewKey>>)[key],
-            updateRuntime: async (runtime: Partial<PuppetRuntime>): Promise<void> => puppetUpdateRuntime(key, runtime),
-            updateAppearance: async (appearance: EntityAppearance): Promise<void> => puppetUpdateAppearance(key, appearance),
-            assignView: async (view: ViewKey): Promise<void> => puppetAssignView(key, view),
-            unassignView: async (): Promise<void> => puppetUnassignView(key),
-            reload: async (): Promise<void> => puppetReload(key),
-          };
-          puppets.set(key, full);
-        }
+      const version = data.info.update.current;
+      if (seenVersionRef.current !== null && seenVersionRef.current !== version) window.location.reload();
+      seenVersionRef.current = version;
 
+      const puppets = new Map<PuppetKey, UiPuppetState>();
 
-        const views = new Map<ViewKey, UiViewState>();
-        for (const [key, config] of Object.entries(data.views)) {
-          const full: UiViewState = {
-            key,
-            config,
-            assignedPuppets: Object.entries(data.runtime.puppetOrchestrator.assignments).filter(([, v]) => v == key).map(([k]) => k), // TODO: Simplify?
-            appearance: {
-              color: config.appearance?.color ?? DEFAULT_ENTITY_COLOR,
-              icon: config.appearance?.icon ?? VIEW_TYPE_META[config.type].icon,
-            },
-            url: `${window.location.origin}${data.info.view.route_base}/${key}`,
-            update: (next: AnyViewConfig): Promise<void> => viewUpdate(key, next),
-            delete: (): Promise<void> => viewDelete(key),
-            assign: (puppets: PuppetKey[]): Promise<void> =>
-              withToast(
-                // Fire in parallel so the displays switch together, but await + toast as one op.
-                Promise.all(puppets.map((puppet) => puppetAssignView(puppet, key, false))).then(() => undefined),
-                { loading: "Assigning view…", success: "View assigned" },
-              ),
-          }
-          views.set(key, full);
-        }
-
-        const state: UiWebServerState = {
-          ...data,
-          puppets: puppets,
-          views: views,
+      for (const pup of data.puppets) {
+        const key: PuppetKey = pup.config.id;
+        const full: UiPuppetState = {
+          ...pup,
+          assignedView: (data.runtime.puppetOrchestrator.assignments as Partial<Record<PuppetKey, ViewKey>>)[key],
+          updateRuntime: async (runtime: Partial<PuppetRuntime>): Promise<void> => puppetUpdateRuntime(key, runtime),
+          updateAppearance: async (appearance: EntityAppearance): Promise<void> => puppetUpdateAppearance(key, appearance),
+          assignView: async (view: ViewKey): Promise<void> => puppetAssignView(key, view),
+          unassignView: async (): Promise<void> => puppetUnassignView(key),
+          reload: async (): Promise<void> => puppetReload(key),
         };
+        puppets.set(key, full);
+      }
 
-        setStatus(ConnectionStatus.CONNECTED);
-        resetPingTimeout();
-        applyUiWebServerState(state); // TODO: Add validation?
-      },
-    );
 
-    eventSource.onerror = (): void => {
-      setStatus(ConnectionStatus.DISCONNECTED);
-      setError("Lost connection to the server!");
+      const views = new Map<ViewKey, UiViewState>();
+      for (const [key, config] of Object.entries(data.views)) {
+        const full: UiViewState = {
+          key,
+          config,
+          assignedPuppets: Object.entries(data.runtime.puppetOrchestrator.assignments).filter(([, v]) => v == key).map(([k]) => k), // TODO: Simplify?
+          appearance: {
+            color: config.appearance?.color ?? DEFAULT_ENTITY_COLOR,
+            icon: config.appearance?.icon ?? VIEW_TYPE_META[config.type].icon,
+          },
+          url: `${window.location.origin}${data.info.view.route_base}/${key}`,
+          update: (next: AnyViewConfig): Promise<void> => viewUpdate(key, next),
+          delete: (): Promise<void> => viewDelete(key),
+          assign: (puppets: PuppetKey[]): Promise<void> =>
+            withToast(
+              // Fire in parallel so the displays switch together, but await + toast as one op.
+              Promise.all(puppets.map((puppet) => puppetAssignView(puppet, key, false))).then(() => undefined),
+              { loading: "Assigning view…", success: "View assigned" },
+            ),
+        }
+        views.set(key, full);
+      }
+
+      const state: UiWebServerState = {
+        ...data,
+        puppets: puppets,
+        views: views,
+      };
+
+      setStatus(ConnectionStatus.CONNECTED);
+      resetPingTimeout();
+      applyUiWebServerState(state); // TODO: Add validation?
     };
 
+    connect();
+
+    // Complete on purpose: StrictMode mounts this effect twice in dev, and a leftover timer
+    // would open a second stream and a second retry loop.
     return () => {
-      eventSource.close();
-      if (pingTimeoutRef.current) clearTimeout(pingTimeoutRef.current);
+      if (retryTimer) clearTimeout(retryTimer);
+      clearPingTimeout();
+      eventSource?.close();
     };
   }, [applyUiWebServerState, pingTimeoutMs]);
 
@@ -261,7 +294,7 @@ export function ApiStateProvider({
         console.log(`Connected to server!`);
         break;
       case ConnectionStatus.DISCONNECTED:
-        console.warn(`Lost connection to server!`); // TODO: Add auto reconnect.
+        console.warn(`Lost connection to server!`);
         break;
       case ConnectionStatus.CONNECTING:
       default:
