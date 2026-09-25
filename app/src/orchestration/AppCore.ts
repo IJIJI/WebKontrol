@@ -2,6 +2,7 @@ import { Logger } from "../logging/Logger";
 import type { SystemManager } from "../system/SystemManager";
 import type { UpdateManager } from "../system/update/UpdateManager";
 import type { UiManager } from "../ui/UiManager";
+import { seedDefaultView } from "../views/defaultView";
 import type { WebServerState } from "../webServer/model";
 import type { WebServer } from "../webServer/WebServer";
 import type { PuppetOrchestrator } from "./puppet/PuppetOrchestrator";
@@ -120,6 +121,10 @@ export class AppCore { // TODO: Move every non-puppet management from the appcor
     });
     await this._webServer.start(); // TODO rename to init? Or split?
     await this._puppetOrchestrator.init();
+
+    // Last: a fresh box gets its welcome screen. After the orchestrator, because that is
+    // where its runtime store opens, and the default view is part of that runtime.
+    await seedDefaultView(this._viewManager, this._puppetOrchestrator);
 
 
   }

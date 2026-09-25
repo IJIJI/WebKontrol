@@ -33,9 +33,10 @@ export function UpdateOverlay({
 }): JSX.Element | null {
   const navigate = useNavigate();
 
-  // The client has no SSE reconnect, so a full reload is how we come back after the
-  // restart. GET / only answers once the whole server (including the SPA middleware) is
-  // up, which is exactly the readiness we need.
+  // The visible restart path: the state stream reconnects on its own (and reloads when the
+  // version changed), but this poll reloads the moment the server answers, so the overlay
+  // never sits on a stale page. GET / only answers once the whole server (including the SPA
+  // middleware) is up, which is exactly the readiness we need.
   useEffect(() => {
     if (phase !== UpdatePhase.RESTARTING) return;
     const timer = setInterval(() => {

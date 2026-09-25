@@ -9,8 +9,9 @@
  *   node install.mjs <target-dir> [--version vX.Y.Z] [--api-base <url>]
  *
  * Layout-only on purpose: it verifies prerequisites (node, yarn via corepack, tar) but
- * never installs them, and it prints a systemd unit rather than writing one. Boot
- * survival belongs to the deployment vehicle (the Pi image, Docker's restart policy, or
+ * never installs them, and it sets up no autostart (on Linux it points at the README's
+ * "Start on boot"; the browsers need a desktop session, which a plain system service
+ * lacks). Boot survival belongs to the deployment vehicle (the Pi image, Docker's restart policy, or
  * the Windows launcher), not to this script.
  *
  * Standalone by design: fetched raw from the repo, it can import nothing from the app.
@@ -33,8 +34,8 @@ for (let i = 0; i < args.length; i++) {
   if (args[i].startsWith("--")) flags.set(args[i], args[++i]);
   else positional.push(args[i]);
 }
-// Absolute from here on: the printed systemd unit needs absolute paths, and a relative
-// target would otherwise be echoed as typed.
+// Absolute from here on: the printed run instructions need an absolute path, and a
+// relative target would otherwise be echoed as typed.
 const root = positional[0] === undefined ? undefined : resolve(positional[0]);
 const wantedVersion = flags.get("--version");
 const apiBase = flags.get("--api-base") ?? "https://api.github.com";
@@ -183,18 +184,8 @@ Run it (from the install directory; it is the data home):
 
 The admin UI serves on the configured port (config/config.yaml, default 80).
 Updates, from now on, happen in the admin UI under Settings.
-
-To start on boot under systemd, a unit like this works:
-
-    [Unit]
-    Description=WebKontrol
-    After=network-online.target
-
-    [Service]
-    WorkingDirectory=${root}
-    ExecStart="${process.execPath}" "${join(root, "supervisor.js")}"
-    Restart=always
-
-    [Install]
-    WantedBy=multi-user.target
+`);
+if (process.platform === "linux") console.log(`To start on boot: the browsers need a desktop session, so a plain system
+service cannot run them. See "Start on boot" in the README:
+https://github.com/${REPO}#start-on-boot
 `);

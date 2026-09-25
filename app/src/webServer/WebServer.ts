@@ -57,7 +57,9 @@ export class WebServer implements RouteRegistrar {
       for (const res of this._sseClients) res.write(this._getSseDataPayload);
     }
     this._logger.info(`Updated state for ${this._sseClients.size} clients.`);
-    this._logger.debug(`New state:`, state);
+    // A summary, not the state: the full payload carries every release's notes body.
+    const puppets = state.puppets.map(p => `${p.config.id}=${p.info.state}/${p.info.navigation.state}`).join(", ");
+    this._logger.debug(`New state: puppets [${puppets}], update ${state.info.update.activity.state}, ${state.info.update.releases.length} releases.`);
   }
 
   public setHandlers(handlers: WebServerMutationHandlers): void {

@@ -14,6 +14,7 @@ import { fieldErrors, validateBlockTree } from "../model/validate";
 import { writeBlockClipboard } from "../model/blockClipboard";
 import { blockInfo } from "../model/registry";
 import { useFlash } from "../../../common/hooks/useFlash";
+import { SettingWidth, SettingWidthContext } from "../../settings/settingWidth";
 import {
   type BlockLike,
   type BlockPath,
@@ -148,17 +149,22 @@ export function BlockEditor({
             </>
           }
         >
-          <BlockForm
-            // Keyed per block: the form's local state (which groups are folded open, whether a
-            // picker modal is up) belongs to the block being edited, not to the pane.
-            key={pathKey(path)}
-            block={selected}
-            savedBlock={savedBlockAt(saved, path, selected.type)}
-            path={path}
-            setAt={setAt}
-            onOpen={setSelectedPath}
-            errors={fieldErrors(issues, path)}
-          />
+          {/* The pane is narrow: a setting whose input does not fit beside its title stacks
+              instead of squeezing the title's description into a sliver that overflows the row.
+              A setting's own width (e.g. the always-compact textarea) still wins. */}
+          <SettingWidthContext value={SettingWidth.AUTO}>
+            <BlockForm
+              // Keyed per block: the form's local state (which groups are folded open, whether a
+              // picker modal is up) belongs to the block being edited, not to the pane.
+              key={pathKey(path)}
+              block={selected}
+              savedBlock={savedBlockAt(saved, path, selected.type)}
+              path={path}
+              setAt={setAt}
+              onOpen={setSelectedPath}
+              errors={fieldErrors(issues, path)}
+            />
+          </SettingWidthContext>
         </BlockPane>
       )}
     </div>

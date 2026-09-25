@@ -1,49 +1,46 @@
 # NOTES
 
-Session handoff, written 2026-09-16. Resume from **Next**.
+Session handoff, written 2026-09-19. Resume from **Next**.
 
 ## Task
 
-A Raspberry Pi image with no desktop environment (black screen or logo, the puppet windows appear on it) plus per-puppet window positioning (monitor / x,y / size), with the config builder folded in. Both on an X11 session.
+Get v3 to its first stable release marked GitHub latest: close the remaining v2 gaps and polish, starting with two small log fixes.
 
 ## Done
 
-- v3.0.0 is merged into `main`, tagged, and published as a **pre-release** with the update tarball attached. GitHub "latest" is still v2.0.0 on purpose; the README install command carries `--version v3.0.0` until a stable 3.x exists.
-- Windows install test of the published release: pass (installer 42 s, layout correct, clean start/stop twice).
-- Raspberry Pi 4 test (Pi OS Bookworm 64-bit, official 7" touch display): install passes, app runs, URL view and block view render on the panel, block edits stream live, clean shutdown. README Pi section updated from it (this commit).
-- **Positioning proven on X11.** Layout on the test Pi from `xrandr`: `HDMI-1 primary 1920x1080+0+0` (micro-HDMI beside the USB-C power), `DSI-1 800x480+1920+0`. `--window-position=1920,0 --window-size=800,480 --start-fullscreen` puts a fullscreen Chromium on the DSI screen. With no flags the window lands on the primary (HDMI).
-- **Desktop-less session proven.** With the desktop stopped:
-  ```bash
-  sudo systemctl stop lightdm; sudo xinit /bin/sh -c 'xsetroot -solid black; exec chromium --no-sandbox --password-store=basic --no-first-run --window-position=1920,0 --window-size=800,480 --start-fullscreen https://example.com' -- :1 vt7 -nocursor
-  ```
-  gives a black HDMI screen, the page fullscreen on the DSI screen, no cursor. `sudo systemctl start lightdm` restores the desktop.
-- Touch mapping, recorded but declared OUT of scope for the image: `DISPLAY=:0 xinput map-to-output "10-0038 generic ft5x06 (00)" DSI-1` (session-only, belongs in a startup script if ever wanted).
-- The test Pi is left in **X11 mode** (`raspi-config`, option 6, A6), the mode the image needs.
+- **v3.1.0** (pre-release): per-puppet `window: { x, y }` positioning (`width`/`height` accepted, documented as not needed). Verified on a Pi 4 (HDMI + official touch display) and on Windows across three monitors.
+- **v3.2.0** (pre-release): the Raspberry Pi image (`pi-image/`, rpi-image-gen, trixie, X11 with openbox, no desktop), built and attached by `.github/workflows/release.yml` after the tarball. Update checks recover after an offline start (retry at 30 min doubling to 16 h). Installer skips Puppeteer's download on ARM and accepts `GITHUB_TOKEN`. A test box updated v3.1.0 to v3.2.0 from the admin.
+- **v3.2.1** (pre-release, published 2026-09-19): the three image commits that missed v3.2.0 (card grows on first boot, 512 MB FAT32 boot partition, versioned image name `WebKontrol_Pi_<tag>.img.zst`, CI disk cleanup) plus the README "Raspberry Pi image" section. No app change. v3.2.0's release notes were corrected to point at v3.2.1's image.
+- **Image verified on a Pi 4** (local build): no rainbow, logo on every screen, screens laid out side by side (HDMI first, then the touch display), puppet fullscreen, card grows (29 GB root on a 32 GB card), SSH off by default and on via an `ssh` file, forced password change, kill / reboot / power loss / offline boot all recover.
+- **History cleanup**: the two commits with an AI co-author trailer were reworded; `main`, `dev`, `v3.1.0`, `v3.2.0` force-pushed. `v3.0.0` and older untouched.
+- **Decided**: the red FAILED view status pill for an assigned view is intended (it signals danger). The Companion remote-control API docs ship later together with a Companion module, not before latest. The fullscreen "press Esc" hint on positioned puppets is accepted.
 
 ## In progress
 
-Nothing in code. Landing pads for the positioning feature:
-- `app/src/puppet/puppeteer/schema.ts`: the commented-out `PuppeteerPuppetWindowConfigSchema` TODO is where `window: { x, y, width, height }` goes (extend `PuppeteerPuppetConfigSchema`).
-- `app/src/puppet/puppeteer/PuppeteerPuppet.ts`, `_doInit()`: the `args` array carries `--start-fullscreen` and `--kiosk`; positioning means adding `--window-position=x,y --window-size=w,h` from config and dropping `--kiosk` (see Dead ends for why).
-- Config builder: see the "Config generator" and "Puppet window positioning" items in the project backlog (memory), no code yet.
+Nothing in code; the working tree is clean at `bcd2387` (Version 3.2.1).
+
+Pending outside code:
+- **Deferred tests**, to run together with the tests of the first release marked latest: update a box v3.2.0 to v3.2.1 from the admin; fresh-card test of `WebKontrol_Pi_v3.2.1.img.zst` (`df -h /` near card size, `sudo journalctl -u webkontrol-growfs -b` shows the growth, `lsblk -f` shows BOOT as vfat 512M, whether Windows gives BOOT a letter by itself, and the README's untested `Get-Volume -FileSystemLabel BOOT | Get-Partition | Add-PartitionAccessPath -AssignDriveLetter`).
+- **Delete the rewrite backup** after a few days (from `app/`, PowerShell):
+  ```powershell
+  git for-each-ref --format="%(refname)" refs/original | ForEach-Object { git update-ref -d $_ }
+  ```
 
 ## Dead ends
 
-- **`--kiosk` ignores `--window-position`** and fullscreens on the primary output. `--start-fullscreen` honours the position. Do not retry kiosk for placement.
-- **Wayland (labwc, the Pi OS default)** ignores window position entirely: clients cannot place their own windows there. Placement needs X11 (or compositor rules, not pursued).
-- **Without `--kiosk`, Chromium shows the "unsupported command-line flag --no-sandbox" infobar** on the display; kiosk mode was hiding it. Open options: `--test-type` (suppresses that infobar), drop `--no-sandbox` when not running as root, or launch plain and place + fullscreen through CDP `Browser.setWindowBounds`. Undecided.
-- **Running the X session as root** needs `--no-sandbox` and has no session D-Bus (flood of harmless dbus errors). The image should run the session as the normal user. GCM `PHONE_REGISTRATION_ERROR` lines are Chromium's push registration; `--disable-background-networking` silences them.
-- **Puppeteer's browser download on ARM** succeeds but fetches an x86-64 Chrome that cannot exec. `chromiumExecutablePath` is mandatory on the Pi; `PUPPETEER_SKIP_DOWNLOAD=true` only saves the download.
-- **Starting the app over SSH** without the desktop's display fails with puppeteer's "Missing X server". Under X11, `DISPLAY=:0` is enough.
-- Hardware, not software: a solid **white** touch panel from boot while the kernel reports DSI-1 connected means the display's own small panel ribbon is loose.
+- **`git filter-branch` over all branches and tags rewrote the whole history**: it strips the `gpgsig` header from every commit it processes, and GitHub signs web merges, so every descendant got a new ID. Limit it to the commits that must change (`-- <refs> ^<parent-of-first> ^<last-untouched-tag>`). It also only runs from the repo top level (`git -C ..` from `app/`).
+- **PowerShell pipes into `git update-ref --stdin` fail** ("expected SP"): loop in PowerShell and call `git update-ref` per ref instead.
+- **No window manager means Chromium cannot fullscreen properly**: `--kiosk`/`--start-fullscreen` ask the WM to size the window, so the image runs `openbox`. Kiosk mode ignores `--window-position`, so positioned puppets run without it.
+- **`PAMName=login` in the image's unit** looped forever on a fresh box: the forced-change (expired) password makes PAM refuse the session. Removed.
+- **Waiting for `network-online.target`** delayed the display ~2 minutes per boot (wlan0 never comes up). The unit orders after `network.target` only.
+- **A 1280x720 splash TGA** wrapped in the 800x480 touch display's framebuffer; it is 640x360 now. The firmware rainbow cannot be customised, only disabled (`disable_splash=1`).
+- **Raspberry Pi Imager customisation** does not reliably apply to rpi-image-gen images; skipped. Wayland cannot place windows; the image is X11.
+- **Chrome's `ERR_UNSAFE_PORT` on port 22** is Chrome refusing the port, not a test of SSH; use `Test-NetConnection webkontrol.local -Port 22`.
 
 ## Next
 
-Add `window: { x, y, width, height }` (all optional) to `PuppeteerPuppetConfigSchema` in `app/src/puppet/puppeteer/schema.ts`, and in `PuppeteerPuppet._doInit()` pass `--window-position` and `--window-size` from it and drop `--kiosk` whenever a window is configured. Pick the infobar fix from Dead ends while doing it. Verify on the test Pi with the DSI display at `1920,0`.
+Two log fixes, then release notes material for the next pre-release:
+1. `app/src/webServer/WebServer.ts`, `setState()`: the `this._logger.debug("New state:", state)` line dumps the whole state on every change, including every release's full notes body (hundreds of KB per session on an SD card). Log a short summary instead (for example the puppet states and the update activity), never `releases[].notes`.
+2. `app/src/orchestration/puppet/PuppetOrchestrator.ts`, `_navigatePuppet()`: the catch logs `Navigation failed for puppet "<id>".` at ERROR with the full error, which for "Puppet not initialized" (thrown by `AbstractPuppet` while a browser failed to launch or is closing) prints a stack trace for an expected state. Log that case at warn without the stack; keep ERROR for real failures.
 
-## Also open, not part of this arc
-
-- Idle view (splash with admin URLs + QR) for puppets with no assigned view; a fresh install shows a black screen today.
-- How a flashed image gets its first puppet (lean: bake one default puppet; boot-partition config adoption later).
-- Small code follow-ups: `install.mjs` and `UpdateRunner` should set `PUPPETEER_SKIP_DOWNLOAD` on arm/arm64; the orchestrator logs a stack trace at ERROR for "Puppet not initialized" when a browser fails to launch; the WebServer's DEBUG "New state" line dumps the full state including every release's notes body (hundreds of KB per session).
-- v3 screenshots for the README, then a stable 3.x release that becomes GitHub latest.
+Then, in order (full list and both release checklists in the project backlog): idle view with the admin address and a QR code, a clock view seeded on a fresh install, the admin reconnecting by itself after a server restart, a branded boot splash, the README ready for stable (v3 screenshots), then the stable 3.x marked latest.

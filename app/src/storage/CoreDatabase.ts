@@ -48,6 +48,17 @@ export class CoreDatabase {
 
   private _db: BetterSQLite3Database<typeof schema>;
   private _sqlite: Database.Database;
+  private _isFresh: boolean;
+
+  /**
+   * True when this process created the database: it held no data before. First-run work
+   * (seeding the default view) hangs off this, since a migration step cannot do it, fresh
+   * databases skip the chain. If "once ever, existing installs too" is ever needed, that
+   * wants a stored marker instead, not this flag.
+   */
+  public get isFresh(): boolean {
+    return this._isFresh;
+  }
 
   public static getInstance(): CoreDatabase {
     if (!CoreDatabase._instance) {
@@ -94,6 +105,8 @@ export class CoreDatabase {
     // After creation, before anything reads: transform what older releases left behind.
     // A failing step throws through the constructor on purpose; on a managed device that
     // crash is what hands control to the supervisor's snapshot restore.
+    this._isFresh = fresh;
+
     const migrated = runMigrations(sqlite, MIGRATIONS, fresh);
     if (migrated.ran.length > 0)
       this._logger.important(`Migrated database from step ${migrated.from} to ${migrated.to}:`, migrated.ran);

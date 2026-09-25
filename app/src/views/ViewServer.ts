@@ -20,6 +20,8 @@ const VIEW_CLIENT_FONTS_PATH = "/viewclient/fonts";
 const BUNDLED_FONTS: Record<string, string> = {
   "DSEG7Classic-Regular.woff2": asset("assets/fonts/DSEG/DSEG7Classic-Regular.woff2"),
   "DSEG14Classic-Regular.woff2": asset("assets/fonts/DSEG/DSEG14Classic-Regular.woff2"),
+  // The brand font, used by the seeded default view and by the admin's own logo.
+  "ZenDots-Regular.ttf": asset("assets/fonts/ZenDots/ZenDots-Regular.ttf"),
 };
 
 /**
@@ -96,7 +98,9 @@ export class ViewServer {
 
     return {
       body: data,
-      contentType: "font/woff2",
+      // From the extension: the allowlist holds both woff2 (the display fonts) and ttf (the
+      // brand font), and a font served under the wrong type is a cache and proxy hazard.
+      contentType: req.params.file.endsWith(".ttf") ? "font/ttf" : "font/woff2",
       headers: { "Cache-Control": "public, max-age=86400" },
     };
   }

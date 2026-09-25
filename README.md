@@ -2,18 +2,18 @@
 
 [![License](https://img.shields.io/github/license/IJIJI/WebKontrol)](https://github.com/IJIJI/WebKontrol/blob/main/LICENSE) [![Version](https://img.shields.io/github/v/release/IJIJI/WebKontrol?display_name=tag&include_prereleases)](https://github.com/IJIJI/WebKontrol/releases) ![Last Commit](https://img.shields.io/github/last-commit/IJIJI/WebKontrol)
 
-WebKontrol turns any machine into a remote-controlled display. It can drive multiple displays and show websites and views built in the blockbuilder. WebKontrol features a web interface and remote control through platforms like Bitfocus Companion.
+WebKontrol turns any machine into a remote-controlled display. It drives one or more screens, each showing a website or a view built from blocks, and everything is managed from a web interface on any device in the network. There is a ready-made Raspberry Pi image, and installed systems update themselves from that interface.
 
-<img src="img/admin_interface_2.png" width="400"/> <img src="img/clock_interface.png" width="400"/>
+<img src="img/hero.gif" width="100%" alt="The admin on the left assigns views to two displays on the right, then edits a view while it is on screen"/>
 
-> [!WARNING]
-> **We are currently in the midst of a full rewrite to version 3, but it's in the early stages.** It works, but we cannot guarantee complete stability yet. Use **[v2](#v2-stable)** in live production scenarios for now, as it has been thoroughly tested.
+> [!NOTE]
+> Version 3 is the current version. It is a rewrite of [v2](#v2), which remains available for existing installs but is no longer developed.
 
 ## Backstory
 
 I originally built WebKontrol for the live-streaming industry. It allows me to display a clock or use something like [stagetimer.io](https://stagetimer.io/). It turned out to work for information displays and touch kiosks just as well, offering more remote control than most existing solutions I have tried. 
 
-The first two versions only supported a single screen displaying a URL. In the latest version, this has been expanded to offer multiple outputs, an expansive view builder, plugin support, and a useful web interface. We are currently implementing the plugin support, which would enable data sources from different platforms and conditional rendering.
+The first two versions only supported a single screen displaying a URL. Version 3 drives multiple screens, builds views from blocks in the web interface, updates itself, and ships as a Raspberry Pi image. Plugins, with data sources from other platforms and conditional rendering, are the next step.
 
 I am planning to sell pre-configured boxes with SDI outputs. If you are interested, [contact me](mailto:shop@synapt.nl).
 
@@ -111,10 +111,10 @@ Pick an install directory. In the following example, `/opt/webkontrol` is used
 
 ```shell
 curl -fsSL https://raw.githubusercontent.com/ijiji/WebKontrol/main/install.mjs -o install.mjs
-node install.mjs /opt/webkontrol --version v3.2.1
+node install.mjs /opt/webkontrol --version v3.3.0
 ```
 
-v3.2.1 is published as a pre-release, and the installer never installs pre-releases on its own, so the tag is passed explicitly. Once a stable v3 release exists, drop `--version` and the installer picks the latest stable release by itself.
+v3.3.0 is published as a pre-release, and the installer never installs pre-releases on its own, so the tag is passed explicitly. Once a stable v3 release exists, drop `--version` and the installer picks the latest stable release by itself.
 
 The installer writes a commented starter `config/config.yaml`; edit it to add your displays (or prepare the file beforehand, the installer keeps an existing one). A minimal config with one display:
 
@@ -131,7 +131,35 @@ web:
 
 You never need git on a device. A git checkout is the developer setup (see [Develop](#develop)) and cannot be updated from the UI.
 
-<!-- TODO: ## Config Guide -->
+## Config Guide
+
+`config/config.yaml` holds what must exist before the app starts. Everything else (the views, which display shows what, the theme) is managed in the admin and stored in the database.
+
+```yaml
+puppets:
+  - id: hall-1                  # 2 to 12 characters: lowercase letters, digits, - and _
+    name:
+      long: Hallway display     # 3 to 25 characters, shown in the admin
+      short: HALL1              # 1 to 10 characters, shown where space is tight
+    chromiumExecutablePath: /usr/bin/chromium   # optional: the browser to launch (see Chromium below)
+    window:                     # optional: which screen, see Window position below
+      x: 1920
+      y: 0
+
+web:
+  port: 80                      # the admin and the views serve here (default 80)
+  sse:
+    ping_interval: 1000         # ms between keep-alive pings to the admin (default 1000)
+
+views:
+  route_base: /view             # where views are served, /view/<key> (default /view)
+```
+
+- `puppets` is the list of displays. Each one launches its own browser. An `id` is stored lowercased.
+- `web.port` needs the right to bind low ports on Linux: see [Port 80](#port-80).
+- A `config/config.local.yaml` next to it, when present, replaces `config.yaml` entirely (it is never merged). Developers use it for their own displays.
+
+The installer writes a commented starter file with `puppets: []` and `web.port: 80`.
 
 ## Run
 
@@ -142,7 +170,27 @@ node supervisor.js
 
 The admin serves on the configured port (default 80). Open `http://<the machine's address>/` from any browser on the network.
 
-To start on boot, the installer prints a ready-to-paste systemd unit at the end of the install.
+To start on boot, run the supervisor from the desktop session's autostart, not as a system service: the browsers need the desktop. See [Start on boot](#start-on-boot) for Raspberry Pi OS; the [Raspberry Pi image](#raspberry-pi-image) does this for you.
+
+## Use
+
+Open the admin in a browser: `http://<the machine's address>/` (or `http://webkontrol.local/` on the image).
+
+**Puppets** lists every display with its status and what it shows. *Assign* puts a view on it; a display without a view of its own shows the default view.
+
+<img src="img/admin-puppets.png" width="640" alt="The Puppets page: two displays, each with a status and an Assign button"/>
+
+**Views** holds what the displays can show. A *website* view is a URL, opened as is. A *blocks* view is built in the editor from blocks: text, a clock, a website, an image, and containers that arrange them (a stack, a grid, free placement). Edits reach the displays as you save, without a reload. *Share* gives a view's own link, to open it in any browser.
+
+<img src="img/admin-views.png" width="640" alt="The Views page: website and blocks views, each with Share and Assign"/>
+
+<img src="img/admin-editor.png" width="640" alt="The block editor: the block tree on the left, the selected block's settings on the right"/>
+
+**Config** holds the theme, the system name and the default load timeout. Its *Releases* button opens the updates page: an installed system updates from there.
+
+A fresh install starts with one view, a clock with the date and the WebKontrol logo, as the default view. When a view fails to load, the display shows a clock with the error and a countdown to the next attempt, and keeps retrying.
+
+<img src="img/display-clock.png" width="640" alt="The default view on a display: a seven-segment clock, the date and the WebKontrol logo"/>
 
 
 ## Install on an existing Raspberry Pi OS
@@ -214,7 +262,7 @@ Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::AllS
 
 ### Start on boot
 
-The browsers need the desktop, so the supervisor must start inside the desktop session, not as a bare system service. The systemd unit the installer prints is for machines without a display and does not apply here. Add the supervisor to the LXDE autostart instead:
+The browsers need the desktop, so the supervisor must start inside the desktop session, not as a bare system service. Add the supervisor to the LXDE autostart instead:
 
 ```bash
 sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
@@ -244,36 +292,10 @@ Add `@unclutter -idle 2` to the same autostart file (the number is the idle seco
 ### Disable screen blanking
 
 `sudo raspi-config`, option 2 Display, then D2 Screen Blanking: disable it.
-<!-- 
 
-## Use
+# v2
 
-Once you have started the script, you should see the splash screen appearing. It lists the IP addresses on which the web interface is available. It should look something like this:
-
-<img src="img/splash_interface.png" width="400"/>
-
-Once you navigate to one of the IP addresses you should see the web interface.
-
-<img src="img/admin_interface_2.png" width="400"/>
-
-In the admin interface, there are four buttons and one input.
-
-- **View:** Opens the current URL in a new tab.
-- **Reload:** Reloads the browser on the WebKontrol instance. It also returns to the set URL. If you the puppet and then reload, it will return to the originally requested URL.
-- **View Internal Clock:** Opens the internal clock in a new tab.
-- **Internal Clock:** When pressed, this fills the input with the link to the internal clock.
-- **Input:** Here you can enter the URL you wish to display on the WebKontrol instance.
-
-#### No connection
-
-If the page that is requested fails, WebKontrol will retry every 30 seconds. While it waits it will display a page with the current time and a countdown.
-
-<img src="img/no_connect_interface.png" width="400"/> -->
-
-
-# v2 Stable
-
-v2 is the previous generation: one browser, one URL, a small web panel with a clock. It has run in production for a long time and is the recommended choice when you need something proven today.
+v2 is the previous generation: one browser, one URL, a small web panel with a clock. It ran in production for a long time and is no longer developed; existing installs can keep using it.
 
 Clone the [v2.0.0 release](https://github.com/IJIJI/WebKontrol/releases/tag/v2.0.0) by its tag:
 
