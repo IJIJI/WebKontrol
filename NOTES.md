@@ -1,46 +1,55 @@
 # NOTES
 
-Session handoff, written 2026-09-19. Resume from **Next**.
+Session handoff, written 2026-09-26. Resume from **Next**.
 
 ## Task
 
-Get v3 to its first stable release marked GitHub latest: close the remaining v2 gaps and polish, starting with two small log fixes.
+Get v3 to its first stable release marked GitHub latest (v3.3.1 is in its soak now), and start the next features on a branch that leaves the release line free for soak fixes.
 
 ## Done
 
-- **v3.1.0** (pre-release): per-puppet `window: { x, y }` positioning (`width`/`height` accepted, documented as not needed). Verified on a Pi 4 (HDMI + official touch display) and on Windows across three monitors.
-- **v3.2.0** (pre-release): the Raspberry Pi image (`pi-image/`, rpi-image-gen, trixie, X11 with openbox, no desktop), built and attached by `.github/workflows/release.yml` after the tarball. Update checks recover after an offline start (retry at 30 min doubling to 16 h). Installer skips Puppeteer's download on ARM and accepts `GITHUB_TOKEN`. A test box updated v3.1.0 to v3.2.0 from the admin.
-- **v3.2.1** (pre-release, published 2026-09-19): the three image commits that missed v3.2.0 (card grows on first boot, 512 MB FAT32 boot partition, versioned image name `WebKontrol_Pi_<tag>.img.zst`, CI disk cleanup) plus the README "Raspberry Pi image" section. No app change. v3.2.0's release notes were corrected to point at v3.2.1's image.
-- **Image verified on a Pi 4** (local build): no rainbow, logo on every screen, screens laid out side by side (HDMI first, then the touch display), puppet fullscreen, card grows (29 GB root on a 32 GB card), SSH off by default and on via an `ssh` file, forced password change, kill / reboot / power loss / offline boot all recover.
-- **History cleanup**: the two commits with an AI co-author trailer were reworded; `main`, `dev`, `v3.1.0`, `v3.2.0` force-pushed. `v3.0.0` and older untouched.
-- **Decided**: the red FAILED view status pill for an assigned view is intended (it signals danger). The Companion remote-control API docs ship later together with a Companion module, not before latest. The fullscreen "press Esc" hint on positioned puppets is accepted.
+- **v3.3.0** (pre-release, 2026-09-25): seeded default view on a fresh install (the "Clock": dual tone DSEG7 clock, `l j F` date, WebKontrol wordmark with `V3` subline), dual tone segment fonts (`DSEG7 Classic Dual`, `DSEG14 Classic Dual`), the admin reconnects by itself (every 2 s) and reloads on a version change, branded boot splash and X background, the nav shows the running version, `pi-image/build.sh` derives the version from `app/package.json`, smaller logs, dependency security updates, the installer no longer prints an unusable systemd unit, block panel settings stack when narrow, README rewritten for v3 (hero GIF, Use, Config Guide, current screenshots). Fresh-card test on a Pi 4 passed (splash, default view, card growth to 29G, BOOT 512M FAT32 mounts on Windows by itself, reconnect after restart/reboot/cable pull, offline boot, update 3.3.0 -> 3.2.1 -> 3.3.0).
+- **v3.3.1** (pre-release, 2026-09-26, run 36250812626 green, tarball and `WebKontrol_Pi_v3.3.1.img.zst` attached and verified): the default view is chosen from a view's menu ("Make default" / "Stop being default", `PUT /api/views/default`), the Puppets, puppet and Views pages show which displays follow it (a "Default" chip, the view no longer reads "Inactive"); a failed update check retries at 4 min doubling to 16 h, the update page says when and has Check now bottom right, and checks again when opened; the logo no longer shows `VV3.3.0` on managed installs (a managed install reports the tag with its `v`).
+- **Verified by scratch boxes on Windows** for everything above; the failed-check recovery was tested end to end with a fake GitHub (recovered by the automatic retry 4 min after the first failure, no clicks).
 
 ## In progress
 
-Nothing in code; the working tree is clean at `bcd2387` (Version 3.2.1).
+Nothing in code; `dev` is clean at `84af711` (Version 3.3.1) and equals `main`.
 
 Pending outside code:
-- **Deferred tests**, to run together with the tests of the first release marked latest: update a box v3.2.0 to v3.2.1 from the admin; fresh-card test of `WebKontrol_Pi_v3.2.1.img.zst` (`df -h /` near card size, `sudo journalctl -u webkontrol-growfs -b` shows the growth, `lsblk -f` shows BOOT as vfat 512M, whether Windows gives BOOT a letter by itself, and the README's untested `Get-Volume -FileSystemLabel BOOT | Get-Partition | Add-PartitionAccessPath -AssignDriveLetter`).
-- **Delete the rewrite backup** after a few days (from `app/`, PowerShell):
-  ```powershell
-  git for-each-ref --format="%(refname)" refs/original | ForEach-Object { git update-ref -d $_ }
-  ```
+- **Update the test Pi 3.3.0 -> 3.3.1** from the admin (Config, Releases). Check: the logo reads `V3.3.1`, the Puppets page shows the Default chips, the Clock's menu offers "Stop being default", the page comes back by itself after the update.
+- **Soak on 3.3.1, starting 2026-09-27, 4 days**: HDMI = Ontime website view, touch display = Clock, both assigned explicitly. Day 2: one reboot, one cable pull. Daily: screens right, admin reachable without a refresh, then over SSH `journalctl -u webkontrol --since yesterday -p warning --no-pager | tail -20`, `free -m`, `du -sh /opt/webkontrol/logs`.
+- **Stable after a clean soak**: 3.3.1 as is (or 3.3.2 with soak fixes); the README drops `--version` in the same commit as the bump; published WITHOUT the pre-release flag.
+
+## Branch strategy (proposed 2026-09-26, awaiting the user's yes)
+
+- `dev` stays the 3.3.x release line: only soak fixes and the stable release land there, and `dev` -> `main` for each release as now.
+- New features go on `next`, branched from `dev` at `84af711`. Soak fixes made on `dev` are merged forward into `next` (`dev` -> `next`), never the other way until 3.4 is ready; then `next` -> `dev` -> `main` as the 3.4.0 pre-release.
+- CI runs only on a published release, so pushing `next` builds nothing. `next` keeps `package.json` at 3.3.x until its own release bump.
+- The old `puppet_nav_runtime_refactor` branch (and its revert branch on origin) predates this and can be deleted once confirmed merged or abandoned.
 
 ## Dead ends
 
-- **`git filter-branch` over all branches and tags rewrote the whole history**: it strips the `gpgsig` header from every commit it processes, and GitHub signs web merges, so every descendant got a new ID. Limit it to the commits that must change (`-- <refs> ^<parent-of-first> ^<last-untouched-tag>`). It also only runs from the repo top level (`git -C ..` from `app/`).
-- **PowerShell pipes into `git update-ref --stdin` fail** ("expected SP"): loop in PowerShell and call `git update-ref` per ref instead.
-- **No window manager means Chromium cannot fullscreen properly**: `--kiosk`/`--start-fullscreen` ask the WM to size the window, so the image runs `openbox`. Kiosk mode ignores `--window-position`, so positioned puppets run without it.
-- **`PAMName=login` in the image's unit** looped forever on a fresh box: the forced-change (expired) password makes PAM refuse the session. Removed.
-- **Waiting for `network-online.target`** delayed the display ~2 minutes per boot (wlan0 never comes up). The unit orders after `network.target` only.
-- **A 1280x720 splash TGA** wrapped in the 800x480 touch display's framebuffer; it is 640x360 now. The firmware rainbow cannot be customised, only disabled (`disable_splash=1`).
-- **Raspberry Pi Imager customisation** does not reliably apply to rpi-image-gen images; skipped. Wayland cannot place windows; the image is X11.
-- **Chrome's `ERR_UNSAFE_PORT` on port 22** is Chrome refusing the port, not a test of SSH; use `Test-NetConnection webkontrol.local -Port 22`.
+- **Tagging before the release PR was merged**: v3.3.0's first tag sat on a `main` still at v3.2.1; CI refused the version mismatch. Merge the PR first, check `git show origin/main:app/package.json | grep version`, then tag. A release must be deleted and re-created to rerun the workflow.
+- **A stylesheet fix for the narrow block panel** (flex-wrap on `.setting.field`) broke the COMPACT rows. The design already had `SettingWidth.AUTO` via `SettingWidthContext`; the block panel just did not opt in.
+- **A dual tone switch on blocks** only worked with two fonts and felt wrong; dual tone is chosen through the font family instead. Font names with parentheses are rejected as inline styles (the block gets no font at all), hence `DSEG7 Classic Dual`.
+- **A DSEG14 default font on the datetime block** was rejected: a schema default reaches saved views (changes existing clocks) and breaks font inheritance. The right tool is an insert-time preset (backlog).
+- **Checking the nav version only on an unmanaged box** hid the `VV` bug: test version-dependent UI on a managed scratch box (a `current` file in the working dir).
+- **Recording the README GIF with three pages in one headless browser** stalled screenshots for minutes (background tabs are throttled): one browser per page. Real `mouse.move` was seconds per step: record the pointer position per frame and draw it. One shared palette cut the GIF from 3 MB to 1 MB.
+- **`webkontrol.local` did not resolve** on the user's network during the 3.3.0 test (it did on 2026-09-19): probably the network blocking mDNS multicast; `systemctl status avahi-daemon` on the Pi to rule the Pi out.
+
+## Testing recipes
+
+- **Scratch box** (never touches the dev database): a temp dir with `config/config.local.yaml` (`web.port: 8080`, own puppets or `puppets: []`), run `node <repo>/app/dist/app.js` from that dir after `yarn build`. Add a file `current` containing `v3.3.1` to make it a managed install (update checker on). Set `update.api_base: http://127.0.0.1:9999` for a failing check; a one-line node http server on 9999 answering `[]` (404 on `/releases/latest`) simulates GitHub coming back.
+- **Fresh install**: a new scratch dir seeds the Clock view and makes it the default.
+- **Puppeteer** from `app/node_modules/puppeteer` for screenshots and clicks; view pages hold an SSE stream, so wait for `load` or `domcontentloaded`, never `networkidle0`.
+
+## Where things live
+
+- Todo (work with a set moment), backlog (no moment yet) and standing decisions are in the assistant's project memory (`todo.md`, `backlog.md`, `decisions.md`); they move into a repo `.docs/` folder modelled after Dendrite right after the first release marked latest (not created yet).
+- Working rules: consult before every code change, review passes plus a commit list after every piece, the user does all git, `git add` and `git commit` as separate commands with paths from `app/`, no em dashes, no AI traces anywhere.
+- Release checklist: package.json equals the tag, README pin updated, PR merged before tagging, `yarn typecheck` and `yarn check` green, hardware test of what changed, an installer run when `install.mjs` changed, notes in the v3.0.0 style.
 
 ## Next
 
-Two log fixes, then release notes material for the next pre-release:
-1. `app/src/webServer/WebServer.ts`, `setState()`: the `this._logger.debug("New state:", state)` line dumps the whole state on every change, including every release's full notes body (hundreds of KB per session on an SD card). Log a short summary instead (for example the puppet states and the update activity), never `releases[].notes`.
-2. `app/src/orchestration/puppet/PuppetOrchestrator.ts`, `_navigatePuppet()`: the catch logs `Navigation failed for puppet "<id>".` at ERROR with the full error, which for "Puppet not initialized" (thrown by `AbstractPuppet` while a browser failed to launch or is closing) prints a stack trace for an expected state. Log that case at warn without the stack; keep ERROR for real failures.
-
-Then, in order (full list and both release checklists in the project backlog): idle view with the admin address and a QR code, a clock view seeded on a fresh install, the admin reconnecting by itself after a server restart, a branded boot splash, the README ready for stable (v3 screenshots), then the stable 3.x marked latest.
+Create the `next` branch from `dev` (once the strategy above is confirmed) and, as its first work, the `.docs/` folder modelled after Dendrite's (project context, decisions, todo, backlog, conventions), moved out of the assistant's memory so it is in the repo and kept up to date from then on. Then, in order on `next`: the mobile-friendly admin (sized by a 390 px assessment of every page), more units on style fields (vw/vh, em, % besides px), `build.sh` defaulting to GitHub latest.
