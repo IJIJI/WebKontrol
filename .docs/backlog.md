@@ -13,8 +13,11 @@ an entry (what, why not now, trigger, notes); small items are one line.
 view's existing SSE stream.
 *Why not now:* no consumer before the setup page.
 *Trigger:* starting the setup page.
-*Notes:* first consumers are the network addresses (setup page), then
-`webkontrol::data::time` for the date and time block's tick.
+*Notes:* keys follow the namespace pattern (`webkontrol::data::time`). First consumers are
+the network addresses (setup page), then `webkontrol::data::time`, so the date and time block
+ticks from the server instead of its own timer. Data sources also unlock the cleaner dual tone
+below. Open in the bindings: enforce binding types through a namespaced data type key; unify
+the slot metadata and the brand; nullable slots only if needed.
 
 ### Setup page
 *What:* the start screen on a fresh install: the admin addresses
@@ -134,7 +137,6 @@ date and time block is inserted (see decisions: no schema default font).
   iframes.
 - An editor warning when a block has no room.
 - Grid schema: auto-arrange and templates.
-- Data bindings: enforce binding types through a data type key.
 
 ## Settings and fields
 
@@ -167,3 +169,13 @@ date and time block is inserted (see decisions: no schema default font).
 ## Docs
 
 - `app/README.md` is one line.
+
+## Much later
+
+### Microkernel core
+*What:* a base core reused across several projects, with the rest of the app built on top of
+it.
+*Why not now:* much later (2026-09-26); nothing about its shape is decided.
+*Trigger:* none yet.
+*Notes:* the idea came from adapting WebKontrol's web server from Beacon's. The plugin system
+already needs part of such a core.
