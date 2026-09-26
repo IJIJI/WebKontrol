@@ -9,6 +9,7 @@ import {
   PuppetPatchSchema,
   UpdateApplySchema,
   ViewKeyPackageShape,
+  DefaultViewShape,
   WebServerConfigSchema,
   type WebServerConfig,
   type WebServerConfigInput,
@@ -443,6 +444,24 @@ export class WebServer implements RouteRegistrar {
       } catch (e) {
         this._logger.error("Failed to create view:", e);
         res.status(500).json({ error: e instanceof Error ? e.message : "Failed to create view" });
+      }
+    });
+
+    // Registered before the /:key routes on purpose, although only PATCH and DELETE use :key.
+    this._app.put("/api/views/default", async (req, res) => {
+      const result = DefaultViewShape.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ errors: result.error.format() });
+      }
+
+      try {
+        await this._handlers.puppet.setDefaultView(result.data.view ?? undefined);
+        res.status(204).send();
+      } catch (e) {
+        this._logger.error("Failed to set the default view:", e);
+        res.status(500).json({
+          error: e instanceof Error ? e.message : "Failed to set the default view",
+        });
       }
     });
 

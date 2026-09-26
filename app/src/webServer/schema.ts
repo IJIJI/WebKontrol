@@ -20,6 +20,11 @@ export const ViewKeyPackageShape = z.object({
   view: ViewKeySchema,
 })
 
+// Body of PUT /api/views/default: the view puppets without their own view show, null for blank.
+export const DefaultViewShape = z.object({
+  view: ViewKeySchema.nullable(),
+});
+
 // Body of PATCH /api/puppets/:id — the puppet's mutable runtime fields plus its appearance.
 export const PuppetPatchSchema = PuppetRuntimeShape.partial().extend({
   appearance: EntityAppearanceSchema.optional(),

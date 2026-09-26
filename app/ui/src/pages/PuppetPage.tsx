@@ -13,6 +13,7 @@ import { NavigationPill } from "../components/puppets/NavigationPill";
 import { StatusPill } from "../components/pill/statusPill/StatusPill";
 import { timeAgo } from "../common/helpers/relativeTime";
 import { useNow } from "../common/hooks/useNow";
+import { DefaultViewChip } from "../components/views/DefaultViewChip";
 import "./puppetPage.less";
 
 export default function PuppetPage(): JSX.Element {
@@ -32,7 +33,8 @@ export default function PuppetPage(): JSX.Element {
 
   if (!puppet) return <h1>{title}</h1>;
 
-  const assignedView = puppet.assignedView ? state?.views.get(puppet.assignedView) : undefined;
+  // What the screen shows: its own view, or the default one (marked, nothing to unassign).
+  const assignedView = puppet.shownView ? state?.views.get(puppet.shownView) : undefined;
 
   const detailRows: DetailRow[] = [
     { label: "ID", value: puppet.config.id, copy: puppet.config.id },
@@ -53,6 +55,8 @@ export default function PuppetPage(): JSX.Element {
         </Link>
       ) : "-",
     },
+    // No own view: say where it comes from, so "Unassign" missing from the menu makes sense.
+    ...(assignedView && puppet.showsDefault ? [{ label: "Source", value: <DefaultViewChip /> }] : []),
   ];
   if (assignedView) assignedRows.push({ label: "Type", value: <ViewTypeChip type={assignedView.config.type} /> });
 

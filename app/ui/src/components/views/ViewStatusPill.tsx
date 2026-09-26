@@ -15,7 +15,7 @@ export function ViewStatusPill({
 }): JSX.Element {
   const { state } = useApi();
 
-  const assignedPuppets = view.assignedPuppets;
+  const assignedPuppets = view.showingPuppets; // assigned, or showing it as the default view
 
   const status = assignedPuppets.length <= 0 ? ConnectionState.DISABLED : ConnectionState.FAILED;
   const label =

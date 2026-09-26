@@ -170,10 +170,14 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
   }
 
   public async setDefaultView(viewKey: ViewKey | undefined): Promise<void> {
+    // A default nothing can resolve would leave every unassigned screen blank without saying so.
+    if (viewKey !== undefined && !this._viewManager?.getView(viewKey)) throw new Error(`Unknown view "${viewKey}".`);
     await this.updateRuntime({ default_view: viewKey });
-    // Unassigned puppets follow the default, so re-navigate them.
+    // Unassigned puppets follow the default, so re-navigate them. Not awaited, as in
+    // assignView: a load can take the whole load_timeout per screen, and its outcome is the
+    // puppets' broadcast state, not this call's (the admin's request would hang meanwhile).
     for (const id of this._puppets.keys()) {
-      if (this.getAssignedView(id) === undefined) await this._navigatePuppet(id);
+      if (this.getAssignedView(id) === undefined) void this._navigatePuppet(id);
     }
     this._logger.info(`Set default view to "${viewKey ?? "(none)"}".`);
   }
@@ -432,6 +436,7 @@ export class PuppetOrchestrator extends EventEmitter<PuppetOrchestratorEvents>  
       assignView: (puppet: PuppetKey, view: ViewKey) => this.assignView(puppet, view),
       unassignView: (puppet: PuppetKey) => this.unassignView(puppet),
       reload: (puppet: PuppetKey) => Promise.resolve(this.reloadPuppet(puppet)),
+      setDefaultView: (view: ViewKey | undefined) => this.setDefaultView(view),
     }
   }
 }

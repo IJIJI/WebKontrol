@@ -10,6 +10,7 @@ import { AssignToViewModal } from "../components/views/AssignToViewModal";
 import { ShareViewModal } from "../components/views/ShareViewModal";
 import { useState } from "react";
 import { ViewStatusPill } from "../components/views/ViewStatusPill";
+import { DefaultViewChip } from "../components/views/DefaultViewChip";
 import { Icon } from "../components/icons/Icon";
 
 // TODO: Rename to ViewCollectionpage
@@ -44,6 +45,7 @@ export default function ViewsPage(): JSX.Element {
           chips: <>
                 <ViewTypeChip type={v.config.type} />
                 <ViewStatusPill view={v} collapsed={false} />
+                {v.isDefault && <DefaultViewChip />}
               </>, // TODO: Status pill always collapsed?
                    // TODO: Auto collapse all pills on mobile?
           actions: [

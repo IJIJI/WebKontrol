@@ -66,10 +66,10 @@ assert.match(String(applyGate({ ...base, target: release("v3.0.0") })), /already
   assert.equal(announce({ releases: list, latest: "v3.1.5-beta.1", current: "v3.0.0" }), list[1], "whatever GitHub marks latest is what announces");
 }
 
-//* Retry after a failed check: 30 min doubling to 16 h, then every 16 h for as long as it fails.
+//* Retry after a failed check: 4 min doubling to 16 h, then every 16 h for as long as it fails.
 {
-  const hours = [1, 2, 3, 4, 5, 6, 7, 8].map((attempt) => backoffDelay(attempt, RETRY_PACING) / 3_600_000);
-  assert.deepEqual(hours, [0.5, 1, 2, 4, 8, 16, 16, 16]);
+  const minutes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((attempt) => backoffDelay(attempt, RETRY_PACING) / 60_000);
+  assert.deepEqual(minutes, [4, 8, 16, 32, 64, 128, 256, 512, 960, 960]);
 }
 
 console.log("updateManager.check: all assertions passed");

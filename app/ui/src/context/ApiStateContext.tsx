@@ -23,7 +23,12 @@ import { DEFAULT_ENTITY_COLOR } from "../common/appearance";
 import { VIEW_TYPE_META } from "../components/views/viewMeta";
 
 export interface UiPuppetState extends PuppetDataBundle {
+  /** The puppet's own assignment; what "Unassign" removes. */
   assignedView?: ViewKey;
+  /** What the screen shows: the assignment, else the default view; undefined = blank. */
+  shownView?: ViewKey;
+  /** True when shownView comes from the default view, not an assignment. */
+  showsDefault: boolean;
   // Unused today (runtime is orchestrator-driven via assign), kept for future settable runtime variables.
   updateRuntime: (runtime: Partial<PuppetRuntime>) => Promise<void>;
   updateAppearance: (appearance: EntityAppearance) => Promise<void>;
@@ -38,13 +43,17 @@ export interface UiPuppetState extends PuppetDataBundle {
 export interface UiViewState {
   key: ViewKey;
   config: AnyViewConfig;
-  assignedPuppets: PuppetKey[];
+  /** Puppets showing this view: assigned to it, or unassigned while it is the default. */
+  showingPuppets: PuppetKey[];
+  /** Shown by every puppet without a view of its own. */
+  isDefault: boolean;
   appearance: Required<EntityAppearance>;
   // TODO: Have the backend send per-view URLs so the origin doesn't need to come from the client.
   url: string;
   update: (config: AnyViewConfig) => Promise<void>;
   delete: () => Promise<void>;
   assign: (puppets: PuppetKey[]) => Promise<void>;
+  setDefault: (on: boolean) => Promise<void>;
 }
 
 export interface UiWebServerState extends Omit<WebServerState, "puppets" | "views"> {
@@ -107,6 +116,8 @@ interface ApiState {
       create: (config: AnyViewConfig, notify?: boolean) => Promise<ViewKey>;
       update: (key: ViewKey, config: AnyViewConfig, notify?: boolean) => Promise<void>;
       delete: (key: ViewKey, notify?: boolean) => Promise<void>;
+      /** The view puppets without their own view show; null = blank. */
+      setDefault: (key: ViewKey | null, notify?: boolean) => Promise<void>;
       updateRuntime: (
         config: Partial<ViewManagerRuntimeInput>,
         notify?: boolean,
@@ -228,11 +239,17 @@ export function ApiStateProvider({
 
       const puppets = new Map<PuppetKey, UiPuppetState>();
 
+      const assignments = data.runtime.puppetOrchestrator.assignments as Partial<Record<PuppetKey, ViewKey>>;
+      // Resolved the way the orchestrator resolves it, so the admin says what the screen shows.
+      const defaultView = data.runtime.puppetOrchestrator.default_view;
+      const shownBy = (id: PuppetKey): ViewKey | undefined => assignments[id] ?? defaultView;
       for (const pup of data.puppets) {
         const key: PuppetKey = pup.config.id;
         const full: UiPuppetState = {
           ...pup,
-          assignedView: (data.runtime.puppetOrchestrator.assignments as Partial<Record<PuppetKey, ViewKey>>)[key],
+          assignedView: assignments[key],
+          shownView: shownBy(key),
+          showsDefault: assignments[key] === undefined && defaultView !== undefined,
           updateRuntime: async (runtime: Partial<PuppetRuntime>): Promise<void> => puppetUpdateRuntime(key, runtime),
           updateAppearance: async (appearance: EntityAppearance): Promise<void> => puppetUpdateAppearance(key, appearance),
           assignView: async (view: ViewKey): Promise<void> => puppetAssignView(key, view),
@@ -248,7 +265,8 @@ export function ApiStateProvider({
         const full: UiViewState = {
           key,
           config,
-          assignedPuppets: Object.entries(data.runtime.puppetOrchestrator.assignments).filter(([, v]) => v == key).map(([k]) => k), // TODO: Simplify?
+          showingPuppets: data.puppets.map((p) => p.config.id).filter((id) => shownBy(id) === key),
+          isDefault: defaultView === key,
           appearance: {
             color: config.appearance?.color ?? DEFAULT_ENTITY_COLOR,
             icon: config.appearance?.icon ?? VIEW_TYPE_META[config.type].icon,
@@ -256,6 +274,7 @@ export function ApiStateProvider({
           url: `${window.location.origin}${data.info.view.route_base}/${key}`,
           update: (next: AnyViewConfig): Promise<void> => viewUpdate(key, next),
           delete: (): Promise<void> => viewDelete(key),
+          setDefault: (on: boolean): Promise<void> => viewSetDefault(on ? key : null),
           assign: (puppets: PuppetKey[]): Promise<void> =>
             withToast(
               // Fire in parallel so the displays switch together, but await + toast as one op.
@@ -475,6 +494,16 @@ export function ApiStateProvider({
     );
   };
 
+  const viewSetDefault = async (key: ViewKey | null, notify = true): Promise<void> => {
+    return withToast(
+      Api.put(`/views/default`, { view: key }),
+      key === null
+        ? { loading: "Clearing the default view…", success: "No default view: unassigned displays are blank" }
+        : { loading: "Setting the default view…", success: "Default view set" },
+      notify,
+    );
+  };
+
   useConnectionToast({ state: status });
 
   return (
@@ -507,6 +536,7 @@ export function ApiStateProvider({
             create: viewCreate,
             update: viewUpdate,
             delete: viewDelete,
+            setDefault: viewSetDefault,
             updateRuntime: viewManagerUpdateRuntime,
           },
         },
