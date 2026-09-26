@@ -16,7 +16,7 @@ export function ViewStatusGroupPill({
 }): JSX.Element {
   const { state } = useApi();
 
-  const assignedPuppets = view.assignedPuppets;
+  const assignedPuppets = view.showingPuppets; // assigned, or showing it as the default view
 
   const items: StatusItem[] = assignedPuppets.map((id) => {
     const puppet = state?.puppets.get(id);

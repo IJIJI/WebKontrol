@@ -51,6 +51,10 @@ export interface PuppetWebhandlers {
   reload: (
     puppet: PuppetKey,
   ) => Promise<void>;
+  /** What a puppet without its own view shows; undefined = blank. Moves those puppets now. */
+  setDefaultView: (
+    view: ViewKey | undefined,
+  ) => Promise<void>;
 }
 export interface SystemWebhandlers {
   updateRuntime: (config: Partial<SystemRuntime>) => void | Promise<void>;

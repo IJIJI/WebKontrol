@@ -15,6 +15,7 @@ import { DuplicateViewModal } from "./DuplicateViewModal";
 import { ShareViewModal } from "./ShareViewModal";
 import { ViewTypeChip } from "./ViewTypeChip";
 import { ViewStatusGroupPill } from "./ViewStatusGroupPill";
+import { DefaultViewChip } from "./DefaultViewChip";
 
 // A view's detail-page header: fills EntityHeader with view-specific content.
 export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
@@ -33,6 +34,10 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
     { id: "open", label: "Open in new tab", icon: <Icons.openInNew />, onClick: () => void window.open(serveUrl, "_blank", "noopener") },
     { id: "edit", label: "Edit", icon: <Icons.edit />, onClick: () => void navigate(`/views/${key}/edit`) },
     { id: "duplicate", label: "Duplicate", icon: <Icons.tabDuplicate />, onClick: () => setDuplicateOpen(true) },
+    // The default view is what every display without a view of its own shows; unset = blank.
+    view.isDefault
+      ? { id: "default", label: "Stop being default", icon: <Icons.home />, onClick: () => void view.setDefault(false) }
+      : { id: "default", label: "Make default", icon: <Icons.home />, onClick: () => void view.setDefault(true) },
     { divider: true },
     { id: "delete", label: "Delete", icon: <Icons.delete />, danger: true, onClick: () => setDeleteOpen(true) },
   ];
@@ -48,6 +53,7 @@ export function ViewHeader({ view }: { view: UiViewState }): JSX.Element {
           <>
             <ViewTypeChip type={config.type} />
             <ViewStatusGroupPill view={view} />
+            {view.isDefault && <DefaultViewChip />}
           </>
         }
         actions={
