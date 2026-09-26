@@ -80,7 +80,9 @@ export default function PageLayout(): JSX.Element {
         className={["page-layout", "pad-none"].filter(Boolean).join(" ")}
       >
         <div className="page-header logo">
-          <BrandLogo size={20} version={version ? `v${version}` : "v3"} collapsed={isCollapsed} />
+          {/* A managed install reports its release tag ("v3.3.0"), a checkout its package
+              version ("3.3.0"): prefix the v only where it is missing. */}
+          <BrandLogo size={20} version={version ? (version.startsWith("v") ? version : `v${version}`) : "v3"} collapsed={isCollapsed} />
         </div>
         <div className="page-header title">
           <h1 className="title-text">
