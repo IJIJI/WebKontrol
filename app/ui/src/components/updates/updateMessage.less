@@ -41,9 +41,21 @@
     height: 18px; // aligns the icon with the first line of text
   }
 
+  // Wraps only when an action does not fit beside the text: the text then keeps a readable
+  // width and the action drops to its own line, still bottom right.
+  flex-wrap: wrap;
+  row-gap: 6px;
+
   .text {
-    flex: 1 1 auto;
+    flex: 1 1 140px;
     min-width: 0;
+  }
+
+  // Bottom right: the text reads first, the way out sits where the eye ends.
+  .action {
+    flex: 0 0 auto;
+    align-self: flex-end;
+    margin-left: auto;
   }
 
   .dismiss {

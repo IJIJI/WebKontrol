@@ -23,10 +23,13 @@ export enum MessageTone {
 export function UpdateMessage({
   tone,
   children,
+  action,
   onDismiss,
 }: {
   tone: MessageTone;
   children: ReactNode;
+  /** A control that answers the message (e.g. "Check now"), placed bottom right. */
+  action?: ReactNode;
   /** Present only for messages that can honestly be acknowledged. */
   onDismiss?: () => void | Promise<void>;
 }): JSX.Element {
@@ -36,6 +39,7 @@ export function UpdateMessage({
         {tone === MessageTone.PROBLEM ? <Icons.alert size={16} /> : <Icons.checkCircle size={16} />}
       </span>
       <span className="text">{children}</span>
+      {action && <span className="action">{action}</span>}
       {onDismiss && (
         // ✕ is the house's non-destructive dismiss: the record stays, it just stops asking.
         <button type="button" className="dismiss" onClick={() => void onDismiss()} aria-label="Dismiss">

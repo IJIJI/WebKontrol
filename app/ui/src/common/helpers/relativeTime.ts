@@ -26,3 +26,16 @@ export function timeAgo(moment: number, now: number = Date.now()): string {
   }
   return "just now";
 }
+
+/**
+ * A future moment as "in 4 minutes", rounded up so it never promises sooner than it will be.
+ * A moment already past (the tick is on its way, or the clock jumped) reads "any moment now".
+ */
+export function timeUntil(moment: number, now: number = Date.now()): string {
+  const remaining = moment - now;
+  if (remaining <= 0) return "any moment now";
+  for (const [unit, ms] of STEPS) {
+    if (remaining >= ms) return RELATIVE.format(Math.ceil(remaining / ms), unit);
+  }
+  return RELATIVE.format(1, "second");
+}

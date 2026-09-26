@@ -1,8 +1,8 @@
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import "./updatePage.less";
-import { timeAgo } from "../common/helpers/relativeTime";
+import { timeAgo, timeUntil } from "../common/helpers/relativeTime";
 import { useNow } from "../common/hooks/useNow";
 import { Variant } from "../common/types/variants";
 import { Button } from "../components/button/Button";
@@ -39,6 +39,16 @@ export default function UpdatePage(): JSX.Element {
       true,
     );
   }, [setMeta, version]);
+
+  // Opening this page after a failed check is the moment someone wants to know: try again
+  // right away instead of leaving them to wait for the retry or find the button. Once per
+  // visit, and only when the state has arrived (the first render may not have it yet).
+  const checkedOnOpen = useRef(false);
+  useEffect(() => {
+    if (checkedOnOpen.current || !info) return;
+    checkedOnOpen.current = true;
+    if (info.managed && info.checkError !== undefined) void api.callBacks.update.check(false).catch(() => undefined);
+  }, [info, api]);
 
   if (!info) return <LoadingPage />;
 
@@ -128,7 +138,9 @@ export default function UpdatePage(): JSX.Element {
         info={info}
         settling={settling}
         now={now}
+        busy={busy}
         onAcknowledge={() => api.callBacks.update.acknowledge()}
+        onCheck={() => api.callBacks.update.check()}
       />
 
       <div className="releaseList">
@@ -294,12 +306,16 @@ function UpdateMessages({
   info,
   settling,
   now,
+  busy,
   onAcknowledge,
+  onCheck,
 }: {
   info: UpdateInfo;
   settling: boolean;
   now: number;
+  busy: boolean;
   onAcknowledge: () => void | Promise<void>;
+  onCheck: () => void | Promise<void>;
 }): JSX.Element {
   const journal = info.journal;
   const seen = journal?.acknowledged === true;
@@ -307,7 +323,19 @@ function UpdateMessages({
   return (
     <>
       {info.checkError !== undefined && (
-        <UpdateMessage tone={MessageTone.PROBLEM}>Check failed: {info.checkError}</UpdateMessage>
+        // What happens next and the way to not wait for it, together: a failed check alone
+        // reads as a dead end, while the network may well be back already.
+        <UpdateMessage
+          tone={MessageTone.PROBLEM}
+          action={
+            <Button size={12} disabled={busy} onClick={() => void onCheck()}>
+              Check now
+            </Button>
+          }
+        >
+          Check failed: {info.checkError}.
+          {info.nextCheckAt !== undefined && <> Trying again {timeUntil(info.nextCheckAt, now)}.</>}
+        </UpdateMessage>
       )}
 
       {settling && (

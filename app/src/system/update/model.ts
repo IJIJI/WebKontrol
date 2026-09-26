@@ -48,6 +48,7 @@ export interface UpdateInfo {
   latest: string | null;
   lastChecked: number | null;
   checkError?: string; // why the last check failed; cleared by a successful one
+  nextCheckAt?: number; // when a failed check is retried by itself; cleared by a successful one
   activity: UpdateActivity;
   journal?: UpdateJournalEntry; // the most recent apply's outcome; absent before the first
 }
