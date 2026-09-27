@@ -1,10 +1,10 @@
 # NOTES
 
-Session handoff, written 2026-09-26. Resume from **Next**.
+Session handoff, updated 2026-09-27. Resume from **Next**.
 
 ## Task
 
-Get v3 to its first stable release marked GitHub latest (v3.3.1 is in its soak now), and start the next features on a branch that leaves the release line free for soak fixes.
+Get v3 to its first stable release marked GitHub latest (v3.3.1 is in its soak; soak fixes are made on `dev` in a separate session), and develop 3.4 on `next` meanwhile.
 
 ## Done
 
@@ -14,19 +14,15 @@ Get v3 to its first stable release marked GitHub latest (v3.3.1 is in its soak n
 
 ## In progress
 
-Nothing in code; `dev` is clean at `84af711` (Version 3.3.1) and equals `main`.
+Nothing in code. `dev` and `next` are both at `4952e13`: `84af711` (Version 3.3.1) plus the four docs commits that created `.docs/`. `main` is at the 3.3.1 merge.
 
 Pending outside code:
-- **Update the test Pi 3.3.0 -> 3.3.1** from the admin (Config, Releases). Check: the logo reads `V3.3.1`, the Puppets page shows the Default chips, the Clock's menu offers "Stop being default", the page comes back by itself after the update.
-- **Soak on 3.3.1, starting 2026-09-27, 4 days**: HDMI = Ontime website view, touch display = Clock, both assigned explicitly. Day 2: one reboot, one cable pull. Daily: screens right, admin reachable without a refresh, then over SSH `journalctl -u webkontrol --since yesterday -p warning --no-pager | tail -20`, `free -m`, `du -sh /opt/webkontrol/logs`.
+- **Soak on 3.3.1**: day 2 on 2026-09-27, clean so far. Setup and daily checks are in `.docs/todo.md` (Soak).
 - **Stable after a clean soak**: 3.3.1 as is (or 3.3.2 with soak fixes); the README drops `--version` in the same commit as the bump; published WITHOUT the pre-release flag.
 
-## Branch strategy (proposed 2026-09-26, awaiting the user's yes)
+## Branches
 
-- `dev` stays the 3.3.x release line: only soak fixes and the stable release land there, and `dev` -> `main` for each release as now.
-- New features go on `next`, branched from `dev` at `84af711`. Soak fixes made on `dev` are merged forward into `next` (`dev` -> `next`), never the other way until 3.4 is ready; then `next` -> `dev` -> `main` as the 3.4.0 pre-release.
-- CI runs only on a published release, so pushing `next` builds nothing. `next` keeps `package.json` at 3.3.x until its own release bump.
-- The old `puppet_nav_runtime_refactor` branch (and its revert branch on origin) predates this and can be deleted once confirmed merged or abandoned.
+Settled, see `.docs/overview.md` (Branches): `dev` is the 3.3.x release line, `next` holds 3.4, fixes flow forward `dev` to `next`. `.docs/` changes go on `next`; a fix on `dev` carries only its own doc lines.
 
 ## Dead ends
 
@@ -46,10 +42,10 @@ Pending outside code:
 
 ## Where things live
 
-- Todo (work with a set moment), backlog (no moment yet) and standing decisions are in the assistant's project memory (`todo.md`, `backlog.md`, `decisions.md`); they move into a repo `.docs/` folder modelled after Dendrite right after the first release marked latest (not created yet).
+- Everything lasting is in `.docs/` (start at `overview.md`): todo, backlog, decisions, conventions, architecture, the release runbook with the testing recipes, and the Pi image.
 - Working rules: consult before every code change, review passes plus a commit list after every piece, the user does all git, `git add` and `git commit` as separate commands with paths from `app/`, no em dashes, no AI traces anywhere.
 - Release checklist: package.json equals the tag, README pin updated, PR merged before tagging, `yarn typecheck` and `yarn check` green, hardware test of what changed, an installer run when `install.mjs` changed, notes in the v3.0.0 style.
 
 ## Next
 
-Create the `next` branch from `dev` (once the strategy above is confirmed) and, as its first work, the `.docs/` folder modelled after Dendrite's (project context, decisions, todo, backlog, conventions), moved out of the assistant's memory so it is in the repo and kept up to date from then on. Then, in order on `next`: the mobile-friendly admin (sized by a 390 px assessment of every page), more units on style fields (vw/vh, em, % besides px), `build.sh` defaulting to GitHub latest.
+The user picks the backlog items that join 3.4 (a candidate list was given 2026-09-27). Then the 3.4 plan on `next`, from `.docs/todo.md`: the width assessment, the tablet-first admin, more units on style fields, `build.sh` defaulting to GitHub latest, and the puppet runtime fields (backlog).

@@ -70,6 +70,7 @@ config or database.
 - `next`: new features for the next minor release. Fixes on `dev` are merged forward into
   `next`; `next` goes back into `dev` only when its release is ready. `package.json` on `next`
   keeps the released version until that release's own bump.
+- `.docs/` changes go on `next`. A fix on `dev` carries only its own doc lines.
 - CI runs only on a published release, so pushing a branch builds nothing.
 
 ## Where a box keeps its state

@@ -26,7 +26,7 @@ code. A seeded block view fed by an addresses data source, so offline boots and 
 update live. v2's `OsDetails.getAddresses` ports into the empty
 `src/system/network/NetworkDetails.ts`.
 *Why not now:* it needs data sources, and the QR code needs a phone-friendly admin.
-*Trigger:* data sources exist and the mobile todo item is done.
+*Trigger:* data sources exist and the admin works on phones (todo: Tablet-first admin).
 *Notes:* shown through the default view or per puppet is an open question in decisions.
 A scan lands on a phone, hence the mobile dependency.
 
@@ -122,6 +122,15 @@ date and time block is inserted (see decisions: no schema default font).
   crash.
 - A view readiness signal, only if a silently broken view ever happens.
 - Beacon integration.
+
+### The puppet runtime's unused fields
+*What:* `rotation` (0 to 270 in steps of 90), `scale` (0.25 to 4) and `reload_interval` (1 min
+to 7 days) are in `PuppetRuntimeShape` (`src/puppet/types/schema.ts`), stored and accepted by
+`PATCH /api/puppets/:id`, but nothing applies them and the admin does not show them. Rotation
+and scale are to be implemented if possible; `reload_interval` is implemented or removed.
+*Why not now:* found 2026-09-27; the choice belongs in the 3.4 plan.
+*Trigger:* the 3.4 plan.
+*Notes:* rotation overlaps "Display rotation" above (xrandr per output, or rotating the page).
 
 ## Blocks and views
 

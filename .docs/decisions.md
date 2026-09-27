@@ -37,7 +37,8 @@ when a decision is made; keep rejected alternatives.
   belongs to the image, not the installer.
 - **Branches** (2026-09-26): `dev` is the release line, `next` holds the next features, fixes
   flow forward `dev` to `next`. Rejected: developing features on `dev` during a soak, which
-  would block soak fixes.
+  would block soak fixes. `.docs/` changes go on `next`; a fix on `dev` carries only its own
+  doc lines (2026-09-27), since every session shares the same docs.
 - **The first stable release does not need** the setup page (it waits for data sources) or
   the Companion API documentation (it ships with a Companion module later).
 
@@ -112,7 +113,8 @@ when a decision is made; keep rejected alternatives.
 - **The logo shows the running version** from the state; the boot splash shows only the major
   version, since a full version baked into the image goes wrong after the first update.
 - **Mobile** (2026-09-26): the operator's pages first, then the rest; the block editor stays a
-  desktop tool.
+  desktop tool. The target is iPads and smaller laptops first, with phones of every size
+  supported one level below (2026-09-27).
 
 ## Config and security
 
