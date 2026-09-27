@@ -56,6 +56,8 @@ variable). CI keeps passing the release tag explicitly.
 
 ## For the maintainer
 
+- Delete the old `puppet_nav_runtime_refactor` branch and its revert branch on origin once
+  confirmed merged or abandoned.
 - If not done yet: delete the history-rewrite backup refs from 2026-09-19 (from `app/`,
   PowerShell):
   `git for-each-ref --format="%(refname)" refs/original | ForEach-Object { git update-ref -d $_ }`

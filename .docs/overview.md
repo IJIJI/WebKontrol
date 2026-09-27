@@ -16,7 +16,8 @@ anything, check [decisions.md](decisions.md) (settled, do not re-argue) and
 
 `NOTES.md` at the repo root is the session handoff: where the last session stopped and the
 single next step. These `.docs/` files are the lasting record; keep them current in the same
-change as the code (see conventions).
+change as the code (see conventions). They never ship: the release tarball holds only the
+build output and the package files, and the image is built from the tarball.
 
 ## What WebKontrol is
 
@@ -59,14 +60,17 @@ config or database.
   `yarn serve` runs the build under the supervisor.
 - `yarn typecheck` (both TypeScript projects), `yarn check` (the assert-based `*.check.ts`
   files; there is no test framework), `yarn lint` (ESLint; informational in CI).
-- `yarn e2e:update`: the update system end to end against a local fake GitHub (about 15 min).
+- `yarn e2e:update`: the update system end to end against a local fake GitHub (a few minutes;
+  `--no-build` reuses the existing `dist`). Not part of CI.
 
 ## Branches
 
 - `main`: what is released. Tags (`vX.Y.Z`) sit on `main`.
 - `dev`: the current release line (3.3.x). Only fixes for that line and the release itself.
 - `next`: new features for the next minor release. Fixes on `dev` are merged forward into
-  `next`; `next` goes back into `dev` only when its release is ready.
+  `next`; `next` goes back into `dev` only when its release is ready. `package.json` on `next`
+  keeps the released version until that release's own bump.
+- CI runs only on a published release, so pushing a branch builds nothing.
 
 ## Where a box keeps its state
 

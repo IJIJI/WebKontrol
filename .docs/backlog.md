@@ -39,9 +39,10 @@ output, browser and Node).
 *Notes:* verify its API and types when picked.
 
 ### Blank view
-*What:* an assignable blank view, also what a puppet gets when it is cleared.
-*Why not now:* `about:blank` (black) does the job.
-*Trigger:* a need to assign "nothing" explicitly.
+*What:* an assignable blank view, to force one screen blank while a default view is set.
+*Why not now:* a screen is blank (`about:blank`) when it has no view and no default is set.
+*Trigger:* a need to blank one screen while the others follow the default.
+*Notes:* clearing a screen's view returns it to the default view.
 
 ### Fonts: review and add more
 *What:* bundled OFL fonts plus system fonts (FONT_SUGGESTIONS must match what renders),
@@ -53,8 +54,10 @@ date and time block is inserted (see decisions: no schema default font).
 
 ### Then, roughly in this order
 - The Companion module together with the documented remote-control API.
-- A config builder with boot-partition adoption (files placed on BOOT that the image adopts on
-  first boot, including the user password), since Imager customisation does not apply.
+- A config builder with boot-partition adoption, since Imager customisation does not apply:
+  it emits files for BOOT that the image adopts on first boot with its own small oneshot:
+  `config.yaml`, the `ssh` trigger, and `userconf.txt` (`webkontrol:<sha512-crypt>`, read by
+  Pi OS's `userconf-pi`) for a custom password. Check that `userconf-pi` works on trixie.
 - Display rotation, a windowed or borderless mode, and richer placement and sizing than
   `window: {x, y, width, height}` (rotation through xrandr per output or rotating the page;
   borderless needs an openbox rule or Chromium's `--app`).
@@ -108,6 +111,7 @@ date and time block is inserted (see decisions: no schema default font).
   code on hover; one derived status instead of connection plus navigation.
 - A logging severity pass: the severity follows the state a sequence ends in.
 - `WebServer.ts`: one `sendError` for the repeated 500 shape; a route path review.
+- `PUT /api/views/default` with an unknown view key answers 500; it should be 404.
 - Config: an environment override for the config path; derive a short name from the id.
 - One generic runtime store instead of four stores with the same functions.
 - AppCore and LifeCycle tidy-ups; move `helpers/json.ts` and `helpers/error.ts` to

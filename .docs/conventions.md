@@ -13,8 +13,11 @@ How work is done in this repo. Follow these in every session.
   decision. Do the parts that do not depend on the answer, then ask: numbered, with a
   recommendation first.
 - **No unrequested changes.** Never alter presentation, behaviour or a settled decision that
-  was not asked for; raise it and wait. Prefer targeted edits over rewriting a file, since a
-  rewrite silently reverts what someone else changed.
+  was not asked for; raise it and wait, even when it is a genuine improvement. When a task
+  implies a visual change, keep the existing look unless a new one was asked for.
+- Prefer targeted edits over rewriting a file, since a rewrite silently reverts what someone
+  else changed. Re-read a file before rewriting it. After a change across several files, check
+  the diff for presentation changes that were not intended, and report them.
 - A decision in `decisions.md` stays settled unless new facts appear.
 
 ## While working
@@ -26,15 +29,17 @@ How work is done in this repo. Follow these in every session.
 - Record decisions, definitions and findings the moment they are made, in the matching file
   here, in the same change as the code.
 
-## After each piece of work
+## After each piece of work, and before presenting a plan
 
 1. **Review it in 3 to 6 passes**, each with one lens: SOLID, KISS and YAGNI, bugs, code smells
    (refactoring.guru), design patterns where they genuinely fit, an outside read. Fix real bugs
-   directly; raise everything else. Report the passes and what each changed.
+   directly, but only in code whose change was already approved; raise everything else. Report
+   the passes as a numbered list with what each changed.
 2. **Hand over a commit list** covering every uncommitted file: one table per commit (file,
    status: created, modified, deleted, moved, renamed; a short note), then the commit message,
-   a plain explanation, and the commands. If the tree is midway through a group, say it is
-   not committable yet rather than inventing a boundary.
+   a plain explanation, and a runnable `git add` that stages exactly that commit's files. If
+   the tree is midway through a group, say it is not committable yet rather than inventing a
+   boundary.
 
 ## Git
 

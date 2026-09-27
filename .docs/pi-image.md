@@ -3,15 +3,27 @@
 ## Design
 
 - Built with rpi-image-gen, pinned to commit `89f5e5d` in `pi-image/build.sh` (its layer names
-  have changed under HEAD before). Debian trixie, device layer `rpi4`.
+  changed after May 2026, so HEAD can break a build). Debian trixie, device layer `rpi4`.
+  Trixie over bookworm for the newer base and longer support: a flashed box can never change
+  its Debian release through the in-app updater, only by a reflash. Modelled on
+  rpi-image-gen's `webkiosk` example and Beacon's `pi-image/`, with X11 instead of cage.
+- The image job lives inside `release.yml`, after the tarball job: a separate workflow
+  triggered by the release would race the tarball upload. It runs on every published release,
+  pre-releases included.
+- `pi-image/.gitattributes` forces LF: everything in it runs on Linux.
 - **X11 with openbox, no desktop.** A systemd unit starts `xinit` with
   `pi-image/files/webkontrol-session` as the configured user, after `network.target` (it
   does not wait for the network to be online).
   The session paints the screens black, disables blanking, lays the screens out, starts
   openbox, sets `splash.png` as the background on every screen, then runs the supervisor.
+  X starts through the setuid wrapper (`xserver-xorg-legacy`, `allowed_users=anybody`), with
+  no PAM session. The logo stays visible on screens without a puppet on purpose: it shows the
+  box is on.
+- Node gets `cap_net_bind_service`, so the app serves port 80 without root.
 - **Screen layout**: HDMI first at 0,0 as primary, then each next screen to its right (below
-  when xrandr refuses that). `/opt/webkontrol/config/display.sh`, when present,
-  replaces the layout with its own `xrandr` commands.
+  when xrandr refuses that, for the Pi 3's 2048 px X screen limit).
+  `/opt/webkontrol/config/display.sh`, when present, replaces the layout with its own `xrandr`
+  commands.
 - **The app** is installed in the image by `install.mjs` from the release tarball (a managed
   install, so it updates itself), with Node 22 for arm64 in `/usr/local`. The baked config has
   one puppet, `display-1`, with `chromiumExecutablePath: /usr/bin/chromium`.
@@ -24,16 +36,33 @@
   (`webkontrol-growfs`). The boot partition is 512 MB FAT32, labelled `BOOT`.
 - **Splash images**: `splash.png` is 1920x1080; `pi-image/splash.tga` is 640x360, 24-bit
   uncompressed, under 224 colours (a larger one wraps on the 800x480 touch display). Both show
-  the wordmark with the `V3` subline, rendered from the admin's logo.
+  the wordmark with the `V3` subline, rendered from the admin's logo: Puppeteer renders the
+  logo at size 120 with the repo's Zen Dots, Pillow downscales and quantises it. The render
+  page is not committed; redo it the same way when the logo changes.
 - **Build**: `bash pi-image/build.sh [tag]` in WSL2 or on Debian/Ubuntu, about 30 minutes;
   without a tag it takes the version from `app/package.json`. The layer's version variable is
   required, so a direct rpi-image-gen run without one fails instead of building an old release.
-  CI builds and attaches the image for every published release.
+  Check layer changes in WSL with rpi-image-gen at the pin: `bin/ig metadata --lint` and
+  `--validate`.
+- **Never publish the deploy directory**: its `config.yaml.zst` holds the build config,
+  including the password and a CI token when one was given. CI uploads only the image.
 
 ## Hardware facts
 
 - Tested on a Raspberry Pi 4 with an HDMI monitor and the official 7" touch display. The Pi 3
-  and Pi 5 are expected to work but are untested.
+  and Pi 5 are expected to work but are untested; Pi 3 support is wanted, and there is no
+  Pi 3 to test on.
+- At boot the logo shows on the touch display first and on HDMI a little later (the monitor
+  resyncs); expected.
+- The touch controller (edt_ft5x06) logs occasional I2C -121 errors; harmless.
+- The BOOT partition got a drive letter by itself on one Windows PC (2026-09-25) and not on
+  another (2026-09-19). The README's
+  `Get-Volume -FileSystemLabel BOOT | Get-Partition | Add-PartitionAccessPath -AssignDriveLetter`
+  line is untested.
+- Pi OS with a desktop uses Wayland (labwc) since late 2024; window placement needs X11
+  (`raspi-config`, advanced options). Started over SSH there, the app needs
+  `WAYLAND_DISPLAY=wayland-0 DISPLAY=:0 XDG_RUNTIME_DIR=/run/user/<uid>`, or Puppeteer
+  reports "Missing X server".
 - On the test Pi, `xrandr` reports `HDMI-1 1920x1080+0+0` and `DSI-1 800x480+1920+0`: a puppet
   on the touch display takes `window: {x: 1920, y: 0}`.
 - Window placement needs X11: under Wayland a client cannot place its own window.
@@ -59,3 +88,7 @@
   `Test-NetConnection webkontrol.local -Port 22`.
 - **`webkontrol.local` not resolving** on some networks is mDNS being blocked (for example
   client isolation); `systemctl status avahi-daemon` on the Pi rules the Pi out.
+- **Manual Chromium tests on the Pi** need `--password-store=basic`, or a keyring prompt
+  appears (Puppeteer passes it). Run them as the user, not root: as root Chromium needs
+  `--no-sandbox` and floods the log with harmless D-Bus and GCM registration errors (Puppeteer's
+  default `--disable-background-networking` silences the GCM ones).

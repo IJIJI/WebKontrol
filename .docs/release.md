@@ -9,7 +9,8 @@
 - What changed is tested where it runs: Windows and/or the Pi; a fresh-card test when
   `pi-image/` changed; an installer run when `install.mjs` changed.
 - Release notes follow the earlier ones: one opening paragraph, a caution while it is a
-  pre-release, "What is new", "Fixed" when there is anything, "Install".
+  pre-release, "What is new", "Fixed" when there is anything, "Install". They name the image
+  file actually attached.
 
 ## Releasing
 
@@ -43,7 +44,8 @@ builds the image for an existing release as a workflow artifact, not on the rele
 Never touches the development database. After `yarn build`, make a directory with
 `config/config.local.yaml` (for example `web.port: 8080` and your own puppets, or
 `puppets: []` for no browser windows) and run from that directory:
-`node <repo>/app/dist/app.js`. A new directory is a fresh install: it seeds the Clock view.
+`node <repo>/app/dist/app.js`. A new directory is a fresh install: it seeds the Clock view
+and makes it the default.
 
 ### A managed scratch box
 Add a file `current` containing a tag (`v3.3.1`) to the directory: the app then behaves as an
@@ -60,6 +62,13 @@ Puppeteer from `app/node_modules`. View pages hold an SSE stream: wait for `load
 `domcontentloaded`, never `networkidle0`. Several pages that must keep rendering need one
 headless browser each: a browser throttles pages that are not in front, and screenshots of
 them stall. `boundingBox()` is relative to the viewport; for crops, screenshot the viewport.
+A script that reads `/api/state` keeps Node alive: end it with `process.exit`. In the admin,
+"Add block" is an icon button (find it by its aria-label), and a pinned paste closes the block
+picker at once.
+
+### README screenshots
+Puppeteer at 1280x800 in the dark theme on a scratch box; the display shot at 1920x1080.
+Puppet names: "Display 1" (DISP1), "Display 2" (DISP2) and "SDI 1" (SDI-1).
 
 ### The README hero GIF
 Recorded once, not part of the repo. Three headless browsers (the admin and two display
@@ -67,7 +76,11 @@ mirrors), frames taken while a script clicks through the admin, the pointer posi
 per frame and drawn afterwards (real mouse moves were seconds per step), the website display
 captured as one still per navigation, the admin's moving background off (`disableBackground`
 through `PATCH /api/config/ui`). Composed with Pillow using one shared palette for all frames
-(per-frame palettes tripled the file).
+(per-frame palettes tripled the file). The story: Display 1 switches from Ontime
+(getontime.no) to OBS (obsproject.com), SDI 1 from the Clock to a "Studio" block view, then
+a live edit of that view. Both sites load without a consent banner in headless Chromium;
+Rundown Studio, stagetimer, h2r and several others were rejected (consent banners, busy or
+dead pages).
 
 ## Dead ends
 

@@ -6,8 +6,9 @@ document disagree, the file wins and this document gets fixed.
 ## Processes
 
 ```
-supervisor.ts   restarts the app on any exit it did not ask for (shared backoff curve);
-                confirms or rolls back an update through releases/pending.json
+supervisor.ts   restarts the app after every exit unless shutting down; a requested exit
+                (code 0) is healthy, crashes back off; confirms or rolls back an update
+                through releases/pending.json
   └─ app.ts     process guards (unhandledRejection logs and survives, uncaughtException
                 closes and exits 1 within 10 s), then LifeCycle
 ```
@@ -17,15 +18,16 @@ directly so a crash stays visible.
 
 ## Start-up
 
-`src/orchestration/LifeCycle.ts` reads the config (`ConfigManager`: `config.local.yaml` replaces
-`config.yaml` when present, never merged; validated by `orchestration/config/schema.ts`), builds a puppet per
-configured entry through `PuppetFactory`, and wires the managers into `AppCore`.
+`src/orchestration/LifeCycle.ts` reads the config (`ConfigManager`: `config.local.yaml`
+replaces `config.yaml` when present, never merged; validated by
+`orchestration/config/schema.ts`), builds a puppet per configured entry through
+`PuppetFactory`, and wires the managers into `AppCore`.
 
 `src/orchestration/AppCore.ts` initialises them in this order: system, updates, views (the
 orchestrator resolves assignments into targets, so views come first), the view server's
 bundle, the orchestrator's view context, the UI settings, the view routes and the handlers,
-the web server, the puppets. Last, on a fresh database,
-it seeds the default view (`src/views/defaultView.ts`). AppCore also keeps the one
+the web server, the puppets. Last, on a fresh database, it seeds the default view
+(`src/views/defaultView.ts`). AppCore also keeps the one
 `WebServerState` object in sync with every manager's events and hands it to the web server.
 
 ## Puppets (`src/puppet/`, `src/orchestration/puppet/`)
@@ -35,7 +37,8 @@ it seeds the default view (`src/views/defaultView.ts`). AppCore also keeps the o
   repair, the fallback page.
 - `puppeteer/PuppeteerPuppet.ts`: the Chromium implementation. `--start-fullscreen` and
   `--test-type` always; `--kiosk` without a configured `window`,
-  `--window-position`/`--window-size` with one. `puppeteer/failures.ts` classifies a failed navigation.
+  `--window-position`/`--window-size` with one. `puppeteer/failures.ts` classifies a failed
+  navigation.
 - `fallbackPage.ts`: the locally rendered page shown when a target fails to load (clock, the
   failure, a countdown); written into the page, so it needs neither server nor network.
 - `pacing.ts`: the one backoff curve (`RetryHandler`) used by navigation retries, crash repair
@@ -81,6 +84,11 @@ routes through `RouteRegistrar` before `start()`.
 - `UpdateManager.ts`: whether and when. Checks at start and daily; a failed check retries on
   `RETRY_PACING` (4 min doubling to 16 h). Announces only GitHub's `latest` when newer.
   `applyGate` refuses an apply that would lose data. Dormant in a git checkout.
+- Managed or not: a `current` file in the working directory makes an install managed. A
+  managed install reports the tag in `current` as its version (`v3.3.1`), a checkout the
+  `package.json` version (`3.3.1`); UI that shows the version handles both.
+- On ARM, `install.mjs` and `UpdateRunner` skip Puppeteer's browser download (it would fetch
+  an x86-64 Chrome), so puppets there need `chromiumExecutablePath`.
 - `plan.ts` (the pure "what"), `UpdateRunner.ts` (the disk work: download, install, flip
   `current`, snapshot the database, write `pending.json`), `version.ts` (tag ordering),
   `schema.ts` (the journal of the last apply).

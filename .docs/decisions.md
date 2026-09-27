@@ -16,8 +16,9 @@ when a decision is made; keep rejected alternatives.
   better-sqlite3 has no prebuilt binary. Raise the minimum to 22.22 or leave it.
 - **Block info, open since 2026-07-29**: an icon id set or a raw SVG escape hatch for plugin
   icons; whether `info` is exposed as a block catalogue over the wire; a category and order
-  for the block picker; a bounded short label derived from config (`{field}` interpolation
-  with a length cap, never a mini-language). Reassess against the code before deciding.
+  for the block picker; which `info` fields are required; a bounded short label derived from
+  config (`{field}` interpolation with a length cap, never a mini-language). Reassess against
+  the code before deciding.
 - **The setup page on a fresh install** (when it is built): shown through the default view,
   or assigned per puppet.
 
@@ -56,7 +57,8 @@ when a decision is made; keep rejected alternatives.
 - **Window positioning**: `window: {x, y, width, height}`, all optional, always fullscreen.
   `--kiosk` is dropped when a window is set (kiosk ignores the position); `--test-type` always
   (it hides the "unsupported flag" infobar). `width` and `height` are accepted but documented
-  as not needed. Placement works on X11 and Windows, never Wayland.
+  as not needed (kept for windowed puppets later). Placement works on X11 and Windows, never
+  Wayland.
 - **The fullscreen exit pop-up on positioned puppets is accepted** (2026-09-18). A fix exists
   (launch with `--kiosk`, then place and fullscreen through CDP `Browser.setWindowBounds`),
   was verified on Windows and reverted the same day. Do not re-propose unless asked.
@@ -84,7 +86,8 @@ when a decision is made; keep rejected alternatives.
   the unlit segments behind the text. Rejected: a dual tone switch on the block (it only
   worked with two fonts); a COLRv1 colour font built from DSEG (a font build step; revisit
   with data sources); names with parentheses (rejected by the browser as inline styles, the
-  block gets no font).
+  block gets no font). The font files ship unmodified under their own names; the Dual names
+  are CSS aliases only, because DSEG's OFL reserves the name "DSEG".
 - **No schema default font on the date and time block** (2026-09-20): a schema default
   reaches saved views and breaks font inheritance. A preset applied when inserting a block is
   the right tool.
@@ -99,6 +102,10 @@ when a decision is made; keep rejected alternatives.
 - `withToast` is the single toast owner; drafts do not own toasts or navigation guarding;
   settings rows focus on click only when opted in through `inputRef`; puppet appearance is
   runtime state, not config; the trash icon destroys, the cross dismisses.
+- The block copy and paste store is `localStorage`, with paste pinned in the block picker.
+- **Narrow settings use `SettingWidth.AUTO`** through `SettingWidthContext` (the block panel
+  and modals opt in). Rejected: flex-wrap rules on `.setting.field`, which broke the compact
+  rows.
 - **Reconnect** (2026-09-24): the state stream reconnects every 2 s after any loss and the
   page reloads when the running version changes. Rejected: a backoff (one tab on a LAN needs
   none); keeping unsaved form data across an update (not worth the code).
@@ -117,5 +124,5 @@ when a decision is made; keep rejected alternatives.
 ## Documentation
 
 - User documentation stays in the README; GitHub Pages when it grows (2026-09-19).
-- Working documentation lives in `.docs/` (2026-09-26). The context file is `overview.md`,
-  not a tool-specific name.
+- Working documentation lives in `.docs/` (2026-09-26) and never ships. The context file is
+  `overview.md`, not a tool-specific name. No README link: the docs are for development.
