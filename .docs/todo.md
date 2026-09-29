@@ -7,9 +7,15 @@ Entry: moment, what, done when, notes. A finished entry is removed.
 
 ### Soak
 *Moment:* running, four days on 3.3.1; day 2 on 2026-09-27, day 3 on 2026-09-29, clean so
-far. Day 3: 671 MB used and 1173 MB available of 1844, logs 340K.
-*What:* the Pi runs unattended. HDMI shows the Ontime website view, the touch display the
-Clock, both assigned explicitly. Day 2: one reboot and one cable pull.
+far. Day 3: 671 MB used and 1173 MB available of 1844, logs 340K; the log's warnings are
+all explained (three update applies, two failed boot checks). The boot list shows no reboot
+since 2026-09-26 15:59. Power pull on 2026-09-29: no new warnings in the log.
+*What:* the Pi runs unattended on one screen (2026-09-29; the plan had two, HDMI on the Ontime
+website view and the touch display on the Clock), its view assigned explicitly. One power
+pull (more realistic than a clean reboot; a clean reboot passed in the 3.3.0 fresh-card test)
+and one cable pull. After the power pull: the screen comes back by itself, the admin
+reconnects without a refresh, the views and the assignment are intact, and the log shows at
+most the one failed update check right after boot.
 *Done when:* four days without new bugs. Daily: the screens are right, the admin loads without
 a refresh, and over SSH
 `grep -E "WARN|ERROR|FATAL" /opt/webkontrol/logs/webkontrol.log | tail -20`,

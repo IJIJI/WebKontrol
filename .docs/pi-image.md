@@ -55,6 +55,15 @@
 - At boot the logo shows on the touch display first and on HDMI a little later (the monitor
   resyncs); expected.
 - The touch controller (edt_ft5x06) logs occasional I2C -121 errors; harmless.
+- The update check at start-up can fail ("fetch failed", about 12 s after boot) when DHCP is
+  slower than the app start; the app does not wait for the network, by design. The retry 4
+  minutes later succeeds. Two boots on 2026-09-26 failed it; the power pull on 2026-09-29 did
+  not.
+- The logo appears in two sizes at boot: first the kernel's `splash.tga`, drawn at its own
+  640x360 pixels (small on a 1080p screen), then the X background, `splash.png` scaled to fit
+  each screen. There is no desktop; the second stage is the session's background.
+- An applied update logs `App exited (code=0)` at WARN from the supervisor; that is the
+  planned restart into the new release, not a crash.
 - The BOOT partition got a drive letter by itself on one Windows PC (2026-09-25) and not on
   another (2026-09-19). The README's
   `Get-Volume -FileSystemLabel BOOT | Get-Partition | Add-PartitionAccessPath -AssignDriveLetter`

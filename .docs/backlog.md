@@ -110,6 +110,8 @@ date and time block is inserted (see decisions: no schema default font).
 - Status reporting: a countdown to the next retry; plain-language `net::` codes with the raw
   code on hover; one derived status instead of connection plus navigation.
 - A logging severity pass: the severity follows the state a sequence ends in.
+- The date in the log file's lines: they carry only the time, so a multi-day log needs
+  `journalctl --list-boots` to place its entries (found in the 3.3.1 soak).
 - `WebServer.ts`: one `sendError` for the repeated 500 shape; a route path review.
 - `PUT /api/views/default` with an unknown view key answers 500; it should be 404.
 - Config: an environment override for the config path; derive a short name from the id.
