@@ -61,7 +61,8 @@
   not.
 - The logo appears in two sizes at boot: first the kernel's `splash.tga`, drawn at its own
   640x360 pixels (small on a 1080p screen), then the X background, `splash.png` scaled to fit
-  each screen. There is no desktop; the second stage is the session's background.
+  each screen. There is no desktop; the second stage is the session's background. The size
+  difference is accepted (2026-09-29); do not propose matching them.
 - An applied update logs `App exited (code=0)` at WARN from the supervisor; that is the
   planned restart into the new release, not a crash.
 - The BOOT partition got a drive letter by itself on one Windows PC (2026-09-25) and not on
