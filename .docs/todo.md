@@ -6,13 +6,17 @@ Entry: moment, what, done when, notes. A finished entry is removed.
 ## Now: stable 3.x
 
 ### Soak
-*Moment:* running, four days on 3.3.1; day 2 on 2026-09-27, clean so far.
+*Moment:* running, four days on 3.3.1; day 2 on 2026-09-27, day 3 on 2026-09-29, clean so
+far. Day 3: 671 MB used and 1173 MB available of 1844, logs 340K.
 *What:* the Pi runs unattended. HDMI shows the Ontime website view, the touch display the
 Clock, both assigned explicitly. Day 2: one reboot and one cable pull.
 *Done when:* four days without new bugs. Daily: the screens are right, the admin loads without
 a refresh, and over SSH
+`grep -E "WARN|ERROR|FATAL" /opt/webkontrol/logs/webkontrol.log | tail -20`,
 `journalctl -u webkontrol --since yesterday -p warning --no-pager | tail -20`, `free -m` and
-`du -sh /opt/webkontrol/logs` look unremarkable (memory flat, logs growing slowly).
+`du -sh /opt/webkontrol/logs` look unremarkable (memory flat, logs growing slowly). The
+journal check only catches systemd-level trouble: the app writes every level to stdout,
+which the journal files as info, so its warnings and errors are only in the log file.
 *Notes:* a Windows v3.3.x install alongside, if a machine can stay on. Soak fixes are made on
 `dev` in a separate session.
 
