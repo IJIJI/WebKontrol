@@ -111,10 +111,10 @@ Pick an install directory. In the following example, `/opt/webkontrol` is used
 
 ```shell
 curl -fsSL https://raw.githubusercontent.com/ijiji/WebKontrol/main/install.mjs -o install.mjs
-node install.mjs /opt/webkontrol --version v3.3.1
+node install.mjs /opt/webkontrol
 ```
 
-v3.3.1 is published as a pre-release, and the installer never installs pre-releases on its own, so the tag is passed explicitly. Once a stable v3 release exists, drop `--version` and the installer picks the latest stable release by itself.
+The installer picks the latest stable release by itself. Pass `--version vX.Y.Z` to install a specific release, such as a pre-release.
 
 The installer writes a commented starter `config/config.yaml`; edit it to add your displays (or prepare the file beforehand, the installer keeps an existing one). A minimal config with one display:
 
