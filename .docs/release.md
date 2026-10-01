@@ -57,6 +57,20 @@ Set `update.api_base: http://127.0.0.1:9999` in the scratch config: every check 
 bring the "network" back, run a fake GitHub on that port:
 `node -e 'require("http").createServer((q,r)=>{r.setHeader("content-type","application/json");if(q.url.includes("/releases/latest")){r.statusCode=404;r.end("{}")}else r.end("[]")}).listen(9999)'`
 
+### Checking a running Pi
+Over SSH. The app's warnings and errors are only in its log file: it writes every level to
+stdout, which the journal files as info, so `journalctl -p warning` only shows systemd-level
+trouble.
+- `grep -E "WARN|ERROR|FATAL" /opt/webkontrol/logs/webkontrol.log | tail -20`: expected are
+  `App exited (code=0)` per applied update and sometimes one failed update check right after a
+  boot. `grep -n -B6 -A2 "App exited" <log>` shows what preceded an exit.
+- `journalctl --list-boots --no-pager | tail -6` dates the boots (the log has only times);
+  `journalctl -b -1 -n 25 --no-pager` shows how a boot ended: a power loss stops mid-stream,
+  a clean shutdown ends with systemd stopping services.
+- `free -m` and `du -sh /opt/webkontrol/logs` for memory and log growth. Reference from the
+  3.3.1 soak (Pi 4, 2 GB, one screen): 671 MB used after three days up, logs 372K after five
+  days.
+
 ### Browser automation
 Puppeteer from `app/node_modules`. View pages hold an SSE stream: wait for `load` or
 `domcontentloaded`, never `networkidle0`. Several pages that must keep rendering need one
