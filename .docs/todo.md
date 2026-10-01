@@ -15,7 +15,10 @@ first stable release".
 (2026-09-29 and twice on 2026-09-30), no problems seen afterwards; no warnings in the app log
 beyond the update restarts and two failed boot-time update checks from before the soak;
 memory flat (671 MB used after three days up, 641 MB on the last day); logs 372K. The release
-work is done on `dev` in a separate session.
+work is done on `dev` in a separate session. Checked 2026-10-01: the audit shows only the
+accepted findings; `pi-image/` and `install.mjs` are unchanged since v3.3.0, so no new
+fresh-card test is needed. Never tested yet: the installer without `--version`, and a real
+"latest" announcement on a box; both only work once the release is latest.
 
 ## On `next`, for 3.4 (during the soak)
 

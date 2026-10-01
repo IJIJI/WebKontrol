@@ -66,6 +66,8 @@ date and time block is inserted (see decisions: no schema default font).
   `Intl`'s `timeZone`. The image bakes Europe/Amsterdam for now.
 - Screens plugged in after boot are not laid out (the session does it once); a udev hotplug
   hook could rerun it. The README says to restart the service.
+- Turn Wi-Fi off in the image (it is wired only): `iwd` runs unconfigured and writes a journal
+  line every five minutes (see pi-image.md).
 - The Docker decision (open question in decisions), then the Electron Windows launcher (tray,
   start on login; it must create and run the same managed layout so updates take one path).
 - A cleaner dual tone: a segment display block, or a COLRv1 colour font generated from DSEG,

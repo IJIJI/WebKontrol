@@ -65,6 +65,11 @@
   difference is accepted (2026-09-29); do not propose matching them.
 - An applied update logs `App exited (code=0)` at WARN from the supervisor; that is the
   planned restart into the new release, not a crash.
+- The Wi-Fi service (`iwd`) runs on the image although nothing configures it: the image
+  config neither sets Wi-Fi up nor turns it off. It logs a `connect-info` line to the journal
+  every five minutes. With no saved network (`iwctl known-networks list` is empty) it cannot
+  join anything. Why it logs on that rhythm is not known.
+- The image has no `ip` command.
 - The BOOT partition got a drive letter by itself on one Windows PC (2026-09-25) and not on
   another (2026-09-19). The README's
   `Get-Volume -FileSystemLabel BOOT | Get-Partition | Add-PartitionAccessPath -AssignDriveLetter`
