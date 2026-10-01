@@ -7,18 +7,21 @@ Entry: moment, what, done when, notes. A finished entry is removed.
 
 ### Stable release
 *Moment:* now; the soak passed on 2026-10-01.
-*What:* 3.3.1 as is (the soak needed no fixes), published without the pre-release flag so
-GitHub marks it latest and every v3 box is offered it.
-*Done when:* released and a box updated to it. See [release.md](release.md), "Before the
-first stable release".
+*What:* 3.3.2 (decided 2026-10-01: a new release, not the re-flagged 3.3.1): the 3.3.1 code
+with the version bump and the README install command without `--version`, published without
+the pre-release flag so GitHub marks it latest and every v3 box is offered it.
+*Done when:* released, and afterwards: the Pi on 3.3.1 is offered 3.3.2 by itself and updates
+to it; the installer without `--version` installs v3.3.2 on Windows; the new image is flashed
+and boots into the Clock (its build pulls fresh Debian packages, so it is not the soaked
+image). See [release.md](release.md), "Before the first stable release".
 *Notes:* the soak ran on 3.3.1 from 2026-09-27 on a Pi 4 with one screen: three power pulls
 (2026-09-29 and twice on 2026-09-30), no problems seen afterwards; no warnings in the app log
 beyond the update restarts and two failed boot-time update checks from before the soak;
 memory flat (671 MB used after three days up, 641 MB on the last day); logs 372K. The release
 work is done on `dev` in a separate session. Checked 2026-10-01: the audit shows only the
-accepted findings; `pi-image/` and `install.mjs` are unchanged since v3.3.0, so no new
-fresh-card test is needed. Never tested yet: the installer without `--version`, and a real
-"latest" announcement on a box; both only work once the release is latest.
+accepted findings; `pi-image/` and `install.mjs` are unchanged since v3.3.0. Never tested
+yet: the installer without `--version`, and a real "latest" announcement on a box; both only
+work once the release is latest.
 
 ## On `next`, for 3.4 (during the soak)
 
